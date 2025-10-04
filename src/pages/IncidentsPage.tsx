@@ -3,6 +3,8 @@ import { useIncidentStore } from '@/stores/incidentStore';
 import { useCatalogStore } from '@/stores/catalogStore';
 import { useAuthStore } from '@/stores/authStore';
 import PageHeader from '@/components/layout/PageHeader';
+import IncidentDetailsDialog from '@/components/incidents/IncidentDetailsDialog';
+import type { Incident } from '@/types/incidents';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +21,7 @@ export default function IncidentsPage() {
   const { objects } = useCatalogStore();
   const user = useAuthStore((state) => state.user);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -260,11 +263,11 @@ export default function IncidentsPage() {
                   </div>
 
                   <div className="flex gap-2 pt-2">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => setSelectedIncident(incident)}>
                       <Icon name="Eye" className="mr-1" size={14} />
                       Просмотр
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setSelectedIncident(incident)}>
                       <Icon name="MessageSquare" size={14} />
                     </Button>
                   </div>
@@ -274,6 +277,14 @@ export default function IncidentsPage() {
           );
         })}
       </div>
+
+      {selectedIncident && (
+        <IncidentDetailsDialog
+          incident={selectedIncident}
+          open={!!selectedIncident}
+          onOpenChange={(open) => !open && setSelectedIncident(null)}
+        />
+      )}
     </div>
   );
 }

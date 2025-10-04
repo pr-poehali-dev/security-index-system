@@ -42,7 +42,9 @@ export const useIncidentStore = create<IncidentState>((set, get) => ({
       ...incident,
       id,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      comments: [],
+      attachments: []
     };
     set((state) => ({ incidents: [...state.incidents, newIncident] }));
     return id;

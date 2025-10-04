@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
 import PageHeader from '@/components/layout/PageHeader';
+import TaskDetailsDialog from '@/components/tasks/TaskDetailsDialog';
 import { Card, CardContent } from '@/components/ui/card';
+import type { Task } from '@/types/tasks';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,6 +14,7 @@ export default function TasksPage() {
   const { tasks, getTasksByAssignee } = useTaskStore();
   const user = useAuthStore((state) => state.user);
   const [selectedView, setSelectedView] = useState<'my' | 'all'>('my');
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const myTasks = user ? getTasksByAssignee(user.id) : [];
   const displayTasks = selectedView === 'my' ? myTasks : tasks;
@@ -179,12 +182,12 @@ export default function TasksPage() {
                       </div>
 
                       <div className="flex gap-2 pt-2">
-                        <Button variant="outline" size="sm" className="flex-1">
+                        <Button variant="outline" size="sm" className="flex-1" onClick={() => setSelectedTask(task)}>
                           <Icon name="Eye" className="mr-1" size={14} />
                           Просмотр
                         </Button>
                         {task.status === 'in_progress' && (
-                          <Button size="sm" variant="default">
+                          <Button size="sm" variant="default" onClick={() => setSelectedTask(task)}>
                             <Icon name="Check" size={14} className="mr-1" />
                             Завершить
                           </Button>
@@ -198,6 +201,14 @@ export default function TasksPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {selectedTask && (
+        <TaskDetailsDialog
+          task={selectedTask}
+          open={!!selectedTask}
+          onOpenChange={(open) => !open && setSelectedTask(null)}
+        />
+      )}
     </div>
   );
 }

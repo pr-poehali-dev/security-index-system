@@ -28,17 +28,62 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date().toISOString(),
       objectId: 'obj-1',
-      objectName: 'Котельная №1'
+      objectName: 'Котельная №1',
+      comments: [],
+      attachments: [],
+      timeline: [
+        {
+          id: 'event-1',
+          taskId: 'task-1',
+          eventType: 'created',
+          description: 'Задача создана из инцидента',
+          userId: '3',
+          userName: 'Аудитор',
+          createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: 'event-2',
+          taskId: 'task-1',
+          eventType: 'assigned',
+          description: 'Задача назначена исполнителю',
+          userId: '3',
+          userName: 'Аудитор',
+          createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000 + 300000).toISOString()
+        },
+        {
+          id: 'event-3',
+          taskId: 'task-1',
+          eventType: 'status_changed',
+          description: 'Статус изменен на "В работе"',
+          userId: '4',
+          userName: 'Менеджер',
+          createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
+        }
+      ]
     }
   ],
   
   addTask: (task) => {
     const id = `task-${Date.now()}`;
+    const createdAt = new Date().toISOString();
     const newTask: Task = {
       ...task,
       id,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt,
+      updatedAt: createdAt,
+      comments: [],
+      attachments: [],
+      timeline: [
+        {
+          id: `event-${Date.now()}`,
+          taskId: id,
+          eventType: 'created',
+          description: 'Задача создана',
+          userId: task.createdBy,
+          userName: task.createdByName,
+          createdAt
+        }
+      ]
     };
     set((state) => ({ tasks: [...state.tasks, newTask] }));
     return id;
