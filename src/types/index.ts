@@ -41,6 +41,30 @@ export interface CertificationArea {
   requiresRostechnadzor: boolean;
 }
 
+export interface Organization {
+  id: string;
+  tenantId: string;
+  name: string;
+  inn: string;
+  kpp?: string;
+  address?: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+}
+
+export interface Personnel {
+  id: string;
+  tenantId: string;
+  organizationId?: string;
+  fullName: string;
+  position: string;
+  email?: string;
+  phone?: string;
+  role: 'Auditor' | 'Manager' | 'Director';
+  status: 'active' | 'inactive';
+  createdAt: string;
+}
+
 export interface Employee {
   id: string;
   tenantId: string;

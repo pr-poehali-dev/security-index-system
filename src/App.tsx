@@ -11,6 +11,7 @@ import { ROUTES } from "@/lib/constants";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
 import TenantsPage from "@/pages/TenantsPage";
+import SettingsPage from "@/pages/SettingsPage";
 import CatalogPage from "@/pages/CatalogPage";
 import IncidentsPage from "@/pages/IncidentsPage";
 import ChecklistsPage from "@/pages/ChecklistsPage";
@@ -87,6 +88,16 @@ const App = () => {
                 <ProtectedRoute>
                   <AuthenticatedLayout>
                     <TenantsPage />
+                  </AuthenticatedLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.SETTINGS}
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedLayout>
+                    <SettingsPage />
                   </AuthenticatedLayout>
                 </ProtectedRoute>
               }

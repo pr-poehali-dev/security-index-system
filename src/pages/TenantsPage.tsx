@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuthStore } from '@/stores/authStore';
 import { useTenantStore } from '@/stores/tenantStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,10 +11,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import PageHeader from '@/components/layout/PageHeader';
 import Icon from '@/components/ui/icon';
-import { MODULES } from '@/lib/constants';
+import { MODULES, ROUTES } from '@/lib/constants';
+import { Navigate } from 'react-router-dom';
 import type { ModuleType } from '@/types';
 
 export default function TenantsPage() {
+  const user = useAuthStore((state) => state.user);
+
+  if (!user || user.role !== 'SuperAdmin') {
+    return <Navigate to={ROUTES.DASHBOARD} replace />;
+  }
   const { tenants, addTenant } = useTenantStore();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [generatedCredentials, setGeneratedCredentials] = useState<{ email: string; password: string } | null>(null);

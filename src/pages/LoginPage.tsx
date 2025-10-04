@@ -37,11 +37,11 @@ export default function LoginPage() {
   };
 
   const testUsers = [
-    { email: 'superadmin@system.ru', role: 'SuperAdmin' },
-    { email: 'admin@company.ru', role: 'TenantAdmin' },
-    { email: 'auditor@company.ru', role: 'Auditor' },
-    { email: 'manager@company.ru', role: 'Manager' },
-    { email: 'director@company.ru', role: 'Director' }
+    { email: 'superadmin@system.ru', role: 'SuperAdmin', description: 'Управление тенантами' },
+    { email: 'admin@company.ru', role: 'TenantAdmin', description: 'Настройки, организации, персонал' },
+    { email: 'auditor@company.ru', role: 'Auditor', description: 'Проверки и инциденты' },
+    { email: 'manager@company.ru', role: 'Manager', description: 'Задачи и обслуживание' },
+    { email: 'director@company.ru', role: 'Director', description: 'Аналитика и бюджет' }
   ];
 
   return (
@@ -147,10 +147,10 @@ export default function LoginPage() {
                       key={user.email}
                       type="button"
                       onClick={() => setEmail(user.email)}
-                      className="w-full text-left px-2 py-1 text-xs rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      className="w-full text-left px-2 py-1.5 text-xs rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     >
-                      <span className="font-medium text-emerald-600">{user.email}</span>
-                      <span className="text-gray-500 ml-2">({user.role})</span>
+                      <div className="font-medium text-emerald-600">{user.email}</div>
+                      <div className="text-gray-500 text-[10px]">{user.description}</div>
                     </button>
                   ))}
                 </div>
