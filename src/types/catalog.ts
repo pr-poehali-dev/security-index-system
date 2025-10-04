@@ -1,4 +1,18 @@
 export type HazardClass = '1' | '2' | '3' | '4';
+export type ObjectType = 'industrial' | 'energy' | 'mining' | 'chemical' | 'gas' | 'building' | 'other';
+export type ObjectStatus = 'active' | 'inactive' | 'under_construction' | 'decommissioned';
+
+export interface Organization {
+  id: string;
+  tenantId: string;
+  name: string;
+  inn: string;
+  type: 'holding' | 'legal_entity' | 'branch';
+  parentId?: string;
+  children?: Organization[];
+  level: number;
+  createdAt: string;
+}
 
 export interface HazardousObject {
   id: string;
@@ -15,7 +29,11 @@ export interface HazardousObject {
   responsiblePersonId?: string;
   registrationNumber: string;
   registrationDate: string;
-  status: 'active' | 'inactive' | 'decommissioned';
+  status: ObjectStatus;
+  organizationId: string;
+  organizationName?: string;
+  commissioningDate?: string;
+  nextExaminationDate?: string;
   equipment: Equipment[];
   documentation: Documentation[];
   inspectionSchedule?: InspectionSchedule[];

@@ -11,7 +11,14 @@ import { ROUTES } from "@/lib/constants";
 import LoginPage from "@/pages/LoginPage";
 import DashboardPage from "@/pages/DashboardPage";
 import TenantsPage from "@/pages/TenantsPage";
+import CatalogPage from "@/pages/CatalogPage";
+import IncidentsPage from "@/pages/IncidentsPage";
+import ChecklistsPage from "@/pages/ChecklistsPage";
 import AttestationPage from "@/pages/AttestationPage";
+import TasksPage from "@/pages/TasksPage";
+import ExaminationPage from "@/pages/ExaminationPage";
+import MaintenancePage from "@/pages/MaintenancePage";
+import BudgetPage from "@/pages/BudgetPage";
 import Sidebar from "@/components/layout/Sidebar";
 import NotFound from "./pages/NotFound";
 
@@ -85,11 +92,81 @@ const App = () => {
               }
             />
             <Route
+              path={ROUTES.CATALOG}
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedLayout>
+                    <CatalogPage />
+                  </AuthenticatedLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.INCIDENTS}
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedLayout>
+                    <IncidentsPage />
+                  </AuthenticatedLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.CHECKLISTS}
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedLayout>
+                    <ChecklistsPage />
+                  </AuthenticatedLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path={ROUTES.ATTESTATION}
               element={
                 <ProtectedRoute>
                   <AuthenticatedLayout>
                     <AttestationPage />
+                  </AuthenticatedLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.TASKS}
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedLayout>
+                    <TasksPage />
+                  </AuthenticatedLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.EXAMINATION}
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedLayout>
+                    <ExaminationPage />
+                  </AuthenticatedLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.MAINTENANCE}
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedLayout>
+                    <MaintenancePage />
+                  </AuthenticatedLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.BUDGET}
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedLayout>
+                    <BudgetPage />
                   </AuthenticatedLayout>
                 </ProtectedRoute>
               }
