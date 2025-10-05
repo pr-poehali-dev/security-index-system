@@ -6,6 +6,7 @@ interface ChecklistsState {
   audits: Audit[];
   selectedChecklist: Checklist | null;
   selectedAudit: Audit | null;
+  error: string | null;
   addChecklist: (checklist: Omit<Checklist, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateChecklist: (id: string, updates: Partial<Checklist>) => void;
   deleteChecklist: (id: string) => void;
@@ -17,6 +18,8 @@ interface ChecklistsState {
   selectAudit: (audit: Audit | null) => void;
   getAuditsByStatus: (status: Audit['status']) => Audit[];
   getUpcomingAudits: () => Audit[];
+  setError: (error: string | null) => void;
+  clearError: () => void;
 }
 
 const MOCK_CHECKLISTS: Checklist[] = [
@@ -254,5 +257,15 @@ export const useChecklistsStore = create<ChecklistsState>((set, get) => ({
       const scheduledDate = new Date(audit.scheduledDate);
       return scheduledDate >= now && scheduledDate <= thirtyDaysLater;
     });
+  },
+  
+  error: null,
+  
+  setError: (error) => {
+    set({ error });
+  },
+  
+  clearError: () => {
+    set({ error: null });
   }
 }));

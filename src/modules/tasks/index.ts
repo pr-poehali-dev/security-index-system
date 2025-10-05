@@ -1,3 +1,3 @@
 export { default as TasksPage } from './pages/TasksPage';
-export { useTasksStore } from './store/tasksStore';
-export type { Task } from './store/tasksStore';
+export { useTaskStore } from '@/stores/taskStore';
+export type { Task } from '@/types/tasks';

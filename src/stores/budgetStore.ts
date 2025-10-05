@@ -18,6 +18,9 @@ interface BudgetState {
     utilization: number;
     byCategory: Record<Budget['category'], { planned: number; actual: number; utilization: number }>;
   };
+  error: string | null;
+  setError: (error: string | null) => void;
+  clearError: () => void;
 }
 
 const MOCK_BUDGETS: Budget[] = [
@@ -126,30 +129,58 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
   budgets: MOCK_BUDGETS,
   selectedYear: 2024,
   selectedQuarter: 'all',
+  error: null,
 
   setSelectedYear: (year) => set({ selectedYear: year }),
 
   setSelectedQuarter: (quarter) => set({ selectedQuarter: quarter }),
 
-  addBudget: (budgetData) => set((state) => ({
-    budgets: [
-      ...state.budgets,
-      {
-        ...budgetData,
-        id: `budget-${Date.now()}`
-      }
-    ]
-  })),
+  addBudget: (budgetData) => {
+    try {
+      set((state) => ({
+        budgets: [
+          ...state.budgets,
+          {
+            ...budgetData,
+            id: `budget-${Date.now()}`
+          }
+        ],
+        error: null
+      }));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Ошибка при добавлении бюджета';
+      set({ error: errorMessage });
+      throw error;
+    }
+  },
 
-  updateBudget: (id, updates) => set((state) => ({
-    budgets: state.budgets.map((budget) =>
-      budget.id === id ? { ...budget, ...updates } : budget
-    )
-  })),
+  updateBudget: (id, updates) => {
+    try {
+      set((state) => ({
+        budgets: state.budgets.map((budget) =>
+          budget.id === id ? { ...budget, ...updates } : budget
+        ),
+        error: null
+      }));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Ошибка при обновлении бюджета';
+      set({ error: errorMessage });
+      throw error;
+    }
+  },
 
-  deleteBudget: (id) => set((state) => ({
-    budgets: state.budgets.filter((budget) => budget.id !== id)
-  })),
+  deleteBudget: (id) => {
+    try {
+      set((state) => ({
+        budgets: state.budgets.filter((budget) => budget.id !== id),
+        error: null
+      }));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Ошибка при удалении бюджета';
+      set({ error: errorMessage });
+      throw error;
+    }
+  },
 
   getBudgetsByYear: (year) => {
     const { budgets, selectedQuarter } = get();
@@ -199,5 +230,13 @@ export const useBudgetStore = create<BudgetState>((set, get) => ({
       : 0;
 
     return stats;
+  },
+  
+  setError: (error) => {
+    set({ error });
+  },
+  
+  clearError: () => {
+    set({ error: null });
   }
 }));

@@ -6,6 +6,7 @@ interface EquipmentState {
   examinations: Examination[];
   maintenanceRecords: MaintenanceRecord[];
   selectedEquipment: Equipment | null;
+  error: string | null;
   filters: {
     status: Equipment['status'] | 'all';
     type: string | 'all';
@@ -24,6 +25,8 @@ interface EquipmentState {
   getEquipmentMaintenance: (equipmentId: string) => MaintenanceRecord[];
   getUpcomingMaintenance: () => MaintenanceRecord[];
   getEquipmentNeedingMaintenance: () => Equipment[];
+  setError: (error: string | null) => void;
+  clearError: () => void;
 }
 
 const MOCK_EQUIPMENT: Equipment[] = [
@@ -258,5 +261,15 @@ export const useEquipmentStore = create<EquipmentState>((set, get) => ({
       const maintenanceDate = new Date(eq.nextMaintenanceDate);
       return maintenanceDate <= now;
     });
+  },
+  
+  error: null,
+  
+  setError: (error) => {
+    set({ error });
+  },
+  
+  clearError: () => {
+    set({ error: null });
   }
 }));

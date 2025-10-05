@@ -5,11 +5,14 @@ interface CatalogState {
   organizations: Organization[];
   objects: HazardousObject[];
   selectedOrganization: string | null;
+  error: string | null;
   addOrganization: (org: Omit<Organization, 'id' | 'createdAt'>) => string;
   addObject: (obj: Omit<HazardousObject, 'id' | 'createdAt' | 'updatedAt'>) => string;
   updateObject: (id: string, updates: Partial<HazardousObject>) => void;
   getObjectsByOrganization: (organizationId: string) => HazardousObject[];
   setSelectedOrganization: (id: string | null) => void;
+  setError: (error: string | null) => void;
+  clearError: () => void;
 }
 
 export const useCatalogStore = create<CatalogState>((set, get) => ({
@@ -61,38 +64,58 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
     }
   ],
   selectedOrganization: null,
+  error: null,
   
   addOrganization: (org) => {
-    const id = `org-${Date.now()}`;
-    const newOrg: Organization = {
-      ...org,
-      id,
-      createdAt: new Date().toISOString()
-    };
-    set((state) => ({ organizations: [...state.organizations, newOrg] }));
-    return id;
+    try {
+      const id = `org-${Date.now()}`;
+      const newOrg: Organization = {
+        ...org,
+        id,
+        createdAt: new Date().toISOString()
+      };
+      set((state) => ({ organizations: [...state.organizations, newOrg], error: null }));
+      return id;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Ошибка при добавлении организации';
+      set({ error: errorMessage });
+      throw error;
+    }
   },
   
   addObject: (obj) => {
-    const id = `obj-${Date.now()}`;
-    const newObj: HazardousObject = {
-      ...obj,
-      id,
-      equipment: obj.equipment || [],
-      documentation: obj.documentation || [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    set((state) => ({ objects: [...state.objects, newObj] }));
-    return id;
+    try {
+      const id = `obj-${Date.now()}`;
+      const newObj: HazardousObject = {
+        ...obj,
+        id,
+        equipment: obj.equipment || [],
+        documentation: obj.documentation || [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      set((state) => ({ objects: [...state.objects, newObj], error: null }));
+      return id;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Ошибка при добавлении объекта';
+      set({ error: errorMessage });
+      throw error;
+    }
   },
   
   updateObject: (id, updates) => {
-    set((state) => ({
-      objects: state.objects.map((obj) =>
-        obj.id === id ? { ...obj, ...updates, updatedAt: new Date().toISOString() } : obj
-      )
-    }));
+    try {
+      set((state) => ({
+        objects: state.objects.map((obj) =>
+          obj.id === id ? { ...obj, ...updates, updatedAt: new Date().toISOString() } : obj
+        ),
+        error: null
+      }));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Ошибка при обновлении объекта';
+      set({ error: errorMessage });
+      throw error;
+    }
   },
   
   getObjectsByOrganization: (organizationId) => {
@@ -101,5 +124,13 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
   
   setSelectedOrganization: (id) => {
     set({ selectedOrganization: id });
+  },
+  
+  setError: (error) => {
+    set({ error });
+  },
+  
+  clearError: () => {
+    set({ error: null });
   }
 }));

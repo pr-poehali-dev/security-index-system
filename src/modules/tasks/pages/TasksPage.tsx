@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useTasksStore } from '../store/tasksStore';
+import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
-import type { Task } from '../store/tasksStore';
+import type { Task } from '@/types/tasks';
 
 export default function TasksPage() {
   const {
@@ -19,7 +19,7 @@ export default function TasksPage() {
     getTaskStats,
     getOverdueTasks,
     completeTask
-  } = useTasksStore();
+  } = useTaskStore();
   
   const user = useAuthStore((state) => state.user);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
