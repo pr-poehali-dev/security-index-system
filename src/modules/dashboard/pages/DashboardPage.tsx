@@ -6,104 +6,104 @@ import { Badge } from '@/components/ui/badge';
 import PageHeader from '@/components/layout/PageHeader';
 import Icon from '@/components/ui/icon';
 
+const stats = [
+  {
+    title: 'Активные сотрудники',
+    value: '483',
+    change: '+12%',
+    trend: 'up',
+    icon: 'Users',
+    color: 'text-blue-600'
+  },
+  {
+    title: 'Действующие аттестации',
+    value: '875',
+    change: '+8%',
+    trend: 'up',
+    icon: 'GraduationCap',
+    color: 'text-emerald-600'
+  },
+  {
+    title: 'Истекают в течение 30 дней',
+    value: '42',
+    change: '-15%',
+    trend: 'down',
+    icon: 'AlertTriangle',
+    color: 'text-amber-600'
+  },
+  {
+    title: 'Открытые инциденты',
+    value: '8',
+    change: '-25%',
+    trend: 'down',
+    icon: 'AlertCircle',
+    color: 'text-red-600'
+  }
+];
+
+const recentActivity = [
+  {
+    id: 1,
+    type: 'certification',
+    title: 'Аттестация по промбезопасности',
+    user: 'Иванов И.И.',
+    time: '2 часа назад',
+    status: 'completed'
+  },
+  {
+    id: 2,
+    type: 'incident',
+    title: 'Инцидент на объекте ОПО-125',
+    user: 'Петров П.П.',
+    time: '5 часов назад',
+    status: 'pending'
+  },
+  {
+    id: 3,
+    type: 'task',
+    title: 'Проверка КИП и А',
+    user: 'Сидорова А.А.',
+    time: '1 день назад',
+    status: 'in_progress'
+  },
+  {
+    id: 4,
+    type: 'maintenance',
+    title: 'Плановый ремонт котельной №3',
+    user: 'Козлов В.В.',
+    time: '1 день назад',
+    status: 'completed'
+  }
+];
+
+const upcomingCertifications = [
+  { name: 'Иванов Иван', area: 'Промышленная безопасность', date: '2025-10-15', daysLeft: 10 },
+  { name: 'Петрова Анна', area: 'Охрана труда', date: '2025-10-20', daysLeft: 15 },
+  { name: 'Сидоров Петр', area: 'Энергобезопасность', date: '2025-10-25', daysLeft: 20 },
+  { name: 'Козлова Мария', area: 'Экология', date: '2025-11-01', daysLeft: 27 }
+];
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'completed': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400';
+    case 'in_progress': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400';
+    case 'pending': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400';
+    default: return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400';
+  }
+};
+
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case 'completed': return 'Завершено';
+    case 'in_progress': return 'В работе';
+    case 'pending': return 'Ожидает';
+    default: return status;
+  }
+};
+
 export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
   const tenants = useTenantStore((state) => state.tenants);
-
-  const stats = [
-    {
-      title: 'Активные сотрудники',
-      value: '483',
-      change: '+12%',
-      trend: 'up',
-      icon: 'Users',
-      color: 'text-blue-600'
-    },
-    {
-      title: 'Действующие аттестации',
-      value: '875',
-      change: '+8%',
-      trend: 'up',
-      icon: 'GraduationCap',
-      color: 'text-emerald-600'
-    },
-    {
-      title: 'Истекают в течение 30 дней',
-      value: '42',
-      change: '-15%',
-      trend: 'down',
-      icon: 'AlertTriangle',
-      color: 'text-amber-600'
-    },
-    {
-      title: 'Открытые инциденты',
-      value: '8',
-      change: '-25%',
-      trend: 'down',
-      icon: 'AlertCircle',
-      color: 'text-red-600'
-    }
-  ];
-
-  const recentActivity = [
-    {
-      id: 1,
-      type: 'certification',
-      title: 'Аттестация по промбезопасности',
-      user: 'Иванов И.И.',
-      time: '2 часа назад',
-      status: 'completed'
-    },
-    {
-      id: 2,
-      type: 'incident',
-      title: 'Инцидент на объекте ОПО-125',
-      user: 'Петров П.П.',
-      time: '5 часов назад',
-      status: 'pending'
-    },
-    {
-      id: 3,
-      type: 'task',
-      title: 'Проверка КИП и А',
-      user: 'Сидорова А.А.',
-      time: '1 день назад',
-      status: 'in_progress'
-    },
-    {
-      id: 4,
-      type: 'maintenance',
-      title: 'Плановый ремонт котельной №3',
-      user: 'Козлов В.В.',
-      time: '1 день назад',
-      status: 'completed'
-    }
-  ];
-
-  const upcomingCertifications = [
-    { name: 'Иванов Иван', area: 'Промышленная безопасность', date: '2025-10-15', daysLeft: 10 },
-    { name: 'Петрова Анна', area: 'Охрана труда', date: '2025-10-20', daysLeft: 15 },
-    { name: 'Сидоров Петр', area: 'Энергобезопасность', date: '2025-10-25', daysLeft: 20 },
-    { name: 'Козлова Мария', area: 'Экология', date: '2025-11-01', daysLeft: 27 }
-  ];
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400';
-      case 'in_progress': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400';
-      case 'pending': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400';
-      default: return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'completed': return 'Завершено';
-      case 'in_progress': return 'В работе';
-      case 'pending': return 'Ожидает';
-      default: return status;
-    }
-  };
 
   return (
     <div>

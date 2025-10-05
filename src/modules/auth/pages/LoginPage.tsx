@@ -9,6 +9,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import Icon from '@/components/ui/icon';
 import { ROUTES } from '@/lib/constants';
 
+const testUsers = [
+  { email: 'superadmin@system.ru', role: 'SuperAdmin', description: 'Управление тенантами' },
+  { email: 'admin@company.ru', role: 'TenantAdmin', description: 'Настройки, организации, персонал' },
+  { email: 'auditor@company.ru', role: 'Auditor', description: 'Проверки и инциденты' },
+  { email: 'manager@company.ru', role: 'Manager', description: 'Задачи и обслуживание' },
+  { email: 'director@company.ru', role: 'Director', description: 'Аналитика и бюджет' }
+];
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,14 +43,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-
-  const testUsers = [
-    { email: 'superadmin@system.ru', role: 'SuperAdmin', description: 'Управление тенантами' },
-    { email: 'admin@company.ru', role: 'TenantAdmin', description: 'Настройки, организации, персонал' },
-    { email: 'auditor@company.ru', role: 'Auditor', description: 'Проверки и инциденты' },
-    { email: 'manager@company.ru', role: 'Manager', description: 'Задачи и обслуживание' },
-    { email: 'director@company.ru', role: 'Director', description: 'Аналитика и бюджет' }
-  ];
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
