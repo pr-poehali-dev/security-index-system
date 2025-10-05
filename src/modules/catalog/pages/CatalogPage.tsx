@@ -7,8 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import { ViewModeToggle, type ViewMode } from '@/components/ui/view-mode-toggle';
 import OrganizationTree from '@/components/shared/OrganizationTree';
 import ObjectCard from '../components/ObjectCard';
+import ObjectTableView from '../components/ObjectTableView';
 import ObjectFormModal from '../components/ObjectFormModal';
 import ObjectDetailsModal from '../components/ObjectDetailsModal';
 import type { IndustrialObject } from '@/types/catalog';
@@ -18,7 +20,7 @@ export default function CatalogPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedObject, setSelectedObject] = useState<IndustrialObject | null>(null);
@@ -166,22 +168,7 @@ export default function CatalogPage() {
                 <SelectItem value="liquidated">Ликвидирован</SelectItem>
               </SelectContent>
             </Select>
-            <div className="flex gap-1 border rounded-lg p-1">
-              <Button
-                variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('grid')}
-              >
-                <Icon name="LayoutGrid" size={16} />
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-              >
-                <Icon name="List" size={16} />
-              </Button>
-            </div>
+            <ViewModeToggle value={viewMode} onChange={setViewMode} />
           </div>
 
           <div className="flex-1 overflow-auto">
@@ -202,21 +189,29 @@ export default function CatalogPage() {
                     </Badge>
                   )}
                 </div>
-                <div className={`
-                  ${viewMode === 'grid' 
-                    ? 'grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4' 
-                    : 'space-y-3'
-                  }
-                `}>
-                  {filteredObjects.map((obj) => (
-                    <ObjectCard 
-                      key={obj.id} 
-                      object={obj}
-                      onView={handleViewObject}
-                      onEdit={handleEditObject}
-                    />
-                  ))}
-                </div>
+                {viewMode === 'table' ? (
+                  <ObjectTableView
+                    objects={filteredObjects}
+                    onView={handleViewObject}
+                    onEdit={handleEditObject}
+                  />
+                ) : (
+                  <div className={`
+                    ${viewMode === 'grid' 
+                      ? 'grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4' 
+                      : 'space-y-3'
+                    }
+                  `}>
+                    {filteredObjects.map((obj) => (
+                      <ObjectCard 
+                        key={obj.id} 
+                        object={obj}
+                        onView={handleViewObject}
+                        onEdit={handleEditObject}
+                      />
+                    ))}
+                  </div>
+                )}
               </>
             )}
           </div>

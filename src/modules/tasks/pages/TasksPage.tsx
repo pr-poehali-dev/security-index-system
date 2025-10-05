@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
+import TaskTableView from '../components/TaskTableView';
 import type { Task } from '@/types/tasks';
 
 export default function TasksPage() {
@@ -24,6 +25,7 @@ export default function TasksPage() {
   const user = useAuthStore((state) => state.user);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [currentTab, setCurrentTab] = useState('all');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
 
   const filteredTasks = getFilteredTasks();
   const stats = getTaskStats();
@@ -162,7 +164,27 @@ export default function TasksPage() {
 
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-lg">Фильтры</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Фильтры</CardTitle>
+            <div className="flex gap-1 border rounded-lg p-1">
+              <Button
+                variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('cards')}
+                title="Карточки"
+              >
+                <Icon name="LayoutGrid" size={16} />
+              </Button>
+              <Button
+                variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('table')}
+                title="Таблица"
+              >
+                <Icon name="Table" size={16} />
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -242,7 +264,10 @@ export default function TasksPage() {
         </TabsList>
 
         <TabsContent value={currentTab} className="mt-6">
-          <div className="space-y-4">
+          {viewMode === 'table' ? (
+            <TaskTableView tasks={tasksToDisplay} onTaskClick={(task) => setSelectedTask(task)} />
+          ) : (
+            <div className="space-y-4">
             {tasksToDisplay.map((task) => {
               const isOverdue = new Date(task.dueDate) < new Date() && task.status !== 'completed' && task.status !== 'cancelled';
 
@@ -325,7 +350,8 @@ export default function TasksPage() {
                 </CardContent>
               </Card>
             )}
-          </div>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
