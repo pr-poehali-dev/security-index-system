@@ -13,6 +13,7 @@ import ObjectCard from '../components/ObjectCard';
 import ObjectTableView from '../components/ObjectTableView';
 import ObjectFormModal from '../components/ObjectFormModal';
 import ObjectDetailsModal from '../components/ObjectDetailsModal';
+import OrganizationFormModal from '../components/OrganizationFormModal';
 import type { IndustrialObject } from '@/types/catalog';
 
 export default function CatalogPage() {
@@ -25,11 +26,18 @@ export default function CatalogPage() {
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedObject, setSelectedObject] = useState<IndustrialObject | null>(null);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+  const [orgFormModalOpen, setOrgFormModalOpen] = useState(false);
+  const [orgFormMode, setOrgFormMode] = useState<'create' | 'edit'>('create');
 
   const handleCreateObject = () => {
     setSelectedObject(null);
     setFormMode('create');
     setFormModalOpen(true);
+  };
+
+  const handleCreateOrganization = () => {
+    setOrgFormMode('create');
+    setOrgFormModalOpen(true);
   };
 
   const handleEditObject = (object: IndustrialObject) => {
@@ -130,7 +138,7 @@ export default function CatalogPage() {
           <CardContent className="p-4 flex-1 overflow-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-lg">Организации</h3>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={handleCreateOrganization}>
                 <Icon name="Plus" size={16} />
               </Button>
             </div>
@@ -230,6 +238,12 @@ export default function CatalogPage() {
         onOpenChange={setDetailsModalOpen}
         object={selectedObject}
         onEdit={handleEditObject}
+      />
+
+      <OrganizationFormModal
+        open={orgFormModalOpen}
+        onOpenChange={setOrgFormModalOpen}
+        mode={orgFormMode}
       />
     </div>
   );
