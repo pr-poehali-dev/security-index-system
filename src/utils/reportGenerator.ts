@@ -4,6 +4,51 @@ import type { Task } from '@/types/tasks';
 import type { Incident } from '@/types/incidents';
 import type { IndustrialObject, Organization } from '@/types/catalog';
 
+export type ReportPeriod = 'week' | 'month' | 'quarter' | 'all';
+
+const getDateRangeForPeriod = (period: ReportPeriod): { start: Date; end: Date } => {
+  const end = new Date();
+  const start = new Date();
+  
+  switch (period) {
+    case 'week':
+      start.setDate(start.getDate() - 7);
+      break;
+    case 'month':
+      start.setMonth(start.getMonth() - 1);
+      break;
+    case 'quarter':
+      start.setMonth(start.getMonth() - 3);
+      break;
+    case 'all':
+      start.setFullYear(2000);
+      break;
+  }
+  
+  return { start, end };
+};
+
+const getPeriodLabel = (period: ReportPeriod): string => {
+  switch (period) {
+    case 'week': return 'za nedelyu';
+    case 'month': return 'za mesyac';
+    case 'quarter': return 'za kvartal';
+    case 'all': return 'za vse vremya';
+  }
+};
+
+const filterTasksByPeriod = (tasks: Task[], period: ReportPeriod): Task[] => {
+  if (period === 'all') return tasks;
+  const { start } = getDateRangeForPeriod(period);
+  return tasks.filter(task => new Date(task.createdAt) >= start);
+};
+
+const filterIncidentsByPeriod = (incidents: Incident[], period: ReportPeriod): Incident[] => {
+  if (period === 'all') return incidents;
+  const { start } = getDateRangeForPeriod(period);
+  return incidents.filter(incident => new Date(incident.createdAt) >= start);
+};
+
 // Расширяем тип jsPDF для autoTable
 declare module 'jspdf' {
   interface jsPDF {
@@ -35,7 +80,10 @@ export const generateDashboardReport = async (data: {
   incidents: Incident[];
   objects: IndustrialObject[];
   organizations: Organization[];
-}) => {
+}, period: ReportPeriod = 'all') => {
+  const filteredTasks = filterTasksByPeriod(data.tasks, period);
+  const filteredIncidents = filterIncidentsByPeriod(data.incidents, period);
+  const periodLabel = getPeriodLabel(period);
   const doc = new jsPDF();
   await loadFont(doc);
   
@@ -43,7 +91,7 @@ export const generateDashboardReport = async (data: {
 
   // Заголовок
   doc.setFontSize(18);
-  doc.text('Otchet po sisteme', 20, yPos);
+  doc.text(`Otchet po sisteme (${periodLabel})`, 20, yPos);
   yPos += 10;
   
   doc.setFontSize(10);
@@ -77,13 +125,13 @@ export const generateDashboardReport = async (data: {
   yPos = doc.lastAutoTable?.finalY || yPos + 60;
   yPos += 10;
 
-  // Критические задачи
-  if (data.tasks.length > 0) {
+  // Критические задачи за период
+  if (filteredTasks.length > 0) {
     doc.setFontSize(14);
     doc.text('Kriticheskie zadachi', 20, yPos);
     yPos += 10;
 
-    const tasksData = data.tasks.slice(0, 10).map(task => [
+    const tasksData = filteredTasks.slice(0, 10).map(task => [
       task.title.substring(0, 40),
       task.priority === 'critical' ? 'Kritich.' : 
       task.priority === 'high' ? 'Vysokiy' : 
@@ -109,26 +157,28 @@ export const generateDashboardReport = async (data: {
   doc.save(fileName);
 };
 
-export const generateTasksReport = async (tasks: Task[]) => {
+export const generateTasksReport = async (tasks: Task[], period: ReportPeriod = 'all') => {
+  const filteredTasks = filterTasksByPeriod(tasks, period);
+  const periodLabel = getPeriodLabel(period);
   const doc = new jsPDF();
   await loadFont(doc);
 
   let yPos = 20;
 
   doc.setFontSize(18);
-  doc.text('Otchet po zadacham', 20, yPos);
+  doc.text(`Otchet po zadacham (${periodLabel})`, 20, yPos);
   yPos += 10;
   
   doc.setFontSize(10);
   doc.text(`Data: ${new Date().toLocaleDateString('ru-RU')}`, 20, yPos);
   yPos += 15;
 
-  // Статистика
-  const total = tasks.length;
-  const open = tasks.filter(t => t.status === 'open').length;
-  const inProgress = tasks.filter(t => t.status === 'in_progress').length;
-  const completed = tasks.filter(t => t.status === 'completed').length;
-  const critical = tasks.filter(t => t.priority === 'critical').length;
+  // Статистика за период
+  const total = filteredTasks.length;
+  const open = filteredTasks.filter(t => t.status === 'open').length;
+  const inProgress = filteredTasks.filter(t => t.status === 'in_progress').length;
+  const completed = filteredTasks.filter(t => t.status === 'completed').length;
+  const critical = filteredTasks.filter(t => t.priority === 'critical').length;
 
   const statsData = [
     ['Vsego zadach', total.toString()],
@@ -149,8 +199,8 @@ export const generateTasksReport = async (tasks: Task[]) => {
   yPos = doc.lastAutoTable?.finalY || yPos + 40;
   yPos += 10;
 
-  // Таблица задач
-  const tasksData = tasks.map(task => [
+  // Таблица задач за период
+  const tasksData = filteredTasks.map(task => [
     task.title.substring(0, 35),
     task.assignee?.substring(0, 20) || '-',
     task.priority === 'critical' ? 'Krit.' : 
@@ -174,26 +224,28 @@ export const generateTasksReport = async (tasks: Task[]) => {
   doc.save(fileName);
 };
 
-export const generateIncidentsReport = async (incidents: Incident[]) => {
+export const generateIncidentsReport = async (incidents: Incident[], period: ReportPeriod = 'all') => {
+  const filteredIncidents = filterIncidentsByPeriod(incidents, period);
+  const periodLabel = getPeriodLabel(period);
   const doc = new jsPDF();
   await loadFont(doc);
 
   let yPos = 20;
 
   doc.setFontSize(18);
-  doc.text('Otchet po incidentam', 20, yPos);
+  doc.text(`Otchet po incidentam (${periodLabel})`, 20, yPos);
   yPos += 10;
   
   doc.setFontSize(10);
   doc.text(`Data: ${new Date().toLocaleDateString('ru-RU')}`, 20, yPos);
   yPos += 15;
 
-  // Статистика
-  const total = incidents.length;
-  const critical = incidents.filter(i => i.priority === 'critical').length;
-  const high = incidents.filter(i => i.priority === 'high').length;
-  const open = incidents.filter(i => i.status === 'open').length;
-  const resolved = incidents.filter(i => i.status === 'resolved').length;
+  // Статистика за период
+  const total = filteredIncidents.length;
+  const critical = filteredIncidents.filter(i => i.priority === 'critical').length;
+  const high = filteredIncidents.filter(i => i.priority === 'high').length;
+  const open = filteredIncidents.filter(i => i.status === 'open').length;
+  const resolved = filteredIncidents.filter(i => i.status === 'resolved').length;
 
   const statsData = [
     ['Vsego incidentov', total.toString()],
@@ -214,8 +266,8 @@ export const generateIncidentsReport = async (incidents: Incident[]) => {
   yPos = doc.lastAutoTable?.finalY || yPos + 40;
   yPos += 10;
 
-  // Таблица инцидентов
-  const incidentsData = incidents.map(incident => [
+  // Таблица инцидентов за период
+  const incidentsData = filteredIncidents.map(incident => [
     incident.title.substring(0, 35),
     incident.assignedToName?.substring(0, 20) || '-',
     incident.priority === 'critical' ? 'Krit.' : 
@@ -241,23 +293,32 @@ export const generateIncidentsReport = async (incidents: Incident[]) => {
 
 export const generateExpertiseReport = async (
   objects: IndustrialObject[],
-  organizations: Organization[]
+  organizations: Organization[],
+  period: ReportPeriod = 'all'
 ) => {
+  const periodLabel = getPeriodLabel(period);
+  const { start } = getDateRangeForPeriod(period);
+  
+  const filteredObjects = period === 'all' ? objects : objects.filter(obj => {
+    if (!obj.expertiseDate) return false;
+    return new Date(obj.expertiseDate) >= start;
+  });
+  
   const doc = new jsPDF();
   await loadFont(doc);
 
   let yPos = 20;
 
   doc.setFontSize(18);
-  doc.text('Otchet po ekspertizam EPB', 20, yPos);
+  doc.text(`Otchet po ekspertizam EPB (${periodLabel})`, 20, yPos);
   yPos += 10;
   
   doc.setFontSize(10);
   doc.text(`Data: ${new Date().toLocaleDateString('ru-RU')}`, 20, yPos);
   yPos += 15;
 
-  // Фильтруем объекты с экспертизами
-  const objectsWithExpertise = objects
+  // Фильтруем объекты с экспертизами за период
+  const objectsWithExpertise = filteredObjects
     .filter(obj => obj.nextExpertiseDate)
     .map(obj => {
       const dueDate = new Date(obj.nextExpertiseDate!);
@@ -321,15 +382,17 @@ export const generateExpertiseReport = async (
 
 export const generateOrganizationsReport = async (
   organizations: Organization[],
-  objects: IndustrialObject[]
+  objects: IndustrialObject[],
+  period: ReportPeriod = 'all'
 ) => {
+  const periodLabel = getPeriodLabel(period);
   const doc = new jsPDF();
   await loadFont(doc);
 
   let yPos = 20;
 
   doc.setFontSize(18);
-  doc.text('Otchet po organizaciyam', 20, yPos);
+  doc.text(`Otchet po organizaciyam (${periodLabel})`, 20, yPos);
   yPos += 10;
   
   doc.setFontSize(10);

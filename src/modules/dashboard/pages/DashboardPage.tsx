@@ -18,8 +18,10 @@ import {
   generateTasksReport,
   generateIncidentsReport,
   generateExpertiseReport,
-  generateOrganizationsReport
+  generateOrganizationsReport,
+  type ReportPeriod
 } from '@/utils/reportGenerator';
+import ReportPeriodSelector from '@/components/dashboard/ReportPeriodSelector';
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -272,7 +274,7 @@ export default function DashboardPage() {
     });
   }, [incidents]);
 
-  const handleGenerateDashboardReport = async () => {
+  const handleGenerateDashboardReport = async (period: ReportPeriod) => {
     try {
       toast.info('Формируем отчет...');
       await generateDashboardReport({
@@ -290,47 +292,47 @@ export default function DashboardPage() {
         incidents,
         objects,
         organizations
-      });
+      }, period);
       toast.success('Отчет успешно сформирован!');
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
     }
   };
 
-  const handleGenerateTasksReport = async () => {
+  const handleGenerateTasksReport = async (period: ReportPeriod) => {
     try {
       toast.info('Формируем отчет по задачам...');
-      await generateTasksReport(tasks);
+      await generateTasksReport(tasks, period);
       toast.success('Отчет по задачам сформирован!');
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
     }
   };
 
-  const handleGenerateIncidentsReport = async () => {
+  const handleGenerateIncidentsReport = async (period: ReportPeriod) => {
     try {
       toast.info('Формируем отчет по инцидентам...');
-      await generateIncidentsReport(incidents);
+      await generateIncidentsReport(incidents, period);
       toast.success('Отчет по инцидентам сформирован!');
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
     }
   };
 
-  const handleGenerateExpertiseReport = async () => {
+  const handleGenerateExpertiseReport = async (period: ReportPeriod) => {
     try {
       toast.info('Формируем отчет по экспертизам...');
-      await generateExpertiseReport(objects, organizations);
+      await generateExpertiseReport(objects, organizations, period);
       toast.success('Отчет по экспертизам сформирован!');
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
     }
   };
 
-  const handleGenerateOrganizationsReport = async () => {
+  const handleGenerateOrganizationsReport = async (period: ReportPeriod) => {
     try {
       toast.info('Формируем отчет по организациям...');
-      await generateOrganizationsReport(organizations, objects);
+      await generateOrganizationsReport(organizations, objects, period);
       toast.success('Отчет по организациям сформирован!');
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
@@ -344,10 +346,12 @@ export default function DashboardPage() {
         description="Обзор ключевых показателей системы"
         icon="LayoutDashboard"
         action={
-          <Button onClick={handleGenerateDashboardReport} variant="default" className="gap-2">
-            <Icon name="FileText" size={18} />
-            Сформировать отчет
-          </Button>
+          <ReportPeriodSelector 
+            onGenerateReport={handleGenerateDashboardReport}
+            variant="default"
+            size="default"
+            showLabel={true}
+          />
         }
       />
 
@@ -386,9 +390,12 @@ export default function DashboardPage() {
                 Последняя активность
               </CardTitle>
               <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={handleGenerateTasksReport}>
-                  <Icon name="FileText" size={14} />
-                </Button>
+                <ReportPeriodSelector 
+                  onGenerateReport={handleGenerateTasksReport}
+                  variant="ghost"
+                  size="sm"
+                  showLabel={false}
+                />
                 <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.TASKS)}>
                   Все задачи
                   <Icon name="ArrowRight" size={14} className="ml-1" />
@@ -452,9 +459,12 @@ export default function DashboardPage() {
                 Критические задачи
               </CardTitle>
               <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={handleGenerateTasksReport}>
-                  <Icon name="FileText" size={14} />
-                </Button>
+                <ReportPeriodSelector 
+                  onGenerateReport={handleGenerateTasksReport}
+                  variant="ghost"
+                  size="sm"
+                  showLabel={false}
+                />
                 <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.TASKS)}>
                   Все задачи
                   <Icon name="ArrowRight" size={14} className="ml-1" />
@@ -517,9 +527,12 @@ export default function DashboardPage() {
                 Экспертизы промышленной безопасности
               </CardTitle>
               <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={handleGenerateExpertiseReport}>
-                  <Icon name="FileText" size={14} />
-                </Button>
+                <ReportPeriodSelector 
+                  onGenerateReport={handleGenerateExpertiseReport}
+                  variant="ghost"
+                  size="sm"
+                  showLabel={false}
+                />
                 <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.CATALOG)}>
                   Все объекты
                   <Icon name="ArrowRight" size={14} className="ml-1" />
@@ -586,9 +599,12 @@ export default function DashboardPage() {
                 Организации
               </CardTitle>
               <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={handleGenerateOrganizationsReport}>
-                  <Icon name="FileText" size={14} />
-                </Button>
+                <ReportPeriodSelector 
+                  onGenerateReport={handleGenerateOrganizationsReport}
+                  variant="ghost"
+                  size="sm"
+                  showLabel={false}
+                />
               </div>
             </div>
           </CardHeader>
@@ -643,9 +659,12 @@ export default function DashboardPage() {
                 <Icon name="TrendingUp" size={20} className="text-emerald-600" />
                 Динамика задач за 30 дней
               </CardTitle>
-              <Button variant="ghost" size="sm" onClick={handleGenerateTasksReport}>
-                <Icon name="FileText" size={14} />
-              </Button>
+              <ReportPeriodSelector 
+                onGenerateReport={handleGenerateTasksReport}
+                variant="ghost"
+                size="sm"
+                showLabel={false}
+              />
             </div>
           </CardHeader>
           <CardContent>
@@ -702,9 +721,12 @@ export default function DashboardPage() {
                 <Icon name="BarChart3" size={20} className="text-red-600" />
                 Инциденты по приоритетам за 30 дней
               </CardTitle>
-              <Button variant="ghost" size="sm" onClick={handleGenerateIncidentsReport}>
-                <Icon name="FileText" size={14} />
-              </Button>
+              <ReportPeriodSelector 
+                onGenerateReport={handleGenerateIncidentsReport}
+                variant="ghost"
+                size="sm"
+                showLabel={false}
+              />
             </div>
           </CardHeader>
           <CardContent>
