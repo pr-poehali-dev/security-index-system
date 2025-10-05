@@ -76,10 +76,8 @@ export default function ObjectDetailsModal({ open, onOpenChange, object, onEdit 
   const [documentTypeFilter, setDocumentTypeFilter] = useState<string>('all');
   const [documentStatusFilter, setDocumentStatusFilter] = useState<string>('all');
   
-  if (!object) return null;
-  
-  const organization = organizations.find(org => org.id === object.organizationId);
-  const allDocuments = getDocumentsByObject(object.id);
+  const organization = object ? organizations.find(org => org.id === object.organizationId) : null;
+  const allDocuments = object ? getDocumentsByObject(object.id) : [];
   
   const documents = useMemo(() => {
     return allDocuments.filter(doc => {
@@ -88,6 +86,8 @@ export default function ObjectDetailsModal({ open, onOpenChange, object, onEdit 
       return matchesType && matchesStatus;
     });
   }, [allDocuments, documentTypeFilter, documentStatusFilter]);
+  
+  if (!object) return null;
 
   const formatDate = (date: string | undefined) => {
     if (!date) return '-';

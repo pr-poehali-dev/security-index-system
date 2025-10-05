@@ -1,6 +1,8 @@
+import { useState, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import { SortableTableHeader, type SortDirection } from '@/components/ui/sortable-table-header';
 import type { Task } from '@/types/tasks';
 
 interface TaskTableViewProps {
@@ -45,6 +47,70 @@ const getStatusLabel = (status: Task['status']) => {
 };
 
 export default function TaskTableView({ tasks, onTaskClick }: TaskTableViewProps) {
+  const [sortConfig, setSortConfig] = useState<{ field: string; direction: SortDirection }>({ 
+    field: 'dueDate', 
+    direction: 'asc' 
+  });
+
+  const handleSort = (field: string) => {
+    setSortConfig(prev => {
+      if (prev.field !== field) {
+        return { field, direction: 'asc' };
+      }
+      if (prev.direction === 'asc') {
+        return { field, direction: 'desc' };
+      }
+      if (prev.direction === 'desc') {
+        return { field, direction: null };
+      }
+      return { field, direction: 'asc' };
+    });
+  };
+
+  const sortedTasks = useMemo(() => {
+    if (!sortConfig.direction) return tasks;
+
+    return [...tasks].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortConfig.field) {
+        case 'title':
+          aValue = a.title.toLowerCase();
+          bValue = b.title.toLowerCase();
+          break;
+        case 'priority':
+          const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+          aValue = priorityOrder[a.priority];
+          bValue = priorityOrder[b.priority];
+          break;
+        case 'status':
+          const statusOrder = { open: 1, in_progress: 2, completed: 3, cancelled: 4 };
+          aValue = statusOrder[a.status];
+          bValue = statusOrder[b.status];
+          break;
+        case 'assignee':
+          aValue = a.assignedTo.toLowerCase();
+          bValue = b.assignedTo.toLowerCase();
+          break;
+        case 'dueDate':
+          aValue = new Date(a.dueDate).getTime();
+          bValue = new Date(b.dueDate).getTime();
+          break;
+        case 'object':
+          aValue = (a.object || '').toLowerCase();
+          bValue = (b.object || '').toLowerCase();
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [tasks, sortConfig]);
+
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('ru-RU', {
       day: '2-digit',
@@ -64,17 +130,47 @@ export default function TaskTableView({ tasks, onTaskClick }: TaskTableViewProps
         <table className="w-full">
           <thead className="bg-muted/50 border-b">
             <tr>
-              <th className="text-left p-3 font-semibold text-sm">Название</th>
-              <th className="text-left p-3 font-semibold text-sm">Приоритет</th>
-              <th className="text-left p-3 font-semibold text-sm">Статус</th>
-              <th className="text-left p-3 font-semibold text-sm">Ответственный</th>
-              <th className="text-left p-3 font-semibold text-sm">Срок</th>
-              <th className="text-left p-3 font-semibold text-sm">Объект</th>
+              <SortableTableHeader
+                label="Название"
+                field="title"
+                currentSort={sortConfig}
+                onSort={handleSort}
+              />
+              <SortableTableHeader
+                label="Приоритет"
+                field="priority"
+                currentSort={sortConfig}
+                onSort={handleSort}
+              />
+              <SortableTableHeader
+                label="Статус"
+                field="status"
+                currentSort={sortConfig}
+                onSort={handleSort}
+              />
+              <SortableTableHeader
+                label="Ответственный"
+                field="assignee"
+                currentSort={sortConfig}
+                onSort={handleSort}
+              />
+              <SortableTableHeader
+                label="Срок"
+                field="dueDate"
+                currentSort={sortConfig}
+                onSort={handleSort}
+              />
+              <SortableTableHeader
+                label="Объект"
+                field="object"
+                currentSort={sortConfig}
+                onSort={handleSort}
+              />
               <th className="text-right p-3 font-semibold text-sm">Действия</th>
             </tr>
           </thead>
           <tbody>
-            {tasks.map((task) => {
+            {sortedTasks.map((task) => {
               const overdueTask = isOverdue(task.dueDate, task.status);
               
               return (

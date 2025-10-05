@@ -1,6 +1,8 @@
+import { useState, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import { SortableTableHeader, type SortDirection } from '@/components/ui/sortable-table-header';
 import { useCatalogStore } from '@/stores/catalogStore';
 import type { IndustrialObject } from '@/types/catalog';
 
@@ -36,6 +38,71 @@ const getTypeLabel = (type: IndustrialObject['type']) => {
 
 export default function ObjectTableView({ objects, onView, onEdit }: ObjectTableViewProps) {
   const { organizations } = useCatalogStore();
+  const [sortConfig, setSortConfig] = useState<{ field: string; direction: SortDirection }>({ 
+    field: 'name', 
+    direction: 'asc' 
+  });
+
+  const handleSort = (field: string) => {
+    setSortConfig(prev => {
+      if (prev.field !== field) {
+        return { field, direction: 'asc' };
+      }
+      if (prev.direction === 'asc') {
+        return { field, direction: 'desc' };
+      }
+      if (prev.direction === 'desc') {
+        return { field, direction: null };
+      }
+      return { field, direction: 'asc' };
+    });
+  };
+
+  const sortedObjects = useMemo(() => {
+    if (!sortConfig.direction) return objects;
+
+    return [...objects].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortConfig.field) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'registrationNumber':
+          aValue = a.registrationNumber.toLowerCase();
+          bValue = b.registrationNumber.toLowerCase();
+          break;
+        case 'type':
+          aValue = a.type;
+          bValue = b.type;
+          break;
+        case 'organization':
+          aValue = organizations.find(org => org.id === a.organizationId)?.name.toLowerCase() || '';
+          bValue = organizations.find(org => org.id === b.organizationId)?.name.toLowerCase() || '';
+          break;
+        case 'status':
+          aValue = a.status;
+          bValue = b.status;
+          break;
+        case 'nextExpertiseDate':
+          aValue = a.nextExpertiseDate ? new Date(a.nextExpertiseDate).getTime() : 0;
+          bValue = b.nextExpertiseDate ? new Date(b.nextExpertiseDate).getTime() : 0;
+          break;
+        case 'responsiblePerson':
+          aValue = a.responsiblePerson.toLowerCase();
+          bValue = b.responsiblePerson.toLowerCase();
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [objects, sortConfig, organizations]);
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('ru-RU', {
@@ -62,18 +129,53 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
         <table className="w-full">
           <thead className="bg-muted/50 border-b">
             <tr>
-              <th className="text-left p-3 font-semibold text-sm">Название</th>
-              <th className="text-left p-3 font-semibold text-sm">Рег. номер</th>
-              <th className="text-left p-3 font-semibold text-sm">Тип</th>
-              <th className="text-left p-3 font-semibold text-sm">Организация</th>
-              <th className="text-left p-3 font-semibold text-sm">Статус</th>
-              <th className="text-left p-3 font-semibold text-sm">Следующая ЭПБ</th>
-              <th className="text-left p-3 font-semibold text-sm">Ответственный</th>
+              <SortableTableHeader
+                label="Название"
+                field="name"
+                currentSort={sortConfig}
+                onSort={handleSort}
+              />
+              <SortableTableHeader
+                label="Рег. номер"
+                field="registrationNumber"
+                currentSort={sortConfig}
+                onSort={handleSort}
+              />
+              <SortableTableHeader
+                label="Тип"
+                field="type"
+                currentSort={sortConfig}
+                onSort={handleSort}
+              />
+              <SortableTableHeader
+                label="Организация"
+                field="organization"
+                currentSort={sortConfig}
+                onSort={handleSort}
+              />
+              <SortableTableHeader
+                label="Статус"
+                field="status"
+                currentSort={sortConfig}
+                onSort={handleSort}
+              />
+              <SortableTableHeader
+                label="Следующая ЭПБ"
+                field="nextExpertiseDate"
+                currentSort={sortConfig}
+                onSort={handleSort}
+              />
+              <SortableTableHeader
+                label="Ответственный"
+                field="responsiblePerson"
+                currentSort={sortConfig}
+                onSort={handleSort}
+              />
               <th className="text-right p-3 font-semibold text-sm">Действия</th>
             </tr>
           </thead>
           <tbody>
-            {objects.map((obj) => {
+            {sortedObjects.map((obj) => {
               const organization = organizations.find(org => org.id === obj.organizationId);
               
               return (
