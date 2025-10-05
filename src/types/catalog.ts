@@ -1,78 +1,74 @@
-export type HazardClass = '1' | '2' | '3' | '4';
-export type ObjectType = 'industrial' | 'energy' | 'mining' | 'chemical' | 'gas' | 'building' | 'other';
-export type ObjectStatus = 'active' | 'inactive' | 'under_construction' | 'decommissioned';
+export type HazardClass = 'I' | 'II' | 'III' | 'IV';
+export type ObjectType = 'opo' | 'gts' | 'building';
+export type ObjectStatus = 'active' | 'conservation' | 'liquidated';
+export type DocumentStatus = 'valid' | 'expiring_soon' | 'expired';
+export type DocumentType = 'passport' | 'scheme' | 'permit' | 'protocol' | 'certificate' | 'other';
 
 export interface Organization {
   id: string;
   tenantId: string;
   name: string;
-  inn: string;
+  inn?: string;
   type: 'holding' | 'legal_entity' | 'branch';
   parentId?: string;
   children?: Organization[];
   level: number;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
   createdAt: string;
+  updatedAt: string;
 }
 
-export interface HazardousObject {
+export interface IndustrialObject {
   id: string;
   tenantId: string;
-  code: string;
+  organizationId: string;
+  registrationNumber: string;
   name: string;
-  type: 'industrial' | 'energy' | 'mining' | 'chemical' | 'gas' | 'other';
-  hazardClass: HazardClass;
+  type: ObjectType;
+  category?: string;
+  hazardClass?: HazardClass;
+  commissioningDate: string;
+  status: ObjectStatus;
   location: {
     address: string;
     coordinates?: { lat: number; lng: number };
   };
   responsiblePerson: string;
   responsiblePersonId?: string;
-  registrationNumber: string;
-  registrationDate: string;
-  status: ObjectStatus;
-  organizationId: string;
-  organizationName?: string;
-  commissioningDate?: string;
-  nextExaminationDate?: string;
-  equipment: Equipment[];
-  documentation: Documentation[];
-  inspectionSchedule?: InspectionSchedule[];
+  nextExpertiseDate?: string;
+  nextDiagnosticDate?: string;
+  nextTestDate?: string;
+  description?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface Equipment {
-  id: string;
-  objectId: string;
-  name: string;
-  type: string;
-  serialNumber: string;
-  manufacturer: string;
-  commissioningDate: string;
-  nextInspectionDate?: string;
-  status: 'operational' | 'maintenance' | 'faulty' | 'decommissioned';
-  specifications?: Record<string, string>;
-}
-
-export interface Documentation {
+export interface ObjectDocument {
   id: string;
   objectId: string;
   title: string;
-  type: 'certificate' | 'permit' | 'instruction' | 'protocol' | 'other';
-  documentNumber: string;
+  type: DocumentType;
+  documentNumber?: string;
   issueDate: string;
   expiryDate?: string;
   fileUrl?: string;
-  status: 'valid' | 'expired' | 'pending_renewal';
+  fileName?: string;
+  fileSize?: number;
+  status: DocumentStatus;
+  createdAt: string;
+  uploadedBy?: string;
 }
 
-export interface InspectionSchedule {
+export interface Location {
   id: string;
   objectId: string;
-  inspectionType: 'routine' | 'extraordinary' | 'regulatory';
-  scheduledDate: string;
-  frequency: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
-  responsiblePerson: string;
-  status: 'scheduled' | 'completed' | 'overdue';
-  lastInspectionDate?: string;
+  address: string;
+  latitude?: number;
+  longitude?: number;
+  region?: string;
+  district?: string;
+  settlement?: string;
 }
