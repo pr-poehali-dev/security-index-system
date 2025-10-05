@@ -1,8 +1,12 @@
+import { useState } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
+import CreateExaminationDialog from '../components/CreateExaminationDialog';
+import ExaminationDetailsDialog from '../components/ExaminationDetailsDialog';
+import UploadConclusionDialog from '../components/UploadConclusionDialog';
 
 const examinations = [
   { id: '1', object: 'Котельная №1', type: 'Экспертиза ПБ', scheduled: '2025-11-15', status: 'scheduled', executor: 'ООО "Эксперт"' },
@@ -31,6 +35,21 @@ const getStatusLabel = (status: string) => {
 };
 
 export default function ExaminationPage() {
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [selectedExamination, setSelectedExamination] = useState<typeof examinations[0] | null>(null);
+
+  const handleViewDetails = (exam: typeof examinations[0]) => {
+    setSelectedExamination(exam);
+    setDetailsDialogOpen(true);
+  };
+
+  const handleUploadConclusion = (exam: typeof examinations[0]) => {
+    setSelectedExamination(exam);
+    setUploadDialogOpen(true);
+  };
+
   return (
     <div>
       <PageHeader
@@ -38,7 +57,7 @@ export default function ExaminationPage() {
         description="Планирование и учет экспертиз и диагностирований"
         icon="Microscope"
         action={
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={() => setCreateDialogOpen(true)}>
             <Icon name="Plus" size={18} />
             Запланировать диагностирование
           </Button>
@@ -113,7 +132,7 @@ export default function ExaminationPage() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => handleViewDetails(exam)}>
                   <Icon name="Eye" className="mr-2" size={14} />
                   Подробнее
                 </Button>
@@ -124,7 +143,7 @@ export default function ExaminationPage() {
                   </Button>
                 )}
                 {exam.status === 'in_progress' && (
-                  <Button size="sm">
+                  <Button size="sm" onClick={() => handleUploadConclusion(exam)}>
                     <Icon name="Upload" className="mr-2" size={14} />
                     Загрузить заключение
                   </Button>
@@ -134,6 +153,18 @@ export default function ExaminationPage() {
           </Card>
         ))}
       </div>
+
+      <CreateExaminationDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
+      <ExaminationDetailsDialog 
+        open={detailsDialogOpen} 
+        onOpenChange={setDetailsDialogOpen}
+        examination={selectedExamination}
+      />
+      <UploadConclusionDialog
+        open={uploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+        examination={selectedExamination}
+      />
     </div>
   );
 }
