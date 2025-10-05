@@ -3,6 +3,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { SortableTableHeader, type SortDirection } from '@/components/ui/sortable-table-header';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { exportToCSV, exportToExcel, type ExportColumn } from '@/utils/export';
 import type { Task } from '@/types/tasks';
 
 interface TaskTableViewProps {
@@ -124,8 +131,62 @@ export default function TaskTableView({ tasks, onTaskClick }: TaskTableViewProps
     return new Date(dueDate) < new Date();
   };
 
+  const handleExport = (format: 'csv' | 'excel') => {
+    const columns: ExportColumn<Task>[] = [
+      { key: 'title', label: 'Название' },
+      { key: 'description', label: 'Описание' },
+      { 
+        key: 'priority', 
+        label: 'Приоритет',
+        format: (value) => getPriorityLabel(value)
+      },
+      { 
+        key: 'status', 
+        label: 'Статус',
+        format: (value) => getStatusLabel(value)
+      },
+      { key: 'assignee', label: 'Ответственный' },
+      { 
+        key: 'dueDate', 
+        label: 'Срок',
+        format: (value) => formatDate(value)
+      },
+      { key: 'object', label: 'Объект' }
+    ];
+
+    const filename = `Задачи_${new Date().toLocaleDateString('ru-RU').replace(/\./g, '-')}`;
+
+    if (format === 'csv') {
+      exportToCSV(sortedTasks, columns, filename);
+    } else {
+      exportToExcel(sortedTasks, columns, filename, 'Задачи');
+    }
+  };
+
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="space-y-3">
+      <div className="flex justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Icon name="Download" size={16} className="mr-2" />
+              Экспорт
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleExport('csv')}>
+              <Icon name="FileText" size={16} className="mr-2" />
+              Экспорт в CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExport('excel')}>
+              <Icon name="FileSpreadsheet" size={16} className="mr-2" />
+              Экспорт в Excel
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      
+      <div className="border rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-muted/50 border-b">
@@ -240,12 +301,14 @@ export default function TaskTableView({ tasks, onTaskClick }: TaskTableViewProps
         </table>
       </div>
       
-      {tasks.length === 0 && (
+      
+      {sortedTasks.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
           <Icon name="Search" className="mx-auto mb-3" size={48} />
           <p>Задачи не найдены</p>
         </div>
       )}
+      </div>
     </div>
   );
 }
