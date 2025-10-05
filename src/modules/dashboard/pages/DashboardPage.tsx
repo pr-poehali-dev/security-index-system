@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
-import { useTenantStore } from '@/stores/tenantStore';
 import { useCatalogStore } from '@/stores/catalogStore';
 import { useTaskStore } from '@/stores/taskStore';
 import { useIncidentStore } from '@/stores/incidentStore';
@@ -12,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import PageHeader from '@/components/layout/PageHeader';
 import Icon from '@/components/ui/icon';
 import { ROUTES } from '@/lib/constants';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -58,7 +58,6 @@ const getPriorityLabel = (priority: string) => {
 export default function DashboardPage() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
-  const tenants = useTenantStore((state) => state.tenants);
   const { objects, organizations } = useCatalogStore();
   const { tasks, getTaskStats, getOverdueTasks } = useTaskStore();
   const { incidents, getIncidentsByStatus } = useIncidentStore();
@@ -208,6 +207,62 @@ export default function DashboardPage() {
       })
       .slice(0, 5);
   }, [tasks]);
+
+  const tasksChartData = useMemo(() => {
+    const last30Days = Array.from({ length: 30 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (29 - i));
+      return date;
+    });
+
+    return last30Days.map(date => {
+      const dateStr = date.toISOString().split('T')[0];
+      const dayTasks = tasks.filter(task => {
+        const taskDate = new Date(task.createdAt).toISOString().split('T')[0];
+        return taskDate === dateStr;
+      });
+
+      const completed = dayTasks.filter(t => t.status === 'completed').length;
+      const open = dayTasks.filter(t => t.status === 'open').length;
+      const inProgress = dayTasks.filter(t => t.status === 'in_progress').length;
+
+      return {
+        date: date.getDate() + ' ' + date.toLocaleDateString('ru-RU', { month: 'short' }),
+        'Открыто': open,
+        'В работе': inProgress,
+        'Завершено': completed
+      };
+    });
+  }, [tasks]);
+
+  const incidentsChartData = useMemo(() => {
+    const last30Days = Array.from({ length: 30 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (29 - i));
+      return date;
+    });
+
+    return last30Days.map(date => {
+      const dateStr = date.toISOString().split('T')[0];
+      const dayIncidents = incidents.filter(incident => {
+        const incidentDate = new Date(incident.createdAt).toISOString().split('T')[0];
+        return incidentDate === dateStr;
+      });
+
+      const critical = dayIncidents.filter(i => i.priority === 'critical').length;
+      const high = dayIncidents.filter(i => i.priority === 'high').length;
+      const medium = dayIncidents.filter(i => i.priority === 'medium').length;
+      const low = dayIncidents.filter(i => i.priority === 'low').length;
+
+      return {
+        date: date.getDate() + ' ' + date.toLocaleDateString('ru-RU', { month: 'short' }),
+        'Критический': critical,
+        'Высокий': high,
+        'Средний': medium,
+        'Низкий': low
+      };
+    });
+  }, [incidents]);
 
   return (
     <div>
@@ -479,58 +534,98 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {user?.role === 'SuperAdmin' && tenants.length > 0 && (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Icon name="Building2" size={20} className="text-emerald-600" />
-              Управление тенантами
+              <Icon name="TrendingUp" size={20} className="text-emerald-600" />
+              Динамика задач за 30 дней
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {tenants.map((tenant) => {
-                const daysUntilExpiry = Math.floor((new Date(tenant.expiresAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-                const isExpiring = daysUntilExpiry <= 30;
-                
-                return (
-                  <div 
-                    key={tenant.id} 
-                    className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-emerald-500 transition-colors cursor-pointer"
-                    onClick={() => navigate(ROUTES.TENANTS)}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h4 className="font-semibold text-sm text-gray-900 dark:text-white">{tenant.name}</h4>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">ИНН: {tenant.inn}</p>
-                      </div>
-                      <Badge variant={tenant.status === 'active' ? 'default' : 'secondary'}>
-                        {tenant.status === 'active' ? 'Активен' : 'Неактивен'}
-                      </Badge>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-xs">
-                        <Icon name="Users" size={14} className="text-gray-500" />
-                        <span className="text-gray-600 dark:text-gray-400">{tenant.adminName}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs">
-                        <Icon name="Calendar" size={14} className="text-gray-500" />
-                        <span className={isExpiring ? 'text-amber-600' : 'text-gray-600 dark:text-gray-400'}>
-                          Истекает через {daysUntilExpiry} дней
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1 flex-wrap">
-                        <span className="text-xs text-gray-600 dark:text-gray-400">Модулей:</span>
-                        <Badge variant="outline" className="text-xs">{tenant.modules.length}</Badge>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={tasksChartData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
+                <XAxis 
+                  dataKey="date" 
+                  tick={{ fontSize: 12 }} 
+                  className="text-gray-600 dark:text-gray-400"
+                />
+                <YAxis 
+                  tick={{ fontSize: 12 }} 
+                  className="text-gray-600 dark:text-gray-400"
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px'
+                  }}
+                />
+                <Legend />
+                <Line 
+                  type="monotone" 
+                  dataKey="Открыто" 
+                  stroke="#3b82f6" 
+                  strokeWidth={2}
+                  dot={{ fill: '#3b82f6', r: 3 }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="В работе" 
+                  stroke="#f59e0b" 
+                  strokeWidth={2}
+                  dot={{ fill: '#f59e0b', r: 3 }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="Завершено" 
+                  stroke="#10b981" 
+                  strokeWidth={2}
+                  dot={{ fill: '#10b981', r: 3 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
-      )}
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Icon name="BarChart3" size={20} className="text-red-600" />
+              Инциденты по приоритетам за 30 дней
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={incidentsChartData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
+                <XAxis 
+                  dataKey="date" 
+                  tick={{ fontSize: 12 }} 
+                  className="text-gray-600 dark:text-gray-400"
+                />
+                <YAxis 
+                  tick={{ fontSize: 12 }} 
+                  className="text-gray-600 dark:text-gray-400"
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px'
+                  }}
+                />
+                <Legend />
+                <Bar dataKey="Критический" stackId="a" fill="#ef4444" />
+                <Bar dataKey="Высокий" stackId="a" fill="#f97316" />
+                <Bar dataKey="Средний" stackId="a" fill="#eab308" />
+                <Bar dataKey="Низкий" stackId="a" fill="#22c55e" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
