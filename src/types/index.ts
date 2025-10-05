@@ -101,6 +101,156 @@ export interface EmployeeCertification {
   verificationStatus?: 'pending' | 'verified' | 'failed';
 }
 
+export interface CompetencyMatrix {
+  id: string;
+  tenantId: string;
+  organizationId: string;
+  position: string;
+  requiredAreas: string[];
+  recommendedAreas: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GapAnalysis {
+  employeeId: string;
+  fullName: string;
+  position: string;
+  missingRequired: CertificationArea[];
+  missingRecommended: CertificationArea[];
+  expiringCertifications: EmployeeCertification[];
+  riskLevel: 'high' | 'medium' | 'low';
+}
+
+export interface Incident {
+  id: string;
+  tenantId: string;
+  organizationId: string;
+  title: string;
+  description: string;
+  type: 'accident' | 'near_miss' | 'violation' | 'equipment_failure';
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  status: 'reported' | 'investigating' | 'resolved' | 'closed';
+  reportedBy: string;
+  assignedTo?: string;
+  occurredAt: string;
+  reportedAt: string;
+  resolvedAt?: string;
+  rootCause?: string;
+  correctiveActions?: string;
+}
+
+export interface Checklist {
+  id: string;
+  tenantId: string;
+  name: string;
+  category: string;
+  items: ChecklistItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChecklistItem {
+  id: string;
+  question: string;
+  requiresComment: boolean;
+  criticalItem: boolean;
+}
+
+export interface Audit {
+  id: string;
+  tenantId: string;
+  checklistId: string;
+  organizationId: string;
+  auditorId: string;
+  scheduledDate: string;
+  completedDate?: string;
+  status: 'scheduled' | 'in_progress' | 'completed';
+  findings: AuditFinding[];
+}
+
+export interface AuditFinding {
+  id: string;
+  itemId: string;
+  result: 'pass' | 'fail' | 'n/a';
+  comment?: string;
+  photo?: string;
+}
+
+export interface Task {
+  id: string;
+  tenantId: string;
+  title: string;
+  description?: string;
+  type: 'corrective_action' | 'maintenance' | 'audit' | 'other';
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  status: 'open' | 'in_progress' | 'completed' | 'cancelled';
+  assignedTo: string;
+  createdBy: string;
+  dueDate: string;
+  completedAt?: string;
+  sourceType?: 'incident' | 'audit' | 'checklist';
+  sourceId?: string;
+}
+
+export interface Equipment {
+  id: string;
+  tenantId: string;
+  organizationId: string;
+  name: string;
+  type: string;
+  manufacturer?: string;
+  serialNumber?: string;
+  commissionDate?: string;
+  status: 'operational' | 'maintenance' | 'repair' | 'decommissioned';
+  nextMaintenanceDate?: string;
+  nextExaminationDate?: string;
+}
+
+export interface Examination {
+  id: string;
+  tenantId: string;
+  equipmentId: string;
+  type: 'periodic' | 'extraordinary' | 'commissioning';
+  scheduledDate: string;
+  completedDate?: string;
+  performedBy?: string;
+  result: 'passed' | 'failed' | 'conditional';
+  defects: Defect[];
+  protocolNumber?: string;
+}
+
+export interface Defect {
+  id: string;
+  description: string;
+  severity: 'critical' | 'major' | 'minor';
+  status: 'open' | 'fixed' | 'deferred';
+}
+
+export interface MaintenanceRecord {
+  id: string;
+  tenantId: string;
+  equipmentId: string;
+  type: 'preventive' | 'corrective' | 'emergency';
+  scheduledDate: string;
+  completedDate?: string;
+  performedBy?: string;
+  workDescription: string;
+  partsUsed?: string;
+  cost?: number;
+  nextMaintenanceDate?: string;
+}
+
+export interface Budget {
+  id: string;
+  tenantId: string;
+  year: number;
+  category: 'attestation' | 'maintenance' | 'equipment' | 'training' | 'other';
+  planned: number;
+  actual: number;
+  quarter: 1 | 2 | 3 | 4;
+}
+
 export interface DashboardStats {
   totalEmployees: number;
   activeCertifications: number;
