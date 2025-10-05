@@ -12,6 +12,14 @@ import PageHeader from '@/components/layout/PageHeader';
 import Icon from '@/components/ui/icon';
 import { ROUTES } from '@/lib/constants';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { toast } from 'sonner';
+import {
+  generateDashboardReport,
+  generateTasksReport,
+  generateIncidentsReport,
+  generateExpertiseReport,
+  generateOrganizationsReport
+} from '@/utils/reportGenerator';
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -264,12 +272,83 @@ export default function DashboardPage() {
     });
   }, [incidents]);
 
+  const handleGenerateDashboardReport = async () => {
+    try {
+      toast.info('Формируем отчет...');
+      await generateDashboardReport({
+        stats: {
+          totalObjects: objectsStats.total,
+          activeObjects: objectsStats.active,
+          openTasks: taskStats.open,
+          tasksInProgress: taskStats.inProgress,
+          overdueTasks: overdueTasks.length,
+          openIncidents: openIncidents.length,
+          criticalIncidents: incidents.filter(i => i.priority === 'critical').length,
+          expertiseOverdue: objectsStats.needsExpertise
+        },
+        tasks: criticalTasks,
+        incidents,
+        objects,
+        organizations
+      });
+      toast.success('Отчет успешно сформирован!');
+    } catch (error) {
+      toast.error('Ошибка при формировании отчета');
+    }
+  };
+
+  const handleGenerateTasksReport = async () => {
+    try {
+      toast.info('Формируем отчет по задачам...');
+      await generateTasksReport(tasks);
+      toast.success('Отчет по задачам сформирован!');
+    } catch (error) {
+      toast.error('Ошибка при формировании отчета');
+    }
+  };
+
+  const handleGenerateIncidentsReport = async () => {
+    try {
+      toast.info('Формируем отчет по инцидентам...');
+      await generateIncidentsReport(incidents);
+      toast.success('Отчет по инцидентам сформирован!');
+    } catch (error) {
+      toast.error('Ошибка при формировании отчета');
+    }
+  };
+
+  const handleGenerateExpertiseReport = async () => {
+    try {
+      toast.info('Формируем отчет по экспертизам...');
+      await generateExpertiseReport(objects, organizations);
+      toast.success('Отчет по экспертизам сформирован!');
+    } catch (error) {
+      toast.error('Ошибка при формировании отчета');
+    }
+  };
+
+  const handleGenerateOrganizationsReport = async () => {
+    try {
+      toast.info('Формируем отчет по организациям...');
+      await generateOrganizationsReport(organizations, objects);
+      toast.success('Отчет по организациям сформирован!');
+    } catch (error) {
+      toast.error('Ошибка при формировании отчета');
+    }
+  };
+
   return (
     <div>
       <PageHeader
         title={`Добро пожаловать, ${user?.name.split(' ')[0] || 'Пользователь'}`}
         description="Обзор ключевых показателей системы"
         icon="LayoutDashboard"
+        action={
+          <Button onClick={handleGenerateDashboardReport} variant="default" className="gap-2">
+            <Icon name="FileText" size={18} />
+            Сформировать отчет
+          </Button>
+        }
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -306,10 +385,15 @@ export default function DashboardPage() {
                 <Icon name="Activity" size={20} className="text-emerald-600" />
                 Последняя активность
               </CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.TASKS)}>
-                Все задачи
-                <Icon name="ArrowRight" size={14} className="ml-1" />
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={handleGenerateTasksReport}>
+                  <Icon name="FileText" size={14} />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.TASKS)}>
+                  Все задачи
+                  <Icon name="ArrowRight" size={14} className="ml-1" />
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -367,10 +451,15 @@ export default function DashboardPage() {
                 <Icon name="AlertTriangle" size={20} className="text-red-600" />
                 Критические задачи
               </CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.TASKS)}>
-                Все задачи
-                <Icon name="ArrowRight" size={14} className="ml-1" />
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={handleGenerateTasksReport}>
+                  <Icon name="FileText" size={14} />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.TASKS)}>
+                  Все задачи
+                  <Icon name="ArrowRight" size={14} className="ml-1" />
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -427,10 +516,15 @@ export default function DashboardPage() {
                 <Icon name="Calendar" size={20} className="text-amber-600" />
                 Экспертизы промышленной безопасности
               </CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.CATALOG)}>
-                Все объекты
-                <Icon name="ArrowRight" size={14} className="ml-1" />
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={handleGenerateExpertiseReport}>
+                  <Icon name="FileText" size={14} />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.CATALOG)}>
+                  Все объекты
+                  <Icon name="ArrowRight" size={14} className="ml-1" />
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -486,10 +580,17 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Icon name="Building2" size={20} className="text-blue-600" />
-              Организации
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Icon name="Building2" size={20} className="text-blue-600" />
+                Организации
+              </CardTitle>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={handleGenerateOrganizationsReport}>
+                  <Icon name="FileText" size={14} />
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -537,10 +638,15 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Icon name="TrendingUp" size={20} className="text-emerald-600" />
-              Динамика задач за 30 дней
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Icon name="TrendingUp" size={20} className="text-emerald-600" />
+                Динамика задач за 30 дней
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={handleGenerateTasksReport}>
+                <Icon name="FileText" size={14} />
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -591,10 +697,15 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Icon name="BarChart3" size={20} className="text-red-600" />
-              Инциденты по приоритетам за 30 дней
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Icon name="BarChart3" size={20} className="text-red-600" />
+                Инциденты по приоритетам за 30 дней
+              </CardTitle>
+              <Button variant="ghost" size="sm" onClick={handleGenerateIncidentsReport}>
+                <Icon name="FileText" size={14} />
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
