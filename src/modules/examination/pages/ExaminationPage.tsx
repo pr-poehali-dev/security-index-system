@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
+import { SearchBar } from '@/components/ui/search-bar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import CreateExaminationDialog from '../components/CreateExaminationDialog';
 import ExaminationDetailsDialog from '../components/ExaminationDetailsDialog';
 import UploadConclusionDialog from '../components/UploadConclusionDialog';
@@ -39,6 +41,25 @@ export default function ExaminationPage() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [selectedExamination, setSelectedExamination] = useState<typeof examinations[0] | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
+
+  const filteredExaminations = useMemo(() => {
+    return examinations.filter((exam) => {
+      const matchesSearch = exam.object.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           exam.executor.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           exam.type.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || exam.status === statusFilter;
+      const matchesType = typeFilter === 'all' || exam.type === typeFilter;
+      return matchesSearch && matchesStatus && matchesType;
+    });
+  }, [searchQuery, statusFilter, typeFilter]);
+
+  const examinationTypes = useMemo(() => {
+    const types = new Set(examinations.map(e => e.type));
+    return Array.from(types);
+  }, []);
 
   const handleViewDetails = (exam: typeof examinations[0]) => {
     setSelectedExamination(exam);
@@ -103,8 +124,48 @@ export default function ExaminationPage() {
         </Card>
       </div>
 
-      <div className="space-y-4">
-        {examinations.map((exam) => (
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Поиск по объекту, исполнителю, типу..."
+          className="flex-1"
+        />
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Статус" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Все статусы</SelectItem>
+            <SelectItem value="scheduled">Запланировано</SelectItem>
+            <SelectItem value="in_progress">В процессе</SelectItem>
+            <SelectItem value="completed">Завершено</SelectItem>
+            <SelectItem value="overdue">Просрочено</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger className="w-full sm:w-[220px]">
+            <SelectValue placeholder="Тип диагностирования" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Все типы</SelectItem>
+            {examinationTypes.map((type) => (
+              <SelectItem key={type} value={type}>{type}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {filteredExaminations.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          <p>Диагностирования не найдены</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Badge variant="secondary">{filteredExaminations.length} диагностирований</Badge>
+          </div>
+          {filteredExaminations.map((exam) => (
           <Card key={exam.id}>
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
@@ -151,8 +212,9 @@ export default function ExaminationPage() {
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <CreateExaminationDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
       <ExaminationDetailsDialog 

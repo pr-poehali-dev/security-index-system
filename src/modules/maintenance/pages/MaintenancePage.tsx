@@ -1,8 +1,11 @@
+import { useState, useMemo } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
+import { SearchBar } from '@/components/ui/search-bar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const works = [
   { id: '1', object: 'Котельная №1', type: 'ТО', title: 'Плановое ТО №3', scheduled: '2025-10-10', status: 'planned', executor: 'Внутренняя служба' },
@@ -29,6 +32,26 @@ const getTypeColor = (type: string) => {
 };
 
 export default function MaintenancePage() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
+
+  const filteredWorks = useMemo(() => {
+    return works.filter((work) => {
+      const matchesSearch = work.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           work.object.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           work.executor.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || work.status === statusFilter;
+      const matchesType = typeFilter === 'all' || work.type === typeFilter;
+      return matchesSearch && matchesStatus && matchesType;
+    });
+  }, [searchQuery, statusFilter, typeFilter]);
+
+  const workTypes = useMemo(() => {
+    const types = new Set(works.map(w => w.type));
+    return Array.from(types);
+  }, []);
+
   return (
     <div>
       <PageHeader
@@ -91,8 +114,47 @@ export default function MaintenancePage() {
         </Card>
       </div>
 
-      <div className="space-y-4">
-        {works.map((work) => (
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Поиск по названию, объекту, исполнителю..."
+          className="flex-1"
+        />
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Статус" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Все статусы</SelectItem>
+            <SelectItem value="planned">Запланировано</SelectItem>
+            <SelectItem value="in_progress">В работе</SelectItem>
+            <SelectItem value="completed">Завершено</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Тип работ" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Все типы</SelectItem>
+            {workTypes.map((type) => (
+              <SelectItem key={type} value={type}>{type}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {filteredWorks.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          <p>Работы не найдены</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Badge variant="secondary">{filteredWorks.length} работ</Badge>
+          </div>
+          {filteredWorks.map((work) => (
           <Card key={work.id}>
             <CardContent className="p-6">
               <div className="flex items-start justify-between mb-4">
@@ -140,8 +202,9 @@ export default function MaintenancePage() {
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
