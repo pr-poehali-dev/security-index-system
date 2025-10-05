@@ -15,7 +15,7 @@ interface AddPersonnelDialogProps {
 
 export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelDialogProps) {
   const user = useAuthStore((state) => state.user);
-  const { organizations, addPersonnel, getOrganizationsByTenant } = useSettingsStore();
+  const { addPersonnel, getOrganizationsByTenant, getDepartmentsByOrganization } = useSettingsStore();
   const { toast } = useToast();
 
   const tenantOrgs = getOrganizationsByTenant(user!.tenantId!);
@@ -26,8 +26,14 @@ export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelD
     email: '',
     phone: '',
     organizationId: '',
-    role: 'Manager' as 'Auditor' | 'Manager' | 'Director'
+    departmentId: '',
+    role: 'Manager' as 'Auditor' | 'Manager' | 'Director',
+    hireDate: ''
   });
+
+  const departments = formData.organizationId 
+    ? getDepartmentsByOrganization(formData.organizationId)
+    : [];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,8 +54,10 @@ export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelD
       email: formData.email || undefined,
       phone: formData.phone || undefined,
       organizationId: formData.organizationId || undefined,
+      departmentId: formData.departmentId || undefined,
       role: formData.role,
-      status: 'active'
+      status: 'active',
+      hireDate: formData.hireDate ? new Date(formData.hireDate).toISOString() : new Date().toISOString()
     });
 
     toast({
@@ -62,8 +70,10 @@ export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelD
       position: '', 
       email: '', 
       phone: '', 
-      organizationId: '', 
-      role: 'Manager' 
+      organizationId: '',
+      departmentId: '',
+      role: 'Manager',
+      hireDate: ''
     });
     onOpenChange(false);
   };
@@ -101,35 +111,73 @@ export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelD
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="organization">Организация</Label>
-            <Select value={formData.organizationId} onValueChange={(value) => setFormData({ ...formData, organizationId: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Выберите организацию" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Не указана</SelectItem>
-                {tenantOrgs.map((org) => (
-                  <SelectItem key={org.id} value={org.id}>
-                    {org.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="organization">Организация</Label>
+              <Select 
+                value={formData.organizationId} 
+                onValueChange={(value) => setFormData({ ...formData, organizationId: value, departmentId: '' })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите организацию" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Не указана</SelectItem>
+                  {tenantOrgs.map((org) => (
+                    <SelectItem key={org.id} value={org.id}>
+                      {org.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="department">Подразделение</Label>
+              <Select 
+                value={formData.departmentId} 
+                onValueChange={(value) => setFormData({ ...formData, departmentId: value })}
+                disabled={!formData.organizationId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите подразделение" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Не указано</SelectItem>
+                  {departments.map((dept) => (
+                    <SelectItem key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="role">Роль *</Label>
-            <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value as typeof formData.role })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Auditor">Аудитор</SelectItem>
-                <SelectItem value="Manager">Менеджер</SelectItem>
-                <SelectItem value="Director">Директор</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="role">Роль *</Label>
+              <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value as typeof formData.role })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Auditor">Аудитор</SelectItem>
+                  <SelectItem value="Manager">Менеджер</SelectItem>
+                  <SelectItem value="Director">Директор</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="hireDate">Дата приема</Label>
+              <Input
+                id="hireDate"
+                type="date"
+                value={formData.hireDate}
+                onChange={(e) => setFormData({ ...formData, hireDate: e.target.value })}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

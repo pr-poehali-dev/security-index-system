@@ -52,16 +52,31 @@ export interface Organization {
   createdAt: string;
 }
 
+export interface Department {
+  id: string;
+  tenantId: string;
+  organizationId: string;
+  parentId?: string;
+  name: string;
+  code?: string;
+  head?: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+}
+
 export interface Personnel {
   id: string;
   tenantId: string;
   organizationId?: string;
+  departmentId?: string;
   fullName: string;
   position: string;
   email?: string;
   phone?: string;
   role: 'Auditor' | 'Manager' | 'Director';
-  status: 'active' | 'inactive';
+  status: 'active' | 'dismissed';
+  hireDate?: string;
+  dismissalDate?: string;
   createdAt: string;
 }
 

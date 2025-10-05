@@ -17,7 +17,7 @@ interface EditPersonnelDialogProps {
 
 export default function EditPersonnelDialog({ personnel, open, onOpenChange }: EditPersonnelDialogProps) {
   const user = useAuthStore((state) => state.user);
-  const { updatePersonnel, getOrganizationsByTenant } = useSettingsStore();
+  const { updatePersonnel, getOrganizationsByTenant, getDepartmentsByOrganization } = useSettingsStore();
   const { toast } = useToast();
 
   const tenantOrgs = getOrganizationsByTenant(user!.tenantId!);
@@ -28,9 +28,16 @@ export default function EditPersonnelDialog({ personnel, open, onOpenChange }: E
     email: personnel.email || '',
     phone: personnel.phone || '',
     organizationId: personnel.organizationId || '',
+    departmentId: personnel.departmentId || '',
     role: personnel.role,
-    status: personnel.status
+    status: personnel.status,
+    hireDate: personnel.hireDate ? new Date(personnel.hireDate).toISOString().split('T')[0] : '',
+    dismissalDate: personnel.dismissalDate ? new Date(personnel.dismissalDate).toISOString().split('T')[0] : ''
   });
+
+  const departments = formData.organizationId 
+    ? getDepartmentsByOrganization(formData.organizationId)
+    : [];
 
   useEffect(() => {
     setFormData({
@@ -39,8 +46,11 @@ export default function EditPersonnelDialog({ personnel, open, onOpenChange }: E
       email: personnel.email || '',
       phone: personnel.phone || '',
       organizationId: personnel.organizationId || '',
+      departmentId: personnel.departmentId || '',
       role: personnel.role,
-      status: personnel.status
+      status: personnel.status,
+      hireDate: personnel.hireDate ? new Date(personnel.hireDate).toISOString().split('T')[0] : '',
+      dismissalDate: personnel.dismissalDate ? new Date(personnel.dismissalDate).toISOString().split('T')[0] : ''
     });
   }, [personnel]);
 
@@ -56,14 +66,26 @@ export default function EditPersonnelDialog({ personnel, open, onOpenChange }: E
       return;
     }
 
+    if (formData.status === 'dismissed' && !formData.dismissalDate) {
+      toast({
+        title: 'Ошибка',
+        description: 'Укажите дату увольнения',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     updatePersonnel(personnel.id, {
       fullName: formData.fullName,
       position: formData.position,
       email: formData.email || undefined,
       phone: formData.phone || undefined,
       organizationId: formData.organizationId || undefined,
+      departmentId: formData.departmentId || undefined,
       role: formData.role,
-      status: formData.status
+      status: formData.status,
+      hireDate: formData.hireDate ? new Date(formData.hireDate).toISOString() : undefined,
+      dismissalDate: formData.dismissalDate ? new Date(formData.dismissalDate).toISOString() : undefined
     });
 
     toast({
@@ -76,7 +98,7 @@ export default function EditPersonnelDialog({ personnel, open, onOpenChange }: E
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Редактировать сотрудника</DialogTitle>
           <DialogDescription>
@@ -107,21 +129,47 @@ export default function EditPersonnelDialog({ personnel, open, onOpenChange }: E
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="organization">Организация</Label>
-            <Select value={formData.organizationId} onValueChange={(value) => setFormData({ ...formData, organizationId: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Выберите организацию" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Не указана</SelectItem>
-                {tenantOrgs.map((org) => (
-                  <SelectItem key={org.id} value={org.id}>
-                    {org.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="organization">Организация</Label>
+              <Select 
+                value={formData.organizationId} 
+                onValueChange={(value) => setFormData({ ...formData, organizationId: value, departmentId: '' })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите организацию" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Не указана</SelectItem>
+                  {tenantOrgs.map((org) => (
+                    <SelectItem key={org.id} value={org.id}>
+                      {org.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="department">Подразделение</Label>
+              <Select 
+                value={formData.departmentId} 
+                onValueChange={(value) => setFormData({ ...formData, departmentId: value })}
+                disabled={!formData.organizationId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Выберите подразделение" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Не указано</SelectItem>
+                  {departments.map((dept) => (
+                    <SelectItem key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -141,15 +189,38 @@ export default function EditPersonnelDialog({ personnel, open, onOpenChange }: E
 
             <div className="space-y-2">
               <Label htmlFor="status">Статус</Label>
-              <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as 'active' | 'inactive' })}>
+              <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as 'active' | 'dismissed' })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Активен</SelectItem>
-                  <SelectItem value="inactive">Неактивен</SelectItem>
+                  <SelectItem value="active">Действующий</SelectItem>
+                  <SelectItem value="dismissed">Уволен</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="hireDate">Дата приема</Label>
+              <Input
+                id="hireDate"
+                type="date"
+                value={formData.hireDate}
+                onChange={(e) => setFormData({ ...formData, hireDate: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="dismissalDate">Дата увольнения</Label>
+              <Input
+                id="dismissalDate"
+                type="date"
+                value={formData.dismissalDate}
+                onChange={(e) => setFormData({ ...formData, dismissalDate: e.target.value })}
+                disabled={formData.status === 'active'}
+              />
             </div>
           </div>
 
