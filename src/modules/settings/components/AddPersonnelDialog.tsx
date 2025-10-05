@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -7,52 +7,33 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import type { Personnel } from '@/types';
 
-interface EditPersonnelDialogProps {
-  personnel: Personnel;
+interface AddPersonnelDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function EditPersonnelDialog({ personnel, open, onOpenChange }: EditPersonnelDialogProps) {
+export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelDialogProps) {
   const user = useAuthStore((state) => state.user);
-  const { updatePersonnel, getOrganizationsByTenant, getDepartmentsByOrganization } = useSettingsStore();
+  const { addPersonnel, getOrganizationsByTenant, getDepartmentsByOrganization } = useSettingsStore();
   const { toast } = useToast();
 
   const tenantOrgs = getOrganizationsByTenant(user!.tenantId!);
 
   const [formData, setFormData] = useState({
-    fullName: personnel.fullName,
-    position: personnel.position,
-    email: personnel.email || '',
-    phone: personnel.phone || '',
-    organizationId: personnel.organizationId || '',
-    departmentId: personnel.departmentId || '',
-    role: personnel.role,
-    status: personnel.status,
-    hireDate: personnel.hireDate ? new Date(personnel.hireDate).toISOString().split('T')[0] : '',
-    dismissalDate: personnel.dismissalDate ? new Date(personnel.dismissalDate).toISOString().split('T')[0] : ''
+    fullName: '',
+    position: '',
+    email: '',
+    phone: '',
+    organizationId: '',
+    departmentId: '',
+    role: 'Manager' as 'Auditor' | 'Manager' | 'Director',
+    hireDate: ''
   });
 
   const departments = formData.organizationId 
     ? getDepartmentsByOrganization(formData.organizationId)
     : [];
-
-  useEffect(() => {
-    setFormData({
-      fullName: personnel.fullName,
-      position: personnel.position,
-      email: personnel.email || '',
-      phone: personnel.phone || '',
-      organizationId: personnel.organizationId || '',
-      departmentId: personnel.departmentId || '',
-      role: personnel.role,
-      status: personnel.status,
-      hireDate: personnel.hireDate ? new Date(personnel.hireDate).toISOString().split('T')[0] : '',
-      dismissalDate: personnel.dismissalDate ? new Date(personnel.dismissalDate).toISOString().split('T')[0] : ''
-    });
-  }, [personnel]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,16 +47,8 @@ export default function EditPersonnelDialog({ personnel, open, onOpenChange }: E
       return;
     }
 
-    if (formData.status === 'dismissed' && !formData.dismissalDate) {
-      toast({
-        title: 'Ошибка',
-        description: 'Укажите дату увольнения',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    updatePersonnel(personnel.id, {
+    addPersonnel({
+      tenantId: user!.tenantId!,
       fullName: formData.fullName,
       position: formData.position,
       email: formData.email || undefined,
@@ -83,26 +56,35 @@ export default function EditPersonnelDialog({ personnel, open, onOpenChange }: E
       organizationId: formData.organizationId || undefined,
       departmentId: formData.departmentId || undefined,
       role: formData.role,
-      status: formData.status,
-      hireDate: formData.hireDate ? new Date(formData.hireDate).toISOString() : undefined,
-      dismissalDate: formData.dismissalDate ? new Date(formData.dismissalDate).toISOString() : undefined
+      status: 'active',
+      hireDate: formData.hireDate ? new Date(formData.hireDate).toISOString() : new Date().toISOString()
     });
 
     toast({
       title: 'Успешно',
-      description: 'Данные сотрудника обновлены'
+      description: 'Сотрудник добавлен'
     });
 
+    setFormData({ 
+      fullName: '', 
+      position: '', 
+      email: '', 
+      phone: '', 
+      organizationId: '',
+      departmentId: '',
+      role: 'Manager',
+      hireDate: ''
+    });
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Редактировать сотрудника</DialogTitle>
+          <DialogTitle>Добавить сотрудника</DialogTitle>
           <DialogDescription>
-            Изменение данных и роли пользователя
+            Создание нового пользователя с назначением роли
           </DialogDescription>
         </DialogHeader>
 
@@ -188,38 +170,12 @@ export default function EditPersonnelDialog({ personnel, open, onOpenChange }: E
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status">Статус</Label>
-              <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as 'active' | 'dismissed' })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Действующий</SelectItem>
-                  <SelectItem value="dismissed">Уволен</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
               <Label htmlFor="hireDate">Дата приема</Label>
               <Input
                 id="hireDate"
                 type="date"
                 value={formData.hireDate}
                 onChange={(e) => setFormData({ ...formData, hireDate: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="dismissalDate">Дата увольнения</Label>
-              <Input
-                id="dismissalDate"
-                type="date"
-                value={formData.dismissalDate}
-                onChange={(e) => setFormData({ ...formData, dismissalDate: e.target.value })}
-                disabled={formData.status === 'active'}
               />
             </div>
           </div>
@@ -251,7 +207,7 @@ export default function EditPersonnelDialog({ personnel, open, onOpenChange }: E
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Отмена
             </Button>
-            <Button type="submit">Сохранить</Button>
+            <Button type="submit">Добавить</Button>
           </DialogFooter>
         </form>
       </DialogContent>

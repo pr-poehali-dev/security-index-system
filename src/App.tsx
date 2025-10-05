@@ -21,7 +21,7 @@ import { ExaminationPage } from "@/modules/examination";
 import { MaintenancePage } from "@/modules/maintenance";
 import { BudgetPage } from "@/modules/budget";
 import Sidebar from "@/components/layout/Sidebar";
-import NotFound from "./pages/NotFound";
+import { NotFoundPage } from "@/modules/common";
 
 const queryClient = new QueryClient();
 
@@ -183,7 +183,7 @@ const App = () => {
               }
             />
             <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

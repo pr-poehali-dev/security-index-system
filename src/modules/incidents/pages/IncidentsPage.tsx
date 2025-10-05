@@ -3,7 +3,7 @@ import { useIncidentStore } from '@/stores/incidentStore';
 import { useCatalogStore } from '@/stores/catalogStore';
 import { useAuthStore } from '@/stores/authStore';
 import PageHeader from '@/components/layout/PageHeader';
-import IncidentDetailsDialog from '@/components/incidents/IncidentDetailsDialog';
+import IncidentDetailsDialog from '../components/IncidentDetailsDialog';
 import IncidentCard from '../components/IncidentCard';
 import CreateIncidentDialog from '../components/CreateIncidentDialog';
 import type { Incident, IncidentPriority } from '@/types/incidents';
