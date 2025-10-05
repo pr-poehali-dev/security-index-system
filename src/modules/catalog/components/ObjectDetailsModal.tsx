@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -5,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 import { useCatalogStore } from '@/stores/catalogStore';
+import DocumentUploadModal from './DocumentUploadModal';
 import type { IndustrialObject } from '@/types/catalog';
 
 interface ObjectDetailsModalProps {
@@ -54,6 +56,7 @@ const InfoRow = ({ icon, label, value }: { icon: string; label: string; value: s
 
 export default function ObjectDetailsModal({ open, onOpenChange, object, onEdit }: ObjectDetailsModalProps) {
   const { organizations, getDocumentsByObject } = useCatalogStore();
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
   
   if (!object) return null;
   
@@ -335,7 +338,7 @@ export default function ObjectDetailsModal({ open, onOpenChange, object, onEdit 
                     <Icon name="FileText" size={18} />
                     Документация
                   </h3>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" onClick={() => setUploadModalOpen(true)}>
                     <Icon name="Upload" className="mr-2" size={16} />
                     Загрузить документ
                   </Button>
@@ -386,6 +389,12 @@ export default function ObjectDetailsModal({ open, onOpenChange, object, onEdit 
             </Card>
           </TabsContent>
         </Tabs>
+
+        <DocumentUploadModal
+          open={uploadModalOpen}
+          onOpenChange={setUploadModalOpen}
+          objectId={object.id}
+        />
       </DialogContent>
     </Dialog>
   );
