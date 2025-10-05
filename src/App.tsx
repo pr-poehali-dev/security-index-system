@@ -16,7 +16,7 @@ import CatalogPage from "@/pages/CatalogPage";
 import IncidentsPage from "@/pages/IncidentsPage";
 import ChecklistsPage from "@/pages/ChecklistsPage";
 import AttestationPage from "@/pages/AttestationPage";
-import TasksPage from "@/pages/TasksPage";
+import { TasksPage } from "@/modules/tasks";
 import ExaminationPage from "@/pages/ExaminationPage";
 import MaintenancePage from "@/pages/MaintenancePage";
 import BudgetPage from "@/pages/BudgetPage";
