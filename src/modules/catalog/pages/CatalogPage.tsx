@@ -14,7 +14,7 @@ import ObjectTableView from '../components/ObjectTableView';
 import ObjectFormModal from '../components/ObjectFormModal';
 import ObjectDetailsModal from '../components/ObjectDetailsModal';
 import OrganizationFormModal from '../components/OrganizationFormModal';
-import type { IndustrialObject } from '@/types/catalog';
+import type { IndustrialObject, Organization } from '@/types/catalog';
 
 export default function CatalogPage() {
   const { objects, selectedOrganization } = useCatalogStore();
@@ -28,6 +28,7 @@ export default function CatalogPage() {
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [orgFormModalOpen, setOrgFormModalOpen] = useState(false);
   const [orgFormMode, setOrgFormMode] = useState<'create' | 'edit'>('create');
+  const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
 
   const handleCreateObject = () => {
     setSelectedObject(null);
@@ -36,8 +37,19 @@ export default function CatalogPage() {
   };
 
   const handleCreateOrganization = () => {
+    setSelectedOrg(null);
     setOrgFormMode('create');
     setOrgFormModalOpen(true);
+  };
+
+  const handleEditOrganization = (org: Organization) => {
+    setSelectedOrg(org);
+    setOrgFormMode('edit');
+    setOrgFormModalOpen(true);
+  };
+
+  const handleDeleteOrganization = () => {
+    // Callback after delete if needed
   };
 
   const handleEditObject = (object: IndustrialObject) => {
@@ -142,7 +154,10 @@ export default function CatalogPage() {
                 <Icon name="Plus" size={16} />
               </Button>
             </div>
-            <OrganizationTree />
+            <OrganizationTree 
+              onEdit={handleEditOrganization}
+              onDelete={handleDeleteOrganization}
+            />
           </CardContent>
         </Card>
 
@@ -243,6 +258,7 @@ export default function CatalogPage() {
       <OrganizationFormModal
         open={orgFormModalOpen}
         onOpenChange={setOrgFormModalOpen}
+        organization={selectedOrg || undefined}
         mode={orgFormMode}
       />
     </div>
