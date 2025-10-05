@@ -1,80 +1,88 @@
 import { useState } from 'react';
-import { useTaskStore } from '@/stores/taskStore';
+import { useTasksStore } from '@/stores/tasksStore';
 import { useAuthStore } from '@/stores/authStore';
 import PageHeader from '@/components/layout/PageHeader';
-import TaskDetailsDialog from '@/components/tasks/TaskDetailsDialog';
-import { Card, CardContent } from '@/components/ui/card';
-import type { Task } from '@/types/tasks';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
+import type { Task } from '@/types';
 
 export default function TasksPage() {
-  const { tasks, getTasksByAssignee } = useTaskStore();
+  const {
+    tasks,
+    filters,
+    setFilters,
+    getFilteredTasks,
+    getTaskStats,
+    getOverdueTasks,
+    completeTask
+  } = useTasksStore();
+  
   const user = useAuthStore((state) => state.user);
-  const [selectedView, setSelectedView] = useState<'my' | 'all'>('my');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [currentTab, setCurrentTab] = useState('all');
 
-  const myTasks = user ? getTasksByAssignee(user.id) : [];
-  const displayTasks = selectedView === 'my' ? myTasks : tasks;
+  const filteredTasks = getFilteredTasks();
+  const stats = getTaskStats();
+  const overdueTasks = getOverdueTasks();
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = (priority: Task['priority']) => {
     switch (priority) {
-      case 'critical': return 'bg-red-100 text-red-700';
-      case 'high': return 'bg-orange-100 text-orange-700';
-      case 'medium': return 'bg-yellow-100 text-yellow-700';
-      case 'low': return 'bg-green-100 text-green-700';
-      default: return 'bg-gray-100 text-gray-700';
+      case 'critical': return 'bg-red-100 text-red-700 border-red-200';
+      case 'high': return 'bg-orange-100 text-orange-700 border-orange-200';
+      case 'medium': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'low': return 'bg-green-100 text-green-700 border-green-200';
     }
   };
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      new: 'bg-blue-100 text-blue-700',
-      assigned: 'bg-purple-100 text-purple-700',
-      in_progress: 'bg-amber-100 text-amber-700',
-      under_review: 'bg-cyan-100 text-cyan-700',
-      completed: 'bg-emerald-100 text-emerald-700',
-      cancelled: 'bg-gray-100 text-gray-700'
-    };
-    return colors[status] || 'bg-gray-100 text-gray-700';
+  const getStatusColor = (status: Task['status']) => {
+    switch (status) {
+      case 'open': return 'bg-blue-100 text-blue-700';
+      case 'in_progress': return 'bg-purple-100 text-purple-700';
+      case 'completed': return 'bg-green-100 text-green-700';
+      case 'cancelled': return 'bg-gray-100 text-gray-700';
+    }
   };
 
-  const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      new: 'Новая',
-      assigned: 'Назначена',
-      in_progress: 'В работе',
-      under_review: 'На проверке',
-      completed: 'Завершена',
-      cancelled: 'Отменена'
-    };
-    return labels[status] || status;
+  const getTypeLabel = (type: Task['type']) => {
+    switch (type) {
+      case 'corrective_action': return 'Корректирующее действие';
+      case 'maintenance': return 'Обслуживание';
+      case 'audit': return 'Аудит';
+      case 'other': return 'Прочее';
+    }
   };
 
-  const getPriorityLabel = (priority: string) => {
-    const labels: Record<string, string> = {
-      critical: 'Критический',
-      high: 'Высокий',
-      medium: 'Средний',
-      low: 'Низкий'
-    };
-    return labels[priority] || priority;
+  const getPriorityLabel = (priority: Task['priority']) => {
+    switch (priority) {
+      case 'critical': return 'Критический';
+      case 'high': return 'Высокий';
+      case 'medium': return 'Средний';
+      case 'low': return 'Низкий';
+    }
   };
 
-  const stats = {
-    total: tasks.length,
-    inProgress: tasks.filter(t => t.status === 'in_progress').length,
-    completed: tasks.filter(t => t.status === 'completed').length,
-    overdue: tasks.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'completed').length
+  const getStatusLabel = (status: Task['status']) => {
+    switch (status) {
+      case 'open': return 'Открыта';
+      case 'in_progress': return 'В работе';
+      case 'completed': return 'Завершена';
+      case 'cancelled': return 'Отменена';
+    }
   };
+
+  const tasksToDisplay = currentTab === 'all' ? filteredTasks : 
+                        currentTab === 'overdue' ? overdueTasks :
+                        filteredTasks.filter(t => t.status === currentTab);
 
   return (
     <div>
       <PageHeader
         title="Управление задачами"
-        description="Постановка и контроль выполнения задач"
+        description="Постановка и контроль выполнения задач по промышленной безопасности"
         icon="ListTodo"
         action={
           <Button className="gap-2">
@@ -84,131 +92,242 @@ export default function TasksPage() {
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
               <Icon name="ListTodo" className="text-gray-600" size={24} />
-              <span className="text-2xl font-bold">{stats.total}</span>
+              <span className="text-3xl font-bold">{stats.total}</span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">Всего задач</p>
           </CardContent>
         </Card>
+
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
-              <Icon name="Clock" className="text-amber-600" size={24} />
-              <span className="text-2xl font-bold">{stats.inProgress}</span>
+              <Icon name="Circle" className="text-blue-600" size={24} />
+              <span className="text-3xl font-bold">{stats.open}</span>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Открыто</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-2">
+              <Icon name="Clock" className="text-purple-600" size={24} />
+              <span className="text-3xl font-bold">{stats.inProgress}</span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">В работе</p>
           </CardContent>
         </Card>
+
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
-              <Icon name="CheckCircle2" className="text-emerald-600" size={24} />
-              <span className="text-2xl font-bold">{stats.completed}</span>
+              <Icon name="CheckCircle2" className="text-green-600" size={24} />
+              <span className="text-3xl font-bold">{stats.completed}</span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">Завершено</p>
           </CardContent>
         </Card>
-        <Card>
+
+        <Card className={stats.overdue > 0 ? 'border-red-300 bg-red-50' : ''}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
               <Icon name="AlertTriangle" className="text-red-600" size={24} />
-              <span className="text-2xl font-bold">{stats.overdue}</span>
+              <span className="text-3xl font-bold text-red-600">{stats.overdue}</span>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Просрочено</p>
+            <p className="text-sm text-red-600 font-medium">Просрочено</p>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs value={selectedView} onValueChange={(v) => setSelectedView(v as 'my' | 'all')}>
+      {stats.critical > 0 && (
+        <Card className="mb-6 border-red-300 bg-red-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Icon name="AlertCircle" className="text-red-600" size={24} />
+              <div>
+                <p className="font-semibold text-red-900">Внимание!</p>
+                <p className="text-sm text-red-700">
+                  {stats.critical} критических задач требуют немедленного внимания
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-lg">Фильтры</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Статус</label>
+              <Select value={filters.status} onValueChange={(value) => setFilters({ status: value as any })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все</SelectItem>
+                  <SelectItem value="open">Открыта</SelectItem>
+                  <SelectItem value="in_progress">В работе</SelectItem>
+                  <SelectItem value="completed">Завершена</SelectItem>
+                  <SelectItem value="cancelled">Отменена</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Приоритет</label>
+              <Select value={filters.priority} onValueChange={(value) => setFilters({ priority: value as any })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все</SelectItem>
+                  <SelectItem value="critical">Критический</SelectItem>
+                  <SelectItem value="high">Высокий</SelectItem>
+                  <SelectItem value="medium">Средний</SelectItem>
+                  <SelectItem value="low">Низкий</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Тип задачи</label>
+              <Select value={filters.type} onValueChange={(value) => setFilters({ type: value as any })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все</SelectItem>
+                  <SelectItem value="corrective_action">Корректирующее действие</SelectItem>
+                  <SelectItem value="maintenance">Обслуживание</SelectItem>
+                  <SelectItem value="audit">Аудит</SelectItem>
+                  <SelectItem value="other">Прочее</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Исполнитель</label>
+              <Select value={filters.assignedTo} onValueChange={(value) => setFilters({ assignedTo: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все</SelectItem>
+                  <SelectItem value="Иванов И.И.">Иванов И.И.</SelectItem>
+                  <SelectItem value="Сидоров С.С.">Сидоров С.С.</SelectItem>
+                  <SelectItem value="Козлов А.В.">Козлов А.В.</SelectItem>
+                  <SelectItem value="Кадровая служба">Кадровая служба</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Tabs value={currentTab} onValueChange={setCurrentTab}>
         <TabsList>
-          <TabsTrigger value="my">Мои задачи ({myTasks.length})</TabsTrigger>
-          <TabsTrigger value="all">Все задачи ({tasks.length})</TabsTrigger>
+          <TabsTrigger value="all">Все ({filteredTasks.length})</TabsTrigger>
+          <TabsTrigger value="open">Открытые ({stats.open})</TabsTrigger>
+          <TabsTrigger value="in_progress">В работе ({stats.inProgress})</TabsTrigger>
+          <TabsTrigger value="overdue" className="text-red-600">Просроченные ({stats.overdue})</TabsTrigger>
         </TabsList>
 
-        <TabsContent value={selectedView} className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {displayTasks.map((task) => {
-              const isOverdue = new Date(task.dueDate) < new Date() && task.status !== 'completed';
-              
+        <TabsContent value={currentTab} className="mt-6">
+          <div className="space-y-4">
+            {tasksToDisplay.map((task) => {
+              const isOverdue = new Date(task.dueDate) < new Date() && task.status !== 'completed' && task.status !== 'cancelled';
+
               return (
-                <Card key={task.id} className={`hover-scale ${isOverdue ? 'border-red-300' : ''}`}>
+                <Card key={task.id} className={isOverdue ? 'border-red-300' : ''}>
                   <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{task.title}</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{task.description}</p>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-semibold text-lg">{task.title}</h3>
+                          {task.sourceType && (
+                            <Badge variant="outline" className="text-xs">
+                              {task.sourceType === 'incident' ? 'Из инцидента' : 
+                               task.sourceType === 'audit' ? 'Из аудита' : 'Из чек-листа'}
+                            </Badge>
+                          )}
                         </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{task.description}</p>
+                      </div>
+                      <div className="flex flex-col gap-2 ml-4">
                         <Badge className={getPriorityColor(task.priority)}>
                           {getPriorityLabel(task.priority)}
                         </Badge>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2">
                         <Badge className={getStatusColor(task.status)}>
                           {getStatusLabel(task.status)}
                         </Badge>
-                        {task.source !== 'manual' && (
-                          <Badge variant="outline" className="text-xs">
-                            {task.source === 'incident' ? 'Из инцидента' : 'Автоматическая'}
-                          </Badge>
-                        )}
                       </div>
+                    </div>
 
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Icon name="User" size={14} className="text-gray-500" />
-                          <span className="text-gray-700 dark:text-gray-300">
-                            {task.assignedToName || 'Не назначена'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Icon name="Calendar" size={14} className={isOverdue ? 'text-red-500' : 'text-gray-500'} />
-                          <span className={isOverdue ? 'text-red-600' : 'text-gray-700 dark:text-gray-300'}>
-                            {isOverdue && <Icon name="AlertCircle" size={12} className="inline mr-1" />}
-                            Срок: {new Date(task.dueDate).toLocaleDateString('ru-RU')}
-                          </span>
-                        </div>
-                        {task.objectName && (
-                          <div className="flex items-center gap-2">
-                            <Icon name="Building" size={14} className="text-gray-500" />
-                            <span className="text-gray-700 dark:text-gray-300">{task.objectName}</span>
-                          </div>
-                        )}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
+                      <div>
+                        <p className="text-gray-500 mb-1">Тип</p>
+                        <p className="font-medium">{getTypeLabel(task.type)}</p>
                       </div>
+                      <div>
+                        <p className="text-gray-500 mb-1">Исполнитель</p>
+                        <p className="font-medium">{task.assignedTo}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 mb-1">Срок выполнения</p>
+                        <p className={`font-medium ${isOverdue ? 'text-red-600' : ''}`}>
+                          {isOverdue && <Icon name="AlertTriangle" size={14} className="inline mr-1" />}
+                          {new Date(task.dueDate).toLocaleDateString('ru-RU')}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 mb-1">Создал</p>
+                        <p className="font-medium">{task.createdBy}</p>
+                      </div>
+                    </div>
 
-                      <div className="flex gap-2 pt-2">
-                        <Button variant="outline" size="sm" className="flex-1" onClick={() => setSelectedTask(task)}>
-                          <Icon name="Eye" className="mr-1" size={14} />
-                          Просмотр
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">
+                        <Icon name="Eye" className="mr-2" size={14} />
+                        Подробнее
+                      </Button>
+                      {task.status === 'open' && (
+                        <Button size="sm" variant="secondary">
+                          <Icon name="Play" className="mr-2" size={14} />
+                          Начать работу
                         </Button>
-                        {task.status === 'in_progress' && (
-                          <Button size="sm" variant="default" onClick={() => setSelectedTask(task)}>
-                            <Icon name="Check" size={14} className="mr-1" />
-                            Завершить
-                          </Button>
-                        )}
-                      </div>
+                      )}
+                      {task.status === 'in_progress' && (
+                        <Button size="sm" onClick={() => completeTask(task.id)}>
+                          <Icon name="Check" className="mr-2" size={14} />
+                          Завершить
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
               );
             })}
+
+            {tasksToDisplay.length === 0 && (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Icon name="CheckCircle2" className="mx-auto mb-4 text-gray-400" size={48} />
+                  <p className="text-gray-500">Задачи не найдены</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TabsContent>
       </Tabs>
-
-      {selectedTask && (
-        <TaskDetailsDialog
-          task={selectedTask}
-          open={!!selectedTask}
-          onOpenChange={(open) => !open && setSelectedTask(null)}
-        />
-      )}
     </div>
   );
 }
