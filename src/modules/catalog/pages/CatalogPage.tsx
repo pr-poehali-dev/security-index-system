@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import OrganizationTree from '@/components/shared/OrganizationTree';
 import ObjectCard from '../components/ObjectCard';
+import ObjectFormModal from '../components/ObjectFormModal';
+import ObjectDetailsModal from '../components/ObjectDetailsModal';
 import type { IndustrialObject } from '@/types/catalog';
 
 export default function CatalogPage() {
@@ -17,6 +19,28 @@ export default function CatalogPage() {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [formModalOpen, setFormModalOpen] = useState(false);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedObject, setSelectedObject] = useState<IndustrialObject | null>(null);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+
+  const handleCreateObject = () => {
+    setSelectedObject(null);
+    setFormMode('create');
+    setFormModalOpen(true);
+  };
+
+  const handleEditObject = (object: IndustrialObject) => {
+    setSelectedObject(object);
+    setFormMode('edit');
+    setFormModalOpen(true);
+    setDetailsModalOpen(false);
+  };
+
+  const handleViewObject = (object: IndustrialObject) => {
+    setSelectedObject(object);
+    setDetailsModalOpen(true);
+  };
 
   const filteredObjects = useMemo(() => {
     return objects.filter((obj) => {
@@ -53,7 +77,7 @@ export default function CatalogPage() {
         description="Учет опасных производственных объектов и оборудования"
         icon="Building"
         action={
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={handleCreateObject}>
             <Icon name="Plus" size={18} />
             Добавить объект
           </Button>
@@ -185,7 +209,12 @@ export default function CatalogPage() {
                   }
                 `}>
                   {filteredObjects.map((obj) => (
-                    <ObjectCard key={obj.id} object={obj} />
+                    <ObjectCard 
+                      key={obj.id} 
+                      object={obj}
+                      onView={handleViewObject}
+                      onEdit={handleEditObject}
+                    />
                   ))}
                 </div>
               </>
@@ -193,6 +222,20 @@ export default function CatalogPage() {
           </div>
         </div>
       </div>
+
+      <ObjectFormModal
+        open={formModalOpen}
+        onOpenChange={setFormModalOpen}
+        object={selectedObject || undefined}
+        mode={formMode}
+      />
+
+      <ObjectDetailsModal
+        open={detailsModalOpen}
+        onOpenChange={setDetailsModalOpen}
+        object={selectedObject}
+        onEdit={handleEditObject}
+      />
     </div>
   );
 }
