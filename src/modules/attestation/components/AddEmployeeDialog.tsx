@@ -19,6 +19,8 @@ import {
 } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { useAuthStore } from '@/stores/authStore';
 
 interface AddEmployeeDialogProps {
   open: boolean;
@@ -27,6 +29,13 @@ interface AddEmployeeDialogProps {
 
 export default function AddEmployeeDialog({ open, onOpenChange }: AddEmployeeDialogProps) {
   const { toast } = useToast();
+  const { organizations, departments } = useSettingsStore();
+  const user = useAuthStore((state) => state.user);
+  
+  const activeOrganizations = organizations.filter(org => org.status === 'active');
+  const activeDepartments = user?.tenantId 
+    ? departments.filter(dept => dept.tenantId === user.tenantId && dept.status === 'active')
+    : [];
   const [formData, setFormData] = useState({
     lastName: '',
     firstName: '',
@@ -40,7 +49,7 @@ export default function AddEmployeeDialog({ open, onOpenChange }: AddEmployeeDia
   });
 
   const handleSubmit = () => {
-    if (!formData.lastName || !formData.firstName || !formData.position || !formData.department) {
+    if (!formData.lastName || !formData.firstName || !formData.position || !formData.department || !formData.organization) {
       toast({
         title: "Ошибка",
         description: "Заполните обязательные поля",
@@ -49,9 +58,11 @@ export default function AddEmployeeDialog({ open, onOpenChange }: AddEmployeeDia
       return;
     }
 
+    const selectedOrg = organizations.find(org => org.id === formData.organization);
+    
     toast({
       title: "Сотрудник добавлен",
-      description: `${formData.lastName} ${formData.firstName} ${formData.middleName} успешно добавлен в систему`,
+      description: `${formData.lastName} ${formData.firstName} ${formData.middleName} успешно добавлен в ${selectedOrg?.name || 'организацию'}`,
     });
 
     setFormData({
@@ -142,32 +153,51 @@ export default function AddEmployeeDialog({ open, onOpenChange }: AddEmployeeDia
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="department">
-                Подразделение <span className="text-red-500">*</span>
+              <Label htmlFor="organization">
+                Организация <span className="text-red-500">*</span>
               </Label>
-              <Select value={formData.department} onValueChange={(value) => setFormData({ ...formData, department: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите подразделение" />
+              <Select value={formData.organization} onValueChange={(value) => setFormData({ ...formData, organization: value })}>
+                <SelectTrigger id="organization">
+                  <SelectValue placeholder="Выберите организацию" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Производство">Производство</SelectItem>
-                  <SelectItem value="Ремонт">Ремонт</SelectItem>
-                  <SelectItem value="Энергоцех">Энергоцех</SelectItem>
-                  <SelectItem value="Лаборатория">Лаборатория</SelectItem>
-                  <SelectItem value="Администрация">Администрация</SelectItem>
-                  <SelectItem value="Складское хозяйство">Складское хозяйство</SelectItem>
+                  {activeOrganizations.length > 0 ? (
+                    activeOrganizations.map((org) => (
+                      <SelectItem key={org.id} value={org.id}>
+                        {org.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="p-2 text-sm text-muted-foreground text-center">
+                      Нет доступных организаций
+                    </div>
+                  )}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="organization">Организация</Label>
-              <Input
-                id="organization"
-                value={formData.organization}
-                onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                placeholder='ООО "ПромСтройИнжиниринг"'
-              />
+              <Label htmlFor="department">
+                Подразделение <span className="text-red-500">*</span>
+              </Label>
+              <Select value={formData.department} onValueChange={(value) => setFormData({ ...formData, department: value })}>
+                <SelectTrigger id="department">
+                  <SelectValue placeholder="Выберите подразделение" />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeDepartments.length > 0 ? (
+                    activeDepartments.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="p-2 text-sm text-muted-foreground text-center">
+                      Нет доступных подразделений
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
