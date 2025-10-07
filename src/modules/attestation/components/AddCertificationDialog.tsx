@@ -8,6 +8,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
   Select,
   SelectContent,
@@ -34,6 +35,7 @@ export default function AddCertificationDialog({
   const [expiryDate, setExpiryDate] = useState('');
   const [protocolNumber, setProtocolNumber] = useState('');
   const [protocolDate, setProtocolDate] = useState('');
+  const [verified, setVerified] = useState(false);
 
   const handleSubmit = () => {
     console.log({
@@ -43,6 +45,7 @@ export default function AddCertificationDialog({
       expiryDate,
       protocolNumber,
       protocolDate,
+      verified,
     });
     onOpenChange(false);
   };
@@ -202,17 +205,33 @@ export default function AddCertificationDialog({
               </div>
 
               {protocolNumber && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <div className="flex items-start gap-2">
-                    <Icon name="Info" size={16} className="text-blue-600 mt-0.5" />
-                    <div className="text-sm">
-                      <p className="font-medium text-blue-900 mb-1">Проверка в Ростехнадзоре</p>
-                      <p className="text-blue-700">
-                        После сохранения вы сможете проверить этот протокол в системе Ростехнадзора
-                      </p>
+                <>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="flex items-start gap-2">
+                      <Icon name="Info" size={16} className="text-blue-600 mt-0.5" />
+                      <div className="text-sm">
+                        <p className="font-medium text-blue-900 mb-1">Проверка в Ростехнадзоре</p>
+                        <p className="text-blue-700">
+                          После сохранения вы сможете проверить этот протокол в системе Ростехнадзора
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-900">
+                    <div className="flex items-center gap-3">
+                      <Icon name={verified ? "CheckCircle2" : "AlertCircle"} size={20} className={verified ? "text-emerald-600" : "text-slate-400"} />
+                      <Label htmlFor="verified" className="text-sm font-medium cursor-pointer">
+                        Протокол проверен в реестре Ростехнадзора
+                      </Label>
+                    </div>
+                    <Switch 
+                      id="verified"
+                      checked={verified}
+                      onCheckedChange={setVerified}
+                    />
+                  </div>
+                </>
               )}
             </>
           )}

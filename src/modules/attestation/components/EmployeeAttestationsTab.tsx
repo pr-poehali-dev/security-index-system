@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -33,6 +35,8 @@ interface Certification {
   expiryDate: string;
   protocolNumber?: string;
   protocolDate?: string;
+  verified?: boolean;
+  verifiedDate?: string;
   status: 'valid' | 'expiring_soon' | 'expired';
   daysLeft: number;
 }
@@ -60,6 +64,8 @@ const mockEmployees: Employee[] = [
         expiryDate: '2028-01-01',
         protocolNumber: 'ПБ-123/2023',
         protocolDate: '2023-01-01',
+        verified: true,
+        verifiedDate: '2024-03-15',
         status: 'valid',
         daysLeft: 1182
       },
@@ -71,6 +77,7 @@ const mockEmployees: Employee[] = [
         expiryDate: '2026-09-14',
         protocolNumber: 'ПБ-456/2021',
         protocolDate: '2021-09-15',
+        verified: false,
         status: 'valid',
         daysLeft: 342
       },
@@ -82,6 +89,7 @@ const mockEmployees: Employee[] = [
         expiryDate: '2026-02-17',
         protocolNumber: 'ЭБ-789/2025',
         protocolDate: '2025-02-17',
+        verified: false,
         status: 'valid',
         daysLeft: 133
       }
@@ -101,6 +109,8 @@ const mockEmployees: Employee[] = [
         expiryDate: '2025-03-10',
         protocolNumber: 'ПБ-234/2020',
         protocolDate: '2020-03-10',
+        verified: true,
+        verifiedDate: '2020-03-15',
         status: 'expired',
         daysLeft: -211
       },
@@ -154,6 +164,26 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showAddCertDialog, setShowAddCertDialog] = useState(false);
+
+  const handleVerificationToggle = (certId: string) => {
+    if (!selectedEmployee) return;
+    
+    const updatedEmployee = {
+      ...selectedEmployee,
+      certifications: selectedEmployee.certifications.map(cert => {
+        if (cert.id === certId) {
+          return {
+            ...cert,
+            verified: !cert.verified,
+            verifiedDate: !cert.verified ? new Date().toISOString().split('T')[0] : undefined
+          };
+        }
+        return cert;
+      })
+    };
+    
+    setSelectedEmployee(updatedEmployee);
+  };
 
   const filteredEmployees = mockEmployees.filter(emp => {
     const matchesSearch = emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -475,12 +505,18 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <h4 className="font-semibold">{cert.category}</h4>
                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(cert.status)}`}>
                               <Icon name={getStatusIcon(cert.status) as any} size={12} className="inline mr-1" />
                               {getStatusLabel(cert.status)}
                             </span>
+                            {cert.verified && cert.protocolNumber && (cert.category === 'Промышленная безопасность' || cert.category === 'Энергобезопасность') && (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                <Icon name="CheckCircle2" size={12} className="inline mr-1" />
+                                Проверено
+                              </span>
+                            )}
                           </div>
                           <p className="text-sm text-muted-foreground mb-3">{cert.area}</p>
                           <div className="grid grid-cols-2 gap-3 text-sm">
@@ -521,28 +557,59 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                           )}
                           
                           {cert.protocolNumber && (cert.category === 'Промышленная безопасность' || cert.category === 'Энергобезопасность') && (
-                            <div className="flex items-center gap-2 mt-3 pt-3 border-t">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                className="gap-2"
-                                onClick={() => {
-                                  navigator.clipboard.writeText(cert.protocolNumber || '');
-                                  alert('Номер протокола скопирован');
-                                }}
-                              >
-                                <Icon name="Copy" size={14} />
-                                Скопировать номер протокола
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                className="gap-2"
-                                onClick={() => window.open('https://qr.gosnadzor.ru/prombez', '_blank')}
-                              >
-                                <Icon name="ExternalLink" size={14} />
-                                Проверить в Ростехнадзоре
-                              </Button>
+                            <div className="space-y-3 mt-3 pt-3 border-t">
+                              <div className="flex items-center gap-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  className="gap-2"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(cert.protocolNumber || '');
+                                    alert('Номер протокола скопирован');
+                                  }}
+                                >
+                                  <Icon name="Copy" size={14} />
+                                  Скопировать номер протокола
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  className="gap-2"
+                                  onClick={() => window.open('https://qr.gosnadzor.ru/prombez', '_blank')}
+                                >
+                                  <Icon name="ExternalLink" size={14} />
+                                  Проверить в Ростехнадзоре
+                                </Button>
+                              </div>
+                              
+                              <div className={`flex items-center justify-between p-3 rounded-lg ${
+                                cert.verified 
+                                  ? 'bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900' 
+                                  : 'bg-slate-50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-900'
+                              }`}>
+                                <div className="flex items-center gap-3">
+                                  <Icon 
+                                    name={cert.verified ? "CheckCircle2" : "AlertCircle"} 
+                                    size={20} 
+                                    className={cert.verified ? "text-emerald-600" : "text-slate-400"}
+                                  />
+                                  <div>
+                                    <Label htmlFor={`verify-${cert.id}`} className="text-sm font-medium cursor-pointer">
+                                      {cert.verified ? 'Проверено в реестре Ростехнадзора' : 'Не проверено в реестре'}
+                                    </Label>
+                                    {cert.verified && cert.verifiedDate && (
+                                      <p className="text-xs text-muted-foreground mt-0.5">
+                                        Проверено: {new Date(cert.verifiedDate).toLocaleDateString('ru')}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                                <Switch 
+                                  id={`verify-${cert.id}`}
+                                  checked={cert.verified || false}
+                                  onCheckedChange={() => handleVerificationToggle(cert.id)}
+                                />
+                              </div>
                             </div>
                           )}
                         </div>

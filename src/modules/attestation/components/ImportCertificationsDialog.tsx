@@ -19,6 +19,7 @@ interface ImportedCertification {
   expiryDate: string;
   protocolNumber?: string;
   protocolDate?: string;
+  verified?: boolean;
   status: 'valid' | 'warning' | 'error';
   errors?: string[];
 }
