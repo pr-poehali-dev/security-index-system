@@ -289,7 +289,7 @@ export default function OrdersTrainingTab() {
   };
 
   const handleViewOrder = (orderId: string) => {
-    const order = mockOrders.find(o => o.id === orderId);
+    const order = orders.find(o => o.id === orderId);
     toast({
       title: "Просмотр приказа",
       description: `Приказ №${order?.number} - ${order?.title}`,
