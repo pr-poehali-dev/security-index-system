@@ -16,7 +16,7 @@ import OrganizationsTab from '../components/OrganizationsTab';
 import DepartmentsTab from '../components/DepartmentsTab';
 import PersonnelTab from '../components/PersonnelTab';
 import CompetenciesTab from '../components/CompetenciesTab';
-import CompetencyGapAnalysisTab from '../components/CompetencyGapAnalysisTab';
+import ExternalOrganizationsTab from '../components/ExternalOrganizationsTab';
 import AddCompetencyDialog from '../components/AddCompetencyDialog';
 import EditCompetencyDialog from '../components/EditCompetencyDialog';
 import ProductionSitesTab from '../components/ProductionSitesTab';
@@ -24,7 +24,8 @@ import ProductionSiteDialog from '../components/ProductionSiteDialog';
 import SystemUsersTab from '../components/SystemUsersTab';
 import AddSystemUserDialog from '../components/AddSystemUserDialog';
 import EditSystemUserDialog from '../components/EditSystemUserDialog';
-import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser } from '@/types';
+import ExternalOrganizationDialog from '../components/ExternalOrganizationDialog';
+import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization } from '@/types';
 
 export default function SettingsPage() {
   const user = useAuthStore((state) => state.user);
@@ -34,7 +35,8 @@ export default function SettingsPage() {
     deletePersonnel,
     deleteCompetency,
     deleteProductionSite,
-    deleteSystemUser
+    deleteSystemUser,
+    deleteExternalOrganization
   } = useSettingsStore();
   
   const { toast } = useToast();
@@ -45,12 +47,14 @@ export default function SettingsPage() {
   const [showAddCompetency, setShowAddCompetency] = useState(false);
   const [showAddSite, setShowAddSite] = useState(false);
   const [showAddUser, setShowAddUser] = useState(false);
+  const [showAddExternalOrg, setShowAddExternalOrg] = useState(false);
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
   const [editingDept, setEditingDept] = useState<Department | null>(null);
   const [editingPerson, setEditingPerson] = useState<Personnel | null>(null);
   const [editingCompetency, setEditingCompetency] = useState<CompetencyMatrix | null>(null);
   const [editingSite, setEditingSite] = useState<ProductionSite | null>(null);
   const [editingUser, setEditingUser] = useState<SystemUser | null>(null);
+  const [editingExternalOrg, setEditingExternalOrg] = useState<ExternalOrganization | null>(null);
 
   const isReadOnly = user?.role !== 'TenantAdmin';
   
@@ -100,13 +104,20 @@ export default function SettingsPage() {
     }
   };
 
+  const handleDeleteExternalOrg = (id: string) => {
+    if (confirm('Удалить стороннюю организацию?')) {
+      deleteExternalOrganization(id);
+      toast({ title: 'Организация удалена' });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Настройки</h1>
           <p className="text-muted-foreground mt-2">
-            Управление организациями, подразделениями, персоналом и компетенциями
+            Управление организациями, персоналом, компетенциями и сторонними организациями
           </p>
           {isReadOnly && (
             <p className="text-sm text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
@@ -139,9 +150,9 @@ export default function SettingsPage() {
             <Icon name="GraduationCap" size={16} />
             Справочник компетенций
           </TabsTrigger>
-          <TabsTrigger value="gap-analysis" className="gap-2">
-            <Icon name="BarChart3" size={16} />
-            Анализ пробелов
+          <TabsTrigger value="external-orgs" className="gap-2">
+            <Icon name="Briefcase" size={16} />
+            Сторонние организации
           </TabsTrigger>
           <TabsTrigger value="system-users" className="gap-2">
             <Icon name="UserCog" size={16} />
@@ -189,8 +200,12 @@ export default function SettingsPage() {
           />
         </TabsContent>
 
-        <TabsContent value="gap-analysis">
-          <CompetencyGapAnalysisTab />
+        <TabsContent value="external-orgs">
+          <ExternalOrganizationsTab
+            onAdd={() => setShowAddExternalOrg(true)}
+            onEdit={setEditingExternalOrg}
+            onDelete={handleDeleteExternalOrg}
+          />
         </TabsContent>
 
         <TabsContent value="system-users">
@@ -277,6 +292,17 @@ export default function SettingsPage() {
           onOpenChange={(open) => !open && setEditingUser(null)}
         />
       )}
+
+      <ExternalOrganizationDialog 
+        open={showAddExternalOrg || !!editingExternalOrg} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowAddExternalOrg(false);
+            setEditingExternalOrg(null);
+          }
+        }}
+        organization={editingExternalOrg || undefined}
+      />
     </div>
   );
 }
