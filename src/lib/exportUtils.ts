@@ -1,4 +1,4 @@
-import type { Organization, Department, Personnel } from '@/types';
+import type { Organization, Department, Personnel, ProductionSite } from '@/types';
 
 export function exportOrganizationsToCSV(
   organizations: Organization[],
@@ -218,4 +218,63 @@ export function exportToExcel(data: any[], filename: string) {
     XLSX.utils.book_append_sheet(wb, ws, 'Данные');
     XLSX.writeFile(wb, `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`);
   });
+}
+
+export function exportProductionSitesToExcel(
+  sites: ProductionSite[],
+  organizations: Organization[]
+) {
+  const data = sites.map((site) => {
+    const org = organizations.find((o) => o.id === site.organizationId);
+    return {
+      'Организация': org?.name || '—',
+      'Название площадки': site.name,
+      'Код': site.code || '',
+      'Адрес': site.address,
+      'Руководитель': site.head || '',
+      'Телефон': site.phone || '',
+      'Статус': site.status === 'active' ? 'Активна' : 'Неактивна',
+      'Дата создания': new Date(site.createdAt).toLocaleDateString('ru-RU')
+    };
+  });
+
+  exportToExcel(data, 'Производственные_площадки');
+}
+
+export async function importProductionSitesFromExcel(
+  file: File,
+  tenantId: string,
+  organizations: Organization[]
+): Promise<Omit<ProductionSite, 'id' | 'createdAt'>[]> {
+  const XLSX = await import('xlsx');
+  const buffer = await file.arrayBuffer();
+  const workbook = XLSX.read(buffer, { type: 'array' });
+  const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows: any[] = XLSX.utils.sheet_to_json(worksheet);
+
+  const sites: Omit<ProductionSite, 'id' | 'createdAt'>[] = [];
+
+  for (const row of rows) {
+    const orgName = row['Организация']?.toString().trim();
+    const name = row['Название площадки']?.toString().trim();
+    const address = row['Адрес']?.toString().trim();
+
+    if (!orgName || !name || !address) continue;
+
+    const org = organizations.find(o => o.name === orgName);
+    if (!org) continue;
+
+    sites.push({
+      tenantId,
+      organizationId: org.id,
+      name,
+      address,
+      code: row['Код']?.toString().trim() || undefined,
+      head: row['Руководитель']?.toString().trim() || undefined,
+      phone: row['Телефон']?.toString().trim() || undefined,
+      status: row['Статус'] === 'Неактивна' ? 'inactive' : 'active'
+    });
+  }
+
+  return sites;
 }

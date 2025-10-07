@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
+import { useToast } from '@/hooks/use-toast';
+import { exportProductionSitesToExcel, importProductionSitesFromExcel } from '@/lib/exportUtils';
+import ProductionSitesImportDialog from './ProductionSitesImportDialog';
 import type { ProductionSite } from '@/types';
 import {
   Table,
@@ -25,10 +28,13 @@ interface ProductionSitesTabProps {
 
 export default function ProductionSitesTab({ onAdd, onEdit, onDelete }: ProductionSitesTabProps) {
   const user = useAuthStore((state) => state.user);
-  const { productionSites, getOrganizationsByTenant, getProductionSitesByOrganization } = useSettingsStore();
+  const { productionSites, getOrganizationsByTenant, getProductionSitesByOrganization, importProductionSites } = useSettingsStore();
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterOrg, setFilterOrg] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>(() => {
     const saved = localStorage.getItem('production-sites-view-mode');
     return (saved as 'table' | 'cards') || 'table';
@@ -58,6 +64,28 @@ export default function ProductionSitesTab({ onAdd, onEdit, onDelete }: Producti
   };
 
   const isReadOnly = user?.role !== 'TenantAdmin';
+
+  const handleExport = () => {
+    exportProductionSitesToExcel(filteredSites, organizations);
+    toast({ title: 'Экспорт завершен', description: 'Файл производственных площадок загружен' });
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const sites = await importProductionSitesFromExcel(file, user!.tenantId!, organizations);
+      importProductionSites(sites);
+      toast({ title: 'Импорт завершен', description: `Добавлено: ${sites.length} площадок` });
+    } catch (error) {
+      toast({ title: 'Ошибка импорта', description: 'Проверьте формат файла', variant: 'destructive' });
+    }
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -121,11 +149,42 @@ export default function ProductionSitesTab({ onAdd, onEdit, onDelete }: Producti
               <Icon name="LayoutGrid" size={16} />
             </Button>
           </div>
+          <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
+            <Icon name="Download" size={14} />
+            Экспорт
+          </Button>
           {!isReadOnly && (
-            <Button onClick={onAdd} size="sm" className="gap-2">
-              <Icon name="Plus" size={16} />
-              Добавить площадку
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowImportDialog(true)}
+                className="gap-2"
+              >
+                <Icon name="FileDown" size={14} />
+                Шаблон
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="gap-2"
+              >
+                <Icon name="Upload" size={14} />
+                Импорт
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleImport}
+                className="hidden"
+              />
+              <Button onClick={onAdd} size="sm" className="gap-2">
+                <Icon name="Plus" size={16} />
+                Добавить площадку
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -271,6 +330,11 @@ export default function ProductionSitesTab({ onAdd, onEdit, onDelete }: Producti
           )}
         </div>
       )}
+
+      <ProductionSitesImportDialog 
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
+      />
     </div>
   );
 }
