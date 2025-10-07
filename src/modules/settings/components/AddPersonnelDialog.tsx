@@ -6,208 +6,506 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import Icon from '@/components/ui/icon';
+import type { EducationLevel } from '@/types';
 
 interface AddPersonnelDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+interface CertificationForm {
+  competencyId: string;
+  issueDate: string;
+  expiryDate: string;
+  protocolNumber: string;
+  issuedBy: string;
+}
+
 export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelDialogProps) {
   const user = useAuthStore((state) => state.user);
-  const { addPersonnel, getOrganizationsByTenant, getDepartmentsByOrganization } = useSettingsStore();
+  const { 
+    addPerson, 
+    addPersonnel,
+    addCertification,
+    getOrganizationsByTenant, 
+    getDepartmentsByOrganization,
+    getPositionsByTenant,
+    getCompetenciesDirByTenant
+  } = useSettingsStore();
   const { toast } = useToast();
 
   const tenantOrgs = getOrganizationsByTenant(user!.tenantId!);
+  const tenantPositions = getPositionsByTenant(user!.tenantId!);
+  const tenantCompetencies = getCompetenciesDirByTenant(user!.tenantId!);
 
-  const [formData, setFormData] = useState({
-    fullName: '',
-    position: '',
+  const [personData, setPersonData] = useState({
+    lastName: '',
+    firstName: '',
+    middleName: '',
+    birthDate: '',
+    snils: '',
+    inn: '',
     email: '',
     phone: '',
-    organizationId: '',
-    departmentId: '',
-    role: 'Manager' as 'Auditor' | 'Manager' | 'Director',
-    hireDate: ''
+    address: '',
+    educationLevel: 'no_data' as EducationLevel
   });
 
-  const departments = formData.organizationId 
-    ? getDepartmentsByOrganization(formData.organizationId)
+  const [personnelData, setPersonnelData] = useState({
+    organizationId: '',
+    departmentId: '',
+    positionId: '',
+    role: 'Manager' as 'Auditor' | 'Manager' | 'Director',
+    hireDate: '',
+    requiredCompetencies: [] as string[]
+  });
+
+  const [certifications, setCertifications] = useState<CertificationForm[]>([]);
+
+  const departments = personnelData.organizationId 
+    ? getDepartmentsByOrganization(personnelData.organizationId)
     : [];
+
+  const addCertificationRow = () => {
+    setCertifications([...certifications, {
+      competencyId: '',
+      issueDate: '',
+      expiryDate: '',
+      protocolNumber: '',
+      issuedBy: ''
+    }]);
+  };
+
+  const removeCertificationRow = (index: number) => {
+    setCertifications(certifications.filter((_, i) => i !== index));
+  };
+
+  const updateCertification = (index: number, field: keyof CertificationForm, value: string) => {
+    const updated = [...certifications];
+    updated[index] = { ...updated[index], [field]: value };
+    setCertifications(updated);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.fullName || !formData.position || !formData.role) {
+    if (!personData.lastName || !personData.firstName || !personnelData.positionId || !personnelData.organizationId) {
       toast({
         title: 'Ошибка',
-        description: 'Заполните обязательные поля',
+        description: 'Заполните обязательные поля: Фамилия, Имя, Организация, Должность',
         variant: 'destructive'
       });
       return;
     }
 
+    const personId = `person-${Date.now()}`;
+    
+    addPerson({
+      ...personData,
+      tenantId: user!.tenantId!,
+      status: 'active'
+    });
+
     addPersonnel({
       tenantId: user!.tenantId!,
-      fullName: formData.fullName,
-      position: formData.position,
-      email: formData.email || undefined,
-      phone: formData.phone || undefined,
-      organizationId: formData.organizationId || undefined,
-      departmentId: formData.departmentId || undefined,
-      role: formData.role,
+      personId,
+      positionId: personnelData.positionId,
+      organizationId: personnelData.organizationId,
+      departmentId: personnelData.departmentId || undefined,
+      role: personnelData.role,
+      requiredCompetencies: personnelData.requiredCompetencies.length > 0 ? personnelData.requiredCompetencies : undefined,
       status: 'active',
-      hireDate: formData.hireDate ? new Date(formData.hireDate).toISOString() : new Date().toISOString()
+      hireDate: personnelData.hireDate || undefined
+    });
+
+    certifications.forEach(cert => {
+      if (cert.competencyId && cert.issueDate && cert.expiryDate && cert.protocolNumber) {
+        addCertification({
+          tenantId: user!.tenantId!,
+          personId,
+          competencyId: cert.competencyId,
+          issueDate: cert.issueDate,
+          expiryDate: cert.expiryDate,
+          protocolNumber: cert.protocolNumber,
+          issuedBy: cert.issuedBy || undefined
+        });
+      }
     });
 
     toast({
       title: 'Успешно',
-      description: 'Сотрудник добавлен'
+      description: 'Сотрудник добавлен в систему'
     });
 
-    setFormData({ 
-      fullName: '', 
-      position: '', 
-      email: '', 
-      phone: '', 
+    resetForm();
+    onOpenChange(false);
+  };
+
+  const resetForm = () => {
+    setPersonData({
+      lastName: '',
+      firstName: '',
+      middleName: '',
+      birthDate: '',
+      snils: '',
+      inn: '',
+      email: '',
+      phone: '',
+      address: '',
+      educationLevel: 'no_data'
+    });
+    setPersonnelData({
       organizationId: '',
       departmentId: '',
+      positionId: '',
       role: 'Manager',
-      hireDate: ''
+      hireDate: '',
+      requiredCompetencies: []
     });
-    onOpenChange(false);
+    setCertifications([]);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Добавить сотрудника</DialogTitle>
           <DialogDescription>
-            Создание нового пользователя с назначением роли
+            Заполните личные данные, должность и аттестации сотрудника
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="fullName">ФИО *</Label>
-            <Input
-              id="fullName"
-              value={formData.fullName}
-              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-              placeholder="Иванов Иван Иванович"
-              required
-            />
-          </div>
+        <form onSubmit={handleSubmit}>
+          <Tabs defaultValue="personal" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="personal">Личные данные</TabsTrigger>
+              <TabsTrigger value="position">Должность</TabsTrigger>
+              <TabsTrigger value="certifications">Аттестации</TabsTrigger>
+            </TabsList>
 
-          <div className="space-y-2">
-            <Label htmlFor="position">Должность *</Label>
-            <Input
-              id="position"
-              value={formData.position}
-              onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-              placeholder="Инженер по охране труда"
-              required
-            />
-          </div>
+            <TabsContent value="personal" className="space-y-4 mt-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Фамилия <span className="text-destructive">*</span></Label>
+                  <Input
+                    id="lastName"
+                    value={personData.lastName}
+                    onChange={(e) => setPersonData({ ...personData, lastName: e.target.value })}
+                    required
+                  />
+                </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="organization">Организация</Label>
-              <Select 
-                value={formData.organizationId} 
-                onValueChange={(value) => setFormData({ ...formData, organizationId: value, departmentId: '' })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите организацию" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Не указана</SelectItem>
-                  {tenantOrgs.map((org) => (
-                    <SelectItem key={org.id} value={org.id}>
-                      {org.name}
-                    </SelectItem>
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">Имя <span className="text-destructive">*</span></Label>
+                  <Input
+                    id="firstName"
+                    value={personData.firstName}
+                    onChange={(e) => setPersonData({ ...personData, firstName: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="middleName">Отчество</Label>
+                  <Input
+                    id="middleName"
+                    value={personData.middleName}
+                    onChange={(e) => setPersonData({ ...personData, middleName: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="birthDate">Дата рождения</Label>
+                  <Input
+                    id="birthDate"
+                    type="date"
+                    value={personData.birthDate}
+                    onChange={(e) => setPersonData({ ...personData, birthDate: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="educationLevel">Образование</Label>
+                  <Select
+                    value={personData.educationLevel}
+                    onValueChange={(value: EducationLevel) => setPersonData({ ...personData, educationLevel: value })}
+                  >
+                    <SelectTrigger id="educationLevel">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="higher">Высшее</SelectItem>
+                      <SelectItem value="secondary">Среднее</SelectItem>
+                      <SelectItem value="no_data">Нет данных</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="snils">СНИЛС</Label>
+                  <Input
+                    id="snils"
+                    value={personData.snils}
+                    onChange={(e) => setPersonData({ ...personData, snils: e.target.value })}
+                    placeholder="123-456-789 00"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="inn">ИНН</Label>
+                  <Input
+                    id="inn"
+                    value={personData.inn}
+                    onChange={(e) => setPersonData({ ...personData, inn: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={personData.email}
+                    onChange={(e) => setPersonData({ ...personData, email: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Телефон</Label>
+                  <Input
+                    id="phone"
+                    value={personData.phone}
+                    onChange={(e) => setPersonData({ ...personData, phone: e.target.value })}
+                    placeholder="+7 (999) 123-45-67"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address">Адрес</Label>
+                <Input
+                  id="address"
+                  value={personData.address}
+                  onChange={(e) => setPersonData({ ...personData, address: e.target.value })}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="position" className="space-y-4 mt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="organizationId">Организация <span className="text-destructive">*</span></Label>
+                  <Select
+                    value={personnelData.organizationId}
+                    onValueChange={(value) => setPersonnelData({ ...personnelData, organizationId: value, departmentId: '' })}
+                    required
+                  >
+                    <SelectTrigger id="organizationId">
+                      <SelectValue placeholder="Выберите организацию" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tenantOrgs.map((org) => (
+                        <SelectItem key={org.id} value={org.id}>
+                          {org.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="departmentId">Подразделение</Label>
+                  <Select
+                    value={personnelData.departmentId}
+                    onValueChange={(value) => setPersonnelData({ ...personnelData, departmentId: value })}
+                    disabled={!personnelData.organizationId}
+                  >
+                    <SelectTrigger id="departmentId">
+                      <SelectValue placeholder="Выберите подразделение" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {departments.map((dept) => (
+                        <SelectItem key={dept.id} value={dept.id}>
+                          {dept.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="positionId">Должность <span className="text-destructive">*</span></Label>
+                  <Select
+                    value={personnelData.positionId}
+                    onValueChange={(value) => setPersonnelData({ ...personnelData, positionId: value })}
+                    required
+                  >
+                    <SelectTrigger id="positionId">
+                      <SelectValue placeholder="Выберите должность" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tenantPositions.map((pos) => (
+                        <SelectItem key={pos.id} value={pos.id}>
+                          {pos.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="role">Роль</Label>
+                  <Select
+                    value={personnelData.role}
+                    onValueChange={(value: 'Auditor' | 'Manager' | 'Director') => setPersonnelData({ ...personnelData, role: value })}
+                  >
+                    <SelectTrigger id="role">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Manager">Менеджер</SelectItem>
+                      <SelectItem value="Director">Руководитель</SelectItem>
+                      <SelectItem value="Auditor">Аудитор</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="hireDate">Дата приема</Label>
+                <Input
+                  id="hireDate"
+                  type="date"
+                  value={personnelData.hireDate}
+                  onChange={(e) => setPersonnelData({ ...personnelData, hireDate: e.target.value })}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="certifications" className="space-y-4 mt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Аттестации сотрудника</h4>
+                  <p className="text-sm text-muted-foreground">Добавьте аттестации по областям</p>
+                </div>
+                <Button type="button" size="sm" onClick={addCertificationRow}>
+                  <Icon name="Plus" className="mr-2 h-4 w-4" />
+                  Добавить
+                </Button>
+              </div>
+
+              {certifications.length === 0 ? (
+                <Card>
+                  <CardContent className="pt-6">
+                    <p className="text-center text-muted-foreground">
+                      Нет аттестаций. Нажмите "Добавить" для создания.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  {certifications.map((cert, index) => (
+                    <Card key={index}>
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-sm">Аттестация #{index + 1}</CardTitle>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeCertificationRow(index)}
+                          >
+                            <Icon name="Trash2" className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="space-y-2">
+                          <Label>Область аттестации</Label>
+                          <Select
+                            value={cert.competencyId}
+                            onValueChange={(value) => updateCertification(index, 'competencyId', value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Выберите область" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {tenantCompetencies.map((comp) => (
+                                <SelectItem key={comp.id} value={comp.id}>
+                                  {comp.code} — {comp.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <Label>Дата аттестации</Label>
+                            <Input
+                              type="date"
+                              value={cert.issueDate}
+                              onChange={(e) => updateCertification(index, 'issueDate', e.target.value)}
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Срок окончания</Label>
+                            <Input
+                              type="date"
+                              value={cert.expiryDate}
+                              onChange={(e) => updateCertification(index, 'expiryDate', e.target.value)}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <Label>Номер протокола</Label>
+                            <Input
+                              value={cert.protocolNumber}
+                              onChange={(e) => updateCertification(index, 'protocolNumber', e.target.value)}
+                              placeholder="№ 123/2024"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Кем выдано</Label>
+                            <Input
+                              value={cert.issuedBy}
+                              onChange={(e) => updateCertification(index, 'issuedBy', e.target.value)}
+                              placeholder="Ростехнадзор"
+                            />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
 
-            <div className="space-y-2">
-              <Label htmlFor="department">Подразделение</Label>
-              <Select 
-                value={formData.departmentId} 
-                onValueChange={(value) => setFormData({ ...formData, departmentId: value })}
-                disabled={!formData.organizationId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите подразделение" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Не указано</SelectItem>
-                  {departments.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="role">Роль *</Label>
-              <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value as typeof formData.role })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Auditor">Аудитор</SelectItem>
-                  <SelectItem value="Manager">Менеджер</SelectItem>
-                  <SelectItem value="Director">Директор</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="hireDate">Дата приема</Label>
-              <Input
-                id="hireDate"
-                type="date"
-                value={formData.hireDate}
-                onChange={(e) => setFormData({ ...formData, hireDate: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="ivanov@example.com"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Телефон</Label>
-              <Input
-                id="phone"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="+7 (999) 123-45-67"
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
+          <DialogFooter className="mt-6">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Отмена
             </Button>
-            <Button type="submit">Добавить</Button>
+            <Button type="submit">
+              Добавить сотрудника
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

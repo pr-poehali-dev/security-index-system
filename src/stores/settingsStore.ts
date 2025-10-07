@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization, Person, Position } from '@/types';
+import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization, Person, Position, Certification, Competency } from '@/types';
 
 interface SettingsState {
   organizations: Organization[];
@@ -9,6 +9,8 @@ interface SettingsState {
   positions: Position[];
   personnel: Personnel[];
   competencies: CompetencyMatrix[];
+  competenciesDirectory: Competency[];
+  certifications: Certification[];
   productionSites: ProductionSite[];
   systemUsers: SystemUser[];
   externalOrganizations: ExternalOrganization[];
@@ -71,6 +73,18 @@ interface SettingsState {
   getExternalOrganizationsByTenant: (tenantId: string) => ExternalOrganization[];
   getExternalOrganizationsByType: (tenantId: string, type: ExternalOrganization['type']) => ExternalOrganization[];
   importExternalOrganizations: (orgs: Omit<ExternalOrganization, 'id' | 'createdAt'>[]) => void;
+
+  addCompetencyDir: (competency: Omit<Competency, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateCompetencyDir: (id: string, updates: Partial<Competency>) => void;
+  deleteCompetencyDir: (id: string) => void;
+  getCompetenciesDirByTenant: (tenantId: string) => Competency[];
+  importCompetenciesDir: (comps: Omit<Competency, 'id' | 'createdAt' | 'updatedAt'>[]) => void;
+
+  addCertification: (cert: Omit<Certification, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => void;
+  updateCertification: (id: string, updates: Partial<Certification>) => void;
+  deleteCertification: (id: string) => void;
+  getCertificationsByPerson: (personId: string) => Certification[];
+  getCertificationsByTenant: (tenantId: string) => Certification[];
 }
 
 export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
@@ -849,5 +863,160 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     set((state) => ({
       externalOrganizations: [...state.externalOrganizations, ...newOrgs]
     }));
+  },
+
+  competenciesDirectory: [
+    {
+      id: 'comp-1',
+      tenantId: 'tenant-1',
+      code: 'А.1',
+      name: 'Эксплуатация опасных производственных объектов горнорудной промышленности',
+      category: 'industrial_safety',
+      validityMonths: 36,
+      requiresRostechnadzor: true,
+      status: 'active',
+      createdAt: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'comp-2',
+      tenantId: 'tenant-1',
+      code: 'Б.7',
+      name: 'Эксплуатация электроустановок потребителей',
+      category: 'energy_safety',
+      validityMonths: 60,
+      requiresRostechnadzor: true,
+      status: 'active',
+      createdAt: new Date(Date.now() - 450 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'comp-3',
+      tenantId: 'tenant-1',
+      code: 'ОТ-101',
+      name: 'Охрана труда в организации',
+      category: 'labor_safety',
+      validityMonths: 36,
+      requiresRostechnadzor: false,
+      status: 'active',
+      createdAt: new Date(Date.now() - 400 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 80 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'comp-4',
+      tenantId: 'tenant-1',
+      code: 'ЭК-50',
+      name: 'Экологическая безопасность',
+      category: 'ecology',
+      validityMonths: 60,
+      requiresRostechnadzor: false,
+      status: 'active',
+      createdAt: new Date(Date.now() - 350 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 70 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ],
+
+  certifications: [],
+
+  addCompetencyDir: (competency) => {
+    const newComp: Competency = {
+      ...competency,
+      id: `comp-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    set((state) => ({ competenciesDirectory: [...state.competenciesDirectory, newComp] }));
+  },
+
+  updateCompetencyDir: (id, updates) => {
+    set((state) => ({
+      competenciesDirectory: state.competenciesDirectory.map((comp) =>
+        comp.id === id ? { ...comp, ...updates, updatedAt: new Date().toISOString() } : comp
+      )
+    }));
+  },
+
+  deleteCompetencyDir: (id) => {
+    set((state) => ({
+      competenciesDirectory: state.competenciesDirectory.filter((comp) => comp.id !== id)
+    }));
+  },
+
+  getCompetenciesDirByTenant: (tenantId) => {
+    return get().competenciesDirectory.filter((comp) => comp.tenantId === tenantId);
+  },
+
+  importCompetenciesDir: (comps) => {
+    const newComps = comps.map((comp, index) => ({
+      ...comp,
+      id: `comp-import-${Date.now()}-${index}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }));
+    set((state) => ({ competenciesDirectory: [...state.competenciesDirectory, ...newComps] }));
+  },
+
+  addCertification: (cert) => {
+    const expiryDate = new Date(cert.expiryDate);
+    const today = new Date();
+    const daysLeft = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    
+    let status: 'valid' | 'expiring' | 'expired';
+    if (daysLeft < 0) {
+      status = 'expired';
+    } else if (daysLeft <= 30) {
+      status = 'expiring';
+    } else {
+      status = 'valid';
+    }
+
+    const newCert: Certification = {
+      ...cert,
+      id: `cert-${Date.now()}`,
+      status,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    set((state) => ({ certifications: [...state.certifications, newCert] }));
+  },
+
+  updateCertification: (id, updates) => {
+    set((state) => ({
+      certifications: state.certifications.map((cert) => {
+        if (cert.id !== id) return cert;
+        
+        const updatedCert = { ...cert, ...updates };
+        
+        if (updates.expiryDate) {
+          const expiryDate = new Date(updates.expiryDate);
+          const today = new Date();
+          const daysLeft = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          
+          if (daysLeft < 0) {
+            updatedCert.status = 'expired';
+          } else if (daysLeft <= 30) {
+            updatedCert.status = 'expiring';
+          } else {
+            updatedCert.status = 'valid';
+          }
+        }
+        
+        return { ...updatedCert, updatedAt: new Date().toISOString() };
+      })
+    }));
+  },
+
+  deleteCertification: (id) => {
+    set((state) => ({
+      certifications: state.certifications.filter((cert) => cert.id !== id)
+    }));
+  },
+
+  getCertificationsByPerson: (personId) => {
+    return get().certifications.filter((cert) => cert.personId === personId);
+  },
+
+  getCertificationsByTenant: (tenantId) => {
+    return get().certifications.filter((cert) => cert.tenantId === tenantId);
   }
 }), { name: 'settings-storage' }));

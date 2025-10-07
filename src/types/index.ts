@@ -93,6 +93,8 @@ export interface Department {
   createdAt: string;
 }
 
+export type EducationLevel = 'higher' | 'secondary' | 'no_data';
+
 export interface Person {
   id: string;
   tenantId: string;
@@ -107,6 +109,7 @@ export interface Person {
   email?: string;
   phone?: string;
   address?: string;
+  educationLevel?: EducationLevel;
   status: 'active' | 'inactive';
   createdAt: string;
   updatedAt: string;
@@ -132,6 +135,7 @@ export interface Personnel {
   organizationId?: string;
   departmentId?: string;
   role: 'Auditor' | 'Manager' | 'Director';
+  requiredCompetencies?: string[];
   status: 'active' | 'dismissed';
   hireDate?: string;
   dismissalDate?: string;
@@ -203,6 +207,36 @@ export interface ExternalOrganization {
 
 export interface TrainingOrganization extends ExternalOrganization {
   type: 'training_center';
+}
+
+export type CertificationStatus = 'valid' | 'expiring' | 'expired';
+
+export interface Certification {
+  id: string;
+  tenantId: string;
+  personId: string;
+  competencyId: string;
+  issueDate: string;
+  expiryDate: string;
+  protocolNumber: string;
+  issuedBy?: string;
+  status: CertificationStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Competency {
+  id: string;
+  tenantId: string;
+  code: string;
+  name: string;
+  category: 'industrial_safety' | 'labor_safety' | 'energy_safety' | 'ecology' | 'other';
+  validityMonths: number;
+  requiresRostechnadzor?: boolean;
+  description?: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface GapAnalysis {
