@@ -28,6 +28,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import ImportCertificationsDialog from './ImportCertificationsDialog';
 import AddCertificationDialog from './AddCertificationDialog';
 import MassActionDialog from './MassActionDialog';
+import ExportReportDialog from './ExportReportDialog';
 
 interface Certification {
   id: string;
@@ -177,6 +178,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
   const [orderType, setOrderType] = useState<string>('');
   const [showMassActionDialog, setShowMassActionDialog] = useState(false);
   const [massActionType, setMassActionType] = useState<string>('');
+  const [showExportDialog, setShowExportDialog] = useState(false);
 
   const handleVerificationToggle = (certId: string) => {
     if (!selectedEmployee) return;
@@ -467,10 +469,9 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                     <Icon name="Upload" size={16} className="mr-2" />
                     Импорт из Excel
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleExportToExcel}>
-                    <Icon name="Download" size={16} className="mr-2" />
-                    Экспорт в Excel
-                    {selectedEmployeeIds.size > 0 && ` (${selectedEmployeeIds.size})`}
+                  <DropdownMenuItem onClick={() => setShowExportDialog(true)}>
+                    <Icon name="FileDown" size={16} className="mr-2" />
+                    Экспорт отчёта
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -899,9 +900,13 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
               </div>
 
               <div className="pt-4 border-t flex items-center justify-end gap-2">
-                <Button variant="outline" className="gap-2">
+                <Button 
+                  variant="outline" 
+                  className="gap-2"
+                  onClick={() => setShowExportDialog(true)}
+                >
                   <Icon name="Download" size={16} />
-                  Экспорт PDF
+                  Экспорт отчёта
                 </Button>
                 <Button 
                   className="gap-2"
@@ -932,6 +937,12 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
         onOpenChange={setShowMassActionDialog}
         actionType={massActionType}
         employees={selectedEmployees}
+      />
+
+      <ExportReportDialog
+        open={showExportDialog}
+        onOpenChange={setShowExportDialog}
+        employees={mockEmployees}
       />
     </div>
   );
