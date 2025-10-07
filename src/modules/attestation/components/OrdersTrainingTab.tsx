@@ -22,34 +22,12 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import CreateOrderDialog from './CreateOrderDialog';
 import CreateTrainingDialog from './CreateTrainingDialog';
+import { useAuthStore } from '@/stores/authStore';
+import { useAttestationStore } from '@/stores/attestationStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 
-interface Order {
-  id: string;
-  number: string;
-  date: string;
-  type: 'attestation' | 'training' | 'suspension' | 'sdo' | 'training_center' | 'internal_attestation' | 'rostechnadzor';
-  title: string;
-  employees: string[];
-  status: 'draft' | 'prepared' | 'approved' | 'active' | 'completed' | 'cancelled';
-  createdBy: string;
-  description?: string;
-}
-
-interface Training {
-  id: string;
-  title: string;
-  type: string;
-  startDate: string;
-  endDate: string;
-  employees: string[];
-  organization: string;
-  cost: number;
-  status: 'planned' | 'in_progress' | 'completed' | 'cancelled';
-  program?: string;
-  documents?: string[];
-}
-
-const mockOrders: Order[] = [
+const OLD_mockOrders = [
   {
     id: '1',
     number: '15-А',

@@ -6,56 +6,17 @@ import Icon from '@/components/ui/icon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useAttestationStore } from '@/stores/attestationStore';
 import { CERTIFICATION_CATEGORIES } from '@/lib/constants';
 import { Badge } from '@/components/ui/badge';
-
-interface CertificationType {
-  id: string;
-  name: string;
-  description: string;
-  validityPeriod: number;
-  category: string;
-}
-
-
-
-
-
-const mockCertTypes: CertificationType[] = [
-  {
-    id: '1',
-    name: 'Электробезопасность II группа',
-    description: 'До 1000 В',
-    validityPeriod: 12,
-    category: 'Электробезопасность'
-  },
-  {
-    id: '2',
-    name: 'Электробезопасность III группа',
-    description: 'До 1000 В',
-    validityPeriod: 12,
-    category: 'Электробезопасность'
-  },
-  {
-    id: '3',
-    name: 'Работы на высоте 1 группа',
-    description: 'Без применения средств подмащивания',
-    validityPeriod: 36,
-    category: 'Работы на высоте'
-  },
-  {
-    id: '4',
-    name: 'Промышленная безопасность',
-    description: 'Опасные производственные объекты',
-    validityPeriod: 60,
-    category: 'Промышленная безопасность'
-  },
-];
 
 export default function DirectoriesTab() {
   const user = useAuthStore((state) => state.user);
   const { competencies, getOrganizationsByTenant, getExternalOrganizationsByType } = useSettingsStore();
+  const { getCertificationTypesByTenant } = useAttestationStore();
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const certTypes = user?.tenantId ? getCertificationTypesByTenant(user.tenantId) : [];
   
   const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
   const tenantCompetencies = competencies.filter((c) => c.tenantId === user?.tenantId);
@@ -116,16 +77,16 @@ export default function DirectoriesTab() {
               </div>
 
               <div className="space-y-3">
-                {mockCertTypes.map((cert) => (
+                {certTypes.map((cert) => (
                   <Card key={cert.id}>
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-semibold">{cert.name}</h3>
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium text-blue-600 bg-blue-100 dark:bg-blue-900/30">
-                              {cert.category}
-                            </span>
+                            <Badge variant="outline">
+                              {CERTIFICATION_CATEGORIES[cert.category]}
+                            </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground mb-2">{cert.description}</p>
                           <div className="flex items-center gap-4 text-sm">
