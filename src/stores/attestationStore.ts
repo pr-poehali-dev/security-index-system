@@ -49,6 +49,15 @@ export interface Order {
   updatedAt: string;
 }
 
+export interface TrainingParticipant {
+  employeeId: string;
+  status: 'in_progress' | 'completed' | 'failed';
+  progress?: number;
+  testScore?: number;
+  testMaxScore?: number;
+  completedAt?: string;
+}
+
 export interface Training {
   id: string;
   tenantId: string;
@@ -67,6 +76,7 @@ export interface Training {
   sdoProgress?: number;
   sdoCompletedLessons?: number;
   sdoTotalLessons?: number;
+  participants?: TrainingParticipant[];
   createdAt: string;
   updatedAt: string;
 }
@@ -473,6 +483,22 @@ export const useAttestationStore = create<AttestationState>()(persist((set, get)
       sdoProgress: 65,
       sdoCompletedLessons: 13,
       sdoTotalLessons: 20,
+      participants: [
+        {
+          employeeId: 'personnel-2',
+          status: 'in_progress',
+          progress: 75,
+          testScore: undefined,
+          testMaxScore: 20
+        },
+        {
+          employeeId: 'personnel-3',
+          status: 'in_progress',
+          progress: 55,
+          testScore: undefined,
+          testMaxScore: 20
+        }
+      ],
       createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
     },
@@ -489,6 +515,24 @@ export const useAttestationStore = create<AttestationState>()(persist((set, get)
       status: 'completed',
       certificateNumber: 'ЭБ-2024-09234',
       certificateIssueDate: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString(),
+      participants: [
+        {
+          employeeId: 'personnel-1',
+          status: 'completed',
+          progress: 100,
+          testScore: 18,
+          testMaxScore: 20,
+          completedAt: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          employeeId: 'personnel-2',
+          status: 'completed',
+          progress: 100,
+          testScore: 17,
+          testMaxScore: 20,
+          completedAt: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString()
+        }
+      ],
       createdAt: new Date(Date.now() - 50 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString()
     }

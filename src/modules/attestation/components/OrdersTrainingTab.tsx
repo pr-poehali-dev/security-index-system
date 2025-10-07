@@ -154,10 +154,23 @@ export default function OrdersTrainingTab() {
   const [showCreateOrderDialog, setShowCreateOrderDialog] = useState(false);
   const [showCreateTrainingDialog, setShowCreateTrainingDialog] = useState(false);
   const [trainingViewMode, setTrainingViewMode] = useState<'cards' | 'table'>('cards');
+  const [expandedTrainings, setExpandedTrainings] = useState<Set<string>>(new Set());
 
   const tenantOrders = user?.tenantId ? getOrdersByTenant(user.tenantId) : [];
   const tenantTrainings = user?.tenantId ? getTrainingsByTenant(user.tenantId) : [];
   const trainingOrgs = user?.tenantId ? getExternalOrganizationsByType(user.tenantId, 'training_center') : [];
+
+  const toggleTrainingExpanded = (trainingId: string) => {
+    setExpandedTrainings((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(trainingId)) {
+        newSet.delete(trainingId);
+      } else {
+        newSet.add(trainingId);
+      }
+      return newSet;
+    });
+  };
 
   const filteredOrders = tenantOrders.filter(order => {
     const matchesSearch = order.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1044,10 +1057,19 @@ export default function OrdersTrainingTab() {
                           )}
 
                           <div className="flex items-center justify-between pt-3 border-t">
-                            <div className="flex items-center gap-2 text-sm">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="gap-2 flex-1 justify-start"
+                              onClick={() => toggleTrainingExpanded(training.id)}
+                            >
+                              <Icon 
+                                name={expandedTrainings.has(training.id) ? "ChevronDown" : "ChevronRight"} 
+                                size={16} 
+                              />
                               <span className="text-muted-foreground">Сотрудников:</span>
                               <span className="font-medium">{training.employeeIds.length}</span>
-                            </div>
+                            </Button>
                             <div className="flex items-center gap-2">
                               <Button variant="ghost" size="sm" className="gap-2" onClick={() => handleEditTraining(training.id)}>
                                 <Icon name="Edit" size={14} />
@@ -1085,6 +1107,76 @@ export default function OrdersTrainingTab() {
                               </DropdownMenu>
                             </div>
                           </div>
+
+                          {expandedTrainings.has(training.id) && training.participants && training.participants.length > 0 && (
+                            <div className="pt-3 border-t bg-muted/30">
+                              <h4 className="text-sm font-medium mb-3 px-4">Список обучающихся</h4>
+                              <div className="space-y-2 px-4 pb-3">
+                                {training.participants.map((participant) => {
+                                  const employeePersonnel = personnel.find(p => p.id === participant.employeeId);
+                                  const employeePerson = people.find(p => p.id === employeePersonnel?.personId);
+                                  const employeePosition = positions.find(pos => pos.id === employeePersonnel?.positionId);
+                                  const fullName = employeePerson ? `${employeePerson.lastName} ${employeePerson.firstName} ${employeePerson.middleName || ''}`.trim() : 'Неизвестный сотрудник';
+
+                                  return (
+                                    <div key={participant.employeeId} className="bg-background rounded-lg p-3 border">
+                                      <div className="flex items-start justify-between mb-2">
+                                        <div className="flex-1">
+                                          <p className="font-medium text-sm">{fullName}</p>
+                                          {employeePosition && (
+                                            <p className="text-xs text-muted-foreground">{employeePosition.name}</p>
+                                          )}
+                                        </div>
+                                        <Badge className={
+                                          participant.status === 'completed' 
+                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                            : participant.status === 'in_progress'
+                                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                            : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                        }>
+                                          {participant.status === 'completed' ? 'Обучение завершено' : 
+                                           participant.status === 'in_progress' ? 'Обучается' : 'Не завершено'}
+                                        </Badge>
+                                      </div>
+                                      
+                                      {participant.progress !== undefined && (
+                                        <div className="mb-2">
+                                          <div className="flex items-center justify-between mb-1">
+                                            <span className="text-xs text-muted-foreground">Прогресс</span>
+                                            <span className="text-xs font-medium">{participant.progress}%</span>
+                                          </div>
+                                          <div className="w-full bg-muted rounded-full h-1.5">
+                                            <div 
+                                              className="bg-primary rounded-full h-1.5 transition-all" 
+                                              style={{ width: `${participant.progress}%` }}
+                                            />
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {participant.testScore !== undefined && participant.testMaxScore && (
+                                        <div className="flex items-center gap-2 text-xs">
+                                          <Icon name="ClipboardCheck" size={12} className="text-muted-foreground" />
+                                          <span className="text-muted-foreground">Итоговый тест:</span>
+                                          <span className="font-semibold">
+                                            {participant.testScore} из {participant.testMaxScore}
+                                          </span>
+                                        </div>
+                                      )}
+
+                                      {participant.completedAt && (
+                                        <div className="flex items-center gap-2 text-xs mt-1">
+                                          <Icon name="Calendar" size={12} className="text-muted-foreground" />
+                                          <span className="text-muted-foreground">Завершено:</span>
+                                          <span>{new Date(participant.completedAt).toLocaleDateString('ru')}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     );
