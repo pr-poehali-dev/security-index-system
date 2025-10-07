@@ -1,10 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization } from '@/types';
+import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization, Person, Position } from '@/types';
 
 interface SettingsState {
   organizations: Organization[];
   departments: Department[];
+  people: Person[];
+  positions: Position[];
   personnel: Personnel[];
   competencies: CompetencyMatrix[];
   productionSites: ProductionSite[];
@@ -17,7 +19,20 @@ interface SettingsState {
   addDepartment: (dept: Omit<Department, 'id' | 'createdAt'>) => void;
   updateDepartment: (id: string, updates: Partial<Department>) => void;
   deleteDepartment: (id: string) => void;
-  addPersonnel: (person: Omit<Personnel, 'id' | 'createdAt'>) => void;
+  
+  addPerson: (person: Omit<Person, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updatePerson: (id: string, updates: Partial<Person>) => void;
+  deletePerson: (id: string) => void;
+  getPeopleByTenant: (tenantId: string) => Person[];
+  importPeople: (people: Omit<Person, 'id' | 'createdAt' | 'updatedAt'>[]) => void;
+  
+  addPosition: (position: Omit<Position, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updatePosition: (id: string, updates: Partial<Position>) => void;
+  deletePosition: (id: string) => void;
+  getPositionsByTenant: (tenantId: string) => Position[];
+  importPositions: (positions: Omit<Position, 'id' | 'createdAt' | 'updatedAt'>[]) => void;
+  
+  addPersonnel: (person: Omit<Personnel, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updatePersonnel: (id: string, updates: Partial<Personnel>) => void;
   deletePersonnel: (id: string) => void;
   
@@ -124,63 +139,157 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }
   ],
 
-  personnel: [
+  people: [
     {
-      id: '3',
+      id: 'person-1',
       tenantId: 'tenant-1',
-      organizationId: 'org-1',
-      departmentId: 'dept-1-1',
-      fullName: 'Иванов Иван Иванович',
-      position: 'Главный инженер по безопасности',
+      lastName: 'Иванов',
+      firstName: 'Иван',
+      middleName: 'Иванович',
       email: 'auditor@company.ru',
       phone: '+7 (999) 123-45-67',
+      status: 'active',
+      createdAt: new Date(Date.now() - 300 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 300 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'person-2',
+      tenantId: 'tenant-1',
+      lastName: 'Петров',
+      firstName: 'Петр',
+      middleName: 'Петрович',
+      email: 'manager@company.ru',
+      phone: '+7 (999) 234-56-78',
+      status: 'active',
+      createdAt: new Date(Date.now() - 250 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 250 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'person-3',
+      tenantId: 'tenant-1',
+      lastName: 'Сидоров',
+      firstName: 'Сидор',
+      middleName: 'Сидорович',
+      email: 'director@company.ru',
+      phone: '+7 (999) 345-67-89',
+      status: 'active',
+      createdAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'person-4',
+      tenantId: 'tenant-1',
+      lastName: 'Соколова',
+      firstName: 'Анна',
+      middleName: 'Петровна',
+      email: 'sokolova@company.ru',
+      phone: '+7 (999) 456-78-90',
+      status: 'active',
+      createdAt: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ],
+
+  positions: [
+    {
+      id: 'pos-1',
+      tenantId: 'tenant-1',
+      name: 'Главный инженер по безопасности',
+      code: 'ГИБ',
+      category: 'management',
+      description: 'Руководитель службы безопасности предприятия',
+      status: 'active',
+      createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'pos-2',
+      tenantId: 'tenant-1',
+      name: 'Менеджер по охране труда',
+      code: 'МОТ',
+      category: 'specialist',
+      description: 'Специалист по охране труда и промышленной безопасности',
+      status: 'active',
+      createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'pos-3',
+      tenantId: 'tenant-1',
+      name: 'Технический директор',
+      code: 'ТД',
+      category: 'management',
+      description: 'Руководитель технической службы',
+      status: 'active',
+      createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'pos-4',
+      tenantId: 'tenant-1',
+      name: 'Инженер-механик',
+      code: 'ИМ',
+      category: 'specialist',
+      description: 'Специалист по эксплуатации механического оборудования',
+      status: 'active',
+      createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ],
+
+  personnel: [
+    {
+      id: 'personnel-1',
+      tenantId: 'tenant-1',
+      personId: 'person-1',
+      positionId: 'pos-1',
+      organizationId: 'org-1',
+      departmentId: 'dept-1-1',
       role: 'Auditor',
       status: 'active',
       hireDate: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString()
+      createdAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
-      id: '4',
+      id: 'personnel-2',
       tenantId: 'tenant-1',
+      personId: 'person-2',
+      positionId: 'pos-2',
       organizationId: 'org-1',
       departmentId: 'dept-1-1',
-      fullName: 'Петров Петр Петрович',
-      position: 'Менеджер по охране труда',
-      email: 'manager@company.ru',
-      phone: '+7 (999) 234-56-78',
       role: 'Manager',
       status: 'active',
       hireDate: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString()
+      createdAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
-      id: '5',
+      id: 'personnel-3',
       tenantId: 'tenant-1',
+      personId: 'person-3',
+      positionId: 'pos-3',
       organizationId: 'org-2',
       departmentId: 'dept-2-1',
-      fullName: 'Сидоров Сидор Сидорович',
-      position: 'Технический директор',
-      email: 'director@company.ru',
-      phone: '+7 (999) 345-67-89',
       role: 'Director',
       status: 'active',
       hireDate: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString()
+      createdAt: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
-      id: 'person-6',
+      id: 'personnel-4',
       tenantId: 'tenant-1',
+      personId: 'person-4',
+      positionId: 'pos-4',
       organizationId: 'org-1',
       departmentId: 'dept-1-2',
-      fullName: 'Соколова Анна Петровна',
-      position: 'Инженер-механик',
-      email: 'sokolova@company.ru',
-      phone: '+7 (999) 456-78-90',
       role: 'Manager',
       status: 'dismissed',
       hireDate: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString(),
       dismissalDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString()
+      createdAt: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
     }
   ],
 
@@ -243,11 +352,90 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }));
   },
 
+  addPerson: (person) => {
+    const newPerson: Person = {
+      ...person,
+      id: `person-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    set((state) => ({ people: [...state.people, newPerson] }));
+  },
+
+  updatePerson: (id, updates) => {
+    set((state) => ({
+      people: state.people.map((person) =>
+        person.id === id ? { ...person, ...updates, updatedAt: new Date().toISOString() } : person
+      )
+    }));
+  },
+
+  deletePerson: (id) => {
+    set((state) => ({
+      people: state.people.filter((person) => person.id !== id),
+      personnel: state.personnel.filter((p) => p.personId !== id)
+    }));
+  },
+
+  getPeopleByTenant: (tenantId) => {
+    return get().people.filter((person) => person.tenantId === tenantId);
+  },
+
+  importPeople: (people) => {
+    const newPeople = people.map((person, index) => ({
+      ...person,
+      id: `person-import-${Date.now()}-${index}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }));
+    set((state) => ({ people: [...state.people, ...newPeople] }));
+  },
+
+  addPosition: (position) => {
+    const newPosition: Position = {
+      ...position,
+      id: `pos-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    set((state) => ({ positions: [...state.positions, newPosition] }));
+  },
+
+  updatePosition: (id, updates) => {
+    set((state) => ({
+      positions: state.positions.map((position) =>
+        position.id === id ? { ...position, ...updates, updatedAt: new Date().toISOString() } : position
+      )
+    }));
+  },
+
+  deletePosition: (id) => {
+    set((state) => ({
+      positions: state.positions.filter((position) => position.id !== id),
+      personnel: state.personnel.filter((p) => p.positionId !== id)
+    }));
+  },
+
+  getPositionsByTenant: (tenantId) => {
+    return get().positions.filter((position) => position.tenantId === tenantId);
+  },
+
+  importPositions: (positions) => {
+    const newPositions = positions.map((position, index) => ({
+      ...position,
+      id: `pos-import-${Date.now()}-${index}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }));
+    set((state) => ({ positions: [...state.positions, ...newPositions] }));
+  },
+
   addPersonnel: (person) => {
     const newPerson: Personnel = {
       ...person,
-      id: `person-${Date.now()}`,
-      createdAt: new Date().toISOString()
+      id: `personnel-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     set((state) => ({ personnel: [...state.personnel, newPerson] }));
   },
@@ -255,7 +443,7 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
   updatePersonnel: (id, updates) => {
     set((state) => ({
       personnel: state.personnel.map((person) =>
-        person.id === id ? { ...person, ...updates } : person
+        person.id === id ? { ...person, ...updates, updatedAt: new Date().toISOString() } : person
       )
     }));
   },

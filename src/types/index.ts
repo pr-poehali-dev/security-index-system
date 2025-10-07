@@ -93,20 +93,50 @@ export interface Department {
   createdAt: string;
 }
 
+export interface Person {
+  id: string;
+  tenantId: string;
+  lastName: string;
+  firstName: string;
+  middleName?: string;
+  birthDate?: string;
+  passportSeries?: string;
+  passportNumber?: string;
+  snils?: string;
+  inn?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Position {
+  id: string;
+  tenantId: string;
+  name: string;
+  code?: string;
+  category?: 'management' | 'specialist' | 'worker' | 'other';
+  description?: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Personnel {
   id: string;
   tenantId: string;
+  personId: string;
+  positionId: string;
   organizationId?: string;
   departmentId?: string;
-  fullName: string;
-  position: string;
-  email?: string;
-  phone?: string;
   role: 'Auditor' | 'Manager' | 'Director';
   status: 'active' | 'dismissed';
   hireDate?: string;
   dismissalDate?: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface Employee {
