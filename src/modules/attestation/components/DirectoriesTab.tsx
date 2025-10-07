@@ -7,8 +7,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useAttestationStore } from '@/stores/attestationStore';
-import { CERTIFICATION_CATEGORIES } from '@/lib/constants';
+import { 
+  CERTIFICATION_CATEGORIES, 
+  CERTIFICATION_AREAS_BY_CATEGORY,
+  INDUSTRIAL_SAFETY_AREAS,
+  ENERGY_SAFETY_AREAS,
+  LABOR_SAFETY_AREAS,
+  ECOLOGY_AREAS
+} from '@/lib/constants';
 import { Badge } from '@/components/ui/badge';
+import { 
+  Collapsible, 
+  CollapsibleContent, 
+  CollapsibleTrigger 
+} from '@/components/ui/collapsible';
 
 export default function DirectoriesTab() {
   const user = useAuthStore((state) => state.user);
@@ -55,20 +67,14 @@ export default function DirectoriesTab() {
         <TabsContent value="cert-types">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Виды аттестаций и допусков</CardTitle>
-                <Button className="gap-2">
-                  <Icon name="Plus" size={18} />
-                  Добавить вид
-                </Button>
-              </div>
+              <CardTitle>Справочник видов аттестаций и допусков</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="mb-6">
                 <div className="relative">
                   <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    placeholder="Поиск по названию..."
+                    placeholder="Поиск по коду или названию области..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
@@ -76,39 +82,94 @@ export default function DirectoriesTab() {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                {certTypes.map((cert) => (
-                  <Card key={cert.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold">{cert.name}</h3>
-                            <Badge variant="outline">
-                              {CERTIFICATION_CATEGORIES[cert.category]}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-2">{cert.description}</p>
-                          <div className="flex items-center gap-4 text-sm">
-                            <span className="flex items-center gap-1 text-muted-foreground">
-                              <Icon name="Clock" size={14} />
-                              Срок действия: {cert.validityPeriod} мес.
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
-                            <Icon name="Edit" size={16} />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Icon name="Trash2" size={16} />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+              <div className="space-y-4">
+                {CERTIFICATION_CATEGORIES.map((category) => {
+                  const areas = CERTIFICATION_AREAS_BY_CATEGORY[category.value as keyof typeof CERTIFICATION_AREAS_BY_CATEGORY];
+                  const filteredAreas = areas.filter(area => 
+                    area.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    area.name.toLowerCase().includes(searchQuery.toLowerCase())
+                  );
+                  
+                  if (searchQuery && filteredAreas.length === 0) return null;
+
+                  return (
+                    <Collapsible key={category.value} defaultOpen={!searchQuery || filteredAreas.length > 0}>
+                      <Card>
+                        <CollapsibleTrigger asChild>
+                          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+                                  <Icon name="Award" size={20} className="text-primary" />
+                                </div>
+                                <div>
+                                  <CardTitle className="text-lg">{category.label}</CardTitle>
+                                  <p className="text-sm text-muted-foreground mt-1">
+                                    {filteredAreas.length} {filteredAreas.length === 1 ? 'область' : filteredAreas.length < 5 ? 'области' : 'областей'}
+                                  </p>
+                                </div>
+                              </div>
+                              <Badge variant="outline" className="text-base px-3 py-1">
+                                {category.code}
+                              </Badge>
+                            </div>
+                          </CardHeader>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <CardContent className="pt-0">
+                            <div className="space-y-2">
+                              {filteredAreas.map((area) => (
+                                <div 
+                                  key={area.code}
+                                  className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                                >
+                                  <div className="flex items-center justify-center min-w-[60px] h-9 px-3 rounded-md bg-primary/10 text-primary font-mono text-sm font-semibold">
+                                    {area.code}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium leading-relaxed">{area.name}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </CollapsibleContent>
+                      </Card>
+                    </Collapsible>
+                  );
+                })}
               </div>
+
+              {searchQuery && CERTIFICATION_CATEGORIES.every(category => {
+                const areas = CERTIFICATION_AREAS_BY_CATEGORY[category.value as keyof typeof CERTIFICATION_AREAS_BY_CATEGORY];
+                return areas.filter(area => 
+                  area.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  area.name.toLowerCase().includes(searchQuery.toLowerCase())
+                ).length === 0;
+              }) && (
+                <div className="text-center py-12">
+                  <Icon name="Search" size={48} className="mx-auto text-muted-foreground mb-4" />
+                  <p className="text-lg font-medium mb-2">Ничего не найдено</p>
+                  <p className="text-sm text-muted-foreground">Измените параметры поиска</p>
+                </div>
+              )}
+
+              <Card className="mt-6 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <Icon name="Info" size={20} className="text-blue-600 dark:text-blue-400 mt-0.5" />
+                    <div>
+                      <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                        О справочнике
+                      </h4>
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                        Справочник содержит все области аттестации по промышленной безопасности, энергобезопасности, 
+                        охране труда и экологии согласно требованиям Ростехнадзора и законодательства РФ.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </CardContent>
           </Card>
         </TabsContent>
