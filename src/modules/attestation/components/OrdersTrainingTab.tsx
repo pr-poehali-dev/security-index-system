@@ -142,6 +142,10 @@ const mockTrainings: Training[] = [
 
 export default function OrdersTrainingTab() {
   const { toast } = useToast();
+  const user = useAuthStore((state) => state.user);
+  const { orders, trainings, getOrdersByTenant, getTrainingsByTenant } = useAttestationStore();
+  const { personnel, people, positions, getExternalOrganizationsByType } = useSettingsStore();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('all');
   const [orderTypeFilter, setOrderTypeFilter] = useState<string>('all');
@@ -151,19 +155,22 @@ export default function OrdersTrainingTab() {
   const [showCreateTrainingDialog, setShowCreateTrainingDialog] = useState(false);
   const [trainingViewMode, setTrainingViewMode] = useState<'cards' | 'table'>('cards');
 
-  const filteredOrders = mockOrders.filter(order => {
+  const tenantOrders = user?.tenantId ? getOrdersByTenant(user.tenantId) : [];
+  const tenantTrainings = user?.tenantId ? getTrainingsByTenant(user.tenantId) : [];
+  const trainingOrgs = user?.tenantId ? getExternalOrganizationsByType(user.tenantId, 'training_center') : [];
+
+  const filteredOrders = tenantOrders.filter(order => {
     const matchesSearch = order.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          order.number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          order.employees.some(emp => emp.toLowerCase().includes(searchQuery.toLowerCase()));
+                          order.number.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = orderStatusFilter === 'all' || order.status === orderStatusFilter;
     const matchesType = orderTypeFilter === 'all' || order.type === orderTypeFilter;
     return matchesSearch && matchesStatus && matchesType;
   });
 
-  const filteredTrainings = mockTrainings.filter(training => {
+  const filteredTrainings = tenantTrainings.filter(training => {
+    const org = trainingOrgs.find(o => o.id === training.organizationId);
     const matchesSearch = training.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          training.organization.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          training.employees.some(emp => emp.toLowerCase().includes(searchQuery.toLowerCase()));
+                          (org?.name || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = trainingStatusFilter === 'all' || training.status === trainingStatusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -236,7 +243,7 @@ export default function OrdersTrainingTab() {
   };
 
   const handleChangeOrderStatus = (orderId: string, newStatus: string) => {
-    const order = mockOrders.find(o => o.id === orderId);
+    const order = orders.find(o => o.id === orderId);
     toast({
       title: "Статус изменен",
       description: `Приказ №${order?.number}: ${getStatusLabel(newStatus)}`,
@@ -244,7 +251,7 @@ export default function OrdersTrainingTab() {
   };
 
   const handleChangeTrainingStatus = (trainingId: string, newStatus: string) => {
-    const training = mockTrainings.find(t => t.id === trainingId);
+    const training = trainings.find(t => t.id === trainingId);
     toast({
       title: "Статус изменен",
       description: `Обучение "${training?.title}": ${getStatusLabel(newStatus)}`,
@@ -252,18 +259,18 @@ export default function OrdersTrainingTab() {
   };
 
   const handleSendToSDO = (orderId: string) => {
-    const order = mockOrders.find(o => o.id === orderId);
+    const order = orders.find(o => o.id === orderId);
     toast({
       title: "Отправка в СДО",
-      description: `${order?.employees.length} сотрудников направлены в систему дистанционного обучения`,
+      description: `${order?.employeeIds.length} сотрудников направлены в систему дистанционного обучения`,
     });
   };
 
   const handleSendToTrainingCenter = (orderId: string) => {
-    const order = mockOrders.find(o => o.id === orderId);
+    const order = orders.find(o => o.id === orderId);
     toast({
       title: "Направление в учебный центр",
-      description: `${order?.employees.length} сотрудников направлены в учебный центр`,
+      description: `${order?.employeeIds.length} сотрудников направлены в учебный центр`,
     });
   };
 
@@ -377,8 +384,7 @@ export default function OrdersTrainingTab() {
       'Тип': getOrderTypeLabel(order.type),
       'Название': order.title,
       'Статус': getStatusLabel(order.status),
-      'Количество сотрудников': order.employees.length,
-      'Сотрудники': order.employees.join(', '),
+      'Количество сотрудников': order.employeeIds.length,
       'Создал': order.createdBy,
       'Описание': order.description || ''
     }));
@@ -408,21 +414,22 @@ export default function OrdersTrainingTab() {
   const handleExportTrainingsToExcel = async () => {
     const { utils, writeFile } = await import('xlsx');
     
-    const exportData = filteredTrainings.map(training => ({
-      'Название': training.title,
-      'Тип': training.type,
-      'Организация': training.organization,
-      'Дата начала': new Date(training.startDate).toLocaleDateString('ru'),
-      'Дата окончания': new Date(training.endDate).toLocaleDateString('ru'),
-      'Длительность (дней)': Math.ceil((new Date(training.endDate).getTime() - new Date(training.startDate).getTime()) / (1000 * 60 * 60 * 24)),
-      'Статус': getStatusLabel(training.status),
-      'Количество сотрудников': training.employees.length,
-      'Сотрудники': training.employees.join(', '),
-      'Стоимость': training.cost,
-      'Стоимость на человека': Math.round(training.cost / training.employees.length),
-      'Программа': training.program || '',
-      'Документы': training.documents?.join(', ') || ''
-    }));
+    const exportData = filteredTrainings.map(training => {
+      const org = trainingOrgs.find(o => o.id === training.organizationId);
+      return {
+        'Название': training.title,
+        'Тип': training.type,
+        'Организация': org?.name || '',
+        'Дата начала': new Date(training.startDate).toLocaleDateString('ru'),
+        'Дата окончания': new Date(training.endDate).toLocaleDateString('ru'),
+        'Длительность (дней)': Math.ceil((new Date(training.endDate).getTime() - new Date(training.startDate).getTime()) / (1000 * 60 * 60 * 24)),
+        'Статус': getStatusLabel(training.status),
+        'Количество сотрудников': training.employeeIds.length,
+        'Стоимость': training.cost,
+        'Стоимость на человека': Math.round(training.cost / training.employeeIds.length),
+        'Программа': training.program || ''
+      };
+    });
 
     const ws = utils.json_to_sheet(exportData);
     
@@ -684,7 +691,7 @@ export default function OrdersTrainingTab() {
                               </span>
                               <span className="flex items-center gap-1">
                                 <Icon name="Users" size={14} />
-                                {order.employees.length} чел.
+                                {order.employeeIds.length} чел.
                               </span>
                             </div>
                           </div>
@@ -698,8 +705,6 @@ export default function OrdersTrainingTab() {
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="draft">Черновик</SelectItem>
-                                <SelectItem value="prepared">Подготовлен</SelectItem>
-                                <SelectItem value="approved">Согласован</SelectItem>
                                 <SelectItem value="active">Активен</SelectItem>
                                 <SelectItem value="completed">Исполнен</SelectItem>
                                 <SelectItem value="cancelled">Отменен</SelectItem>
@@ -710,10 +715,8 @@ export default function OrdersTrainingTab() {
 
                         <div className="flex items-center justify-between pt-3 border-t">
                           <div className="flex items-center gap-2 text-sm">
-                            <span className="text-muted-foreground">Сотрудники:</span>
-                            <span className="font-medium">{order.employees.slice(0, 2).join(', ')}
-                              {order.employees.length > 2 && ` и ещё ${order.employees.length - 2}`}
-                            </span>
+                            <span className="text-muted-foreground">Сотрудников:</span>
+                            <span className="font-medium">{order.employeeIds.length}</span>
                           </div>
                           <div className="flex items-center gap-2 flex-wrap">
                             {getOrderActions(order)}
@@ -963,8 +966,9 @@ export default function OrdersTrainingTab() {
               {trainingViewMode === 'cards' ? (
                 <div className="space-y-3">
                   {filteredTrainings.map((training) => {
+                    const org = trainingOrgs.find(o => o.id === training.organizationId);
                     const duration = Math.ceil((new Date(training.endDate).getTime() - new Date(training.startDate).getTime()) / (1000 * 60 * 60 * 24));
-                    const costPerPerson = Math.round(training.cost / training.employees.length);
+                    const costPerPerson = Math.round(training.cost / training.employeeIds.length);
                     
                     return (
                       <Card key={training.id} className="hover:shadow-md transition-shadow">
@@ -984,7 +988,7 @@ export default function OrdersTrainingTab() {
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
                                 <span className="flex items-center gap-1">
                                   <Icon name="Building2" size={14} />
-                                  {training.organization}
+                                  {org?.name || '—'}
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <Icon name="Wallet" size={14} />
@@ -1000,14 +1004,8 @@ export default function OrdersTrainingTab() {
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <Icon name="Users" size={14} />
-                                  {training.employees.length} чел.
+                                  {training.employeeIds.length} чел.
                                 </span>
-                                {training.documents && training.documents.length > 0 && (
-                                  <span className="flex items-center gap-1">
-                                    <Icon name="Paperclip" size={14} />
-                                    {training.documents.length} документов
-                                  </span>
-                                )}
                               </div>
                             </div>
                             <Badge className={getStatusColor(training.status)}>
@@ -1017,10 +1015,8 @@ export default function OrdersTrainingTab() {
 
                           <div className="flex items-center justify-between pt-3 border-t">
                             <div className="flex items-center gap-2 text-sm">
-                              <span className="text-muted-foreground">Сотрудники:</span>
-                              <span className="font-medium">{training.employees.slice(0, 2).join(', ')}
-                                {training.employees.length > 2 && ` и ещё ${training.employees.length - 2}`}
-                              </span>
+                              <span className="text-muted-foreground">Сотрудников:</span>
+                              <span className="font-medium">{training.employeeIds.length}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <Button variant="ghost" size="sm" className="gap-2" onClick={() => handleEditTraining(training.id)}>

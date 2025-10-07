@@ -22,6 +22,9 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthStore } from '@/stores/authStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 
 interface CreateOrderDialogProps {
   open: boolean;
@@ -38,16 +41,23 @@ const orderTypes = [
   { value: 'rostechnadzor', label: 'Ростехнадзор', icon: 'Shield', color: 'text-emerald-600 bg-emerald-100' },
 ];
 
-const mockEmployees = [
-  { id: '1', name: 'Иванов Иван Иванович', position: 'Инженер', department: 'Техническая служба' },
-  { id: '2', name: 'Петрова Анна Сергеевна', position: 'Главный специалист', department: 'Отдел ОТ и ПБ' },
-  { id: '3', name: 'Сидоров Константин Петрович', position: 'Мастер участка', department: 'Производство' },
-  { id: '4', name: 'Морозова Елена Петровна', position: 'Электромонтер', department: 'Энергослужба' },
-  { id: '5', name: 'Кузнецов Александр Викторович', position: 'Инженер по охране труда', department: 'Отдел ОТ и ПБ' },
-];
+
 
 export default function CreateOrderDialog({ open, onOpenChange }: CreateOrderDialogProps) {
   const { toast } = useToast();
+  const user = useAuthStore((state) => state.user);
+  const { personnel, people, positions, getPersonnelByTenant } = useSettingsStore();
+  
+  const tenantPersonnel = user?.tenantId ? getPersonnelByTenant(user.tenantId) : [];
+  const employees = tenantPersonnel.map(p => {
+    const info = getPersonnelFullInfo(p, people, positions);
+    return {
+      id: p.id,
+      name: info.fullName,
+      position: info.position,
+      department: '—'
+    };
+  });
   const [step, setStep] = useState(1);
   const [orderType, setOrderType] = useState('');
   const [orderNumber, setOrderNumber] = useState('');
@@ -59,7 +69,7 @@ export default function CreateOrderDialog({ open, onOpenChange }: CreateOrderDia
 
   const selectedType = orderTypes.find(t => t.value === orderType);
 
-  const filteredEmployees = mockEmployees.filter(emp =>
+  const filteredEmployees = employees.filter(emp =>
     emp.name.toLowerCase().includes(searchEmployee.toLowerCase()) ||
     emp.position.toLowerCase().includes(searchEmployee.toLowerCase()) ||
     emp.department.toLowerCase().includes(searchEmployee.toLowerCase())

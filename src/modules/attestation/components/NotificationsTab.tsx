@@ -14,31 +14,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthStore } from '@/stores/authStore';
+import { useAttestationStore } from '@/stores/attestationStore';
 
-interface NotificationRule {
-  id: string;
-  name: string;
-  enabled: boolean;
-  daysBeforeExpiry: number;
-  notifyEmployee: boolean;
-  notifyManager: boolean;
-  notifyHR: boolean;
-  emailTemplate: string;
-  frequency: 'once' | 'daily' | 'weekly';
-}
-
-interface NotificationLog {
-  id: string;
-  date: string;
-  type: string;
-  recipient: string;
-  employee: string;
-  certification: string;
-  expiryDate: string;
-  status: 'sent' | 'failed' | 'pending';
-}
-
-const mockRules: NotificationRule[] = [
+const OLD_mockRules = [
   {
     id: '1',
     name: 'За 90 дней до истечения',
@@ -108,16 +87,24 @@ const mockLogs: NotificationLog[] = [
 ];
 
 export default function NotificationsTab() {
-  const [rules, setRules] = useState<NotificationRule[]>(mockRules);
-  const [logs] = useState<NotificationLog[]>(mockLogs);
-  const [editingRule, setEditingRule] = useState<NotificationRule | null>(null);
+  const user = useAuthStore((state) => state.user);
+  const { 
+    getNotificationRulesByTenant, 
+    getNotificationLogsByTenant,
+    updateNotificationRule 
+  } = useAttestationStore();
+  
+  const rules = user?.tenantId ? getNotificationRulesByTenant(user.tenantId) : [];
+  const logs = user?.tenantId ? getNotificationLogsByTenant(user.tenantId) : [];
+  const [editingRule, setEditingRule] = useState<any>(null);
   const { toast } = useToast();
 
   const toggleRule = (ruleId: string) => {
-    setRules(rules.map(rule => 
-      rule.id === ruleId ? { ...rule, enabled: !rule.enabled } : rule
-    ));
-    toast({ title: 'Правило обновлено' });
+    const rule = rules.find(r => r.id === ruleId);
+    if (rule) {
+      updateNotificationRule(ruleId, { enabled: !rule.enabled });
+      toast({ title: 'Правило обновлено' });
+    }
   };
 
   const getStatusColor = (status: string) => {
