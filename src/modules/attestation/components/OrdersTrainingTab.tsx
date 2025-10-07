@@ -19,6 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useToast } from '@/hooks/use-toast';
 import CreateOrderDialog from './CreateOrderDialog';
 import CreateTrainingDialog from './CreateTrainingDialog';
 
@@ -162,6 +163,7 @@ const mockTrainings: Training[] = [
 ];
 
 export default function OrdersTrainingTab() {
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('all');
   const [orderTypeFilter, setOrderTypeFilter] = useState<string>('all');
@@ -256,11 +258,136 @@ export default function OrdersTrainingTab() {
   };
 
   const handleChangeOrderStatus = (orderId: string, newStatus: string) => {
-    console.log(`Изменение статуса приказа ${orderId} на ${newStatus}`);
+    const order = mockOrders.find(o => o.id === orderId);
+    toast({
+      title: "Статус изменен",
+      description: `Приказ №${order?.number}: ${getStatusLabel(newStatus)}`,
+    });
   };
 
   const handleChangeTrainingStatus = (trainingId: string, newStatus: string) => {
-    console.log(`Изменение статуса обучения ${trainingId} на ${newStatus}`);
+    const training = mockTrainings.find(t => t.id === trainingId);
+    toast({
+      title: "Статус изменен",
+      description: `Обучение "${training?.title}": ${getStatusLabel(newStatus)}`,
+    });
+  };
+
+  const handleSendToSDO = (orderId: string) => {
+    const order = mockOrders.find(o => o.id === orderId);
+    toast({
+      title: "Отправка в СДО",
+      description: `${order?.employees.length} сотрудников направлены в систему дистанционного обучения`,
+    });
+  };
+
+  const handleSendToTrainingCenter = (orderId: string) => {
+    const order = mockOrders.find(o => o.id === orderId);
+    toast({
+      title: "Направление в учебный центр",
+      description: `${order?.employees.length} сотрудников направлены в учебный центр`,
+    });
+  };
+
+  const handleScheduleAttestation = (orderId: string) => {
+    toast({
+      title: "Назначение даты аттестации",
+      description: "Откроется форма выбора даты и времени проведения аттестации",
+    });
+  };
+
+  const handleRegisterRostechnadzor = (orderId: string) => {
+    toast({
+      title: "Регистрация в Ростехнадзоре",
+      description: "Данные подготовлены для отправки в систему Ростехнадзора",
+    });
+  };
+
+  const handleViewOrder = (orderId: string) => {
+    const order = mockOrders.find(o => o.id === orderId);
+    toast({
+      title: "Просмотр приказа",
+      description: `Приказ №${order?.number} - ${order?.title}`,
+    });
+  };
+
+  const handleEditOrder = (orderId: string) => {
+    toast({
+      title: "Редактирование приказа",
+      description: "Откроется форма редактирования приказа",
+    });
+  };
+
+  const handleDownloadOrderPDF = (orderId: string) => {
+    const order = mockOrders.find(o => o.id === orderId);
+    toast({
+      title: "Загрузка PDF",
+      description: `Приказ №${order?.number} будет загружен в формате PDF`,
+    });
+  };
+
+  const handlePrintOrder = (orderId: string) => {
+    toast({
+      title: "Печать приказа",
+      description: "Откроется окно печати",
+    });
+  };
+
+  const handleDeleteOrder = (orderId: string) => {
+    const order = mockOrders.find(o => o.id === orderId);
+    toast({
+      title: "Удаление приказа",
+      description: `Приказ №${order?.number} будет удален`,
+      variant: "destructive",
+    });
+  };
+
+  const handleViewTraining = (trainingId: string) => {
+    const training = mockTrainings.find(t => t.id === trainingId);
+    toast({
+      title: "Просмотр обучения",
+      description: training?.title,
+    });
+  };
+
+  const handleEditTraining = (trainingId: string) => {
+    toast({
+      title: "Редактирование обучения",
+      description: "Откроется форма редактирования",
+    });
+  };
+
+  const handleViewDocuments = (trainingId: string) => {
+    const training = mockTrainings.find(t => t.id === trainingId);
+    toast({
+      title: "Документы обучения",
+      description: `Документов: ${training?.documents?.length || 0}`,
+    });
+  };
+
+  const handleViewParticipants = (trainingId: string) => {
+    const training = mockTrainings.find(t => t.id === trainingId);
+    toast({
+      title: "Список участников",
+      description: `Участников: ${training?.employees.length}`,
+    });
+  };
+
+  const handleDuplicateTraining = (trainingId: string) => {
+    const training = mockTrainings.find(t => t.id === trainingId);
+    toast({
+      title: "Дублирование обучения",
+      description: `Создана копия: ${training?.title}`,
+    });
+  };
+
+  const handleDeleteTraining = (trainingId: string) => {
+    const training = mockTrainings.find(t => t.id === trainingId);
+    toast({
+      title: "Удаление обучения",
+      description: `${training?.title} будет удалено`,
+      variant: "destructive",
+    });
   };
 
   const handleExportOrdersToExcel = async () => {
@@ -359,7 +486,7 @@ export default function OrdersTrainingTab() {
 
     if (order.type === 'sdo') {
       actions.push(
-        <Button key="send-sdo" variant="outline" size="sm" className="gap-1">
+        <Button key="send-sdo" variant="outline" size="sm" className="gap-1" onClick={() => handleSendToSDO(order.id)}>
           <Icon name="Send" size={14} />
           Отправить в СДО
         </Button>
@@ -368,7 +495,7 @@ export default function OrdersTrainingTab() {
 
     if (order.type === 'training_center') {
       actions.push(
-        <Button key="send-tc" variant="outline" size="sm" className="gap-1">
+        <Button key="send-tc" variant="outline" size="sm" className="gap-1" onClick={() => handleSendToTrainingCenter(order.id)}>
           <Icon name="Send" size={14} />
           Отправить в УЦ
         </Button>
@@ -377,7 +504,7 @@ export default function OrdersTrainingTab() {
 
     if (order.type === 'internal_attestation') {
       actions.push(
-        <Button key="schedule" variant="outline" size="sm" className="gap-1">
+        <Button key="schedule" variant="outline" size="sm" className="gap-1" onClick={() => handleScheduleAttestation(order.id)}>
           <Icon name="Calendar" size={14} />
           Назначить дату
         </Button>
@@ -386,7 +513,7 @@ export default function OrdersTrainingTab() {
 
     if (order.type === 'rostechnadzor') {
       actions.push(
-        <Button key="register" variant="outline" size="sm" className="gap-1">
+        <Button key="register" variant="outline" size="sm" className="gap-1" onClick={() => handleRegisterRostechnadzor(order.id)}>
           <Icon name="ExternalLink" size={14} />
           Зарегистрировать
         </Button>
@@ -619,24 +746,24 @@ export default function OrdersTrainingTab() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleViewOrder(order.id)}>
                                   <Icon name="Eye" size={14} className="mr-2" />
                                   Просмотр
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleEditOrder(order.id)}>
                                   <Icon name="Edit" size={14} className="mr-2" />
                                   Редактировать
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDownloadOrderPDF(order.id)}>
                                   <Icon name="Download" size={14} className="mr-2" />
                                   Скачать PDF
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handlePrintOrder(order.id)}>
                                   <Icon name="Printer" size={14} className="mr-2" />
                                   Печать
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-red-600">
+                                <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteOrder(order.id)}>
                                   <Icon name="Trash2" size={14} className="mr-2" />
                                   Удалить
                                 </DropdownMenuItem>
@@ -700,10 +827,10 @@ export default function OrdersTrainingTab() {
                           </td>
                           <td className="py-3">
                             <div className="flex items-center gap-1">
-                              <Button variant="ghost" size="sm" title="Просмотр">
+                              <Button variant="ghost" size="sm" title="Просмотр" onClick={() => handleViewOrder(order.id)}>
                                 <Icon name="Eye" size={16} />
                               </Button>
-                              <Button variant="ghost" size="sm" title="Редактировать">
+                              <Button variant="ghost" size="sm" title="Редактировать" onClick={() => handleEditOrder(order.id)}>
                                 <Icon name="Edit" size={16} />
                               </Button>
                               <DropdownMenu>
@@ -713,16 +840,16 @@ export default function OrdersTrainingTab() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleDownloadOrderPDF(order.id)}>
                                     <Icon name="Download" size={14} className="mr-2" />
                                     Скачать PDF
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handlePrintOrder(order.id)}>
                                     <Icon name="Printer" size={14} className="mr-2" />
                                     Печать
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-red-600">
+                                  <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteOrder(order.id)}>
                                     <Icon name="Trash2" size={14} className="mr-2" />
                                     Удалить
                                   </DropdownMenuItem>
@@ -918,7 +1045,7 @@ export default function OrdersTrainingTab() {
                               </span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm" className="gap-2">
+                              <Button variant="ghost" size="sm" className="gap-2" onClick={() => handleEditTraining(training.id)}>
                                 <Icon name="Edit" size={14} />
                                 Изменить
                               </Button>
@@ -929,24 +1056,24 @@ export default function OrdersTrainingTab() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleViewTraining(training.id)}>
                                     <Icon name="Eye" size={14} className="mr-2" />
                                     Просмотр
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleViewDocuments(training.id)}>
                                     <Icon name="FileText" size={14} className="mr-2" />
                                     Документы
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleViewParticipants(training.id)}>
                                     <Icon name="Users" size={14} className="mr-2" />
                                     Список участников
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleDuplicateTraining(training.id)}>
                                     <Icon name="Copy" size={14} className="mr-2" />
                                     Дублировать
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-red-600">
+                                  <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteTraining(training.id)}>
                                     <Icon name="Trash2" size={14} className="mr-2" />
                                     Удалить
                                   </DropdownMenuItem>
@@ -1010,10 +1137,10 @@ export default function OrdersTrainingTab() {
                             </td>
                             <td className="py-3">
                               <div className="flex items-center gap-1">
-                                <Button variant="ghost" size="sm" title="Просмотр">
+                                <Button variant="ghost" size="sm" title="Просмотр" onClick={() => handleViewTraining(training.id)}>
                                   <Icon name="Eye" size={16} />
                                 </Button>
-                                <Button variant="ghost" size="sm" title="Редактировать">
+                                <Button variant="ghost" size="sm" title="Редактировать" onClick={() => handleEditTraining(training.id)}>
                                   <Icon name="Edit" size={16} />
                                 </Button>
                                 <DropdownMenu>
@@ -1023,20 +1150,20 @@ export default function OrdersTrainingTab() {
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
-                                    <DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleViewDocuments(training.id)}>
                                       <Icon name="FileText" size={14} className="mr-2" />
                                       Документы
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleViewParticipants(training.id)}>
                                       <Icon name="Users" size={14} className="mr-2" />
                                       Список участников
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleDuplicateTraining(training.id)}>
                                       <Icon name="Copy" size={14} className="mr-2" />
                                       Дублировать
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem className="text-red-600">
+                                    <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteTraining(training.id)}>
                                       <Icon name="Trash2" size={14} className="mr-2" />
                                       Удалить
                                     </DropdownMenuItem>

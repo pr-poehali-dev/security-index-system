@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useToast } from '@/hooks/use-toast';
 
 interface CreateOrderDialogProps {
   open: boolean;
@@ -46,6 +47,7 @@ const mockEmployees = [
 ];
 
 export default function CreateOrderDialog({ open, onOpenChange }: CreateOrderDialogProps) {
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [orderType, setOrderType] = useState('');
   const [orderNumber, setOrderNumber] = useState('');
@@ -94,13 +96,10 @@ export default function CreateOrderDialog({ open, onOpenChange }: CreateOrderDia
   };
 
   const handleCreate = () => {
-    console.log('Создание приказа:', {
-      type: orderType,
-      number: orderNumber,
-      date: orderDate,
-      title: orderTitle,
-      description: orderDescription,
-      employees: Array.from(selectedEmployees)
+    const selectedType = orderTypes.find(t => t.value === orderType);
+    toast({
+      title: "Приказ создан",
+      description: `${selectedType?.label} №${orderNumber} на ${selectedEmployees.size} сотрудников`,
     });
     handleClose();
   };

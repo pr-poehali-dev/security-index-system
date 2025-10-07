@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useToast } from '@/hooks/use-toast';
 
 interface CreateTrainingDialogProps {
   open: boolean;
@@ -63,6 +64,7 @@ const mockEmployees = [
 ];
 
 export default function CreateTrainingDialog({ open, onOpenChange }: CreateTrainingDialogProps) {
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [trainingTitle, setTrainingTitle] = useState('');
   const [trainingType, setTrainingType] = useState('');
@@ -115,16 +117,10 @@ export default function CreateTrainingDialog({ open, onOpenChange }: CreateTrain
 
   const handleCreate = () => {
     const totalCost = cost ? parseFloat(cost) : 0;
-    console.log('Создание обучения:', {
-      title: trainingTitle,
-      type: trainingType,
-      category: trainingCategory,
-      program: trainingProgram,
-      organization,
-      startDate,
-      endDate,
-      cost: totalCost,
-      employees: Array.from(selectedEmployees)
+    const selectedCategory = trainingCategories.find(c => c.value === trainingCategory);
+    toast({
+      title: "Обучение запланировано",
+      description: `${trainingTitle} - ${selectedEmployees.size} сотрудников, ${totalCost.toLocaleString('ru')} ₽`,
     });
     handleClose();
   };
