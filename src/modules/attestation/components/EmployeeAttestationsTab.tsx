@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Checkbox } from '@/components/ui/checkbox';
 import ImportCertificationsDialog from './ImportCertificationsDialog';
 import AddCertificationDialog from './AddCertificationDialog';
 
@@ -170,6 +171,9 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showAddCertDialog, setShowAddCertDialog] = useState(false);
+  const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<Set<string>>(new Set());
+  const [showOrderDialog, setShowOrderDialog] = useState(false);
+  const [orderType, setOrderType] = useState<string>('');
 
   const handleVerificationToggle = (certId: string) => {
     if (!selectedEmployee) return;
@@ -190,6 +194,33 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
     
     setSelectedEmployee(updatedEmployee);
   };
+
+  const handleSelectEmployee = (employeeId: string, checked: boolean) => {
+    const newSelected = new Set(selectedEmployeeIds);
+    if (checked) {
+      newSelected.add(employeeId);
+    } else {
+      newSelected.delete(employeeId);
+    }
+    setSelectedEmployeeIds(newSelected);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedEmployeeIds(new Set(filteredEmployees.map(emp => emp.id)));
+    } else {
+      setSelectedEmployeeIds(new Set());
+    }
+  };
+
+  const handleCreateOrder = (type: string) => {
+    setOrderType(type);
+    setShowOrderDialog(true);
+  };
+
+  const selectedEmployees = useMemo(() => {
+    return mockEmployees.filter(emp => selectedEmployeeIds.has(emp.id));
+  }, [selectedEmployeeIds]);
 
   const uniqueOrganizations = Array.from(new Set(mockEmployees.map(emp => emp.organization)));
 
@@ -329,6 +360,37 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                 <Icon name="Table" size={16} />
                 Таблица
               </Button>
+              
+              {selectedEmployeeIds.size > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="secondary" className="gap-2">
+                      <Icon name="FileText" size={18} />
+                      Сформировать приказ ({selectedEmployeeIds.size})
+                      <Icon name="ChevronDown" size={14} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[320px]">
+                    <DropdownMenuItem onClick={() => handleCreateOrder('sdo')}>
+                      <Icon name="Monitor" size={16} className="mr-2" />
+                      О подготовке в СДО Интеллектуальная система
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleCreateOrder('training_center')}>
+                      <Icon name="School" size={16} className="mr-2" />
+                      О подготовке в учебный центр
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleCreateOrder('internal_attestation')}>
+                      <Icon name="ClipboardCheck" size={16} className="mr-2" />
+                      О аттестации в ЕПТ организации
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleCreateOrder('rostechnadzor')}>
+                      <Icon name="Building2" size={16} className="mr-2" />
+                      О направлении на аттестацию в Ростехнадзор
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+              
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button className="gap-2">
@@ -431,17 +493,49 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
             </div>
           </div>
 
+          {selectedEmployeeIds.size > 0 && (
+            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={selectedEmployeeIds.size === filteredEmployees.length}
+                    onCheckedChange={handleSelectAll}
+                  />
+                  <span className="text-sm font-medium">
+                    Выбрано сотрудников: {selectedEmployeeIds.size}
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedEmployeeIds(new Set())}
+                  className="gap-2"
+                >
+                  <Icon name="X" size={14} />
+                  Отменить выбор
+                </Button>
+              </div>
+            </div>
+          )}
+
           {viewMode === 'cards' ? (
             <div className="space-y-4">
               {filteredEmployees.map((emp) => {
                 const status = getEmployeeStatus(emp);
+                const isSelected = selectedEmployeeIds.has(emp.id);
                 return (
-                  <Card key={emp.id} className="hover:shadow-md transition-shadow">
+                  <Card key={emp.id} className={`hover:shadow-md transition-all ${isSelected ? 'ring-2 ring-blue-500 shadow-md' : ''}`}>
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-lg">{emp.name}</h3>
+                        <div className="flex items-start gap-3 flex-1">
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={(checked) => handleSelectEmployee(emp.id, checked as boolean)}
+                            className="mt-1"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-semibold text-lg">{emp.name}</h3>
                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
                               <Icon name={getStatusIcon(status) as any} size={12} className="inline mr-1" />
                               {getStatusLabel(status)}
@@ -455,6 +549,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                           <p className="text-sm text-muted-foreground mt-1">
                             Аттестаций: {emp.certifications.length}
                           </p>
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <Button 
@@ -513,6 +608,12 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
               <table className="w-full">
                 <thead className="border-b">
                   <tr className="text-left">
+                    <th className="pb-3 font-medium w-12">
+                      <Checkbox
+                        checked={selectedEmployeeIds.size === filteredEmployees.length && filteredEmployees.length > 0}
+                        onCheckedChange={handleSelectAll}
+                      />
+                    </th>
                     <th className="pb-3 font-medium">ФИО</th>
                     <th className="pb-3 font-medium">Организация</th>
                     <th className="pb-3 font-medium">Должность</th>
@@ -525,9 +626,16 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                 <tbody>
                   {filteredEmployees.map((emp) => {
                     const status = getEmployeeStatus(emp);
+                    const isSelected = selectedEmployeeIds.has(emp.id);
                     return (
-                      <tr key={emp.id} className="border-b last:border-0">
-                        <td className="py-3">{emp.name}</td>
+                      <tr key={emp.id} className={`border-b last:border-0 ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}>
+                        <td className="py-3">
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={(checked) => handleSelectEmployee(emp.id, checked as boolean)}
+                          />
+                        </td>
+                        <td className="py-3 font-medium">{emp.name}</td>
                         <td className="py-3 text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <Icon name="Building2" size={14} />
@@ -747,6 +855,76 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
         onOpenChange={setShowAddCertDialog}
         employeeName={selectedEmployee?.name}
       />
+
+      <Dialog open={showOrderDialog} onOpenChange={setShowOrderDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Формирование приказа</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-lg">
+              <h4 className="font-medium mb-2">Тип приказа:</h4>
+              <p className="text-sm">
+                {orderType === 'sdo' && 'О подготовке в СДО Интеллектуальная система подготовки'}
+                {orderType === 'training_center' && 'О подготовке в учебный центр'}
+                {orderType === 'internal_attestation' && 'О аттестации в ЕПТ организации'}
+                {orderType === 'rostechnadzor' && 'О направлении на аттестацию в Ростехнадзор'}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="font-medium">Выбранные сотрудники ({selectedEmployees.length}):</h4>
+              <div className="max-h-60 overflow-y-auto space-y-1 p-3 border rounded-lg">
+                {selectedEmployees.map((emp) => (
+                  <div key={emp.id} className="flex items-start justify-between py-2 border-b last:border-0">
+                    <div>
+                      <p className="font-medium">{emp.name}</p>
+                      <p className="text-sm text-muted-foreground">{emp.position}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleSelectEmployee(emp.id, false)}
+                    >
+                      <Icon name="X" size={14} />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="order-date">Дата приказа</Label>
+              <Input
+                id="order-date"
+                type="date"
+                defaultValue={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="order-number">Номер приказа (опционально)</Label>
+              <Input
+                id="order-number"
+                placeholder="№ автоматически"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowOrderDialog(false)}>
+                Отмена
+              </Button>
+              <Button onClick={() => {
+                setShowOrderDialog(false);
+                setSelectedEmployeeIds(new Set());
+              }} className="gap-2">
+                <Icon name="FileText" size={16} />
+                Сформировать приказ
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
