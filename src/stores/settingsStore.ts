@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, TrainingOrganization } from '@/types';
+import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization } from '@/types';
 
 interface SettingsState {
   organizations: Organization[];
@@ -9,7 +9,7 @@ interface SettingsState {
   competencies: CompetencyMatrix[];
   productionSites: ProductionSite[];
   systemUsers: SystemUser[];
-  trainingOrganizations: TrainingOrganization[];
+  externalOrganizations: ExternalOrganization[];
   
   addOrganization: (org: Omit<Organization, 'id' | 'createdAt'>) => void;
   updateOrganization: (id: string, updates: Partial<Organization>) => void;
@@ -50,11 +50,12 @@ interface SettingsState {
   deleteSystemUser: (id: string) => void;
   getSystemUsersByTenant: (tenantId: string) => SystemUser[];
   
-  addTrainingOrganization: (org: Omit<TrainingOrganization, 'id' | 'createdAt'>) => void;
-  updateTrainingOrganization: (id: string, updates: Partial<TrainingOrganization>) => void;
-  deleteTrainingOrganization: (id: string) => void;
-  getTrainingOrganizationsByTenant: (tenantId: string) => TrainingOrganization[];
-  importTrainingOrganizations: (orgs: Omit<TrainingOrganization, 'id' | 'createdAt'>[]) => void;
+  addExternalOrganization: (org: Omit<ExternalOrganization, 'id' | 'createdAt'>) => void;
+  updateExternalOrganization: (id: string, updates: Partial<ExternalOrganization>) => void;
+  deleteExternalOrganization: (id: string) => void;
+  getExternalOrganizationsByTenant: (tenantId: string) => ExternalOrganization[];
+  getExternalOrganizationsByType: (tenantId: string, type: ExternalOrganization['type']) => ExternalOrganization[];
+  importExternalOrganizations: (orgs: Omit<ExternalOrganization, 'id' | 'createdAt'>[]) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
@@ -516,10 +517,11 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     return get().systemUsers.filter((user) => user.tenantId === tenantId);
   },
 
-  trainingOrganizations: [
+  externalOrganizations: [
     {
-      id: 'training-org-1',
+      id: 'ext-org-1',
       tenantId: 'tenant-1',
+      type: 'training_center',
       name: 'УЦ "Профессионал"',
       inn: '7701234567',
       contactPerson: 'Сидорова Елена Петровна',
@@ -528,12 +530,14 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
       address: 'г. Москва, ул. Ленина, д. 10',
       website: 'https://professional.ru',
       accreditations: ['Ростехнадзор', 'Минтруд'],
+      description: 'Образовательная организация, специализирующаяся на обучении по промышленной безопасности',
       status: 'active',
       createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
-      id: 'training-org-2',
+      id: 'ext-org-2',
       tenantId: 'tenant-1',
+      type: 'training_center',
       name: 'Центр охраны труда',
       inn: '7702345678',
       contactPerson: 'Иванов Петр Сергеевич',
@@ -545,8 +549,9 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
       createdAt: new Date(Date.now() - 300 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
-      id: 'training-org-3',
+      id: 'ext-org-3',
       tenantId: 'tenant-1',
+      type: 'training_center',
       name: 'Энергетический центр',
       inn: '7703456789',
       contactPerson: 'Петрова Анна Сергеевна',
@@ -557,8 +562,9 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
       createdAt: new Date(Date.now() - 250 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
-      id: 'training-org-4',
+      id: 'ext-org-4',
       tenantId: 'tenant-1',
+      type: 'training_center',
       name: 'Учебно-курсовой комбинат',
       inn: '7704567890',
       contactPerson: 'Кузнецов Михаил Иванович',
@@ -570,8 +576,9 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
       createdAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
-      id: 'training-org-5',
+      id: 'ext-org-5',
       tenantId: 'tenant-1',
+      type: 'training_center',
       name: 'Академия безопасности',
       inn: '7705678901',
       contactPerson: 'Смирнова Ольга Викторовна',
@@ -582,44 +589,77 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
       accreditations: ['Ростехнадзор', 'Минтруд', 'МЧС'],
       status: 'active',
       createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'ext-org-6',
+      tenantId: 'tenant-1',
+      type: 'contractor',
+      name: 'ООО "СтройМонтаж"',
+      inn: '7706789012',
+      kpp: '770601001',
+      contactPerson: 'Волков Сергей Петрович',
+      phone: '+7 (495) 678-90-12',
+      email: 'info@stroymontazh.ru',
+      address: 'г. Москва, ул. Строительная, д. 30',
+      description: 'Подрядная организация по строительно-монтажным работам',
+      status: 'active',
+      createdAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'ext-org-7',
+      tenantId: 'tenant-1',
+      type: 'regulatory_body',
+      name: 'Ростехнадзор',
+      contactPerson: 'Государственная инспекция',
+      phone: '+7 (495) 987-65-43',
+      email: 'info@gosnadzor.ru',
+      address: 'г. Москва, ул. Таганская, д. 34',
+      website: 'https://gosnadzor.ru',
+      description: 'Федеральная служба по экологическому, технологическому и атомному надзору',
+      status: 'active',
+      createdAt: new Date(Date.now() - 400 * 24 * 60 * 60 * 1000).toISOString()
     }
   ],
 
-  addTrainingOrganization: (org) => {
-    const newOrg: TrainingOrganization = {
+  addExternalOrganization: (org) => {
+    const newOrg: ExternalOrganization = {
       ...org,
-      id: `training-org-${Date.now()}`,
+      id: `ext-org-${Date.now()}`,
       createdAt: new Date().toISOString()
     };
-    set((state) => ({ trainingOrganizations: [...state.trainingOrganizations, newOrg] }));
+    set((state) => ({ externalOrganizations: [...state.externalOrganizations, newOrg] }));
   },
 
-  updateTrainingOrganization: (id, updates) => {
+  updateExternalOrganization: (id, updates) => {
     set((state) => ({
-      trainingOrganizations: state.trainingOrganizations.map((org) =>
+      externalOrganizations: state.externalOrganizations.map((org) =>
         org.id === id ? { ...org, ...updates } : org
       )
     }));
   },
 
-  deleteTrainingOrganization: (id) => {
+  deleteExternalOrganization: (id) => {
     set((state) => ({
-      trainingOrganizations: state.trainingOrganizations.filter((org) => org.id !== id)
+      externalOrganizations: state.externalOrganizations.filter((org) => org.id !== id)
     }));
   },
 
-  getTrainingOrganizationsByTenant: (tenantId) => {
-    return get().trainingOrganizations.filter((org) => org.tenantId === tenantId);
+  getExternalOrganizationsByTenant: (tenantId) => {
+    return get().externalOrganizations.filter((org) => org.tenantId === tenantId);
   },
 
-  importTrainingOrganizations: (orgs) => {
+  getExternalOrganizationsByType: (tenantId, type) => {
+    return get().externalOrganizations.filter((org) => org.tenantId === tenantId && org.type === type);
+  },
+
+  importExternalOrganizations: (orgs) => {
     const newOrgs = orgs.map((org, index) => ({
       ...org,
-      id: `training-org-import-${Date.now()}-${index}`,
+      id: `ext-org-import-${Date.now()}-${index}`,
       createdAt: new Date().toISOString()
     }));
     set((state) => ({
-      trainingOrganizations: [...state.trainingOrganizations, ...newOrgs]
+      externalOrganizations: [...state.externalOrganizations, ...newOrgs]
     }));
   }
 }), { name: 'settings-storage' }));

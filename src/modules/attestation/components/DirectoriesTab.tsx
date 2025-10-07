@@ -54,12 +54,12 @@ const mockCertTypes: CertificationType[] = [
 
 export default function DirectoriesTab() {
   const user = useAuthStore((state) => state.user);
-  const { competencies, getOrganizationsByTenant, getTrainingOrganizationsByTenant } = useSettingsStore();
+  const { competencies, getOrganizationsByTenant, getExternalOrganizationsByType } = useSettingsStore();
   const [searchQuery, setSearchQuery] = useState('');
   
   const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
   const tenantCompetencies = competencies.filter((c) => c.tenantId === user?.tenantId);
-  const trainingOrganizations = user?.tenantId ? getTrainingOrganizationsByTenant(user.tenantId) : [];
+  const trainingOrganizations = user?.tenantId ? getExternalOrganizationsByType(user.tenantId, 'training_center') : [];
   
   const filteredTemplates = tenantCompetencies.filter(comp => {
     const orgName = organizations.find(o => o.id === comp.organizationId)?.name || '';
@@ -266,7 +266,7 @@ export default function DirectoriesTab() {
                         Об учебных центрах
                       </h4>
                       <p className="text-sm text-blue-700 dark:text-blue-300">
-                        Справочник учебных центров отображает данные из модуля "Настройки" → "Учебные центры".
+                        Справочник учебных центров отображает данные из модуля "Настройки" → "Сторонние организации" (тип: Учебный центр).
                         Для редактирования перейдите в раздел настроек.
                       </p>
                     </div>

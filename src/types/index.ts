@@ -145,19 +145,34 @@ export interface CompetencyAreaRequirement {
   areas: string[];
 }
 
-export interface TrainingOrganization {
+export type ExternalOrganizationType = 
+  | 'training_center' 
+  | 'contractor' 
+  | 'supplier' 
+  | 'regulatory_body'
+  | 'certification_body'
+  | 'other';
+
+export interface ExternalOrganization {
   id: string;
   tenantId: string;
+  type: ExternalOrganizationType;
   name: string;
   inn?: string;
+  kpp?: string;
   contactPerson?: string;
   phone?: string;
   email?: string;
   address?: string;
   website?: string;
   accreditations?: string[];
+  description?: string;
   status: 'active' | 'inactive';
   createdAt: string;
+}
+
+export interface TrainingOrganization extends ExternalOrganization {
+  type: 'training_center';
 }
 
 export interface GapAnalysis {

@@ -59,9 +59,9 @@ const mockEmployees = [
 export default function CreateTrainingDialog({ open, onOpenChange }: CreateTrainingDialogProps) {
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
-  const { getTrainingOrganizationsByTenant } = useSettingsStore();
+  const { getExternalOrganizationsByType } = useSettingsStore();
   
-  const trainingOrgs = user?.tenantId ? getTrainingOrganizationsByTenant(user.tenantId) : [];
+  const trainingOrgs = user?.tenantId ? getExternalOrganizationsByType(user.tenantId, 'training_center') : [];
   
   const [step, setStep] = useState(1);
   const [trainingTitle, setTrainingTitle] = useState('');
