@@ -1,13 +1,23 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 import { exportPersonnelToCSV, downloadCSV, importPersonnelFromCSV } from '@/lib/exportUtils';
 import type { Personnel } from '@/types';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface PersonnelTabProps {
   onAdd: () => void;
@@ -21,13 +31,31 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
     organizations,
     getDepartmentsByTenant,
     getPersonnelByTenant,
+    getOrganizationsByTenant,
     importPersonnel
   } = useSettingsStore();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterOrg, setFilterOrg] = useState<string>('all');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
 
   const tenantDepts = getDepartmentsByTenant(user!.tenantId!);
   const tenantPersonnel = getPersonnelByTenant(user!.tenantId!);
+  const tenantOrgs = getOrganizationsByTenant(user!.tenantId!);
+
+  const filteredPersonnel = tenantPersonnel.filter((person) => {
+    const matchesSearch = 
+      person.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      person.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      person.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      person.phone?.includes(searchTerm);
+
+    const matchesOrg = filterOrg === 'all' || person.organizationId === filterOrg;
+    const matchesStatus = filterStatus === 'all' || person.status === filterStatus;
+
+    return matchesSearch && matchesOrg && matchesStatus;
+  });
 
   const handleExport = () => {
     const csv = exportPersonnelToCSV(tenantPersonnel, organizations, tenantDepts);
@@ -68,12 +96,51 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
     return <Badge variant={variants[role]}>{labels[role]}</Badge>;
   };
 
+  const getOrganizationName = (orgId: string) => {
+    return organizations.find(o => o.id === orgId)?.name || '—';
+  };
+
+  const getDepartmentName = (deptId: string) => {
+    return tenantDepts.find(d => d.id === deptId)?.name || '—';
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center flex-wrap gap-4">
-        <p className="text-sm text-muted-foreground">
-          Всего сотрудников: {tenantPersonnel.length} (действующих: {tenantPersonnel.filter(p => p.status === 'active').length})
-        </p>
+        <div className="flex items-center gap-4 flex-wrap">
+          <p className="text-sm text-muted-foreground">
+            Всего: {tenantPersonnel.length} (активных: {tenantPersonnel.filter(p => p.status === 'active').length})
+          </p>
+          <Input
+            placeholder="Поиск по ФИО, должности, email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-72"
+          />
+          <Select value={filterOrg} onValueChange={setFilterOrg}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Организация" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Все организации</SelectItem>
+              {tenantOrgs.map((org) => (
+                <SelectItem key={org.id} value={org.id}>
+                  {org.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Статус" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Все статусы</SelectItem>
+              <SelectItem value="active">Активные</SelectItem>
+              <SelectItem value="inactive">Неактивные</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
             <Icon name="Download" size={14} />
@@ -102,89 +169,89 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
         </div>
       </div>
 
-      <div className="grid gap-4">
-        {tenantPersonnel.map((person) => {
-          const org = organizations.find(o => o.id === person.organizationId);
-          const dept = tenantDepts.find(d => d.id === person.departmentId);
-          
-          return (
-            <Card key={person.id}>
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 space-y-3">
-                    <div>
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <h3 className="font-semibold text-lg">{person.fullName}</h3>
-                        {getRoleBadge(person.role)}
-                        <Badge variant={person.status === 'active' ? 'default' : 'secondary'}>
-                          {person.status === 'active' ? 'Действующий' : 'Уволен'}
-                        </Badge>
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ФИО</TableHead>
+                <TableHead>Должность</TableHead>
+                <TableHead>Организация</TableHead>
+                <TableHead>Подразделение</TableHead>
+                <TableHead>Контакты</TableHead>
+                <TableHead className="text-center">Роль</TableHead>
+                <TableHead className="text-center">Статус</TableHead>
+                <TableHead className="text-right">Действия</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredPersonnel.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
+                    <Icon name="Search" size={48} className="mx-auto mb-4 opacity-20" />
+                    <p>Сотрудники не найдены</p>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredPersonnel.map((person) => (
+                  <TableRow key={person.id}>
+                    <TableCell className="font-medium">{person.fullName}</TableCell>
+                    <TableCell>{person.position}</TableCell>
+                    <TableCell>
+                      <div className="text-sm">{getOrganizationName(person.organizationId)}</div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">{getDepartmentName(person.departmentId)}</div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm space-y-1">
+                        {person.email && (
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <Icon name="Mail" size={12} />
+                            <span className="truncate max-w-[180px]">{person.email}</span>
+                          </div>
+                        )}
+                        {person.phone && (
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <Icon name="Phone" size={12} />
+                            <span>{person.phone}</span>
+                          </div>
+                        )}
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1">{person.position}</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                      {org && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Icon name="Building2" size={14} />
-                          <span>{org.name}</span>
-                        </div>
-                      )}
-                      {dept && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Icon name="Building" size={14} />
-                          <span>{dept.name}</span>
-                        </div>
-                      )}
-                      {person.email && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Icon name="Mail" size={14} />
-                          <span>{person.email}</span>
-                        </div>
-                      )}
-                      {person.phone && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Icon name="Phone" size={14} />
-                          <span>{person.phone}</span>
-                        </div>
-                      )}
-                      {person.hireDate && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Icon name="Calendar" size={14} />
-                          <span>Принят: {new Date(person.hireDate).toLocaleDateString('ru-RU')}</span>
-                        </div>
-                      )}
-                      {person.dismissalDate && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Icon name="CalendarX" size={14} />
-                          <span>Уволен: {new Date(person.dismissalDate).toLocaleDateString('ru-RU')}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 ml-4">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => onEdit(person)}
-                    >
-                      <Icon name="Pencil" size={14} />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => onDelete(person.id)}
-                    >
-                      <Icon name="Trash2" size={14} />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {getRoleBadge(person.role)}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant={person.status === 'active' ? 'default' : 'secondary'}>
+                        {person.status === 'active' ? 'Активен' : 'Неактивен'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex gap-2 justify-end">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => onEdit(person)}
+                        >
+                          <Icon name="Pencil" size={16} />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => onDelete(person.id)}
+                        >
+                          <Icon name="Trash2" size={16} />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }
