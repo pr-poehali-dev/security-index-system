@@ -37,7 +37,7 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
     getOrganizationsByTenant,
     importPersonnel,
     getCertificationsByPerson,
-    competencies
+    competenciesDirectory
   } = useSettingsStore();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -260,7 +260,7 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
                         return (
                           <div className="flex flex-wrap gap-1">
                             {certs.map((cert) => {
-                              const comp = competencies.find(c => c.id === cert.competencyId);
+                              const comp = competenciesDirectory.find(c => c.id === cert.competencyId);
                               const isExpired = new Date(cert.expiryDate) < new Date();
                               const isExpiring = !isExpired && new Date(cert.expiryDate) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
                               return (
