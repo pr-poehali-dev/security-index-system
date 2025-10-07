@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -11,6 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface Order {
   id: string;
@@ -21,6 +29,7 @@ interface Order {
   employees: string[];
   status: 'draft' | 'prepared' | 'approved' | 'active' | 'completed' | 'cancelled';
   createdBy: string;
+  description?: string;
 }
 
 interface Training {
@@ -33,6 +42,8 @@ interface Training {
   organization: string;
   cost: number;
   status: 'planned' | 'in_progress' | 'completed' | 'cancelled';
+  program?: string;
+  documents?: string[];
 }
 
 const mockOrders: Order[] = [
@@ -42,9 +53,10 @@ const mockOrders: Order[] = [
     date: '2025-10-01',
     type: 'attestation',
     title: 'О проведении аттестации по электробезопасности',
-    employees: ['Иванов И.И.', 'Петрова А.С.'],
+    employees: ['Иванов И.И.', 'Петрова А.С.', 'Сидоров К.П.'],
     status: 'active',
-    createdBy: 'Смирнов А.В.'
+    createdBy: 'Смирнов А.В.',
+    description: 'Проведение внеочередной аттестации по электробезопасности на 4 группу'
   },
   {
     id: '2',
@@ -54,7 +66,41 @@ const mockOrders: Order[] = [
     title: 'О направлении на обучение по промышленной безопасности',
     employees: ['Сидоров П.Н.'],
     status: 'completed',
-    createdBy: 'Смирнов А.В.'
+    createdBy: 'Смирнов А.В.',
+    description: 'Направление на обучение в УЦ "Профессионал"'
+  },
+  {
+    id: '3',
+    number: '13-С',
+    date: '2025-09-20',
+    type: 'suspension',
+    title: 'Об отстранении от работы',
+    employees: ['Морозова Е.П.'],
+    status: 'active',
+    createdBy: 'Смирнов А.В.',
+    description: 'Отстранение до прохождения аттестации'
+  },
+  {
+    id: '4',
+    number: '12-А',
+    date: '2025-09-15',
+    type: 'sdo',
+    title: 'О направлении на обучение в СДО',
+    employees: ['Кузнецов А.В.', 'Васильев И.И.'],
+    status: 'prepared',
+    createdBy: 'Смирнов А.В.',
+    description: 'Обучение охране труда через систему дистанционного обучения'
+  },
+  {
+    id: '5',
+    number: '11-А',
+    date: '2025-09-10',
+    type: 'internal_attestation',
+    title: 'О проведении внутренней аттестации',
+    employees: ['Соколов М.А.', 'Павлова Н.В.', 'Федоров Д.С.'],
+    status: 'draft',
+    createdBy: 'Смирнов А.В.',
+    description: 'Аттестация в единой платформе тестирования организации'
   },
 ];
 
@@ -68,7 +114,9 @@ const mockTrainings: Training[] = [
     employees: ['Сидоров П.Н.', 'Кузнецов А.В.'],
     organization: 'УЦ "Профессионал"',
     cost: 15000,
-    status: 'planned'
+    status: 'planned',
+    program: 'А.1 Общие требования промышленной безопасности',
+    documents: ['Договор', 'Программа обучения']
   },
   {
     id: '2',
@@ -79,27 +127,59 @@ const mockTrainings: Training[] = [
     employees: ['Морозова Е.П.'],
     organization: 'Центр ОТ',
     cost: 8000,
-    status: 'in_progress'
+    status: 'in_progress',
+    program: 'Работы на высоте с применением СИЗ от падения',
+    documents: ['Договор', 'Программа обучения', 'Удостоверение']
+  },
+  {
+    id: '3',
+    title: 'Электробезопасность 4 группа до 1000В',
+    type: 'Повышение квалификации',
+    startDate: '2025-09-01',
+    endDate: '2025-09-05',
+    employees: ['Иванов И.И.', 'Петрова А.С.'],
+    organization: 'Энергетический центр',
+    cost: 12000,
+    status: 'completed',
+    program: 'Электробезопасность для электротехнического персонала',
+    documents: ['Договор', 'Программа обучения', 'Удостоверение', 'Протокол']
+  },
+  {
+    id: '4',
+    title: 'Охрана труда для руководителей',
+    type: 'Повышение квалификации',
+    startDate: '2025-11-10',
+    endDate: '2025-11-15',
+    employees: ['Смирнов А.В.', 'Соколов М.А.'],
+    organization: 'УЦ "Охрана труда"',
+    cost: 18000,
+    status: 'planned',
+    program: 'Обучение по охране труда руководителей и специалистов',
+    documents: ['Заявка']
   },
 ];
 
 export default function OrdersTrainingTab() {
   const [searchQuery, setSearchQuery] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('all');
+  const [orderTypeFilter, setOrderTypeFilter] = useState<string>('all');
   const [trainingStatusFilter, setTrainingStatusFilter] = useState<string>('all');
   const [orderViewMode, setOrderViewMode] = useState<'cards' | 'table'>('cards');
   const [trainingViewMode, setTrainingViewMode] = useState<'cards' | 'table'>('cards');
 
   const filteredOrders = mockOrders.filter(order => {
     const matchesSearch = order.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          order.number.toLowerCase().includes(searchQuery.toLowerCase());
+                          order.number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          order.employees.some(emp => emp.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesStatus = orderStatusFilter === 'all' || order.status === orderStatusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesType = orderTypeFilter === 'all' || order.type === orderTypeFilter;
+    return matchesSearch && matchesStatus && matchesType;
   });
 
   const filteredTrainings = mockTrainings.filter(training => {
     const matchesSearch = training.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          training.organization.toLowerCase().includes(searchQuery.toLowerCase());
+                          training.organization.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          training.employees.some(emp => emp.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesStatus = trainingStatusFilter === 'all' || training.status === trainingStatusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -117,11 +197,28 @@ export default function OrdersTrainingTab() {
     }
   };
 
+  const getOrderTypeIcon = (type: string) => {
+    switch (type) {
+      case 'attestation': return 'Award';
+      case 'training': return 'GraduationCap';
+      case 'suspension': return 'Ban';
+      case 'sdo': return 'Monitor';
+      case 'training_center': return 'Building2';
+      case 'internal_attestation': return 'ClipboardCheck';
+      case 'rostechnadzor': return 'Shield';
+      default: return 'FileText';
+    }
+  };
+
   const getOrderTypeColor = (type: string) => {
     switch (type) {
       case 'attestation': return 'text-blue-600 bg-blue-100 dark:bg-blue-900/30';
       case 'training': return 'text-purple-600 bg-purple-100 dark:bg-purple-900/30';
       case 'suspension': return 'text-red-600 bg-red-100 dark:bg-red-900/30';
+      case 'sdo': return 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30';
+      case 'training_center': return 'text-violet-600 bg-violet-100 dark:bg-violet-900/30';
+      case 'internal_attestation': return 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30';
+      case 'rostechnadzor': return 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30';
       default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900/30';
     }
   };
@@ -158,6 +255,10 @@ export default function OrdersTrainingTab() {
     console.log(`Изменение статуса приказа ${orderId} на ${newStatus}`);
   };
 
+  const handleChangeTrainingStatus = (trainingId: string, newStatus: string) => {
+    console.log(`Изменение статуса обучения ${trainingId} на ${newStatus}`);
+  };
+
   const handleExportOrdersToExcel = async () => {
     const { utils, writeFile } = await import('xlsx');
     
@@ -169,20 +270,22 @@ export default function OrdersTrainingTab() {
       'Статус': getStatusLabel(order.status),
       'Количество сотрудников': order.employees.length,
       'Сотрудники': order.employees.join(', '),
-      'Создал': order.createdBy
+      'Создал': order.createdBy,
+      'Описание': order.description || ''
     }));
 
     const ws = utils.json_to_sheet(exportData);
     
     const colWidths = [
-      { wch: 15 }, // Номер
-      { wch: 12 }, // Дата
-      { wch: 25 }, // Тип
-      { wch: 50 }, // Название
-      { wch: 15 }, // Статус
-      { wch: 20 }, // Количество
-      { wch: 40 }, // Сотрудники
-      { wch: 25 }  // Создал
+      { wch: 15 },
+      { wch: 12 },
+      { wch: 25 },
+      { wch: 50 },
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 40 },
+      { wch: 25 },
+      { wch: 50 }
     ];
     ws['!cols'] = colWidths;
 
@@ -207,23 +310,27 @@ export default function OrdersTrainingTab() {
       'Количество сотрудников': training.employees.length,
       'Сотрудники': training.employees.join(', '),
       'Стоимость': training.cost,
-      'Стоимость на человека': Math.round(training.cost / training.employees.length)
+      'Стоимость на человека': Math.round(training.cost / training.employees.length),
+      'Программа': training.program || '',
+      'Документы': training.documents?.join(', ') || ''
     }));
 
     const ws = utils.json_to_sheet(exportData);
     
     const colWidths = [
-      { wch: 35 }, // Название
-      { wch: 25 }, // Тип
-      { wch: 25 }, // Организация
-      { wch: 15 }, // Дата начала
-      { wch: 17 }, // Дата окончания
-      { wch: 18 }, // Длительность
-      { wch: 15 }, // Статус
-      { wch: 22 }, // Количество
-      { wch: 35 }, // Сотрудники
-      { wch: 12 }, // Стоимость
-      { wch: 20 }  // Стоимость на чел
+      { wch: 35 },
+      { wch: 25 },
+      { wch: 25 },
+      { wch: 15 },
+      { wch: 17 },
+      { wch: 18 },
+      { wch: 15 },
+      { wch: 22 },
+      { wch: 35 },
+      { wch: 12 },
+      { wch: 20 },
+      { wch: 50 },
+      { wch: 30 }
     ];
     ws['!cols'] = colWidths;
 
@@ -285,6 +392,20 @@ export default function OrdersTrainingTab() {
     return actions;
   };
 
+  const orderStats = {
+    total: mockOrders.length,
+    draft: mockOrders.filter(o => o.status === 'draft').length,
+    active: mockOrders.filter(o => o.status === 'active').length,
+    completed: mockOrders.filter(o => o.status === 'completed').length,
+  };
+
+  const trainingStats = {
+    total: mockTrainings.length,
+    planned: mockTrainings.filter(t => t.status === 'planned').length,
+    inProgress: mockTrainings.filter(t => t.status === 'in_progress').length,
+    totalCost: mockTrainings.reduce((sum, t) => sum + t.cost, 0),
+  };
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue="orders" className="space-y-6">
@@ -292,19 +413,68 @@ export default function OrdersTrainingTab() {
           <TabsTrigger value="orders" className="gap-2">
             <Icon name="FileText" size={16} />
             Приказы
+            <Badge variant="secondary" className="ml-1">{orderStats.total}</Badge>
           </TabsTrigger>
           <TabsTrigger value="trainings" className="gap-2">
             <Icon name="GraduationCap" size={16} />
             Обучения
+            <Badge variant="secondary" className="ml-1">{trainingStats.total}</Badge>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="orders">
+        <TabsContent value="orders" className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Всего приказов</p>
+                    <p className="text-2xl font-bold">{orderStats.total}</p>
+                  </div>
+                  <Icon name="FileText" size={24} className="text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Черновики</p>
+                    <p className="text-2xl font-bold">{orderStats.draft}</p>
+                  </div>
+                  <Icon name="FilePen" size={24} className="text-gray-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Активные</p>
+                    <p className="text-2xl font-bold">{orderStats.active}</p>
+                  </div>
+                  <Icon name="CheckCircle2" size={24} className="text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Исполнено</p>
+                    <p className="text-2xl font-bold">{orderStats.completed}</p>
+                  </div>
+                  <Icon name="CheckCheck" size={24} className="text-emerald-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Приказы</CardTitle>
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <CardTitle>Список приказов</CardTitle>
+                <div className="flex items-center gap-2 flex-wrap">
                   <Button
                     variant={orderViewMode === 'cards' ? 'default' : 'outline'}
                     size="sm"
@@ -324,11 +494,11 @@ export default function OrdersTrainingTab() {
                     Таблица
                   </Button>
                   <Button variant="outline" onClick={handleExportOrdersToExcel} className="gap-2">
-                    <Icon name="Download" size={18} />
-                    Экспорт в Excel
+                    <Icon name="Download" size={16} />
+                    Экспорт
                   </Button>
                   <Button className="gap-2">
-                    <Icon name="Plus" size={18} />
+                    <Icon name="Plus" size={16} />
                     Создать приказ
                   </Button>
                 </div>
@@ -339,14 +509,29 @@ export default function OrdersTrainingTab() {
                 <div className="relative flex-1">
                   <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    placeholder="Поиск по номеру или названию..."
+                    placeholder="Поиск по номеру, названию или сотрудникам..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
                   />
                 </div>
-                <Select value={orderStatusFilter} onValueChange={setOrderStatusFilter}>
+                <Select value={orderTypeFilter} onValueChange={setOrderTypeFilter}>
                   <SelectTrigger className="w-full sm:w-[200px]">
+                    <SelectValue placeholder="Тип приказа" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все типы</SelectItem>
+                    <SelectItem value="attestation">Аттестация</SelectItem>
+                    <SelectItem value="training">Обучение</SelectItem>
+                    <SelectItem value="suspension">Отстранение</SelectItem>
+                    <SelectItem value="sdo">СДО</SelectItem>
+                    <SelectItem value="training_center">Учебный центр</SelectItem>
+                    <SelectItem value="internal_attestation">ЕПТ организации</SelectItem>
+                    <SelectItem value="rostechnadzor">Ростехнадзор</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={orderStatusFilter} onValueChange={setOrderStatusFilter}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Статус" />
                   </SelectTrigger>
                   <SelectContent>
@@ -364,18 +549,22 @@ export default function OrdersTrainingTab() {
               {orderViewMode === 'cards' ? (
                 <div className="space-y-3">
                   {filteredOrders.map((order) => (
-                    <Card key={order.id}>
+                    <Card key={order.id} className="hover:shadow-md transition-shadow">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold">Приказ №{order.number}</span>
-                              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getOrderTypeColor(order.type)}`}>
+                            <div className="flex items-center gap-2 mb-2">
+                              <Icon name={getOrderTypeIcon(order.type)} size={18} className="text-muted-foreground" />
+                              <span className="font-semibold text-lg">Приказ №{order.number}</span>
+                              <Badge className={getOrderTypeColor(order.type)}>
                                 {getOrderTypeLabel(order.type)}
-                              </span>
+                              </Badge>
                             </div>
                             <h3 className="font-medium mb-2">{order.title}</h3>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            {order.description && (
+                              <p className="text-sm text-muted-foreground mb-3">{order.description}</p>
+                            )}
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
                               <span className="flex items-center gap-1">
                                 <Icon name="Calendar" size={14} />
                                 {new Date(order.date).toLocaleDateString('ru')}
@@ -391,9 +580,9 @@ export default function OrdersTrainingTab() {
                             </div>
                           </div>
                           <div className="flex flex-col items-end gap-2">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+                            <Badge className={getStatusColor(order.status)}>
                               {getStatusLabel(order.status)}
-                            </span>
+                            </Badge>
                             <Select value={order.status} onValueChange={(value) => handleChangeOrderStatus(order.id, value)}>
                               <SelectTrigger className="w-[140px] h-8 text-xs">
                                 <SelectValue />
@@ -411,20 +600,44 @@ export default function OrdersTrainingTab() {
                         </div>
 
                         <div className="flex items-center justify-between pt-3 border-t">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span>Сотрудники:</span>
-                            <span>{order.employees.join(', ')}</span>
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className="text-muted-foreground">Сотрудники:</span>
+                            <span className="font-medium">{order.employees.slice(0, 2).join(', ')}
+                              {order.employees.length > 2 && ` и ещё ${order.employees.length - 2}`}
+                            </span>
                           </div>
                           <div className="flex items-center gap-2 flex-wrap">
                             {getOrderActions(order)}
-                            <Button variant="ghost" size="sm" className="gap-1">
-                              <Icon name="Eye" size={14} />
-                              Просмотр
-                            </Button>
-                            <Button variant="ghost" size="sm" className="gap-1">
-                              <Icon name="Download" size={14} />
-                              PDF
-                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <Icon name="MoreVertical" size={16} />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem>
+                                  <Icon name="Eye" size={14} className="mr-2" />
+                                  Просмотр
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Icon name="Edit" size={14} className="mr-2" />
+                                  Редактировать
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Icon name="Download" size={14} className="mr-2" />
+                                  Скачать PDF
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Icon name="Printer" size={14} className="mr-2" />
+                                  Печать
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="text-red-600">
+                                  <Icon name="Trash2" size={14} className="mr-2" />
+                                  Удалить
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </div>
                       </CardContent>
@@ -447,15 +660,22 @@ export default function OrdersTrainingTab() {
                     </thead>
                     <tbody>
                       {filteredOrders.map((order) => (
-                        <tr key={order.id} className="border-b last:border-0">
+                        <tr key={order.id} className="border-b last:border-0 hover:bg-muted/50">
                           <td className="py-3 font-medium">№{order.number}</td>
-                          <td className="py-3">{order.title}</td>
                           <td className="py-3">
-                            <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${getOrderTypeColor(order.type)}`}>
-                              {getOrderTypeLabel(order.type)}
-                            </span>
+                            <div>
+                              <div className="font-medium">{order.title}</div>
+                              {order.description && (
+                                <div className="text-xs text-muted-foreground mt-1">{order.description}</div>
+                              )}
+                            </div>
                           </td>
-                          <td className="py-3 text-muted-foreground">
+                          <td className="py-3">
+                            <Badge className={getOrderTypeColor(order.type)}>
+                              {getOrderTypeLabel(order.type)}
+                            </Badge>
+                          </td>
+                          <td className="py-3 text-muted-foreground text-sm">
                             {new Date(order.date).toLocaleDateString('ru')}
                           </td>
                           <td className="py-3 text-center">{order.employees.length}</td>
@@ -476,13 +696,34 @@ export default function OrdersTrainingTab() {
                           </td>
                           <td className="py-3">
                             <div className="flex items-center gap-1">
-                              {getOrderActions(order)}
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" title="Просмотр">
                                 <Icon name="Eye" size={16} />
                               </Button>
-                              <Button variant="ghost" size="sm">
-                                <Icon name="Download" size={16} />
+                              <Button variant="ghost" size="sm" title="Редактировать">
+                                <Icon name="Edit" size={16} />
                               </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <Icon name="MoreVertical" size={16} />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem>
+                                    <Icon name="Download" size={14} className="mr-2" />
+                                    Скачать PDF
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                    <Icon name="Printer" size={14} className="mr-2" />
+                                    Печать
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem className="text-red-600">
+                                    <Icon name="Trash2" size={14} className="mr-2" />
+                                    Удалить
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
                           </td>
                         </tr>
@@ -493,20 +734,69 @@ export default function OrdersTrainingTab() {
               )}
 
               {filteredOrders.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  Приказы не найдены
+                <div className="text-center py-12">
+                  <Icon name="FileText" size={48} className="mx-auto text-muted-foreground mb-4" />
+                  <p className="text-lg font-medium mb-2">Приказы не найдены</p>
+                  <p className="text-sm text-muted-foreground">Измените параметры поиска или создайте новый приказ</p>
                 </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="trainings">
+        <TabsContent value="trainings" className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Всего обучений</p>
+                    <p className="text-2xl font-bold">{trainingStats.total}</p>
+                  </div>
+                  <Icon name="GraduationCap" size={24} className="text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Запланировано</p>
+                    <p className="text-2xl font-bold">{trainingStats.planned}</p>
+                  </div>
+                  <Icon name="CalendarClock" size={24} className="text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">В процессе</p>
+                    <p className="text-2xl font-bold">{trainingStats.inProgress}</p>
+                  </div>
+                  <Icon name="Clock" size={24} className="text-amber-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Бюджет</p>
+                    <p className="text-2xl font-bold">{trainingStats.totalCost.toLocaleString('ru')} ₽</p>
+                  </div>
+                  <Icon name="Wallet" size={24} className="text-emerald-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Обучения</CardTitle>
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <CardTitle>Список обучений</CardTitle>
+                <div className="flex items-center gap-2 flex-wrap">
                   <Button
                     variant={trainingViewMode === 'cards' ? 'default' : 'outline'}
                     size="sm"
@@ -526,11 +816,11 @@ export default function OrdersTrainingTab() {
                     Таблица
                   </Button>
                   <Button variant="outline" onClick={handleExportTrainingsToExcel} className="gap-2">
-                    <Icon name="Download" size={18} />
-                    Экспорт в Excel
+                    <Icon name="Download" size={16} />
+                    Экспорт
                   </Button>
                   <Button className="gap-2">
-                    <Icon name="Plus" size={18} />
+                    <Icon name="Plus" size={16} />
                     Запланировать обучение
                   </Button>
                 </div>
@@ -541,14 +831,14 @@ export default function OrdersTrainingTab() {
                 <div className="relative flex-1">
                   <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    placeholder="Поиск по названию или организации..."
+                    placeholder="Поиск по названию, организации или сотрудникам..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
                   />
                 </div>
                 <Select value={trainingStatusFilter} onValueChange={setTrainingStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Статус" />
                   </SelectTrigger>
                   <SelectContent>
@@ -563,60 +853,107 @@ export default function OrdersTrainingTab() {
 
               {trainingViewMode === 'cards' ? (
                 <div className="space-y-3">
-                  {filteredTrainings.map((training) => (
-                    <Card key={training.id}>
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold">{training.title}</h3>
-                              <span className="px-2 py-0.5 rounded-full text-xs font-medium text-purple-600 bg-purple-100 dark:bg-purple-900/30">
+                  {filteredTrainings.map((training) => {
+                    const duration = Math.ceil((new Date(training.endDate).getTime() - new Date(training.startDate).getTime()) / (1000 * 60 * 60 * 24));
+                    const costPerPerson = Math.round(training.cost / training.employees.length);
+                    
+                    return (
+                      <Card key={training.id} className="hover:shadow-md transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Icon name="GraduationCap" size={18} className="text-muted-foreground" />
+                                <h3 className="font-semibold text-lg">{training.title}</h3>
+                              </div>
+                              <Badge className="mb-3 text-purple-600 bg-purple-100 dark:bg-purple-900/30">
                                 {training.type}
-                              </span>
+                              </Badge>
+                              {training.program && (
+                                <p className="text-sm text-muted-foreground mb-3">{training.program}</p>
+                              )}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
+                                <span className="flex items-center gap-1">
+                                  <Icon name="Building2" size={14} />
+                                  {training.organization}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Icon name="Wallet" size={14} />
+                                  {training.cost.toLocaleString('ru')} ₽ ({costPerPerson.toLocaleString('ru')} ₽/чел)
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Icon name="Calendar" size={14} />
+                                  {new Date(training.startDate).toLocaleDateString('ru')} - {new Date(training.endDate).toLocaleDateString('ru')}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Icon name="Clock" size={14} />
+                                  {duration} {duration === 1 ? 'день' : duration < 5 ? 'дня' : 'дней'}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Icon name="Users" size={14} />
+                                  {training.employees.length} чел.
+                                </span>
+                                {training.documents && training.documents.length > 0 && (
+                                  <span className="flex items-center gap-1">
+                                    <Icon name="Paperclip" size={14} />
+                                    {training.documents.length} документов
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground mb-2">
-                              <span className="flex items-center gap-1">
-                                <Icon name="Building2" size={14} />
-                                {training.organization}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Icon name="Wallet" size={14} />
-                                {training.cost.toLocaleString('ru')} ₽
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Icon name="Calendar" size={14} />
-                                {new Date(training.startDate).toLocaleDateString('ru')} - {new Date(training.endDate).toLocaleDateString('ru')}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Icon name="Users" size={14} />
-                                {training.employees.length} чел.
-                              </span>
-                            </div>
+                            <Badge className={getStatusColor(training.status)}>
+                              {getStatusLabel(training.status)}
+                            </Badge>
                           </div>
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(training.status)}`}>
-                            {getStatusLabel(training.status)}
-                          </span>
-                        </div>
 
-                        <div className="flex items-center justify-between pt-3 border-t">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span>Сотрудники:</span>
-                            <span>{training.employees.join(', ')}</span>
+                          <div className="flex items-center justify-between pt-3 border-t">
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-muted-foreground">Сотрудники:</span>
+                              <span className="font-medium">{training.employees.slice(0, 2).join(', ')}
+                                {training.employees.length > 2 && ` и ещё ${training.employees.length - 2}`}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button variant="ghost" size="sm" className="gap-2">
+                                <Icon name="Edit" size={14} />
+                                Изменить
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <Icon name="MoreVertical" size={16} />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem>
+                                    <Icon name="Eye" size={14} className="mr-2" />
+                                    Просмотр
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                    <Icon name="FileText" size={14} className="mr-2" />
+                                    Документы
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                    <Icon name="Users" size={14} className="mr-2" />
+                                    Список участников
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem>
+                                    <Icon name="Copy" size={14} className="mr-2" />
+                                    Дублировать
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="text-red-600">
+                                    <Icon name="Trash2" size={14} className="mr-2" />
+                                    Удалить
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="sm" className="gap-2">
-                              <Icon name="Edit" size={14} />
-                              Изменить
-                            </Button>
-                            <Button variant="ghost" size="sm" className="gap-2">
-                              <Icon name="FileText" size={14} />
-                              Документы
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -634,45 +971,88 @@ export default function OrdersTrainingTab() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredTrainings.map((training) => (
-                        <tr key={training.id} className="border-b last:border-0">
-                          <td className="py-3 font-medium">{training.title}</td>
-                          <td className="py-3">
-                            <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium text-purple-600 bg-purple-100 dark:bg-purple-900/30">
-                              {training.type}
-                            </span>
-                          </td>
-                          <td className="py-3 text-muted-foreground">{training.organization}</td>
-                          <td className="py-3 text-muted-foreground text-sm">
-                            {new Date(training.startDate).toLocaleDateString('ru', { day: '2-digit', month: '2-digit' })} - {new Date(training.endDate).toLocaleDateString('ru', { day: '2-digit', month: '2-digit' })}
-                          </td>
-                          <td className="py-3 text-center">{training.employees.length}</td>
-                          <td className="py-3 text-muted-foreground">{training.cost.toLocaleString('ru')} ₽</td>
-                          <td className="py-3">
-                            <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(training.status)}`}>
-                              {getStatusLabel(training.status)}
-                            </span>
-                          </td>
-                          <td className="py-3">
-                            <div className="flex items-center gap-1">
-                              <Button variant="ghost" size="sm">
-                                <Icon name="Edit" size={16} />
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                <Icon name="FileText" size={16} />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      {filteredTrainings.map((training) => {
+                        const costPerPerson = Math.round(training.cost / training.employees.length);
+                        
+                        return (
+                          <tr key={training.id} className="border-b last:border-0 hover:bg-muted/50">
+                            <td className="py-3">
+                              <div>
+                                <div className="font-medium">{training.title}</div>
+                                {training.program && (
+                                  <div className="text-xs text-muted-foreground mt-1">{training.program}</div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-3">
+                              <Badge className="text-purple-600 bg-purple-100 dark:bg-purple-900/30">
+                                {training.type}
+                              </Badge>
+                            </td>
+                            <td className="py-3 text-muted-foreground text-sm">{training.organization}</td>
+                            <td className="py-3 text-muted-foreground text-sm">
+                              <div>{new Date(training.startDate).toLocaleDateString('ru', { day: '2-digit', month: '2-digit' })}</div>
+                              <div>{new Date(training.endDate).toLocaleDateString('ru', { day: '2-digit', month: '2-digit' })}</div>
+                            </td>
+                            <td className="py-3 text-center">{training.employees.length}</td>
+                            <td className="py-3 text-muted-foreground text-sm">
+                              <div className="font-medium">{training.cost.toLocaleString('ru')} ₽</div>
+                              <div className="text-xs">{costPerPerson.toLocaleString('ru')} ₽/чел</div>
+                            </td>
+                            <td className="py-3">
+                              <Badge className={getStatusColor(training.status)}>
+                                {getStatusLabel(training.status)}
+                              </Badge>
+                            </td>
+                            <td className="py-3">
+                              <div className="flex items-center gap-1">
+                                <Button variant="ghost" size="sm" title="Просмотр">
+                                  <Icon name="Eye" size={16} />
+                                </Button>
+                                <Button variant="ghost" size="sm" title="Редактировать">
+                                  <Icon name="Edit" size={16} />
+                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm">
+                                      <Icon name="MoreVertical" size={16} />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem>
+                                      <Icon name="FileText" size={14} className="mr-2" />
+                                      Документы
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem>
+                                      <Icon name="Users" size={14} className="mr-2" />
+                                      Список участников
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem>
+                                      <Icon name="Copy" size={14} className="mr-2" />
+                                      Дублировать
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="text-red-600">
+                                      <Icon name="Trash2" size={14} className="mr-2" />
+                                      Удалить
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
               )}
 
               {filteredTrainings.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  Обучения не найдены
+                <div className="text-center py-12">
+                  <Icon name="GraduationCap" size={48} className="mx-auto text-muted-foreground mb-4" />
+                  <p className="text-lg font-medium mb-2">Обучения не найдены</p>
+                  <p className="text-sm text-muted-foreground">Измените параметры поиска или запланируйте новое обучение</p>
                 </div>
               )}
             </CardContent>
