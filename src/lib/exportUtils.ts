@@ -210,3 +210,12 @@ export async function importPersonnelFromCSV(
   
   return personnel;
 }
+
+export function exportToExcel(data: any[], filename: string) {
+  import('xlsx').then(XLSX => {
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Данные');
+    XLSX.writeFile(wb, `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`);
+  });
+}

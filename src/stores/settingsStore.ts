@@ -1,10 +1,13 @@
 import { create } from 'zustand';
-import type { Organization, Department, Personnel } from '@/types';
+import { persist } from 'zustand/middleware';
+import type { Organization, Department, Personnel, CompetencyMatrix } from '@/types';
 
 interface SettingsState {
   organizations: Organization[];
   departments: Department[];
   personnel: Personnel[];
+  competencies: CompetencyMatrix[];
+  
   addOrganization: (org: Omit<Organization, 'id' | 'createdAt'>) => void;
   updateOrganization: (id: string, updates: Partial<Organization>) => void;
   deleteOrganization: (id: string) => void;
@@ -14,18 +17,27 @@ interface SettingsState {
   addPersonnel: (person: Omit<Personnel, 'id' | 'createdAt'>) => void;
   updatePersonnel: (id: string, updates: Partial<Personnel>) => void;
   deletePersonnel: (id: string) => void;
+  
+  addCompetency: (competency: Omit<CompetencyMatrix, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateCompetency: (id: string, updates: Partial<CompetencyMatrix>) => void;
+  deleteCompetency: (id: string) => void;
+  
   importOrganizations: (orgs: Omit<Organization, 'id' | 'createdAt'>[]) => void;
   importDepartments: (depts: Omit<Department, 'id' | 'createdAt'>[]) => void;
   importPersonnel: (people: Omit<Personnel, 'id' | 'createdAt'>[]) => void;
+  importCompetencies: (comps: Omit<CompetencyMatrix, 'id' | 'createdAt' | 'updatedAt'>[]) => void;
+  
   getOrganizationsByTenant: (tenantId: string) => Organization[];
   getDepartmentsByTenant: (tenantId: string) => Department[];
   getDepartmentsByOrganization: (organizationId: string) => Department[];
   getPersonnelByTenant: (tenantId: string) => Personnel[];
   getPersonnelByOrganization: (organizationId: string) => Personnel[];
   getPersonnelByDepartment: (departmentId: string) => Personnel[];
+  getCompetenciesByTenant: (tenantId: string) => CompetencyMatrix[];
+  getCompetenciesByOrganization: (organizationId: string) => CompetencyMatrix[];
 }
 
-export const useSettingsStore = create<SettingsState>((set, get) => ({
+export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
   organizations: [
     {
       id: 'org-1',
@@ -287,5 +299,94 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
   getPersonnelByDepartment: (departmentId) => {
     return get().personnel.filter((person) => person.departmentId === departmentId);
+  },
+
+  competencies: [
+    {
+      id: 'comp-1',
+      tenantId: 'tenant-1',
+      organizationId: 'org-1',
+      position: 'Главный инженер по безопасности',
+      requiredAreas: [
+        {
+          category: 'industrial_safety',
+          areas: ['Б.1', 'Б.2', 'М.1']
+        },
+        {
+          category: 'energy_safety',
+          areas: ['ЭБ.1', 'ЭБ.6']
+        },
+        {
+          category: 'labor_safety',
+          areas: ['ОТ.3', 'ОТ.4']
+        }
+      ],
+      createdAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'comp-2',
+      tenantId: 'tenant-1',
+      organizationId: 'org-1',
+      position: 'Менеджер по охране труда',
+      requiredAreas: [
+        {
+          category: 'labor_safety',
+          areas: ['ОТ.1', 'ОТ.2', 'ОТ.3', 'ОТ.4', 'ОТ.5', 'ОТ.6']
+        },
+        {
+          category: 'industrial_safety',
+          areas: ['Б.1', 'Б.2']
+        }
+      ],
+      createdAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ],
+
+  addCompetency: (competency) => {
+    const now = new Date().toISOString();
+    const newComp: CompetencyMatrix = {
+      ...competency,
+      id: `comp-${Date.now()}`,
+      createdAt: now,
+      updatedAt: now
+    };
+    set((state) => ({ competencies: [...state.competencies, newComp] }));
+  },
+
+  updateCompetency: (id, updates) => {
+    set((state) => ({
+      competencies: state.competencies.map((comp) =>
+        comp.id === id ? { ...comp, ...updates, updatedAt: new Date().toISOString() } : comp
+      )
+    }));
+  },
+
+  deleteCompetency: (id) => {
+    set((state) => ({
+      competencies: state.competencies.filter((comp) => comp.id !== id)
+    }));
+  },
+
+  importCompetencies: (comps) => {
+    const now = new Date().toISOString();
+    const newComps = comps.map((comp, index) => ({
+      ...comp,
+      id: `comp-import-${Date.now()}-${index}`,
+      createdAt: now,
+      updatedAt: now
+    }));
+    set((state) => ({
+      competencies: [...state.competencies, ...newComps]
+    }));
+  },
+
+  getCompetenciesByTenant: (tenantId) => {
+    return get().competencies.filter((comp) => comp.tenantId === tenantId);
+  },
+
+  getCompetenciesByOrganization: (organizationId) => {
+    return get().competencies.filter((comp) => comp.organizationId === organizationId);
   }
-}));
+}), { name: 'settings-storage' }));

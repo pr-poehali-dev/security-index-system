@@ -9,7 +9,8 @@ export type ModuleType =
   | 'tasks'
   | 'examination'
   | 'maintenance'
-  | 'budget';
+  | 'budget'
+  | 'settings';
 
 export interface User {
   id: string;
@@ -106,10 +107,14 @@ export interface CompetencyMatrix {
   tenantId: string;
   organizationId: string;
   position: string;
-  requiredAreas: string[];
-  recommendedAreas: string[];
+  requiredAreas: CompetencyAreaRequirement[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CompetencyAreaRequirement {
+  category: 'industrial_safety' | 'energy_safety' | 'labor_safety' | 'ecology';
+  areas: string[];
 }
 
 export interface GapAnalysis {

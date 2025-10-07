@@ -18,7 +18,8 @@ const MODULE_ROUTES: Record<ModuleType, string> = {
   tasks: ROUTES.TASKS,
   examination: ROUTES.EXAMINATION,
   maintenance: ROUTES.MAINTENANCE,
-  budget: ROUTES.BUDGET
+  budget: ROUTES.BUDGET,
+  settings: ROUTES.SETTINGS
 };
 
 export default function Sidebar() {
@@ -80,22 +81,9 @@ export default function Sidebar() {
           {!sidebarCollapsed && <span className="text-sm font-medium">Дашборд</span>}
         </NavLink>
 
-        {user.role === 'TenantAdmin' && (
-          <NavLink
-            to={ROUTES.SETTINGS}
-            className={({ isActive }) => cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors",
-              isActive 
-                ? "bg-emerald-600 text-white" 
-                : "text-gray-300 hover:bg-gray-800 hover:text-white"
-            )}
-          >
-            <Icon name="Settings" size={20} />
-            {!sidebarCollapsed && <span className="text-sm font-medium">Настройки</span>}
-          </NavLink>
-        )}
-
         {user.availableModules.map((moduleKey) => {
+          if (moduleKey === 'tenants') return null;
+          
           const module = MODULES[moduleKey];
           const route = MODULE_ROUTES[moduleKey];
           

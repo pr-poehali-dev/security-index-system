@@ -15,14 +15,18 @@ import EditPersonnelDialog from '../components/EditPersonnelDialog';
 import OrganizationsTab from '../components/OrganizationsTab';
 import DepartmentsTab from '../components/DepartmentsTab';
 import PersonnelTab from '../components/PersonnelTab';
-import type { Organization, Department, Personnel } from '@/types';
+import CompetenciesTab from '../components/CompetenciesTab';
+import AddCompetencyDialog from '../components/AddCompetencyDialog';
+import EditCompetencyDialog from '../components/EditCompetencyDialog';
+import type { Organization, Department, Personnel, CompetencyMatrix } from '@/types';
 
 export default function SettingsPage() {
   const user = useAuthStore((state) => state.user);
   const {
     deleteOrganization,
     deleteDepartment,
-    deletePersonnel
+    deletePersonnel,
+    deleteCompetency
   } = useSettingsStore();
   
   const { toast } = useToast();
@@ -30,12 +34,16 @@ export default function SettingsPage() {
   const [showAddOrg, setShowAddOrg] = useState(false);
   const [showAddDept, setShowAddDept] = useState(false);
   const [showAddPersonnel, setShowAddPersonnel] = useState(false);
+  const [showAddCompetency, setShowAddCompetency] = useState(false);
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
   const [editingDept, setEditingDept] = useState<Department | null>(null);
   const [editingPerson, setEditingPerson] = useState<Personnel | null>(null);
+  const [editingCompetency, setEditingCompetency] = useState<CompetencyMatrix | null>(null);
 
-  if (!user || user.role !== 'TenantAdmin') {
-    return <Navigate to={ROUTES.DASHBOARD} replace />;
+  const isReadOnly = user?.role !== 'TenantAdmin';
+  
+  if (!user) {
+    return <Navigate to={ROUTES.LOGIN} replace />;
   }
 
   const handleDeleteOrg = (id: string) => {
@@ -59,14 +67,27 @@ export default function SettingsPage() {
     }
   };
 
+  const handleDeleteCompetency = (id: string) => {
+    if (confirm('Удалить запись из справочника компетенций?')) {
+      deleteCompetency(id);
+      toast({ title: 'Запись удалена' });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Настройки тенанта</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Настройки</h1>
           <p className="text-muted-foreground mt-2">
-            Управление организациями, подразделениями и персоналом
+            Управление организациями, подразделениями, персоналом и компетенциями
           </p>
+          {isReadOnly && (
+            <p className="text-sm text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
+              <Icon name="Info" size={14} />
+              Режим просмотра - редактирование доступно только администратору
+            </p>
+          )}
         </div>
       </div>
 
@@ -83,6 +104,10 @@ export default function SettingsPage() {
           <TabsTrigger value="personnel" className="gap-2">
             <Icon name="Users" size={16} />
             Персонал
+          </TabsTrigger>
+          <TabsTrigger value="competencies" className="gap-2">
+            <Icon name="GraduationCap" size={16} />
+            Справочник компетенций
           </TabsTrigger>
         </TabsList>
 
@@ -107,6 +132,14 @@ export default function SettingsPage() {
             onAdd={() => setShowAddPersonnel(true)}
             onEdit={setEditingPerson}
             onDelete={handleDeletePerson}
+          />
+        </TabsContent>
+
+        <TabsContent value="competencies">
+          <CompetenciesTab
+            onAdd={() => setShowAddCompetency(true)}
+            onEdit={setEditingCompetency}
+            onDelete={handleDeleteCompetency}
           />
         </TabsContent>
       </Tabs>
@@ -147,6 +180,19 @@ export default function SettingsPage() {
           personnel={editingPerson}
           open={!!editingPerson}
           onOpenChange={(open) => !open && setEditingPerson(null)}
+        />
+      )}
+
+      <AddCompetencyDialog 
+        open={showAddCompetency} 
+        onOpenChange={setShowAddCompetency}
+      />
+
+      {editingCompetency && (
+        <EditCompetencyDialog 
+          competency={editingCompetency}
+          open={!!editingCompetency}
+          onOpenChange={(open) => !open && setEditingCompetency(null)}
         />
       )}
     </div>
