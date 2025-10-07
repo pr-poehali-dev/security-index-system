@@ -145,6 +145,21 @@ export interface CompetencyAreaRequirement {
   areas: string[];
 }
 
+export interface TrainingOrganization {
+  id: string;
+  tenantId: string;
+  name: string;
+  inn?: string;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  website?: string;
+  accreditations?: string[];
+  status: 'active' | 'inactive';
+  createdAt: string;
+}
+
 export interface GapAnalysis {
   employeeId: string;
   fullName: string;

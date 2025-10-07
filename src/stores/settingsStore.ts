@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser } from '@/types';
+import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, TrainingOrganization } from '@/types';
 
 interface SettingsState {
   organizations: Organization[];
@@ -9,6 +9,7 @@ interface SettingsState {
   competencies: CompetencyMatrix[];
   productionSites: ProductionSite[];
   systemUsers: SystemUser[];
+  trainingOrganizations: TrainingOrganization[];
   
   addOrganization: (org: Omit<Organization, 'id' | 'createdAt'>) => void;
   updateOrganization: (id: string, updates: Partial<Organization>) => void;
@@ -48,6 +49,12 @@ interface SettingsState {
   updateSystemUser: (id: string, updates: Partial<SystemUser>) => void;
   deleteSystemUser: (id: string) => void;
   getSystemUsersByTenant: (tenantId: string) => SystemUser[];
+  
+  addTrainingOrganization: (org: Omit<TrainingOrganization, 'id' | 'createdAt'>) => void;
+  updateTrainingOrganization: (id: string, updates: Partial<TrainingOrganization>) => void;
+  deleteTrainingOrganization: (id: string) => void;
+  getTrainingOrganizationsByTenant: (tenantId: string) => TrainingOrganization[];
+  importTrainingOrganizations: (orgs: Omit<TrainingOrganization, 'id' | 'createdAt'>[]) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
@@ -507,5 +514,112 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
 
   getSystemUsersByTenant: (tenantId) => {
     return get().systemUsers.filter((user) => user.tenantId === tenantId);
+  },
+
+  trainingOrganizations: [
+    {
+      id: 'training-org-1',
+      tenantId: 'tenant-1',
+      name: 'УЦ "Профессионал"',
+      inn: '7701234567',
+      contactPerson: 'Сидорова Елена Петровна',
+      phone: '+7 (495) 123-45-67',
+      email: 'info@professional.ru',
+      address: 'г. Москва, ул. Ленина, д. 10',
+      website: 'https://professional.ru',
+      accreditations: ['Ростехнадзор', 'Минтруд'],
+      status: 'active',
+      createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'training-org-2',
+      tenantId: 'tenant-1',
+      name: 'Центр охраны труда',
+      inn: '7702345678',
+      contactPerson: 'Иванов Петр Сергеевич',
+      phone: '+7 (495) 234-56-78',
+      email: 'ot@center.ru',
+      address: 'г. Москва, пр-т Мира, д. 25',
+      accreditations: ['Минтруд'],
+      status: 'active',
+      createdAt: new Date(Date.now() - 300 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'training-org-3',
+      tenantId: 'tenant-1',
+      name: 'Энергетический центр',
+      inn: '7703456789',
+      contactPerson: 'Петрова Анна Сергеевна',
+      phone: '+7 (495) 345-67-89',
+      email: 'info@energycenter.ru',
+      address: 'г. Москва, ул. Энергетическая, д. 12',
+      status: 'active',
+      createdAt: new Date(Date.now() - 250 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'training-org-4',
+      tenantId: 'tenant-1',
+      name: 'Учебно-курсовой комбинат',
+      inn: '7704567890',
+      contactPerson: 'Кузнецов Михаил Иванович',
+      phone: '+7 (495) 456-78-90',
+      email: 'info@ukk.ru',
+      address: 'г. Москва, ул. Обучения, д. 5',
+      accreditations: ['Минобразования'],
+      status: 'active',
+      createdAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'training-org-5',
+      tenantId: 'tenant-1',
+      name: 'Академия безопасности',
+      inn: '7705678901',
+      contactPerson: 'Смирнова Ольга Викторовна',
+      phone: '+7 (495) 567-89-01',
+      email: 'info@safety-academy.ru',
+      address: 'г. Москва, пр. Безопасности, д. 20',
+      website: 'https://safety-academy.ru',
+      accreditations: ['Ростехнадзор', 'Минтруд', 'МЧС'],
+      status: 'active',
+      createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ],
+
+  addTrainingOrganization: (org) => {
+    const newOrg: TrainingOrganization = {
+      ...org,
+      id: `training-org-${Date.now()}`,
+      createdAt: new Date().toISOString()
+    };
+    set((state) => ({ trainingOrganizations: [...state.trainingOrganizations, newOrg] }));
+  },
+
+  updateTrainingOrganization: (id, updates) => {
+    set((state) => ({
+      trainingOrganizations: state.trainingOrganizations.map((org) =>
+        org.id === id ? { ...org, ...updates } : org
+      )
+    }));
+  },
+
+  deleteTrainingOrganization: (id) => {
+    set((state) => ({
+      trainingOrganizations: state.trainingOrganizations.filter((org) => org.id !== id)
+    }));
+  },
+
+  getTrainingOrganizationsByTenant: (tenantId) => {
+    return get().trainingOrganizations.filter((org) => org.tenantId === tenantId);
+  },
+
+  importTrainingOrganizations: (orgs) => {
+    const newOrgs = orgs.map((org, index) => ({
+      ...org,
+      id: `training-org-import-${Date.now()}-${index}`,
+      createdAt: new Date().toISOString()
+    }));
+    set((state) => ({
+      trainingOrganizations: [...state.trainingOrganizations, ...newOrgs]
+    }));
   }
 }), { name: 'settings-storage' }));

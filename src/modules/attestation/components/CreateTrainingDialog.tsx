@@ -21,6 +21,8 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthStore } from '@/stores/authStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 interface CreateTrainingDialogProps {
   open: boolean;
@@ -46,15 +48,6 @@ const trainingCategories = [
   { value: 'other', label: 'Другое', icon: 'MoreHorizontal' },
 ];
 
-const mockOrganizations = [
-  'УЦ "Профессионал"',
-  'Центр охраны труда',
-  'Энергетический центр',
-  'Ростехнадзор',
-  'Учебно-курсовой комбинат',
-  'Академия безопасности',
-];
-
 const mockEmployees = [
   { id: '1', name: 'Иванов Иван Иванович', position: 'Инженер', department: 'Техническая служба' },
   { id: '2', name: 'Петрова Анна Сергеевна', position: 'Главный специалист', department: 'Отдел ОТ и ПБ' },
@@ -65,6 +58,11 @@ const mockEmployees = [
 
 export default function CreateTrainingDialog({ open, onOpenChange }: CreateTrainingDialogProps) {
   const { toast } = useToast();
+  const user = useAuthStore((state) => state.user);
+  const { getTrainingOrganizationsByTenant } = useSettingsStore();
+  
+  const trainingOrgs = user?.tenantId ? getTrainingOrganizationsByTenant(user.tenantId) : [];
+  
   const [step, setStep] = useState(1);
   const [trainingTitle, setTrainingTitle] = useState('');
   const [trainingType, setTrainingType] = useState('');
@@ -259,11 +257,16 @@ export default function CreateTrainingDialog({ open, onOpenChange }: CreateTrain
                       <SelectValue placeholder="Выберите УЦ" />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockOrganizations.map((org) => (
-                        <SelectItem key={org} value={org}>
-                          {org}
+                      {trainingOrgs.filter(org => org.status === 'active').map((org) => (
+                        <SelectItem key={org.id} value={org.name}>
+                          {org.name}
                         </SelectItem>
                       ))}
+                      {trainingOrgs.filter(org => org.status === 'active').length === 0 && (
+                        <div className="p-2 text-sm text-muted-foreground text-center">
+                          Нет доступных учебных центров
+                        </div>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

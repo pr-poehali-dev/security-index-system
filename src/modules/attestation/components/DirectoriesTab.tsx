@@ -17,15 +17,7 @@ interface CertificationType {
   category: string;
 }
 
-interface TrainingOrganization {
-  id: string;
-  name: string;
-  inn: string;
-  contactPerson: string;
-  phone: string;
-  email: string;
-  address: string;
-}
+
 
 
 
@@ -60,42 +52,26 @@ const mockCertTypes: CertificationType[] = [
   },
 ];
 
-const mockOrganizations: TrainingOrganization[] = [
-  {
-    id: '1',
-    name: 'УЦ "Профессионал"',
-    inn: '7701234567',
-    contactPerson: 'Сидорова Елена Петровна',
-    phone: '+7 (495) 123-45-67',
-    email: 'info@professional.ru',
-    address: 'г. Москва, ул. Ленина, д. 10'
-  },
-  {
-    id: '2',
-    name: 'Центр охраны труда',
-    inn: '7702345678',
-    contactPerson: 'Иванов Петр Сергеевич',
-    phone: '+7 (495) 234-56-78',
-    email: 'ot@center.ru',
-    address: 'г. Москва, пр-т Мира, д. 25'
-  },
-];
-
-
-
 export default function DirectoriesTab() {
   const user = useAuthStore((state) => state.user);
-  const { competencies, getOrganizationsByTenant } = useSettingsStore();
+  const { competencies, getOrganizationsByTenant, getTrainingOrganizationsByTenant } = useSettingsStore();
   const [searchQuery, setSearchQuery] = useState('');
   
   const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
   const tenantCompetencies = competencies.filter((c) => c.tenantId === user?.tenantId);
+  const trainingOrganizations = user?.tenantId ? getTrainingOrganizationsByTenant(user.tenantId) : [];
   
   const filteredTemplates = tenantCompetencies.filter(comp => {
     const orgName = organizations.find(o => o.id === comp.organizationId)?.name || '';
     return comp.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
            orgName.toLowerCase().includes(searchQuery.toLowerCase());
   });
+  
+  const filteredTrainingOrgs = trainingOrganizations.filter(org =>
+    org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    org.inn?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    org.contactPerson?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -181,10 +157,6 @@ export default function DirectoriesTab() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Учебные центры и организации</CardTitle>
-                <Button className="gap-2">
-                  <Icon name="Plus" size={18} />
-                  Добавить организацию
-                </Button>
               </div>
             </CardHeader>
             <CardContent>
@@ -200,49 +172,107 @@ export default function DirectoriesTab() {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                {mockOrganizations.map((org) => (
-                  <Card key={org.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <h3 className="font-semibold mb-2">{org.name}</h3>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Icon name="FileText" size={14} />
-                              ИНН: {org.inn}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Icon name="User" size={14} />
-                              {org.contactPerson}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Icon name="Phone" size={14} />
-                              {org.phone}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Icon name="Mail" size={14} />
-                              {org.email}
-                            </span>
+              {filteredTrainingOrgs.length === 0 ? (
+                <div className="text-center py-12">
+                  <Icon name="Building2" size={48} className="mx-auto text-muted-foreground mb-4" />
+                  <p className="text-lg font-medium mb-2">Учебные центры не найдены</p>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {searchQuery ? 'Измените параметры поиска' : 'Учебные центры настраиваются в модуле "Настройки"'}
+                  </p>
+                  <Button variant="outline" onClick={() => window.location.href = '/settings'} className="gap-2">
+                    <Icon name="Settings" size={16} />
+                    Перейти в настройки
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {filteredTrainingOrgs.map((org) => (
+                    <Card key={org.id}>
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold">{org.name}</h3>
+                              {org.status === 'inactive' && (
+                                <Badge variant="secondary">Неактивен</Badge>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
+                              {org.inn && (
+                                <span className="flex items-center gap-1">
+                                  <Icon name="FileText" size={14} />
+                                  ИНН: {org.inn}
+                                </span>
+                              )}
+                              {org.contactPerson && (
+                                <span className="flex items-center gap-1">
+                                  <Icon name="User" size={14} />
+                                  {org.contactPerson}
+                                </span>
+                              )}
+                              {org.phone && (
+                                <span className="flex items-center gap-1">
+                                  <Icon name="Phone" size={14} />
+                                  {org.phone}
+                                </span>
+                              )}
+                              {org.email && (
+                                <span className="flex items-center gap-1">
+                                  <Icon name="Mail" size={14} />
+                                  {org.email}
+                                </span>
+                              )}
+                              {org.website && (
+                                <span className="flex items-center gap-1">
+                                  <Icon name="Globe" size={14} />
+                                  <a href={org.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                    {org.website.replace('https://', '')}
+                                  </a>
+                                </span>
+                              )}
+                            </div>
+                            {org.address && (
+                              <p className="text-sm text-muted-foreground mt-2 flex items-start gap-1">
+                                <Icon name="MapPin" size={14} className="mt-0.5" />
+                                {org.address}
+                              </p>
+                            )}
+                            {org.accreditations && org.accreditations.length > 0 && (
+                              <div className="flex items-center gap-2 mt-2">
+                                <Icon name="Award" size={14} className="text-muted-foreground" />
+                                <div className="flex flex-wrap gap-1">
+                                  {org.accreditations.map((acc, idx) => (
+                                    <Badge key={idx} variant="outline" className="text-xs">
+                                      {acc}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          <p className="text-sm text-muted-foreground mt-2 flex items-start gap-1">
-                            <Icon name="MapPin" size={14} className="mt-0.5" />
-                            {org.address}
-                          </p>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
-                            <Icon name="Edit" size={16} />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Icon name="Trash2" size={16} />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+
+              <Card className="mt-6 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <Icon name="Info" size={20} className="text-blue-600 dark:text-blue-400 mt-0.5" />
+                    <div>
+                      <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                        Об учебных центрах
+                      </h4>
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
+                        Справочник учебных центров отображает данные из модуля "Настройки" → "Учебные центры".
+                        Для редактирования перейдите в раздел настроек.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </CardContent>
           </Card>
         </TabsContent>
