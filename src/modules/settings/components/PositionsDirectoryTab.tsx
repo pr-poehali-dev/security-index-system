@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
+import { useToast } from '@/hooks/use-toast';
+import { exportToExcel } from '@/lib/exportUtils';
+import * as XLSX from 'xlsx';
 import type { Position } from '@/types';
 import {
   Table,
@@ -31,7 +34,9 @@ const categoryLabels = {
 
 export default function PositionsDirectoryTab({ onAdd, onEdit, onDelete }: PositionsDirectoryTabProps) {
   const user = useAuthStore((state) => state.user);
-  const { getPositionsByTenant } = useSettingsStore();
+  const { getPositionsByTenant, importPositions } = useSettingsStore();
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   const positions = user?.tenantId ? getPositionsByTenant(user.tenantId) : [];
@@ -45,6 +50,59 @@ export default function PositionsDirectoryTab({ onAdd, onEdit, onDelete }: Posit
 
   const isReadOnly = user?.role !== 'TenantAdmin';
 
+  const handleExport = () => {
+    const exportData = filteredPositions.map(pos => ({
+      'Название': pos.name,
+      'Код': pos.code || '',
+      'Категория': categoryLabels[pos.category],
+      'Описание': pos.description || '',
+      'Статус': pos.status === 'active' ? 'Активная' : 'Неактивная'
+    }));
+    exportToExcel(exportData, 'Справочник_должностей');
+    toast({ title: 'Экспорт завершен', description: `Экспортировано: ${exportData.length} должностей` });
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data);
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json<any>(worksheet);
+
+      if (jsonData.length === 0) {
+        throw new Error('Файл пустой');
+      }
+
+      const categoryMap: Record<string, Position['category']> = {
+        'Руководство': 'management',
+        'Специалист': 'specialist',
+        'Рабочий': 'worker',
+        'Другое': 'other'
+      };
+
+      const positionsToImport = jsonData.map(row => ({
+        tenantId: user.tenantId!,
+        name: row['Название'] || '',
+        code: row['Код'] || undefined,
+        category: categoryMap[row['Категория']] || 'other',
+        description: row['Описание'] || undefined,
+        status: (row['Статус']?.toLowerCase().includes('актив') ? 'active' : 'inactive') as Position['status']
+      }));
+
+      importPositions(positionsToImport);
+      toast({ title: 'Импорт завершен', description: `Добавлено: ${positionsToImport.length} должностей` });
+    } catch (error) {
+      toast({ title: 'Ошибка импорта', description: 'Проверьте формат файла', variant: 'destructive' });
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -57,10 +115,27 @@ export default function PositionsDirectoryTab({ onAdd, onEdit, onDelete }: Posit
               </p>
             </div>
             {!isReadOnly && (
-              <Button onClick={onAdd}>
-                <Icon name="Plus" size={16} />
-                Добавить должность
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleExport}>
+                  <Icon name="Download" size={14} />
+                  Экспорт
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                  <Icon name="Upload" size={14} />
+                  Импорт
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleImport}
+                  className="hidden"
+                />
+                <Button onClick={onAdd}>
+                  <Icon name="Plus" size={16} />
+                  Добавить должность
+                </Button>
+              </div>
             )}
           </div>
 

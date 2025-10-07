@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
+import { useToast } from '@/hooks/use-toast';
+import { exportToExcel } from '@/lib/exportUtils';
+import * as XLSX from 'xlsx';
 import type { Person } from '@/types';
 import {
   Table,
@@ -24,7 +27,9 @@ interface PeopleDirectoryTabProps {
 
 export default function PeopleDirectoryTab({ onAdd, onEdit, onDelete }: PeopleDirectoryTabProps) {
   const user = useAuthStore((state) => state.user);
-  const { getPeopleByTenant } = useSettingsStore();
+  const { getPeopleByTenant, importPeople } = useSettingsStore();
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   const people = user?.tenantId ? getPeopleByTenant(user.tenantId) : [];
@@ -43,6 +48,64 @@ export default function PeopleDirectoryTab({ onAdd, onEdit, onDelete }: PeopleDi
     return `${person.lastName} ${person.firstName} ${person.middleName || ''}`.trim();
   };
 
+  const handleExport = () => {
+    const exportData = filteredPeople.map(person => ({
+      'Фамилия': person.lastName,
+      'Имя': person.firstName,
+      'Отчество': person.middleName || '',
+      'Дата рождения': person.birthDate || '',
+      'СНИЛС': person.snils || '',
+      'ИНН': person.inn || '',
+      'Email': person.email || '',
+      'Телефон': person.phone || '',
+      'Адрес': person.address || '',
+      'Образование': person.educationLevel || '',
+      'Статус': person.status === 'active' ? 'Активный' : 'Неактивный'
+    }));
+    exportToExcel(exportData, 'Справочник_людей');
+    toast({ title: 'Экспорт завершен', description: `Экспортировано: ${exportData.length} записей` });
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data);
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json<any>(worksheet);
+
+      if (jsonData.length === 0) {
+        throw new Error('Файл пустой');
+      }
+
+      const peopleToImport = jsonData.map(row => ({
+        tenantId: user.tenantId!,
+        lastName: row['Фамилия'] || '',
+        firstName: row['Имя'] || '',
+        middleName: row['Отчество'] || undefined,
+        birthDate: row['Дата рождения'] || undefined,
+        snils: row['СНИЛС'] || undefined,
+        inn: row['ИНН'] || undefined,
+        email: row['Email'] || undefined,
+        phone: row['Телефон'] || undefined,
+        address: row['Адрес'] || undefined,
+        educationLevel: row['Образование'] as Person['educationLevel'] || undefined,
+        status: (row['Статус']?.toLowerCase().includes('актив') ? 'active' : 'inactive') as Person['status']
+      }));
+
+      importPeople(peopleToImport);
+      toast({ title: 'Импорт завершен', description: `Добавлено: ${peopleToImport.length} человек` });
+    } catch (error) {
+      toast({ title: 'Ошибка импорта', description: 'Проверьте формат файла', variant: 'destructive' });
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -55,10 +118,27 @@ export default function PeopleDirectoryTab({ onAdd, onEdit, onDelete }: PeopleDi
               </p>
             </div>
             {!isReadOnly && (
-              <Button onClick={onAdd}>
-                <Icon name="Plus" size={16} />
-                Добавить человека
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleExport}>
+                  <Icon name="Download" size={14} />
+                  Экспорт
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                  <Icon name="Upload" size={14} />
+                  Импорт
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleImport}
+                  className="hidden"
+                />
+                <Button onClick={onAdd}>
+                  <Icon name="Plus" size={16} />
+                  Добавить человека
+                </Button>
+              </div>
             )}
           </div>
 

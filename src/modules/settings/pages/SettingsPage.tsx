@@ -27,6 +27,8 @@ import SystemUsersTab from '../components/SystemUsersTab';
 import AddSystemUserDialog from '../components/AddSystemUserDialog';
 import EditSystemUserDialog from '../components/EditSystemUserDialog';
 import ExternalOrganizationDialog from '../components/ExternalOrganizationDialog';
+import PersonDialog from '../components/PersonDialog';
+import PositionDialog from '../components/PositionDialog';
 import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization, Person, Position } from '@/types';
 
 export default function SettingsPage() {
@@ -277,6 +279,32 @@ export default function SettingsPage() {
         open={showAddPersonnel} 
         onOpenChange={setShowAddPersonnel}
       />
+
+      <PersonDialog 
+        open={showAddPerson} 
+        onOpenChange={setShowAddPerson}
+      />
+
+      {editingPersonObj && (
+        <PersonDialog 
+          person={editingPersonObj}
+          open={!!editingPersonObj}
+          onOpenChange={(open) => !open && setEditingPersonObj(null)}
+        />
+      )}
+
+      <PositionDialog 
+        open={showAddPosition} 
+        onOpenChange={setShowAddPosition}
+      />
+
+      {editingPositionObj && (
+        <PositionDialog 
+          position={editingPositionObj}
+          open={!!editingPositionObj}
+          onOpenChange={(open) => !open && setEditingPositionObj(null)}
+        />
+      )}
 
       {editingOrg && (
         <EditOrganizationDialog 

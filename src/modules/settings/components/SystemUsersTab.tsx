@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
+import { useToast } from '@/hooks/use-toast';
+import { exportToExcel } from '@/lib/exportUtils';
 import type { SystemUser } from '@/types';
 import {
   Table,
@@ -26,6 +28,7 @@ interface SystemUsersTabProps {
 export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersTabProps) {
   const user = useAuthStore((state) => state.user);
   const { getSystemUsersByTenant, getPersonnelByTenant, organizations } = useSettingsStore();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterRole, setFilterRole] = useState<string>('all');
@@ -77,6 +80,20 @@ export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersT
       case 'Director': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const handleExport = () => {
+    const exportData = filteredUsers.map(sysUser => ({
+      'Login': sysUser.login,
+      'Email': sysUser.email,
+      'Роль': sysUser.role,
+      'Сотрудник': getPersonnelName(sysUser.personnelId),
+      'Доступ к организациям': getOrgNames(sysUser.accessibleOrganizations),
+      'Статус': sysUser.status === 'active' ? 'Активен' : 'Заблокирован',
+      'Дата создания': new Date(sysUser.createdAt).toLocaleDateString('ru-RU')
+    }));
+    exportToExcel(exportData, 'Пользователи_системы');
+    toast({ title: 'Экспорт завершен', description: `Экспортировано: ${exportData.length} пользователей` });
   };
 
   const getRoleLabel = (role: string) => {
@@ -149,6 +166,11 @@ export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersT
               <Icon name="LayoutGrid" size={16} />
             </Button>
           </div>
+
+          <Button variant="outline" size="sm" onClick={handleExport}>
+            <Icon name="Download" size={14} className="mr-2" />
+            Экспорт
+          </Button>
 
           <Button onClick={onAdd}>
             <Icon name="Plus" size={16} className="mr-2" />

@@ -1,14 +1,36 @@
+import { useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { exportToExcel } from '@/lib/exportUtils';
+import { useAuthStore } from '@/stores/authStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { useToast } from '@/hooks/use-toast';
+import * as XLSX from 'xlsx';
+import type { ProductionSite } from '@/types';
 
 interface ProductionSitesImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+interface ImportRow {
+  'Организация': string;
+  'Название площадки': string;
+  'Код': string;
+  'Адрес': string;
+  'Руководитель': string;
+  'Телефон': string;
+  'Статус': string;
+}
+
 export default function ProductionSitesImportDialog({ open, onOpenChange }: ProductionSitesImportDialogProps) {
+  const user = useAuthStore((state) => state.user);
+  const { organizations, importProductionSites } = useSettingsStore();
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const handleDownloadTemplate = () => {
     const templateData = [
       {
@@ -32,7 +54,92 @@ export default function ProductionSitesImportDialog({ open, onOpenChange }: Prod
     ];
 
     exportToExcel(templateData, 'Шаблон_производственных_площадок');
-    onOpenChange(false);
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    setIsProcessing(true);
+
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data);
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json<ImportRow>(worksheet);
+
+      if (jsonData.length === 0) {
+        throw new Error('Файл пустой');
+      }
+
+      const sitesToImport: Omit<ProductionSite, 'id' | 'createdAt'>[] = [];
+      const errors: string[] = [];
+
+      jsonData.forEach((row, index) => {
+        const rowNum = index + 2;
+
+        if (!row['Название площадки']?.trim()) {
+          errors.push(`Строка ${rowNum}: отсутствует название площадки`);
+          return;
+        }
+
+        if (!row['Адрес']?.trim()) {
+          errors.push(`Строка ${rowNum}: отсутствует адрес`);
+          return;
+        }
+
+        const orgName = row['Организация']?.trim();
+        const org = organizations.find(o => o.name === orgName);
+        
+        if (!org) {
+          errors.push(`Строка ${rowNum}: организация "${orgName}" не найдена`);
+          return;
+        }
+
+        const status = row['Статус']?.toLowerCase().includes('актив') ? 'active' : 'inactive';
+
+        sitesToImport.push({
+          tenantId: user.tenantId!,
+          organizationId: org.id,
+          name: row['Название площадки'].trim(),
+          code: row['Код']?.trim(),
+          address: row['Адрес'].trim(),
+          head: row['Руководитель']?.trim(),
+          phone: row['Телефон']?.trim(),
+          status
+        });
+      });
+
+      if (errors.length > 0) {
+        toast({
+          title: 'Ошибки импорта',
+          description: errors.slice(0, 3).join('; '),
+          variant: 'destructive'
+        });
+        setIsProcessing(false);
+        return;
+      }
+
+      importProductionSites(sitesToImport);
+      
+      toast({
+        title: 'Импорт завершен',
+        description: `Добавлено площадок: ${sitesToImport.length}`
+      });
+
+      onOpenChange(false);
+    } catch (error) {
+      toast({
+        title: 'Ошибка импорта',
+        description: error instanceof Error ? error.message : 'Проверьте формат файла',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsProcessing(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
   };
 
   return (
@@ -74,10 +181,27 @@ export default function ProductionSitesImportDialog({ open, onOpenChange }: Prod
             </ul>
           </div>
 
-          <Button onClick={handleDownloadTemplate} className="w-full gap-2">
-            <Icon name="Download" size={16} />
-            Скачать шаблон Excel
-          </Button>
+          <div className="space-y-2">
+            <Button onClick={handleDownloadTemplate} variant="outline" className="w-full gap-2">
+              <Icon name="Download" size={16} />
+              Скачать шаблон Excel
+            </Button>
+            <Button 
+              onClick={() => fileInputRef.current?.click()} 
+              className="w-full gap-2"
+              disabled={isProcessing}
+            >
+              <Icon name="Upload" size={16} />
+              {isProcessing ? 'Обработка...' : 'Загрузить Excel файл'}
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleImport}
+              className="hidden"
+            />
+          </div>
         </div>
       </DialogContent>
     </Dialog>

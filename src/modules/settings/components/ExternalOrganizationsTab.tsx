@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { ExternalOrganization, ExternalOrganizationType } from '@/types';
 import { exportToExcel } from '@/lib/exportUtils';
+import { useToast } from '@/hooks/use-toast';
+import * as XLSX from 'xlsx';
 import {
   Select,
   SelectContent,
@@ -41,7 +43,9 @@ const ORGANIZATION_TYPES: { value: ExternalOrganizationType; label: string; icon
 
 export default function ExternalOrganizationsTab({ onAdd, onEdit, onDelete }: ExternalOrganizationsTabProps) {
   const user = useAuthStore((state) => state.user);
-  const { externalOrganizations: allOrgs } = useSettingsStore();
+  const { externalOrganizations: allOrgs, importExternalOrganizations } = useSettingsStore();
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
 
@@ -81,11 +85,57 @@ export default function ExternalOrganizationsTab({ onAdd, onEdit, onDelete }: Ex
       'Сайт': org.website || '',
       'Аккредитации': org.accreditations?.join(', ') || '',
       'Описание': org.description || '',
-      'Статус': org.status === 'active' ? 'Активен' : 'Неактивен',
-      'Дата создания': new Date(org.createdAt).toLocaleDateString('ru-RU')
+      'Статус': org.status === 'active' ? 'Активен' : 'Неактивен'
     }));
 
     exportToExcel(data, 'Сторонние_организации');
+    toast({ title: 'Экспорт завершен', description: `Экспортировано: ${data.length} записей` });
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data);
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json<any>(worksheet);
+
+      if (jsonData.length === 0) {
+        throw new Error('Файл пустой');
+      }
+
+      const typeMap: Record<string, ExternalOrganizationType> = {};
+      ORGANIZATION_TYPES.forEach(t => {
+        typeMap[t.label] = t.value;
+      });
+
+      const orgsToImport = jsonData.map(row => ({
+        tenantId: user.tenantId!,
+        type: typeMap[row['Тип']] || 'other',
+        name: row['Название'] || '',
+        inn: row['ИНН'] || undefined,
+        kpp: row['КПП'] || undefined,
+        contactPerson: row['Контактное лицо'] || undefined,
+        phone: row['Телефон'] || undefined,
+        email: row['Email'] || undefined,
+        address: row['Адрес'] || undefined,
+        website: row['Сайт'] || undefined,
+        accreditations: row['Аккредитации']?.split(',').map((s: string) => s.trim()).filter(Boolean) || undefined,
+        description: row['Описание'] || undefined,
+        status: (row['Статус']?.toLowerCase().includes('актив') ? 'active' : 'inactive') as 'active' | 'inactive'
+      }));
+
+      importExternalOrganizations(orgsToImport);
+      toast({ title: 'Импорт завершен', description: `Добавлено: ${orgsToImport.length} организаций` });
+    } catch (error) {
+      toast({ title: 'Ошибка импорта', description: 'Проверьте формат файла', variant: 'destructive' });
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
   };
 
   const typeStats = ORGANIZATION_TYPES.map(type => ({
@@ -145,15 +195,28 @@ export default function ExternalOrganizationsTab({ onAdd, onEdit, onDelete }: Ex
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline" onClick={handleExport}>
-              <Icon name="Download" className="mr-2" size={16} />
+            <Button variant="outline" size="sm" onClick={handleExport}>
+              <Icon name="Download" size={14} />
               Экспорт
             </Button>
             {!isReadOnly && (
-              <Button onClick={onAdd}>
-                <Icon name="Plus" className="mr-2" size={16} />
-                Добавить организацию
-              </Button>
+              <>
+                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                  <Icon name="Upload" size={14} />
+                  Импорт
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleImport}
+                  className="hidden"
+                />
+                <Button onClick={onAdd} size="sm">
+                  <Icon name="Plus" size={16} />
+                  Добавить организацию
+                </Button>
+              </>
             )}
           </div>
         </div>
