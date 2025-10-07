@@ -218,6 +218,62 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
     setShowOrderDialog(true);
   };
 
+  const handleExportToExcel = async () => {
+    const { utils, writeFile } = await import('xlsx');
+    
+    const employeesToExport = selectedEmployeeIds.size > 0 
+      ? mockEmployees.filter(emp => selectedEmployeeIds.has(emp.id))
+      : filteredEmployees;
+
+    const exportData = employeesToExport.flatMap(emp => 
+      emp.certifications.map(cert => ({
+        'ФИО': emp.name,
+        'Должность': emp.position,
+        'Подразделение': emp.department,
+        'Организация': emp.organization,
+        'Категория аттестации': cert.category,
+        'Область аттестации': cert.area,
+        'Дата выдачи': new Date(cert.issueDate).toLocaleDateString('ru'),
+        'Срок действия до': new Date(cert.expiryDate).toLocaleDateString('ru'),
+        'Осталось дней': cert.daysLeft,
+        'Статус': cert.status === 'valid' ? 'Действует' : cert.status === 'expiring_soon' ? 'Истекает' : 'Просрочен',
+        'Номер протокола': cert.protocolNumber || '',
+        'Дата протокола': cert.protocolDate ? new Date(cert.protocolDate).toLocaleDateString('ru') : '',
+        'Верифицирован': cert.verified ? 'Да' : 'Нет',
+        'Дата верификации': cert.verifiedDate ? new Date(cert.verifiedDate).toLocaleDateString('ru') : ''
+      }))
+    );
+
+    const ws = utils.json_to_sheet(exportData);
+    
+    const colWidths = [
+      { wch: 30 }, // ФИО
+      { wch: 25 }, // Должность
+      { wch: 20 }, // Подразделение
+      { wch: 35 }, // Организация
+      { wch: 25 }, // Категория
+      { wch: 40 }, // Область
+      { wch: 12 }, // Дата выдачи
+      { wch: 15 }, // Срок действия
+      { wch: 12 }, // Осталось дней
+      { wch: 12 }, // Статус
+      { wch: 18 }, // Номер протокола
+      { wch: 15 }, // Дата протокола
+      { wch: 15 }, // Верифицирован
+      { wch: 15 }  // Дата верификации
+    ];
+    ws['!cols'] = colWidths;
+
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, 'Сотрудники и аттестации');
+
+    const fileName = selectedEmployeeIds.size > 0 
+      ? `Сотрудники_выбранные_${new Date().toLocaleDateString('ru')}.xlsx`
+      : `Сотрудники_все_${new Date().toLocaleDateString('ru')}.xlsx`;
+    
+    writeFile(wb, fileName);
+  };
+
   const selectedEmployees = useMemo(() => {
     return mockEmployees.filter(emp => selectedEmployeeIds.has(emp.id));
   }, [selectedEmployeeIds]);
@@ -408,9 +464,10 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                     <Icon name="Upload" size={16} className="mr-2" />
                     Импорт из Excel
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportToExcel}>
                     <Icon name="Download" size={16} className="mr-2" />
                     Экспорт в Excel
+                    {selectedEmployeeIds.size > 0 && ` (${selectedEmployeeIds.size})`}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -505,15 +562,26 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                     Выбрано сотрудников: {selectedEmployeeIds.size}
                   </span>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedEmployeeIds(new Set())}
-                  className="gap-2"
-                >
-                  <Icon name="X" size={14} />
-                  Отменить выбор
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleExportToExcel}
+                    className="gap-2"
+                  >
+                    <Icon name="Download" size={14} />
+                    Экспорт в Excel
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedEmployeeIds(new Set())}
+                    className="gap-2"
+                  >
+                    <Icon name="X" size={14} />
+                    Отменить выбор
+                  </Button>
+                </div>
               </div>
             </div>
           )}
