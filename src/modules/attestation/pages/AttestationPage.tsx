@@ -6,6 +6,7 @@ import ComplianceAnalysisTab from '../components/ComplianceAnalysisTab';
 import OrdersTrainingTab from '../components/OrdersTrainingTab';
 import ReportsTab from '../components/ReportsTab';
 import DirectoriesTab from '../components/DirectoriesTab';
+import NotificationsTab from '../components/NotificationsTab';
 
 export default function AttestationPage() {
   return (
@@ -38,6 +39,10 @@ export default function AttestationPage() {
             <Icon name="BookOpen" size={16} />
             Справочники
           </TabsTrigger>
+          <TabsTrigger value="notifications" className="gap-2">
+            <Icon name="Bell" size={16} />
+            Уведомления
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="employees">
@@ -58,6 +63,10 @@ export default function AttestationPage() {
 
         <TabsContent value="directories">
           <DirectoriesTab />
+        </TabsContent>
+
+        <TabsContent value="notifications">
+          <NotificationsTab />
         </TabsContent>
       </Tabs>
     </div>
