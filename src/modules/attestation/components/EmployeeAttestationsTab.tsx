@@ -60,7 +60,7 @@ interface EmployeeAttestationsTabProps {
 }
 
 export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttestationsTabProps) {
-  const { personnel, people, positions, tenants } = useSettingsStore();
+  const { personnel, people, positions, organizations } = useSettingsStore();
   const { certifications, updateCertification } = useAttestationStore();
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,7 +82,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
   const mockEmployees = useMemo(() => {
     return personnel.map(p => {
       const info = getPersonnelFullInfo(p, people, positions);
-      const tenant = tenants.find(t => t.id === p.tenantId);
+      const org = organizations.find(o => o.id === p.organizationId);
       const personnelCerts = certifications.filter(c => c.personnelId === p.id);
 
       return {
@@ -90,7 +90,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
         name: info.fullName,
         position: info.position,
         department: '—',
-        organization: tenant?.name || '—',
+        organization: org?.name || '—',
         certifications: personnelCerts.map(cert => {
           const { status, daysLeft } = getCertificationStatus(cert.expiryDate);
           const categoryMap: Record<string, string> = {
@@ -115,7 +115,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
         })
       };
     });
-  }, [personnel, people, positions, tenants, certifications]);
+  }, [personnel, people, positions, organizations, certifications]);
 
   const handleVerificationToggle = (certId: string) => {
     const cert = certifications.find(c => c.id === certId);
