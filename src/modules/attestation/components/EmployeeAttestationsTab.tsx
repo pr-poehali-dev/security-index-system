@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
-import EmployeeCard from './EmployeeCard';
 import {
   Select,
   SelectContent,
@@ -11,13 +10,119 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
-const employees = [
-  { id: '1', name: 'Иванов Иван Иванович', position: 'Инженер', nextCert: '2025-11-20', status: 'valid' as const, daysLeft: 46 },
-  { id: '2', name: 'Петрова Анна Сергеевна', position: 'Начальник участка', nextCert: '2025-10-25', status: 'expiring_soon' as const, daysLeft: 20 },
-  { id: '3', name: 'Сидоров Петр Николаевич', position: 'Техник', nextCert: '2025-09-30', status: 'expired' as const, daysLeft: -5 },
-  { id: '4', name: 'Кузнецов Алексей Владимирович', position: 'Электромонтер', nextCert: '2025-12-15', status: 'valid' as const, daysLeft: 71 },
-  { id: '5', name: 'Морозова Елена Петровна', position: 'Инженер ОТ', nextCert: '2025-10-10', status: 'expiring_soon' as const, daysLeft: 5 },
+interface Certification {
+  id: string;
+  category: string;
+  area: string;
+  issueDate: string;
+  expiryDate: string;
+  status: 'valid' | 'expiring_soon' | 'expired';
+  daysLeft: number;
+}
+
+interface Employee {
+  id: string;
+  name: string;
+  position: string;
+  department: string;
+  certifications: Certification[];
+}
+
+const mockEmployees: Employee[] = [
+  {
+    id: '1',
+    name: 'Иванов Иван Иванович',
+    position: 'Инженер',
+    department: 'Производство',
+    certifications: [
+      {
+        id: '1-1',
+        category: 'Промышленная безопасность',
+        area: 'А.1 Основы промышленной безопасности',
+        issueDate: '2023-01-01',
+        expiryDate: '2028-01-01',
+        status: 'valid',
+        daysLeft: 1182
+      },
+      {
+        id: '1-2',
+        category: 'Промышленная безопасность',
+        area: 'Б.3 Эксплуатация объектов электроэнергетики',
+        issueDate: '2021-09-15',
+        expiryDate: '2026-09-14',
+        status: 'valid',
+        daysLeft: 342
+      },
+      {
+        id: '1-3',
+        category: 'Энергобезопасность',
+        area: 'Электропотребители промышленные 5 группа до и выше 1000В',
+        issueDate: '2025-02-17',
+        expiryDate: '2026-02-17',
+        status: 'valid',
+        daysLeft: 133
+      }
+    ]
+  },
+  {
+    id: '2',
+    name: 'Петрова Анна Сергеевна',
+    position: 'Начальник участка',
+    department: 'Производство',
+    certifications: [
+      {
+        id: '2-1',
+        category: 'Промышленная безопасность',
+        area: 'А.1 Основы промышленной безопасности',
+        issueDate: '2020-03-10',
+        expiryDate: '2025-03-10',
+        status: 'expired',
+        daysLeft: -211
+      },
+      {
+        id: '2-2',
+        category: 'Электробезопасность',
+        area: 'V группа до 1000В',
+        issueDate: '2024-06-15',
+        expiryDate: '2025-06-15',
+        status: 'expiring_soon',
+        daysLeft: 251
+      }
+    ]
+  },
+  {
+    id: '3',
+    name: 'Сидоров Петр Николаевич',
+    position: 'Электромонтер',
+    department: 'Энергетика',
+    certifications: [
+      {
+        id: '3-1',
+        category: 'Электробезопасность',
+        area: 'III группа до 1000В',
+        issueDate: '2023-05-20',
+        expiryDate: '2025-11-20',
+        status: 'expiring_soon',
+        daysLeft: 44
+      },
+      {
+        id: '3-2',
+        category: 'Работы на высоте',
+        area: '2 группа без применения средств подмащивания',
+        issueDate: '2022-08-01',
+        expiryDate: '2025-08-01',
+        status: 'expired',
+        daysLeft: -67
+      }
+    ]
+  }
 ];
 
 interface EmployeeAttestationsTabProps {
@@ -28,20 +133,62 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
-  const filteredEmployees = employees.filter(emp => {
+  const filteredEmployees = mockEmployees.filter(emp => {
     const matchesSearch = emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           emp.position.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || emp.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    
+    if (statusFilter === 'all') return matchesSearch;
+    
+    const hasStatus = emp.certifications.some(cert => cert.status === statusFilter);
+    return matchesSearch && hasStatus;
   });
 
-  const stats = {
-    total: employees.length,
-    valid: employees.filter(e => e.status === 'valid').length,
-    expiring: employees.filter(e => e.status === 'expiring_soon').length,
-    expired: employees.filter(e => e.status === 'expired').length,
+  const getEmployeeStatus = (employee: Employee): 'valid' | 'expiring_soon' | 'expired' => {
+    const hasExpired = employee.certifications.some(c => c.status === 'expired');
+    if (hasExpired) return 'expired';
+    
+    const hasExpiring = employee.certifications.some(c => c.status === 'expiring_soon');
+    if (hasExpiring) return 'expiring_soon';
+    
+    return 'valid';
   };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'valid': return 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30';
+      case 'expiring_soon': return 'text-amber-600 bg-amber-100 dark:bg-amber-900/30';
+      case 'expired': return 'text-red-600 bg-red-100 dark:bg-red-900/30';
+      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900/30';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'valid': return 'Действующие';
+      case 'expiring_soon': return 'Истекают';
+      case 'expired': return 'Просрочены';
+      default: return status;
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'valid': return 'CheckCircle2';
+      case 'expiring_soon': return 'AlertTriangle';
+      case 'expired': return 'XCircle';
+      default: return 'Circle';
+    }
+  };
+
+  const totalCertifications = mockEmployees.reduce((sum, emp) => sum + emp.certifications.length, 0);
+  const validCertifications = mockEmployees.reduce((sum, emp) => 
+    sum + emp.certifications.filter(c => c.status === 'valid').length, 0);
+  const expiringCertifications = mockEmployees.reduce((sum, emp) => 
+    sum + emp.certifications.filter(c => c.status === 'expiring_soon').length, 0);
+  const expiredCertifications = mockEmployees.reduce((sum, emp) => 
+    sum + emp.certifications.filter(c => c.status === 'expired').length, 0);
 
   return (
     <div className="space-y-6">
@@ -49,17 +196,17 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
-              <Icon name="Users" className="text-blue-600" size={24} />
-              <span className="text-2xl font-bold">{stats.total}</span>
+              <Icon name="Award" className="text-blue-600" size={24} />
+              <span className="text-2xl font-bold">{totalCertifications}</span>
             </div>
-            <p className="text-sm text-muted-foreground">Всего сотрудников</p>
+            <p className="text-sm text-muted-foreground">Всего аттестаций</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
               <Icon name="CheckCircle2" className="text-emerald-600" size={24} />
-              <span className="text-2xl font-bold">{stats.valid}</span>
+              <span className="text-2xl font-bold">{validCertifications}</span>
             </div>
             <p className="text-sm text-muted-foreground">Действующие допуски</p>
           </CardContent>
@@ -68,7 +215,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
               <Icon name="AlertTriangle" className="text-amber-600" size={24} />
-              <span className="text-2xl font-bold">{stats.expiring}</span>
+              <span className="text-2xl font-bold">{expiringCertifications}</span>
             </div>
             <p className="text-sm text-muted-foreground">Истекают (30 дней)</p>
           </CardContent>
@@ -77,7 +224,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
               <Icon name="XCircle" className="text-red-600" size={24} />
-              <span className="text-2xl font-bold">{stats.expired}</span>
+              <span className="text-2xl font-bold">{expiredCertifications}</span>
             </div>
             <p className="text-sm text-muted-foreground">Просрочено</p>
           </CardContent>
@@ -87,7 +234,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Реестр сотрудников</CardTitle>
+            <CardTitle>Реестр сотрудников и аттестаций</CardTitle>
             <div className="flex items-center gap-2">
               <Button
                 variant={viewMode === 'cards' ? 'default' : 'outline'}
@@ -131,18 +278,85 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Все статусы</SelectItem>
-                <SelectItem value="valid">Действующий</SelectItem>
-                <SelectItem value="expiring_soon">Истекает</SelectItem>
-                <SelectItem value="expired">Просрочен</SelectItem>
+                <SelectItem value="valid">Действующие</SelectItem>
+                <SelectItem value="expiring_soon">Истекают</SelectItem>
+                <SelectItem value="expired">Просрочены</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {viewMode === 'cards' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {filteredEmployees.map((emp) => (
-                <EmployeeCard key={emp.id} employee={emp} />
-              ))}
+            <div className="space-y-4">
+              {filteredEmployees.map((emp) => {
+                const status = getEmployeeStatus(emp);
+                return (
+                  <Card key={emp.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-lg">{emp.name}</h3>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
+                              <Icon name={getStatusIcon(status) as any} size={12} className="inline mr-1" />
+                              {getStatusLabel(status)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{emp.position} • {emp.department}</p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Аттестаций: {emp.certifications.length}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setSelectedEmployee(emp)}
+                            className="gap-2"
+                          >
+                            <Icon name="Eye" size={14} />
+                            Подробнее
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Icon name="Edit" size={16} />
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t space-y-2">
+                        {emp.certifications.slice(0, 2).map((cert) => (
+                          <div key={cert.id} className="flex items-start justify-between text-sm">
+                            <div className="flex-1">
+                              <p className="font-medium">{cert.category}</p>
+                              <p className="text-muted-foreground text-xs">{cert.area}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className={`text-xs font-medium ${
+                                cert.status === 'valid' ? 'text-emerald-600' :
+                                cert.status === 'expiring_soon' ? 'text-amber-600' : 'text-red-600'
+                              }`}>
+                                до {new Date(cert.expiryDate).toLocaleDateString('ru')}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {cert.daysLeft > 0 ? `${cert.daysLeft} дн.` : 'Просрочено'}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                        {emp.certifications.length > 2 && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full text-xs"
+                            onClick={() => setSelectedEmployee(emp)}
+                          >
+                            Показать все ({emp.certifications.length})
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -151,39 +365,44 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                   <tr className="text-left">
                     <th className="pb-3 font-medium">ФИО</th>
                     <th className="pb-3 font-medium">Должность</th>
-                    <th className="pb-3 font-medium">Следующая аттестация</th>
+                    <th className="pb-3 font-medium">Подразделение</th>
+                    <th className="pb-3 font-medium">Аттестаций</th>
                     <th className="pb-3 font-medium">Статус</th>
                     <th className="pb-3 font-medium">Действия</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredEmployees.map((emp) => (
-                    <tr key={emp.id} className="border-b last:border-0">
-                      <td className="py-3">{emp.name}</td>
-                      <td className="py-3 text-muted-foreground">{emp.position}</td>
-                      <td className="py-3">{new Date(emp.nextCert).toLocaleDateString('ru')}</td>
-                      <td className="py-3">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                          emp.status === 'valid' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
-                          emp.status === 'expiring_soon' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                          'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                        }`}>
-                          <Icon name={emp.status === 'valid' ? 'CheckCircle2' : emp.status === 'expiring_soon' ? 'AlertTriangle' : 'XCircle'} size={12} />
-                          {emp.status === 'valid' ? 'Действующий' : emp.status === 'expiring_soon' ? 'Истекает' : 'Просрочен'}
-                        </span>
-                      </td>
-                      <td className="py-3">
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
-                            <Icon name="Eye" size={16} />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Icon name="Edit" size={16} />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {filteredEmployees.map((emp) => {
+                    const status = getEmployeeStatus(emp);
+                    return (
+                      <tr key={emp.id} className="border-b last:border-0">
+                        <td className="py-3">{emp.name}</td>
+                        <td className="py-3 text-muted-foreground">{emp.position}</td>
+                        <td className="py-3 text-muted-foreground">{emp.department}</td>
+                        <td className="py-3">{emp.certifications.length}</td>
+                        <td className="py-3">
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
+                            <Icon name={getStatusIcon(status) as any} size={12} />
+                            {getStatusLabel(status)}
+                          </span>
+                        </td>
+                        <td className="py-3">
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setSelectedEmployee(emp)}
+                            >
+                              <Icon name="Eye" size={16} />
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Icon name="Edit" size={16} />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -196,6 +415,88 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!selectedEmployee} onOpenChange={(open) => !open && setSelectedEmployee(null)}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Аттестации сотрудника</DialogTitle>
+          </DialogHeader>
+          {selectedEmployee && (
+            <div className="space-y-4">
+              <div className="pb-4 border-b">
+                <h3 className="font-semibold text-lg">{selectedEmployee.name}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {selectedEmployee.position} • {selectedEmployee.department}
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {selectedEmployee.certifications.map((cert) => (
+                  <Card key={cert.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-semibold">{cert.category}</h4>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(cert.status)}`}>
+                              <Icon name={getStatusIcon(cert.status) as any} size={12} className="inline mr-1" />
+                              {getStatusLabel(cert.status)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-3">{cert.area}</p>
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                              <p className="text-muted-foreground">Дата аттестации:</p>
+                              <p className="font-medium">{new Date(cert.issueDate).toLocaleDateString('ru')}</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Действителен до:</p>
+                              <p className={`font-medium ${
+                                cert.status === 'valid' ? 'text-emerald-600' :
+                                cert.status === 'expiring_soon' ? 'text-amber-600' : 'text-red-600'
+                              }`}>
+                                {new Date(cert.expiryDate).toLocaleDateString('ru')}
+                              </p>
+                            </div>
+                          </div>
+                          {cert.daysLeft > 0 ? (
+                            <p className="text-sm text-muted-foreground mt-2">
+                              Осталось: {cert.daysLeft} дней
+                            </p>
+                          ) : (
+                            <p className="text-sm text-red-600 font-medium mt-2">
+                              Просрочено на {Math.abs(cert.daysLeft)} дней
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="sm">
+                            <Icon name="Edit" size={16} />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Icon name="FileText" size={16} />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              <div className="pt-4 border-t flex items-center justify-end gap-2">
+                <Button variant="outline" className="gap-2">
+                  <Icon name="Download" size={16} />
+                  Экспорт PDF
+                </Button>
+                <Button className="gap-2">
+                  <Icon name="Plus" size={16} />
+                  Добавить аттестацию
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
