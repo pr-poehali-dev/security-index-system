@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import ImportCertificationsDialog from './ImportCertificationsDialog';
+import AddCertificationDialog from './AddCertificationDialog';
 
 interface Certification {
   id: string;
@@ -30,6 +31,8 @@ interface Certification {
   area: string;
   issueDate: string;
   expiryDate: string;
+  protocolNumber?: string;
+  protocolDate?: string;
   status: 'valid' | 'expiring_soon' | 'expired';
   daysLeft: number;
 }
@@ -55,6 +58,8 @@ const mockEmployees: Employee[] = [
         area: 'А.1 Основы промышленной безопасности',
         issueDate: '2023-01-01',
         expiryDate: '2028-01-01',
+        protocolNumber: 'ПБ-123/2023',
+        protocolDate: '2023-01-01',
         status: 'valid',
         daysLeft: 1182
       },
@@ -64,6 +69,8 @@ const mockEmployees: Employee[] = [
         area: 'Б.3 Эксплуатация объектов электроэнергетики',
         issueDate: '2021-09-15',
         expiryDate: '2026-09-14',
+        protocolNumber: 'ПБ-456/2021',
+        protocolDate: '2021-09-15',
         status: 'valid',
         daysLeft: 342
       },
@@ -73,6 +80,8 @@ const mockEmployees: Employee[] = [
         area: 'Электропотребители промышленные 5 группа до и выше 1000В',
         issueDate: '2025-02-17',
         expiryDate: '2026-02-17',
+        protocolNumber: 'ЭБ-789/2025',
+        protocolDate: '2025-02-17',
         status: 'valid',
         daysLeft: 133
       }
@@ -90,6 +99,8 @@ const mockEmployees: Employee[] = [
         area: 'А.1 Основы промышленной безопасности',
         issueDate: '2020-03-10',
         expiryDate: '2025-03-10',
+        protocolNumber: 'ПБ-234/2020',
+        protocolDate: '2020-03-10',
         status: 'expired',
         daysLeft: -211
       },
@@ -142,6 +153,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showAddCertDialog, setShowAddCertDialog] = useState(false);
 
   const filteredEmployees = mockEmployees.filter(emp => {
     const matchesSearch = emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -485,6 +497,18 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                                 {new Date(cert.expiryDate).toLocaleDateString('ru')}
                               </p>
                             </div>
+                            {cert.protocolNumber && (
+                              <>
+                                <div>
+                                  <p className="text-muted-foreground">Номер протокола:</p>
+                                  <p className="font-medium">{cert.protocolNumber}</p>
+                                </div>
+                                <div>
+                                  <p className="text-muted-foreground">Дата протокола:</p>
+                                  <p className="font-medium">{cert.protocolDate ? new Date(cert.protocolDate).toLocaleDateString('ru') : '—'}</p>
+                                </div>
+                              </>
+                            )}
                           </div>
                           {cert.daysLeft > 0 ? (
                             <p className="text-sm text-muted-foreground mt-2">
@@ -494,6 +518,32 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                             <p className="text-sm text-red-600 font-medium mt-2">
                               Просрочено на {Math.abs(cert.daysLeft)} дней
                             </p>
+                          )}
+                          
+                          {cert.protocolNumber && (cert.category === 'Промышленная безопасность' || cert.category === 'Энергобезопасность') && (
+                            <div className="flex items-center gap-2 mt-3 pt-3 border-t">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="gap-2"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(cert.protocolNumber || '');
+                                  alert('Номер протокола скопирован');
+                                }}
+                              >
+                                <Icon name="Copy" size={14} />
+                                Скопировать номер протокола
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="gap-2"
+                                onClick={() => window.open('https://qr.gosnadzor.ru/prombez', '_blank')}
+                              >
+                                <Icon name="ExternalLink" size={14} />
+                                Проверить в Ростехнадзоре
+                              </Button>
+                            </div>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
@@ -515,7 +565,10 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                   <Icon name="Download" size={16} />
                   Экспорт PDF
                 </Button>
-                <Button className="gap-2">
+                <Button 
+                  className="gap-2"
+                  onClick={() => setShowAddCertDialog(true)}
+                >
                   <Icon name="Plus" size={16} />
                   Добавить аттестацию
                 </Button>
@@ -528,6 +581,12 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
       <ImportCertificationsDialog 
         open={showImportDialog}
         onOpenChange={setShowImportDialog}
+      />
+
+      <AddCertificationDialog 
+        open={showAddCertDialog}
+        onOpenChange={setShowAddCertDialog}
+        employeeName={selectedEmployee?.name}
       />
     </div>
   );

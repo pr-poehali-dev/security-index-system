@@ -17,6 +17,8 @@ interface ImportedCertification {
   area: string;
   issueDate: string;
   expiryDate: string;
+  protocolNumber?: string;
+  protocolDate?: string;
   status: 'valid' | 'warning' | 'error';
   errors?: string[];
 }
@@ -62,6 +64,8 @@ export default function ImportCertificationsDialog({ open, onOpenChange }: Impor
           area: 'А.1 Основы промышленной безопасности',
           issueDate: '2023-01-01',
           expiryDate: '2028-01-01',
+          protocolNumber: 'ПБ-123/2023',
+          protocolDate: '2023-01-01',
           status: 'valid'
         },
         {
@@ -70,6 +74,8 @@ export default function ImportCertificationsDialog({ open, onOpenChange }: Impor
           area: 'Б.3 Эксплуатация объектов электроэнергетики',
           issueDate: '2021-09-15',
           expiryDate: '2026-09-14',
+          protocolNumber: 'ПБ-456/2021',
+          protocolDate: '2021-09-15',
           status: 'valid'
         },
         {
@@ -86,6 +92,7 @@ export default function ImportCertificationsDialog({ open, onOpenChange }: Impor
           area: 'А.1',
           issueDate: '2023-01-01',
           expiryDate: '2028-01-01',
+          protocolNumber: 'ПБ-999/2023',
           status: 'error',
           errors: ['Сотрудник не найден в системе']
         },
@@ -173,6 +180,7 @@ export default function ImportCertificationsDialog({ open, onOpenChange }: Impor
                       <li>• Формат: .xlsx или .xls</li>
                       <li>• Первая строка — заголовки колонок</li>
                       <li>• Обязательные колонки: ФИО, Категория аттестации, Область аттестации, Дата выдачи, Дата истечения</li>
+                      <li>• Дополнительные колонки: Номер протокола, Дата протокола (для ПБ и ЭБ)</li>
                       <li>• Даты в формате: ДД.ММ.ГГГГ или ГГГГ-ММ-ДД</li>
                       <li>• ФИО должно полностью совпадать с данными в системе</li>
                     </ul>
@@ -308,6 +316,9 @@ export default function ImportCertificationsDialog({ open, onOpenChange }: Impor
                         <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                           <span>Выдана: {new Date(item.issueDate).toLocaleDateString('ru')}</span>
                           <span>До: {new Date(item.expiryDate).toLocaleDateString('ru')}</span>
+                          {item.protocolNumber && (
+                            <span>Протокол: {item.protocolNumber}</span>
+                          )}
                         </div>
                         {item.errors && item.errors.length > 0 && (
                           <div className="mt-2 p-2 rounded bg-red-50 dark:bg-red-950/20">

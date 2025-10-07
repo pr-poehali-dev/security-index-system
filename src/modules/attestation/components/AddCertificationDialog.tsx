@@ -1,0 +1,236 @@
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import Icon from '@/components/ui/icon';
+
+interface AddCertificationDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  employeeName?: string;
+}
+
+export default function AddCertificationDialog({
+  open,
+  onOpenChange,
+  employeeName,
+}: AddCertificationDialogProps) {
+  const [category, setCategory] = useState('');
+  const [area, setArea] = useState('');
+  const [issueDate, setIssueDate] = useState('');
+  const [expiryDate, setExpiryDate] = useState('');
+  const [protocolNumber, setProtocolNumber] = useState('');
+  const [protocolDate, setProtocolDate] = useState('');
+
+  const handleSubmit = () => {
+    console.log({
+      category,
+      area,
+      issueDate,
+      expiryDate,
+      protocolNumber,
+      protocolDate,
+    });
+    onOpenChange(false);
+  };
+
+  const certificationCategories = [
+    'Промышленная безопасность',
+    'Энергобезопасность',
+    'Электробезопасность',
+    'Работы на высоте',
+  ];
+
+  const industrialSafetyAreas = [
+    'А.1 Основы промышленной безопасности',
+    'А.2 Требования промышленной безопасности в химической, нефтехимической и нефтегазоперерабатывающей промышленности',
+    'А.3 Требования промышленной безопасности в нефтяной и газовой промышленности',
+    'Б.1 Эксплуатация опасных производственных объектов',
+    'Б.2 Эксплуатация систем газораспределения и газопотребления',
+    'Б.3 Эксплуатация объектов электроэнергетики',
+    'Б.7 Эксплуатация химически опасных производственных объектов',
+    'В.1 Надзорная деятельность',
+  ];
+
+  const energySafetyAreas = [
+    'Электропотребители промышленные 5 группа до и выше 1000В',
+    'Тепловые энергоустановки',
+    'Электрические сети',
+  ];
+
+  const electricalSafetyAreas = [
+    'I группа',
+    'II группа до 1000В',
+    'III группа до 1000В',
+    'IV группа до 1000В',
+    'V группа до 1000В',
+    'V группа выше 1000В',
+  ];
+
+  const heightWorkAreas = [
+    '1 группа',
+    '2 группа',
+    '3 группа',
+  ];
+
+  const getAreasForCategory = (cat: string) => {
+    switch (cat) {
+      case 'Промышленная безопасность':
+        return industrialSafetyAreas;
+      case 'Энергобезопасность':
+        return energySafetyAreas;
+      case 'Электробезопасность':
+        return electricalSafetyAreas;
+      case 'Работы на высоте':
+        return heightWorkAreas;
+      default:
+        return [];
+    }
+  };
+
+  const showProtocolFields = category === 'Промышленная безопасность' || category === 'Энергобезопасность';
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            Добавить аттестацию
+            {employeeName && <span className="text-muted-foreground font-normal"> — {employeeName}</span>}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="category">Категория аттестации *</Label>
+            <Select value={category} onValueChange={(val) => { setCategory(val); setArea(''); }}>
+              <SelectTrigger id="category">
+                <SelectValue placeholder="Выберите категорию" />
+              </SelectTrigger>
+              <SelectContent>
+                {certificationCategories.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {category && (
+            <div className="space-y-2">
+              <Label htmlFor="area">Область аттестации *</Label>
+              <Select value={area} onValueChange={setArea}>
+                <SelectTrigger id="area">
+                  <SelectValue placeholder="Выберите область" />
+                </SelectTrigger>
+                <SelectContent>
+                  {getAreasForCategory(category).map((ar) => (
+                    <SelectItem key={ar} value={ar}>
+                      {ar}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="issueDate">Дата выдачи *</Label>
+              <Input
+                id="issueDate"
+                type="date"
+                value={issueDate}
+                onChange={(e) => setIssueDate(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="expiryDate">Дата истечения *</Label>
+              <Input
+                id="expiryDate"
+                type="date"
+                value={expiryDate}
+                onChange={(e) => setExpiryDate(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {showProtocolFields && (
+            <>
+              <div className="pt-4 border-t">
+                <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                  <Icon name="FileText" size={16} />
+                  Данные протокола
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="protocolNumber">Номер протокола</Label>
+                    <Input
+                      id="protocolNumber"
+                      type="text"
+                      placeholder="ПБ-123/2023"
+                      value={protocolNumber}
+                      onChange={(e) => setProtocolNumber(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="protocolDate">Дата протокола</Label>
+                    <Input
+                      id="protocolDate"
+                      type="date"
+                      value={protocolDate}
+                      onChange={(e) => setProtocolDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {protocolNumber && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div className="flex items-start gap-2">
+                    <Icon name="Info" size={16} className="text-blue-600 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium text-blue-900 mb-1">Проверка в Ростехнадзоре</p>
+                      <p className="text-blue-700">
+                        После сохранения вы сможете проверить этот протокол в системе Ростехнадзора
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          <div className="flex items-center justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Отмена
+            </Button>
+            <Button 
+              onClick={handleSubmit}
+              disabled={!category || !area || !issueDate || !expiryDate}
+            >
+              <Icon name="Save" size={16} className="mr-2" />
+              Сохранить
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
