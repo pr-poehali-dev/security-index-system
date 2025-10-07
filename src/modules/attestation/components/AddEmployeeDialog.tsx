@@ -29,12 +29,15 @@ interface AddEmployeeDialogProps {
 
 export default function AddEmployeeDialog({ open, onOpenChange }: AddEmployeeDialogProps) {
   const { toast } = useToast();
-  const { organizations, departments } = useSettingsStore();
+  const { organizations, departments, positions } = useSettingsStore();
   const user = useAuthStore((state) => state.user);
   
   const activeOrganizations = organizations.filter(org => org.status === 'active');
   const activeDepartments = user?.tenantId 
     ? departments.filter(dept => dept.tenantId === user.tenantId && dept.status === 'active')
+    : [];
+  const activePositions = user?.tenantId
+    ? positions.filter(pos => pos.tenantId === user.tenantId && pos.status === 'active')
     : [];
   const [formData, setFormData] = useState({
     lastName: '',
@@ -132,12 +135,24 @@ export default function AddEmployeeDialog({ open, onOpenChange }: AddEmployeeDia
               <Label htmlFor="position">
                 Должность <span className="text-red-500">*</span>
               </Label>
-              <Input
-                id="position"
-                value={formData.position}
-                onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                placeholder="Инженер"
-              />
+              <Select value={formData.position} onValueChange={(value) => setFormData({ ...formData, position: value })}>
+                <SelectTrigger id="position">
+                  <SelectValue placeholder="Выберите должность" />
+                </SelectTrigger>
+                <SelectContent>
+                  {activePositions.length > 0 ? (
+                    activePositions.map((pos) => (
+                      <SelectItem key={pos.id} value={pos.id}>
+                        {pos.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="p-2 text-sm text-muted-foreground text-center">
+                      Нет доступных должностей
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
