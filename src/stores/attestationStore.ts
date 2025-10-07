@@ -349,7 +349,7 @@ export const useAttestationStore = create<AttestationState>()(persist((set, get)
       type: 'attestation',
       title: 'О направлении на аттестацию по промышленной безопасности',
       employeeIds: ['personnel-1', 'personnel-2'],
-      status: 'active',
+      status: 'approved',
       createdBy: 'Директор И.И. Петров',
       description: 'Направить сотрудников на аттестацию в АНО ДПО "Учебный центр"',
       createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
