@@ -158,6 +158,82 @@ export default function OrdersTrainingTab() {
     console.log(`Изменение статуса приказа ${orderId} на ${newStatus}`);
   };
 
+  const handleExportOrdersToExcel = async () => {
+    const { utils, writeFile } = await import('xlsx');
+    
+    const exportData = filteredOrders.map(order => ({
+      'Номер приказа': order.number,
+      'Дата': new Date(order.date).toLocaleDateString('ru'),
+      'Тип': getOrderTypeLabel(order.type),
+      'Название': order.title,
+      'Статус': getStatusLabel(order.status),
+      'Количество сотрудников': order.employees.length,
+      'Сотрудники': order.employees.join(', '),
+      'Создал': order.createdBy
+    }));
+
+    const ws = utils.json_to_sheet(exportData);
+    
+    const colWidths = [
+      { wch: 15 }, // Номер
+      { wch: 12 }, // Дата
+      { wch: 25 }, // Тип
+      { wch: 50 }, // Название
+      { wch: 15 }, // Статус
+      { wch: 20 }, // Количество
+      { wch: 40 }, // Сотрудники
+      { wch: 25 }  // Создал
+    ];
+    ws['!cols'] = colWidths;
+
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, 'Приказы');
+
+    const fileName = `Приказы_${new Date().toLocaleDateString('ru')}.xlsx`;
+    writeFile(wb, fileName);
+  };
+
+  const handleExportTrainingsToExcel = async () => {
+    const { utils, writeFile } = await import('xlsx');
+    
+    const exportData = filteredTrainings.map(training => ({
+      'Название': training.title,
+      'Тип': training.type,
+      'Организация': training.organization,
+      'Дата начала': new Date(training.startDate).toLocaleDateString('ru'),
+      'Дата окончания': new Date(training.endDate).toLocaleDateString('ru'),
+      'Длительность (дней)': Math.ceil((new Date(training.endDate).getTime() - new Date(training.startDate).getTime()) / (1000 * 60 * 60 * 24)),
+      'Статус': getStatusLabel(training.status),
+      'Количество сотрудников': training.employees.length,
+      'Сотрудники': training.employees.join(', '),
+      'Стоимость': training.cost,
+      'Стоимость на человека': Math.round(training.cost / training.employees.length)
+    }));
+
+    const ws = utils.json_to_sheet(exportData);
+    
+    const colWidths = [
+      { wch: 35 }, // Название
+      { wch: 25 }, // Тип
+      { wch: 25 }, // Организация
+      { wch: 15 }, // Дата начала
+      { wch: 17 }, // Дата окончания
+      { wch: 18 }, // Длительность
+      { wch: 15 }, // Статус
+      { wch: 22 }, // Количество
+      { wch: 35 }, // Сотрудники
+      { wch: 12 }, // Стоимость
+      { wch: 20 }  // Стоимость на чел
+    ];
+    ws['!cols'] = colWidths;
+
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, 'Обучения');
+
+    const fileName = `Обучения_${new Date().toLocaleDateString('ru')}.xlsx`;
+    writeFile(wb, fileName);
+  };
+
   const getOrderActions = (order: Order) => {
     const actions = [];
 
@@ -246,6 +322,10 @@ export default function OrdersTrainingTab() {
                   >
                     <Icon name="Table" size={16} />
                     Таблица
+                  </Button>
+                  <Button variant="outline" onClick={handleExportOrdersToExcel} className="gap-2">
+                    <Icon name="Download" size={18} />
+                    Экспорт в Excel
                   </Button>
                   <Button className="gap-2">
                     <Icon name="Plus" size={18} />
@@ -444,6 +524,10 @@ export default function OrdersTrainingTab() {
                   >
                     <Icon name="Table" size={16} />
                     Таблица
+                  </Button>
+                  <Button variant="outline" onClick={handleExportTrainingsToExcel} className="gap-2">
+                    <Icon name="Download" size={18} />
+                    Экспорт в Excel
                   </Button>
                   <Button className="gap-2">
                     <Icon name="Plus" size={18} />
