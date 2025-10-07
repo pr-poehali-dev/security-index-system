@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -37,6 +37,7 @@ export default function OrganizationsTab({ onAdd, onEdit, onDelete }: Organizati
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
 
   const tenantOrgs = getOrganizationsByTenant(user!.tenantId!);
   const tenantDepts = getDepartmentsByTenant(user!.tenantId!);
@@ -86,6 +87,24 @@ export default function OrganizationsTab({ onAdd, onEdit, onDelete }: Organizati
           />
         </div>
         <div className="flex gap-2">
+          <div className="flex border rounded-md">
+            <Button
+              variant={viewMode === 'table' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('table')}
+              className="rounded-r-none"
+            >
+              <Icon name="Table" size={16} />
+            </Button>
+            <Button
+              variant={viewMode === 'cards' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('cards')}
+              className="rounded-l-none"
+            >
+              <Icon name="LayoutGrid" size={16} />
+            </Button>
+          </div>
           <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
             <Icon name="Download" size={14} />
             Экспорт
@@ -113,9 +132,10 @@ export default function OrganizationsTab({ onAdd, onEdit, onDelete }: Organizati
         </div>
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          <Table>
+      {viewMode === 'table' ? (
+        <Card>
+          <CardContent className="p-0">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Название</TableHead>
@@ -191,6 +211,77 @@ export default function OrganizationsTab({ onAdd, onEdit, onDelete }: Organizati
           </Table>
         </CardContent>
       </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredOrgs.length === 0 ? (
+            <div className="col-span-full text-center py-12 text-muted-foreground">
+              <Icon name="Search" size={48} className="mx-auto mb-4 opacity-20" />
+              <p>Организации не найдены</p>
+            </div>
+          ) : (
+            filteredOrgs.map((org) => {
+              const orgDepts = getDepartmentsByOrganization(org.id);
+              const orgPersonnel = personnel.filter(p => p.organizationId === org.id);
+              
+              return (
+                <Card key={org.id}>
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{org.name}</CardTitle>
+                        <CardDescription className="mt-1">
+                          ИНН: {org.inn} {org.kpp && `• КПП: ${org.kpp}`}
+                        </CardDescription>
+                      </div>
+                      <Badge variant={org.status === 'active' ? 'default' : 'secondary'}>
+                        {org.status === 'active' ? 'Активна' : 'Неактивна'}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {org.address && (
+                      <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <Icon name="MapPin" size={14} className="mt-0.5" />
+                        <span className="flex-1">{org.address}</span>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Icon name="Building" size={14} />
+                        <span>Подразделений: {orgDepts.length}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Icon name="Users" size={14} />
+                        <span>Персонал: {orgPersonnel.length}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 pt-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 gap-2"
+                        onClick={() => onEdit(org)}
+                      >
+                        <Icon name="Pencil" size={14} />
+                        Изменить
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => onDelete(org.id)}
+                      >
+                        <Icon name="Trash2" size={14} />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </div>
+      )}
     </div>
   );
 }

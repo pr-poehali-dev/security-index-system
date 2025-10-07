@@ -39,6 +39,7 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
   const [searchTerm, setSearchTerm] = useState('');
   const [filterOrg, setFilterOrg] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
 
   const tenantDepts = getDepartmentsByTenant(user!.tenantId!);
   const tenantPersonnel = getPersonnelByTenant(user!.tenantId!);
@@ -142,6 +143,24 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
           </Select>
         </div>
         <div className="flex gap-2">
+          <div className="flex border rounded-md">
+            <Button
+              variant={viewMode === 'table' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('table')}
+              className="rounded-r-none"
+            >
+              <Icon name="Table" size={16} />
+            </Button>
+            <Button
+              variant={viewMode === 'cards' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('cards')}
+              className="rounded-l-none"
+            >
+              <Icon name="LayoutGrid" size={16} />
+            </Button>
+          </div>
           <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
             <Icon name="Download" size={14} />
             Экспорт
@@ -169,9 +188,10 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
         </div>
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          <Table>
+      {viewMode === 'table' ? (
+        <Card>
+          <CardContent className="p-0">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>ФИО</TableHead>
@@ -252,6 +272,78 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
           </Table>
         </CardContent>
       </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredPersonnel.length === 0 ? (
+            <div className="col-span-full text-center py-12 text-muted-foreground">
+              <Icon name="Search" size={48} className="mx-auto mb-4 opacity-20" />
+              <p>Сотрудники не найдены</p>
+            </div>
+          ) : (
+            filteredPersonnel.map((person) => (
+              <Card key={person.id}>
+                <CardContent className="pt-6 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg">{person.fullName}</h3>
+                      <p className="text-sm text-muted-foreground">{person.position}</p>
+                    </div>
+                    <Badge variant={person.status === 'active' ? 'default' : 'secondary'}>
+                      {person.status === 'active' ? 'Активен' : 'Неактивен'}
+                    </Badge>
+                  </div>
+
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Icon name="Building2" size={14} />
+                      <span>{getOrganizationName(person.organizationId)}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Icon name="Building" size={14} />
+                      <span>{getDepartmentName(person.departmentId)}</span>
+                    </div>
+                    {person.email && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Icon name="Mail" size={14} />
+                        <span className="truncate">{person.email}</span>
+                      </div>
+                    )}
+                    {person.phone && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Icon name="Phone" size={14} />
+                        <span>{person.phone}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="pt-2">
+                    {getRoleBadge(person.role)}
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 gap-2"
+                      onClick={() => onEdit(person)}
+                    >
+                      <Icon name="Pencil" size={14} />
+                      Изменить
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => onDelete(person.id)}
+                    >
+                      <Icon name="Trash2" size={14} />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }
