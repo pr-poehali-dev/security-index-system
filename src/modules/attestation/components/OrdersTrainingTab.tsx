@@ -702,30 +702,6 @@ export default function OrdersTrainingTab() {
                           </div>
                         </div>
 
-                        {order.status === 'approved' && (
-                          <div className="pt-3 border-t">
-                            <p className="text-sm font-medium text-muted-foreground mb-3">Направить на:</p>
-                            <div className="grid grid-cols-2 gap-2">
-                              <Button variant="outline" size="sm" className="gap-2 justify-start" onClick={() => handleSendToSDO(order.id)}>
-                                <Icon name="Monitor" size={14} />
-                                СДО ИСП
-                              </Button>
-                              <Button variant="outline" size="sm" className="gap-2 justify-start" onClick={() => handleSendToTrainingCenter(order.id)}>
-                                <Icon name="Building2" size={14} />
-                                Учебный центр
-                              </Button>
-                              <Button variant="outline" size="sm" className="gap-2 justify-start" onClick={() => handleRegisterRostechnadzor(order.id)}>
-                                <Icon name="Shield" size={14} />
-                                Ростехнадзор
-                              </Button>
-                              <Button variant="outline" size="sm" className="gap-2 justify-start" onClick={() => handleScheduleAttestation(order.id)}>
-                                <Icon name="ClipboardCheck" size={14} />
-                                ЕПТ организации
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-
                         <div className="flex items-center justify-between pt-3 border-t">
                           <div className="flex items-center gap-2 text-sm">
                             <span className="text-muted-foreground">Сотрудников:</span>
