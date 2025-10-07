@@ -91,9 +91,9 @@ export default function PersonnelTab() {
   };
 
   const getPersonnelInfo = (p: Personnel) => {
-    const person = people.find(person => person.id === p.personId);
-    const position = positions.find(pos => pos.id === p.positionId);
-    const tenant = tenants.find(t => t.id === p.tenantId);
+    const person = people?.find(person => person.id === p.personId);
+    const position = positions?.find(pos => pos.id === p.positionId);
+    const tenant = tenants?.find(t => t.id === p.tenantId);
     return {
       fullName: getFullName(person),
       positionName: position?.name || '—',
