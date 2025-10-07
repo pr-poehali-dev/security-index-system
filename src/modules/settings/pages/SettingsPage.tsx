@@ -16,6 +16,7 @@ import OrganizationsTab from '../components/OrganizationsTab';
 import DepartmentsTab from '../components/DepartmentsTab';
 import PersonnelTab from '../components/PersonnelTab';
 import CompetenciesTab from '../components/CompetenciesTab';
+import CompetencyGapAnalysisTab from '../components/CompetencyGapAnalysisTab';
 import AddCompetencyDialog from '../components/AddCompetencyDialog';
 import EditCompetencyDialog from '../components/EditCompetencyDialog';
 import type { Organization, Department, Personnel, CompetencyMatrix } from '@/types';
@@ -109,6 +110,10 @@ export default function SettingsPage() {
             <Icon name="GraduationCap" size={16} />
             Справочник компетенций
           </TabsTrigger>
+          <TabsTrigger value="gap-analysis" className="gap-2">
+            <Icon name="BarChart3" size={16} />
+            Анализ пробелов
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="organizations">
@@ -141,6 +146,10 @@ export default function SettingsPage() {
             onEdit={setEditingCompetency}
             onDelete={handleDeleteCompetency}
           />
+        </TabsContent>
+
+        <TabsContent value="gap-analysis">
+          <CompetencyGapAnalysisTab />
         </TabsContent>
       </Tabs>
 

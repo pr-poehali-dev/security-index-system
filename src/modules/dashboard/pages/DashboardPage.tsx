@@ -4,6 +4,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { useCatalogStore } from '@/stores/catalogStore';
 import { useTaskStore } from '@/stores/taskStore';
 import { useIncidentStore } from '@/stores/incidentStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { analyzePersonnelCompetencies } from '@/lib/competencyAnalysis';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -71,11 +73,25 @@ export default function DashboardPage() {
   const { objects, organizations } = useCatalogStore();
   const { tasks, getTaskStats, getOverdueTasks } = useTaskStore();
   const { incidents, getIncidentsByStatus } = useIncidentStore();
+  const { 
+    personnel, 
+    competencies, 
+    getOrganizationsByTenant, 
+    getPersonnelByTenant 
+  } = useSettingsStore();
 
   const taskStats = getTaskStats();
   const overdueTasks = getOverdueTasks();
   const openIncidents = getIncidentsByStatus('open');
   const inProgressIncidents = getIncidentsByStatus('in_progress');
+
+  const tenantPersonnel = user?.tenantId ? getPersonnelByTenant(user.tenantId) : [];
+  const tenantOrganizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
+  
+  const competencyReport = useMemo(() => {
+    if (!user?.availableModules.includes('settings')) return null;
+    return analyzePersonnelCompetencies(tenantPersonnel, competencies, tenantOrganizations);
+  }, [tenantPersonnel, competencies, tenantOrganizations, user]);
 
   const objectsStats = useMemo(() => {
     const total = objects.length;
@@ -380,6 +396,95 @@ export default function DashboardPage() {
           </Card>
         ))}
       </div>
+
+      {competencyReport && competencyReport.totalPersonnel > 0 && (
+        <Card className="mb-6 border-purple-200 dark:border-purple-800">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Icon name="GraduationCap" size={20} className="text-purple-600" />
+                Анализ компетенций персонала
+              </CardTitle>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => navigate(ROUTES.SETTINGS)}
+                className="gap-2"
+              >
+                Подробнее
+                <Icon name="ArrowRight" size={14} />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-4 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                  <Icon name="Users" size={20} className="text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{competencyReport.totalPersonnel}</p>
+                  <p className="text-xs text-muted-foreground">Сотрудников</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
+                  <Icon name="CheckCircle2" size={20} className="text-green-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-green-600">{competencyReport.compliantPersonnel}</p>
+                  <p className="text-xs text-muted-foreground">Соответствуют</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20">
+                  <Icon name="AlertTriangle" size={20} className="text-red-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-red-600">{competencyReport.criticalGaps}</p>
+                  <p className="text-xs text-muted-foreground">Критических</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+                  <Icon name="TrendingUp" size={20} className="text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{competencyReport.complianceRate}%</p>
+                  <p className="text-xs text-muted-foreground">Соответствие</p>
+                </div>
+              </div>
+            </div>
+
+            {competencyReport.criticalGaps > 0 && (
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <Icon name="AlertCircle" className="text-red-600 mt-0.5" size={18} />
+                  <div>
+                    <p className="font-medium text-red-900 dark:text-red-200 text-sm">
+                      Критические пробелы у {competencyReport.criticalGaps} сотрудников
+                    </p>
+                    <p className="text-xs text-red-800 dark:text-red-300 mt-1">
+                      Требуется срочная аттестация. Уровень соответствия менее 50%.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium">Общий уровень соответствия</span>
+                <span className="text-sm font-bold">{competencyReport.complianceRate}%</span>
+              </div>
+              <Progress value={competencyReport.complianceRate} className="h-3" />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <Card>

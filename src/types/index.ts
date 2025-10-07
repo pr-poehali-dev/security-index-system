@@ -121,10 +121,37 @@ export interface GapAnalysis {
   employeeId: string;
   fullName: string;
   position: string;
-  missingRequired: CertificationArea[];
-  missingRecommended: CertificationArea[];
-  expiringCertifications: EmployeeCertification[];
-  riskLevel: 'high' | 'medium' | 'low';
+  organizationId: string;
+  organizationName: string;
+  requiredAreas: CompetencyAreaRequirement[];
+  missingAreas: CompetencyAreaRequirement[];
+  hasAllRequired: boolean;
+  completionRate: number;
+  riskLevel: 'critical' | 'high' | 'medium' | 'low';
+  lastChecked: string;
+}
+
+export interface CompetencyGapReport {
+  totalPersonnel: number;
+  compliantPersonnel: number;
+  nonCompliantPersonnel: number;
+  criticalGaps: number;
+  highRiskGaps: number;
+  complianceRate: number;
+  gaps: GapAnalysis[];
+  byOrganization: {
+    organizationId: string;
+    organizationName: string;
+    totalPersonnel: number;
+    compliant: number;
+    complianceRate: number;
+  }[];
+  byCategory: {
+    category: string;
+    totalRequired: number;
+    totalMissing: number;
+    mostMissingAreas: { code: string; count: number }[];
+  }[];
 }
 
 export interface Incident {
