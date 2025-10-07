@@ -20,6 +20,10 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthStore } from '@/stores/authStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { useAttestationStore } from '@/stores/attestationStore';
+import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
 
 interface Task {
   id: string;
@@ -39,7 +43,7 @@ interface Task {
   completedAt?: string;
 }
 
-const mockEmployees = [
+const OLD_mockEmployees = [
   {
     id: '1',
     name: 'Иванов Иван Иванович',
@@ -204,7 +208,10 @@ const generateTasks = (): Task[] => {
 
 export default function TasksTab() {
   const { toast } = useToast();
-  const [tasks, setTasks] = useState<Task[]>(generateTasks());
+  const user = useAuthStore((state) => state.user);
+  const { personnel, people, positions, departments: deptList } = useSettingsStore();
+  const { certifications } = useAttestationStore();
+  
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [filterDepartment, setFilterDepartment] = useState<string>('all');
@@ -212,7 +219,100 @@ export default function TasksTab() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [autoCreateEnabled, setAutoCreateEnabled] = useState(true);
 
-  const departments = Array.from(new Set(tasks.map(t => t.department)));
+  const tasks = useMemo(() => {
+    const result: Task[] = [];
+    const tenantPersonnel = user?.tenantId ? personnel.filter(p => p.tenantId === user.tenantId) : [];
+    
+    tenantPersonnel.forEach(p => {
+      const info = getPersonnelFullInfo(p, people, positions);
+      const dept = deptList.find(d => d.id === p.departmentId);
+      const personnelCerts = certifications.filter(c => c.personnelId === p.id);
+      
+      personnelCerts.forEach(cert => {
+        const { status, daysLeft } = getCertificationStatus(cert.expiryDate);
+        const expiryDate = new Date(cert.expiryDate);
+        
+        const categoryMap: Record<string, string> = {
+          industrial_safety: 'Промышленная безопасность',
+          energy_safety: 'Электробезопасность',
+          labor_safety: 'Охрана труда',
+          ecology: 'Экология'
+        };
+        
+        if (daysLeft < 0) {
+          result.push({
+            id: `task-${p.id}-${cert.id}-expired`,
+            type: 'expired',
+            priority: 'critical',
+            employeeName: info.fullName,
+            employeeId: p.id,
+            employeePosition: info.position,
+            department: dept?.name || '—',
+            category: categoryMap[cert.category] || cert.category,
+            area: cert.area,
+            expiryDate: cert.expiryDate,
+            daysLeft,
+            createdAt: new Date(expiryDate.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+            status: 'pending',
+          });
+        } else if (daysLeft <= 30) {
+          result.push({
+            id: `task-${p.id}-${cert.id}-30`,
+            type: 'reminder_30',
+            priority: 'high',
+            employeeName: info.fullName,
+            employeeId: p.id,
+            employeePosition: info.position,
+            department: dept?.name || '—',
+            category: categoryMap[cert.category] || cert.category,
+            area: cert.area,
+            expiryDate: cert.expiryDate,
+            daysLeft,
+            createdAt: new Date(expiryDate.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+            status: 'pending',
+          });
+        } else if (daysLeft <= 60) {
+          result.push({
+            id: `task-${p.id}-${cert.id}-60`,
+            type: 'reminder_60',
+            priority: 'medium',
+            employeeName: info.fullName,
+            employeeId: p.id,
+            employeePosition: info.position,
+            department: dept?.name || '—',
+            category: categoryMap[cert.category] || cert.category,
+            area: cert.area,
+            expiryDate: cert.expiryDate,
+            daysLeft,
+            createdAt: new Date(expiryDate.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+            status: 'pending',
+          });
+        } else if (daysLeft <= 90) {
+          result.push({
+            id: `task-${p.id}-${cert.id}-90`,
+            type: 'reminder_90',
+            priority: 'low',
+            employeeName: info.fullName,
+            employeeId: p.id,
+            employeePosition: info.position,
+            department: dept?.name || '—',
+            category: categoryMap[cert.category] || cert.category,
+            area: cert.area,
+            expiryDate: cert.expiryDate,
+            daysLeft,
+            createdAt: new Date(expiryDate.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+            status: 'pending',
+          });
+        }
+      });
+    });
+    
+    return result.sort((a, b) => a.daysLeft - b.daysLeft);
+  }, [user?.tenantId, personnel, people, positions, deptList, certifications]);
+
+  const departments = useMemo(() => {
+    return Array.from(new Set(tasks.map(t => t.department))).filter(d => d !== '—');
+  }, [tasks]);
 
   const filteredTasks = useMemo(() => {
     return tasks.filter(task => {

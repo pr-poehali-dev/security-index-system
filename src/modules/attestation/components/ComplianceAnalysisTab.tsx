@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
@@ -10,8 +10,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthStore } from '@/stores/authStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { useAttestationStore } from '@/stores/attestationStore';
+import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
 
 interface ComplianceData {
+  personnelId: string;
   personnelName: string;
   position: string;
   department: string;
@@ -22,45 +27,58 @@ interface ComplianceData {
   compliancePercent: number;
 }
 
-const mockData: ComplianceData[] = [
-  {
-    personnelName: 'Иванов Иван Иванович',
-    position: 'Инженер',
-    department: 'Производство',
-    requiredCertifications: ['Электробезопасность IV', 'Работы на высоте 2 группа', 'Промышленная безопасность'],
-    actualCertifications: ['Электробезопасность IV', 'Работы на высоте 2 группа'],
-    expiringCertifications: ['Электробезопасность IV'],
-    missingCertifications: ['Промышленная безопасность'],
-    compliancePercent: 67
-  },
-  {
-    personnelName: 'Петрова Анна Сергеевна',
-    position: 'Начальник участка',
-    department: 'Производство',
-    requiredCertifications: ['Электробезопасность V', 'Промышленная безопасность', 'Охрана труда'],
-    actualCertifications: ['Электробезопасность V', 'Промышленная безопасность', 'Охрана труда'],
-    expiringCertifications: [],
-    missingCertifications: [],
-    compliancePercent: 100
-  },
-  {
-    personnelName: 'Сидоров Петр Николаевич',
-    position: 'Техник',
-    department: 'Ремонт',
-    requiredCertifications: ['Электробезопасность III', 'Работы на высоте 3 группа'],
-    actualCertifications: ['Электробезопасность III'],
-    expiringCertifications: ['Электробезопасность III'],
-    missingCertifications: ['Работы на высоте 3 группа'],
-    compliancePercent: 50
-  },
-];
-
 export default function ComplianceAnalysisTab() {
   const { toast } = useToast();
+  const user = useAuthStore((state) => state.user);
+  const { personnel, people, positions, departments, competencies } = useSettingsStore();
+  const { certifications } = useAttestationStore();
+  
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
   const [complianceFilter, setComplianceFilter] = useState<string>('all');
 
-  const filteredData = mockData.filter(item => {
+  const tenantPersonnel = useMemo(() => {
+    return user?.tenantId ? personnel.filter(p => p.tenantId === user.tenantId) : [];
+  }, [personnel, user?.tenantId]);
+
+  const complianceData = useMemo(() => {
+    return tenantPersonnel.map(p => {
+      const info = getPersonnelFullInfo(p, people, positions);
+      const dept = departments.find(d => d.id === p.departmentId);
+      
+      const competency = competencies.find(c => c.positionId === p.positionId);
+      const requiredAreas = competency?.requiredAreas.flatMap(ra => ra.areas) || [];
+      
+      const personnelCerts = certifications.filter(c => c.personnelId === p.id);
+      const actualAreas = personnelCerts.map(c => c.area);
+      
+      const expiringAreas = personnelCerts
+        .filter(c => {
+          const { status } = getCertificationStatus(c.expiryDate);
+          return status === 'expiring_soon';
+        })
+        .map(c => c.area);
+      
+      const missingAreas = requiredAreas.filter(ra => !actualAreas.includes(ra));
+      
+      const compliancePercent = requiredAreas.length > 0 
+        ? Math.round((actualAreas.length / requiredAreas.length) * 100)
+        : 0;
+
+      return {
+        personnelId: p.id,
+        personnelName: info.fullName,
+        position: info.position,
+        department: dept?.name || '—',
+        requiredCertifications: requiredAreas,
+        actualCertifications: actualAreas,
+        expiringCertifications: expiringAreas,
+        missingCertifications: missingAreas,
+        compliancePercent
+      };
+    });
+  }, [tenantPersonnel, people, positions, departments, competencies, certifications]);
+
+  const filteredData = complianceData.filter(item => {
     const matchesDepartment = selectedDepartment === 'all' || item.department === selectedDepartment;
     const matchesCompliance = complianceFilter === 'all' ||
       (complianceFilter === 'full' && item.compliancePercent === 100) ||
@@ -69,13 +87,19 @@ export default function ComplianceAnalysisTab() {
     return matchesDepartment && matchesCompliance;
   });
 
-  const stats = {
-    totalEmployees: mockData.length,
-    fullCompliance: mockData.filter(d => d.compliancePercent === 100).length,
-    partialCompliance: mockData.filter(d => d.compliancePercent > 0 && d.compliancePercent < 100).length,
-    nonCompliant: mockData.filter(d => d.compliancePercent === 0).length,
-    avgCompliance: Math.round(mockData.reduce((acc, d) => acc + d.compliancePercent, 0) / mockData.length)
-  };
+  const stats = useMemo(() => ({
+    totalEmployees: complianceData.length,
+    fullCompliance: complianceData.filter(d => d.compliancePercent === 100).length,
+    partialCompliance: complianceData.filter(d => d.compliancePercent > 0 && d.compliancePercent < 100).length,
+    nonCompliant: complianceData.filter(d => d.compliancePercent === 0).length,
+    avgCompliance: complianceData.length > 0 
+      ? Math.round(complianceData.reduce((acc, d) => acc + d.compliancePercent, 0) / complianceData.length)
+      : 0
+  }), [complianceData]);
+
+  const uniqueDepartments = useMemo(() => {
+    return Array.from(new Set(complianceData.map(d => d.department))).filter(d => d !== '—');
+  }, [complianceData]);
 
   return (
     <div className="space-y-6">
@@ -136,9 +160,9 @@ export default function ComplianceAnalysisTab() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Все подразделения</SelectItem>
-                <SelectItem value="Производство">Производство</SelectItem>
-                <SelectItem value="Ремонт">Ремонт</SelectItem>
-                <SelectItem value="Энергетика">Энергетика</SelectItem>
+                {uniqueDepartments.map(dept => (
+                  <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Select value={complianceFilter} onValueChange={setComplianceFilter}>
