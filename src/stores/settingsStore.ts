@@ -1,6 +1,19 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization, Person, Position, Certification, Competency } from '@/types';
+import {
+  mockOrganizations,
+  mockDepartments,
+  mockPeople,
+  mockPositions,
+  mockPersonnel,
+  mockCompetencies,
+  mockCertifications,
+  mockProductionSites,
+  mockExternalOrganizations,
+  mockSystemUsers,
+  mockCompetencyMatrix
+} from './mockData';
 
 interface SettingsState {
   organizations: Organization[];
@@ -88,224 +101,15 @@ interface SettingsState {
 }
 
 export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
-  organizations: [
-    {
-      id: 'org-1',
-      tenantId: 'tenant-1',
-      name: 'ООО "Энергопром"',
-      inn: '7701234567',
-      kpp: '770101001',
-      address: 'г. Москва, ул. Промышленная, д. 1',
-      status: 'active',
-      createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'org-2',
-      tenantId: 'tenant-1',
-      name: 'АО "ТехСервис"',
-      inn: '7702345678',
-      kpp: '770201001',
-      address: 'г. Москва, пр. Индустриальный, д. 15',
-      status: 'active',
-      createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString()
-    }
-  ],
+  organizations: mockOrganizations,
 
-  departments: [
-    {
-      id: 'dept-1-1',
-      tenantId: 'tenant-1',
-      organizationId: 'org-1',
-      name: 'Отдел охраны труда',
-      code: 'ООТ',
-      head: 'Иванов И.И.',
-      status: 'active',
-      createdAt: new Date(Date.now() - 300 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'dept-1-2',
-      tenantId: 'tenant-1',
-      organizationId: 'org-1',
-      name: 'Производственный отдел',
-      code: 'ПО',
-      status: 'active',
-      createdAt: new Date(Date.now() - 250 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'dept-1-2-1',
-      tenantId: 'tenant-1',
-      organizationId: 'org-1',
-      parentId: 'dept-1-2',
-      name: 'Участок №1',
-      code: 'ПО-1',
-      status: 'active',
-      createdAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'dept-2-1',
-      tenantId: 'tenant-1',
-      organizationId: 'org-2',
-      name: 'Технический отдел',
-      code: 'ТО',
-      head: 'Сидоров С.С.',
-      status: 'active',
-      createdAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString()
-    }
-  ],
+  departments: mockDepartments,
 
-  people: [
-    {
-      id: 'person-1',
-      tenantId: 'tenant-1',
-      lastName: 'Иванов',
-      firstName: 'Иван',
-      middleName: 'Иванович',
-      email: 'auditor@company.ru',
-      phone: '+7 (999) 123-45-67',
-      status: 'active',
-      createdAt: new Date(Date.now() - 300 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 300 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'person-2',
-      tenantId: 'tenant-1',
-      lastName: 'Петров',
-      firstName: 'Петр',
-      middleName: 'Петрович',
-      email: 'manager@company.ru',
-      phone: '+7 (999) 234-56-78',
-      status: 'active',
-      createdAt: new Date(Date.now() - 250 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 250 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'person-3',
-      tenantId: 'tenant-1',
-      lastName: 'Сидоров',
-      firstName: 'Сидор',
-      middleName: 'Сидорович',
-      email: 'director@company.ru',
-      phone: '+7 (999) 345-67-89',
-      status: 'active',
-      createdAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'person-4',
-      tenantId: 'tenant-1',
-      lastName: 'Соколова',
-      firstName: 'Анна',
-      middleName: 'Петровна',
-      email: 'sokolova@company.ru',
-      phone: '+7 (999) 456-78-90',
-      status: 'active',
-      createdAt: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString()
-    }
-  ],
+  people: mockPeople,
 
-  positions: [
-    {
-      id: 'pos-1',
-      tenantId: 'tenant-1',
-      name: 'Главный инженер по безопасности',
-      code: 'ГИБ',
-      category: 'management',
-      description: 'Руководитель службы безопасности предприятия',
-      status: 'active',
-      createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'pos-2',
-      tenantId: 'tenant-1',
-      name: 'Менеджер по охране труда',
-      code: 'МОТ',
-      category: 'specialist',
-      description: 'Специалист по охране труда и промышленной безопасности',
-      status: 'active',
-      createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'pos-3',
-      tenantId: 'tenant-1',
-      name: 'Технический директор',
-      code: 'ТД',
-      category: 'management',
-      description: 'Руководитель технической службы',
-      status: 'active',
-      createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'pos-4',
-      tenantId: 'tenant-1',
-      name: 'Инженер-механик',
-      code: 'ИМ',
-      category: 'specialist',
-      description: 'Специалист по эксплуатации механического оборудования',
-      status: 'active',
-      createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()
-    }
-  ],
+  positions: mockPositions,
 
-  personnel: [
-    {
-      id: 'personnel-1',
-      tenantId: 'tenant-1',
-      personId: 'person-1',
-      positionId: 'pos-1',
-      organizationId: 'org-1',
-      departmentId: 'dept-1-1',
-      role: 'Auditor',
-      status: 'active',
-      hireDate: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'personnel-2',
-      tenantId: 'tenant-1',
-      personId: 'person-2',
-      positionId: 'pos-2',
-      organizationId: 'org-1',
-      departmentId: 'dept-1-1',
-      role: 'Manager',
-      status: 'active',
-      hireDate: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'personnel-3',
-      tenantId: 'tenant-1',
-      personId: 'person-3',
-      positionId: 'pos-3',
-      organizationId: 'org-2',
-      departmentId: 'dept-2-1',
-      role: 'Director',
-      status: 'active',
-      hireDate: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'personnel-4',
-      tenantId: 'tenant-1',
-      personId: 'person-4',
-      positionId: 'pos-4',
-      organizationId: 'org-1',
-      departmentId: 'dept-1-2',
-      role: 'Manager',
-      status: 'dismissed',
-      hireDate: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString(),
-      dismissalDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
-    }
-  ],
+  personnel: mockPersonnel,
 
   addOrganization: (org) => {
     const newOrg: Organization = {
@@ -525,48 +329,7 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     return get().personnel.filter((person) => person.departmentId === departmentId);
   },
 
-  competencies: [
-    {
-      id: 'comp-1',
-      tenantId: 'tenant-1',
-      organizationId: 'org-1',
-      position: 'Главный инженер по безопасности',
-      requiredAreas: [
-        {
-          category: 'industrial_safety',
-          areas: ['Б.1', 'Б.2', 'М.1']
-        },
-        {
-          category: 'energy_safety',
-          areas: ['ЭБ.1', 'ЭБ.6']
-        },
-        {
-          category: 'labor_safety',
-          areas: ['ОТ.3', 'ОТ.4']
-        }
-      ],
-      createdAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'comp-2',
-      tenantId: 'tenant-1',
-      organizationId: 'org-1',
-      position: 'Менеджер по охране труда',
-      requiredAreas: [
-        {
-          category: 'labor_safety',
-          areas: ['ОТ.1', 'ОТ.2', 'ОТ.3', 'ОТ.4', 'ОТ.5', 'ОТ.6']
-        },
-        {
-          category: 'industrial_safety',
-          areas: ['Б.1', 'Б.2']
-        }
-      ],
-      createdAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString()
-    }
-  ],
+  competencies: mockCompetencyMatrix,
 
   addCompetency: (competency) => {
     const now = new Date().toISOString();
@@ -614,42 +377,7 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     return get().competencies.filter((comp) => comp.organizationId === organizationId);
   },
 
-  productionSites: [
-    {
-      id: 'site-1',
-      tenantId: 'tenant-1',
-      organizationId: 'org-1',
-      name: 'Производственная площадка №1',
-      address: 'г. Москва, ул. Заводская, д. 10',
-      code: 'ПП-1',
-      head: 'Кузнецов А.В.',
-      phone: '+7 (999) 111-22-33',
-      status: 'active',
-      createdAt: new Date(Date.now() - 300 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'site-2',
-      tenantId: 'tenant-1',
-      organizationId: 'org-1',
-      name: 'Производственная площадка №2',
-      address: 'Московская обл., г. Подольск, ул. Промышленная, д. 5',
-      code: 'ПП-2',
-      head: 'Морозов В.И.',
-      phone: '+7 (999) 222-33-44',
-      status: 'active',
-      createdAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'site-3',
-      tenantId: 'tenant-1',
-      organizationId: 'org-2',
-      name: 'Сервисный центр',
-      address: 'г. Москва, пр. Индустриальный, д. 20',
-      code: 'СЦ-1',
-      status: 'active',
-      createdAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString()
-    }
-  ],
+  productionSites: mockProductionSites,
 
   addProductionSite: (site) => {
     const newSite: ProductionSite = {
@@ -689,7 +417,7 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }));
   },
 
-  systemUsers: [],
+  systemUsers: mockSystemUsers,
 
   addSystemUser: (user) => {
     const newUser: SystemUser = {
@@ -719,109 +447,7 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     return get().systemUsers.filter((user) => user.tenantId === tenantId);
   },
 
-  externalOrganizations: [
-    {
-      id: 'ext-org-1',
-      tenantId: 'tenant-1',
-      type: 'training_center',
-      name: 'УЦ "Профессионал"',
-      inn: '7701234567',
-      contactPerson: 'Сидорова Елена Петровна',
-      phone: '+7 (495) 123-45-67',
-      email: 'info@professional.ru',
-      address: 'г. Москва, ул. Ленина, д. 10',
-      website: 'https://professional.ru',
-      accreditations: ['Ростехнадзор', 'Минтруд'],
-      description: 'Образовательная организация, специализирующаяся на обучении по промышленной безопасности',
-      status: 'active',
-      createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'ext-org-2',
-      tenantId: 'tenant-1',
-      type: 'training_center',
-      name: 'Центр охраны труда',
-      inn: '7702345678',
-      contactPerson: 'Иванов Петр Сергеевич',
-      phone: '+7 (495) 234-56-78',
-      email: 'ot@center.ru',
-      address: 'г. Москва, пр-т Мира, д. 25',
-      accreditations: ['Минтруд'],
-      status: 'active',
-      createdAt: new Date(Date.now() - 300 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'ext-org-3',
-      tenantId: 'tenant-1',
-      type: 'training_center',
-      name: 'Энергетический центр',
-      inn: '7703456789',
-      contactPerson: 'Петрова Анна Сергеевна',
-      phone: '+7 (495) 345-67-89',
-      email: 'info@energycenter.ru',
-      address: 'г. Москва, ул. Энергетическая, д. 12',
-      status: 'active',
-      createdAt: new Date(Date.now() - 250 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'ext-org-4',
-      tenantId: 'tenant-1',
-      type: 'training_center',
-      name: 'Учебно-курсовой комбинат',
-      inn: '7704567890',
-      contactPerson: 'Кузнецов Михаил Иванович',
-      phone: '+7 (495) 456-78-90',
-      email: 'info@ukk.ru',
-      address: 'г. Москва, ул. Обучения, д. 5',
-      accreditations: ['Минобразования'],
-      status: 'active',
-      createdAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'ext-org-5',
-      tenantId: 'tenant-1',
-      type: 'training_center',
-      name: 'Академия безопасности',
-      inn: '7705678901',
-      contactPerson: 'Смирнова Ольга Викторовна',
-      phone: '+7 (495) 567-89-01',
-      email: 'info@safety-academy.ru',
-      address: 'г. Москва, пр. Безопасности, д. 20',
-      website: 'https://safety-academy.ru',
-      accreditations: ['Ростехнадзор', 'Минтруд', 'МЧС'],
-      status: 'active',
-      createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'ext-org-6',
-      tenantId: 'tenant-1',
-      type: 'contractor',
-      name: 'ООО "СтройМонтаж"',
-      inn: '7706789012',
-      kpp: '770601001',
-      contactPerson: 'Волков Сергей Петрович',
-      phone: '+7 (495) 678-90-12',
-      email: 'info@stroymontazh.ru',
-      address: 'г. Москва, ул. Строительная, д. 30',
-      description: 'Подрядная организация по строительно-монтажным работам',
-      status: 'active',
-      createdAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'ext-org-7',
-      tenantId: 'tenant-1',
-      type: 'regulatory_body',
-      name: 'Ростехнадзор',
-      contactPerson: 'Государственная инспекция',
-      phone: '+7 (495) 987-65-43',
-      email: 'info@gosnadzor.ru',
-      address: 'г. Москва, ул. Таганская, д. 34',
-      website: 'https://gosnadzor.ru',
-      description: 'Федеральная служба по экологическому, технологическому и атомному надзору',
-      status: 'active',
-      createdAt: new Date(Date.now() - 400 * 24 * 60 * 60 * 1000).toISOString()
-    }
-  ],
+  externalOrganizations: mockExternalOrganizations,
 
   addExternalOrganization: (org) => {
     const newOrg: ExternalOrganization = {
@@ -865,58 +491,9 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }));
   },
 
-  competenciesDirectory: [
-    {
-      id: 'comp-1',
-      tenantId: 'tenant-1',
-      code: 'А.1',
-      name: 'Эксплуатация опасных производственных объектов горнорудной промышленности',
-      category: 'industrial_safety',
-      validityMonths: 36,
-      requiresRostechnadzor: true,
-      status: 'active',
-      createdAt: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'comp-2',
-      tenantId: 'tenant-1',
-      code: 'Б.7',
-      name: 'Эксплуатация электроустановок потребителей',
-      category: 'energy_safety',
-      validityMonths: 60,
-      requiresRostechnadzor: true,
-      status: 'active',
-      createdAt: new Date(Date.now() - 450 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'comp-3',
-      tenantId: 'tenant-1',
-      code: 'ОТ-101',
-      name: 'Охрана труда в организации',
-      category: 'labor_safety',
-      validityMonths: 36,
-      requiresRostechnadzor: false,
-      status: 'active',
-      createdAt: new Date(Date.now() - 400 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 80 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'comp-4',
-      tenantId: 'tenant-1',
-      code: 'ЭК-50',
-      name: 'Экологическая безопасность',
-      category: 'ecology',
-      validityMonths: 60,
-      requiresRostechnadzor: false,
-      status: 'active',
-      createdAt: new Date(Date.now() - 350 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 70 * 24 * 60 * 60 * 1000).toISOString()
-    }
-  ],
+  competenciesDirectory: mockCompetencies,
 
-  certifications: [],
+  certifications: mockCertifications,
 
   addCompetencyDir: (competency) => {
     const newComp: Competency = {
