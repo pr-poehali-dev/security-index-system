@@ -8,6 +8,7 @@ import ReportsTab from '../components/ReportsTab';
 import DirectoriesTab from '../components/DirectoriesTab';
 import NotificationsTab from '../components/NotificationsTab';
 import AttestationCalendarTab from '../components/AttestationCalendarTab';
+import TasksTab from '../components/TasksTab';
 
 export default function AttestationPage() {
   return (
@@ -23,6 +24,10 @@ export default function AttestationPage() {
           <TabsTrigger value="employees" className="gap-2">
             <Icon name="Users" size={16} />
             Сотрудники и аттестации
+          </TabsTrigger>
+          <TabsTrigger value="tasks" className="gap-2">
+            <Icon name="ListTodo" size={16} />
+            Задачи
           </TabsTrigger>
           <TabsTrigger value="calendar" className="gap-2">
             <Icon name="CalendarDays" size={16} />
@@ -52,6 +57,10 @@ export default function AttestationPage() {
 
         <TabsContent value="employees">
           <EmployeeAttestationsTab />
+        </TabsContent>
+
+        <TabsContent value="tasks">
+          <TasksTab />
         </TabsContent>
 
         <TabsContent value="calendar">
