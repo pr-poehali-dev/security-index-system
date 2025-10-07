@@ -82,7 +82,7 @@ export default function Sidebar() {
         </NavLink>
 
         {user.availableModules.map((moduleKey) => {
-          if (moduleKey === 'tenants') return null;
+          if (moduleKey === 'tenants' || moduleKey === 'settings') return null;
           
           const module = MODULES[moduleKey];
           const route = MODULE_ROUTES[moduleKey];
@@ -106,6 +106,21 @@ export default function Sidebar() {
       </nav>
 
       <div className="border-t border-gray-800 p-4 space-y-3">
+        {user.availableModules.includes('settings') && (
+          <NavLink
+            to={ROUTES.SETTINGS}
+            className={({ isActive }) => cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg mb-3 transition-colors",
+              isActive 
+                ? "bg-emerald-600 text-white" 
+                : "text-gray-300 hover:bg-gray-800 hover:text-white"
+            )}
+          >
+            <Icon name="Settings" size={20} />
+            {!sidebarCollapsed && <span className="text-sm font-medium">Настройки</span>}
+          </NavLink>
+        )}
+        
         <div className={cn("flex items-center gap-3", sidebarCollapsed && "justify-center")}>
           {!sidebarCollapsed && <span className="text-xs text-gray-400">Тема</span>}
           <div className="flex items-center gap-2">
