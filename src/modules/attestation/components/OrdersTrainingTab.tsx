@@ -539,6 +539,24 @@ export default function OrdersTrainingTab() {
         </TabsList>
 
         <TabsContent value="orders" className="space-y-4">
+          <Card className="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <Icon name="Construction" size={20} className="text-amber-600 dark:text-amber-400 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">
+                    Раздел находится в разработке
+                  </h4>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    Функционал создания и управления приказами находится в стадии разработки. 
+                    В ближайшее время здесь появится возможность автоматического формирования приказов 
+                    на направление сотрудников на обучение и аттестацию.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <Card>
               <CardContent className="p-4">
@@ -859,6 +877,24 @@ export default function OrdersTrainingTab() {
         </TabsContent>
 
         <TabsContent value="trainings" className="space-y-4">
+          <Card className="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <Icon name="Construction" size={20} className="text-amber-600 dark:text-amber-400 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">
+                    Раздел находится в разработке
+                  </h4>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    Функционал планирования и управления обучениями находится в стадии разработки. 
+                    В ближайшее время здесь появится возможность планировать обучения, отслеживать прогресс 
+                    и получать данные из СДО и учебных центров в автоматическом режиме.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <Card>
               <CardContent className="p-4">
