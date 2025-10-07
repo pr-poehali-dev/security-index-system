@@ -19,6 +19,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import CreateOrderDialog from './CreateOrderDialog';
+import CreateTrainingDialog from './CreateTrainingDialog';
 
 interface Order {
   id: string;
@@ -165,6 +167,8 @@ export default function OrdersTrainingTab() {
   const [orderTypeFilter, setOrderTypeFilter] = useState<string>('all');
   const [trainingStatusFilter, setTrainingStatusFilter] = useState<string>('all');
   const [orderViewMode, setOrderViewMode] = useState<'cards' | 'table'>('cards');
+  const [showCreateOrderDialog, setShowCreateOrderDialog] = useState(false);
+  const [showCreateTrainingDialog, setShowCreateTrainingDialog] = useState(false);
   const [trainingViewMode, setTrainingViewMode] = useState<'cards' | 'table'>('cards');
 
   const filteredOrders = mockOrders.filter(order => {
@@ -497,7 +501,7 @@ export default function OrdersTrainingTab() {
                     <Icon name="Download" size={16} />
                     Экспорт
                   </Button>
-                  <Button className="gap-2">
+                  <Button onClick={() => setShowCreateOrderDialog(true)} className="gap-2">
                     <Icon name="Plus" size={16} />
                     Создать приказ
                   </Button>
@@ -819,7 +823,7 @@ export default function OrdersTrainingTab() {
                     <Icon name="Download" size={16} />
                     Экспорт
                   </Button>
-                  <Button className="gap-2">
+                  <Button onClick={() => setShowCreateTrainingDialog(true)} className="gap-2">
                     <Icon name="Plus" size={16} />
                     Запланировать обучение
                   </Button>
@@ -1059,6 +1063,16 @@ export default function OrdersTrainingTab() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <CreateOrderDialog
+        open={showCreateOrderDialog}
+        onOpenChange={setShowCreateOrderDialog}
+      />
+
+      <CreateTrainingDialog
+        open={showCreateTrainingDialog}
+        onOpenChange={setShowCreateTrainingDialog}
+      />
     </div>
   );
 }
