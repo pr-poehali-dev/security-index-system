@@ -129,7 +129,7 @@ export default function PersonnelTab() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {personnel.length === 0 ? (
+            {!personnel || personnel.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="text-center text-muted-foreground">
                   Нет данных. Добавьте первую запись.
