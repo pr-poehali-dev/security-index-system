@@ -16,6 +16,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import ImportCertificationsDialog from './ImportCertificationsDialog';
 
 interface Certification {
   id: string;
@@ -134,6 +141,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [showImportDialog, setShowImportDialog] = useState(false);
 
   const filteredEmployees = mockEmployees.filter(emp => {
     const matchesSearch = emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -254,10 +262,29 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                 <Icon name="Table" size={16} />
                 Таблица
               </Button>
-              <Button onClick={onAddEmployee} className="gap-2">
-                <Icon name="Plus" size={18} />
-                Добавить
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="gap-2">
+                    <Icon name="Plus" size={18} />
+                    Добавить
+                    <Icon name="ChevronDown" size={14} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={onAddEmployee}>
+                    <Icon name="UserPlus" size={16} className="mr-2" />
+                    Добавить сотрудника
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowImportDialog(true)}>
+                    <Icon name="Upload" size={16} className="mr-2" />
+                    Импорт из Excel
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Icon name="Download" size={16} className="mr-2" />
+                    Экспорт в Excel
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </CardHeader>
@@ -497,6 +524,11 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
           )}
         </DialogContent>
       </Dialog>
+
+      <ImportCertificationsDialog 
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
+      />
     </div>
   );
 }
