@@ -17,6 +17,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
+import {
+  certificationCategories,
+  getAreasForCategory,
+} from '@/stores/mockData';
 
 interface AddCertificationDialogProps {
   open: boolean;
@@ -50,59 +54,7 @@ export default function AddCertificationDialog({
     onOpenChange(false);
   };
 
-  const certificationCategories = [
-    'Промышленная безопасность',
-    'Энергобезопасность',
-    'Электробезопасность',
-    'Работы на высоте',
-  ];
 
-  const industrialSafetyAreas = [
-    'А.1 Основы промышленной безопасности',
-    'А.2 Требования промышленной безопасности в химической, нефтехимической и нефтегазоперерабатывающей промышленности',
-    'А.3 Требования промышленной безопасности в нефтяной и газовой промышленности',
-    'Б.1 Эксплуатация опасных производственных объектов',
-    'Б.2 Эксплуатация систем газораспределения и газопотребления',
-    'Б.3 Эксплуатация объектов электроэнергетики',
-    'Б.7 Эксплуатация химически опасных производственных объектов',
-    'В.1 Надзорная деятельность',
-  ];
-
-  const energySafetyAreas = [
-    'Электропотребители промышленные 5 группа до и выше 1000В',
-    'Тепловые энергоустановки',
-    'Электрические сети',
-  ];
-
-  const electricalSafetyAreas = [
-    'I группа',
-    'II группа до 1000В',
-    'III группа до 1000В',
-    'IV группа до 1000В',
-    'V группа до 1000В',
-    'V группа выше 1000В',
-  ];
-
-  const heightWorkAreas = [
-    '1 группа',
-    '2 группа',
-    '3 группа',
-  ];
-
-  const getAreasForCategory = (cat: string) => {
-    switch (cat) {
-      case 'Промышленная безопасность':
-        return industrialSafetyAreas;
-      case 'Энергобезопасность':
-        return energySafetyAreas;
-      case 'Электробезопасность':
-        return electricalSafetyAreas;
-      case 'Работы на высоте':
-        return heightWorkAreas;
-      default:
-        return [];
-    }
-  };
 
   const showProtocolFields = category === 'Промышленная безопасность' || category === 'Энергобезопасность';
 

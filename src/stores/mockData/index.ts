@@ -5,3 +5,11 @@ export { mockProductionSites } from './productionSites';
 export { mockExternalOrganizations } from './externalOrganizations';
 export { mockSystemUsers } from './systemUsers';
 export { mockCompetencyMatrix } from './competencyMatrix';
+export {
+  certificationCategories,
+  industrialSafetyAreas,
+  energySafetyAreas,
+  electricalSafetyAreas,
+  heightWorkAreas,
+  getAreasForCategory
+} from './certificationAreas';
