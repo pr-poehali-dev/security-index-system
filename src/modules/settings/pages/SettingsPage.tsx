@@ -19,7 +19,9 @@ import CompetenciesTab from '../components/CompetenciesTab';
 import CompetencyGapAnalysisTab from '../components/CompetencyGapAnalysisTab';
 import AddCompetencyDialog from '../components/AddCompetencyDialog';
 import EditCompetencyDialog from '../components/EditCompetencyDialog';
-import type { Organization, Department, Personnel, CompetencyMatrix } from '@/types';
+import ProductionSitesTab from '../components/ProductionSitesTab';
+import ProductionSiteDialog from '../components/ProductionSiteDialog';
+import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite } from '@/types';
 
 export default function SettingsPage() {
   const user = useAuthStore((state) => state.user);
@@ -27,7 +29,8 @@ export default function SettingsPage() {
     deleteOrganization,
     deleteDepartment,
     deletePersonnel,
-    deleteCompetency
+    deleteCompetency,
+    deleteProductionSite
   } = useSettingsStore();
   
   const { toast } = useToast();
@@ -36,10 +39,12 @@ export default function SettingsPage() {
   const [showAddDept, setShowAddDept] = useState(false);
   const [showAddPersonnel, setShowAddPersonnel] = useState(false);
   const [showAddCompetency, setShowAddCompetency] = useState(false);
+  const [showAddSite, setShowAddSite] = useState(false);
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
   const [editingDept, setEditingDept] = useState<Department | null>(null);
   const [editingPerson, setEditingPerson] = useState<Personnel | null>(null);
   const [editingCompetency, setEditingCompetency] = useState<CompetencyMatrix | null>(null);
+  const [editingSite, setEditingSite] = useState<ProductionSite | null>(null);
 
   const isReadOnly = user?.role !== 'TenantAdmin';
   
@@ -75,6 +80,13 @@ export default function SettingsPage() {
     }
   };
 
+  const handleDeleteSite = (id: string) => {
+    if (confirm('Удалить производственную площадку?')) {
+      deleteProductionSite(id);
+      toast({ title: 'Производственная площадка удалена' });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -97,6 +109,10 @@ export default function SettingsPage() {
           <TabsTrigger value="organizations" className="gap-2">
             <Icon name="Building2" size={16} />
             Организации
+          </TabsTrigger>
+          <TabsTrigger value="production-sites" className="gap-2">
+            <Icon name="Factory" size={16} />
+            Производственные площадки
           </TabsTrigger>
           <TabsTrigger value="departments" className="gap-2">
             <Icon name="Building" size={16} />
@@ -121,6 +137,14 @@ export default function SettingsPage() {
             onAdd={() => setShowAddOrg(true)}
             onEdit={setEditingOrg}
             onDelete={handleDeleteOrg}
+          />
+        </TabsContent>
+
+        <TabsContent value="production-sites">
+          <ProductionSitesTab
+            onAdd={() => setShowAddSite(true)}
+            onEdit={setEditingSite}
+            onDelete={handleDeleteSite}
           />
         </TabsContent>
 
@@ -202,6 +226,19 @@ export default function SettingsPage() {
           competency={editingCompetency}
           open={!!editingCompetency}
           onOpenChange={(open) => !open && setEditingCompetency(null)}
+        />
+      )}
+
+      <ProductionSiteDialog 
+        open={showAddSite} 
+        onOpenChange={setShowAddSite}
+      />
+
+      {editingSite && (
+        <ProductionSiteDialog 
+          site={editingSite}
+          open={!!editingSite}
+          onOpenChange={(open) => !open && setEditingSite(null)}
         />
       )}
     </div>

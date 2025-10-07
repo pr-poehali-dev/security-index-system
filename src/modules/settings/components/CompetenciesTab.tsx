@@ -32,7 +32,10 @@ export default function CompetenciesTab({ onAdd, onEdit, onDelete }: Competencie
   const [searchTerm, setSearchTerm] = useState('');
   const [filterOrg, setFilterOrg] = useState<string>('all');
   const [showImport, setShowImport] = useState(false);
-  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>(() => {
+    const saved = localStorage.getItem('competencies-view-mode');
+    return (saved as 'table' | 'cards') || 'table';
+  });
 
   const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
   const tenantCompetencies = competencies.filter((c) => c.tenantId === user?.tenantId);
@@ -106,7 +109,10 @@ export default function CompetenciesTab({ onAdd, onEdit, onDelete }: Competencie
               <Button
                 variant={viewMode === 'table' ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => setViewMode('table')}
+                onClick={() => {
+                  setViewMode('table');
+                  localStorage.setItem('competencies-view-mode', 'table');
+                }}
                 className="rounded-r-none"
               >
                 <Icon name="Table" size={16} />
@@ -114,7 +120,10 @@ export default function CompetenciesTab({ onAdd, onEdit, onDelete }: Competencie
               <Button
                 variant={viewMode === 'cards' ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => setViewMode('cards')}
+                onClick={() => {
+                  setViewMode('cards');
+                  localStorage.setItem('competencies-view-mode', 'cards');
+                }}
                 className="rounded-l-none"
               >
                 <Icon name="LayoutGrid" size={16} />

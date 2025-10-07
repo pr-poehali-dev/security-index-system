@@ -39,7 +39,10 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
   const [searchTerm, setSearchTerm] = useState('');
   const [filterOrg, setFilterOrg] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>(() => {
+    const saved = localStorage.getItem('personnel-view-mode');
+    return (saved as 'table' | 'cards') || 'table';
+  });
 
   const tenantDepts = getDepartmentsByTenant(user!.tenantId!);
   const tenantPersonnel = getPersonnelByTenant(user!.tenantId!);
@@ -147,7 +150,10 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
             <Button
               variant={viewMode === 'table' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setViewMode('table')}
+              onClick={() => {
+                setViewMode('table');
+                localStorage.setItem('personnel-view-mode', 'table');
+              }}
               className="rounded-r-none"
             >
               <Icon name="Table" size={16} />
@@ -155,7 +161,10 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
             <Button
               variant={viewMode === 'cards' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setViewMode('cards')}
+              onClick={() => {
+                setViewMode('cards');
+                localStorage.setItem('personnel-view-mode', 'cards');
+              }}
               className="rounded-l-none"
             >
               <Icon name="LayoutGrid" size={16} />

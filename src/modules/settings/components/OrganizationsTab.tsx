@@ -31,13 +31,17 @@ export default function OrganizationsTab({ onAdd, onEdit, onDelete }: Organizati
     getOrganizationsByTenant,
     getDepartmentsByTenant,
     getDepartmentsByOrganization,
+    getProductionSitesByOrganization,
     importOrganizations,
     importDepartments
   } = useSettingsStore();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>(() => {
+    const saved = localStorage.getItem('organizations-view-mode');
+    return (saved as 'table' | 'cards') || 'table';
+  });
 
   const tenantOrgs = getOrganizationsByTenant(user!.tenantId!);
   const tenantDepts = getDepartmentsByTenant(user!.tenantId!);
@@ -91,7 +95,10 @@ export default function OrganizationsTab({ onAdd, onEdit, onDelete }: Organizati
             <Button
               variant={viewMode === 'table' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setViewMode('table')}
+              onClick={() => {
+                setViewMode('table');
+                localStorage.setItem('organizations-view-mode', 'table');
+              }}
               className="rounded-r-none"
             >
               <Icon name="Table" size={16} />
@@ -99,7 +106,10 @@ export default function OrganizationsTab({ onAdd, onEdit, onDelete }: Organizati
             <Button
               variant={viewMode === 'cards' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setViewMode('cards')}
+              onClick={() => {
+                setViewMode('cards');
+                localStorage.setItem('organizations-view-mode', 'cards');
+              }}
               className="rounded-l-none"
             >
               <Icon name="LayoutGrid" size={16} />
@@ -150,13 +160,14 @@ export default function OrganizationsTab({ onAdd, onEdit, onDelete }: Organizati
             <TableBody>
               {filteredOrgs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
                     <Icon name="Search" size={48} className="mx-auto mb-4 opacity-20" />
                     <p>Организации не найдены</p>
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredOrgs.map((org) => {
+                  const orgSites = getProductionSitesByOrganization(org.id);
                   const orgDepts = getDepartmentsByOrganization(org.id);
                   const orgPersonnel = personnel.filter(p => p.organizationId === org.id);
                   
@@ -173,6 +184,9 @@ export default function OrganizationsTab({ onAdd, onEdit, onDelete }: Organizati
                         <div className="text-sm max-w-xs truncate">
                           {org.address || '—'}
                         </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="outline">{orgSites.length}</Badge>
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge variant="secondary">{orgDepts.length}</Badge>
@@ -220,6 +234,7 @@ export default function OrganizationsTab({ onAdd, onEdit, onDelete }: Organizati
             </div>
           ) : (
             filteredOrgs.map((org) => {
+              const orgSites = getProductionSitesByOrganization(org.id);
               const orgDepts = getDepartmentsByOrganization(org.id);
               const orgPersonnel = personnel.filter(p => p.organizationId === org.id);
               
@@ -246,14 +261,21 @@ export default function OrganizationsTab({ onAdd, onEdit, onDelete }: Organizati
                       </div>
                     )}
                     
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <Icon name="Building" size={14} />
-                        <span>Подразделений: {orgDepts.length}</span>
+                    <div className="grid grid-cols-3 gap-2 text-sm">
+                      <div className="flex flex-col items-center p-2 bg-muted/50 rounded">
+                        <Icon name="Factory" size={16} className="text-muted-foreground mb-1" />
+                        <span className="text-xs text-muted-foreground">Площадок</span>
+                        <span className="font-semibold">{orgSites.length}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Icon name="Users" size={14} />
-                        <span>Персонал: {orgPersonnel.length}</span>
+                      <div className="flex flex-col items-center p-2 bg-muted/50 rounded">
+                        <Icon name="Building" size={16} className="text-muted-foreground mb-1" />
+                        <span className="text-xs text-muted-foreground">Подразд.</span>
+                        <span className="font-semibold">{orgDepts.length}</span>
+                      </div>
+                      <div className="flex flex-col items-center p-2 bg-muted/50 rounded">
+                        <Icon name="Users" size={16} className="text-muted-foreground mb-1" />
+                        <span className="text-xs text-muted-foreground">Персонал</span>
+                        <span className="font-semibold">{orgPersonnel.length}</span>
                       </div>
                     </div>
 

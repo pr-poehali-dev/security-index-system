@@ -1,12 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Organization, Department, Personnel, CompetencyMatrix } from '@/types';
+import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite } from '@/types';
 
 interface SettingsState {
   organizations: Organization[];
   departments: Department[];
   personnel: Personnel[];
   competencies: CompetencyMatrix[];
+  productionSites: ProductionSite[];
   
   addOrganization: (org: Omit<Organization, 'id' | 'createdAt'>) => void;
   updateOrganization: (id: string, updates: Partial<Organization>) => void;
@@ -35,6 +36,12 @@ interface SettingsState {
   getPersonnelByDepartment: (departmentId: string) => Personnel[];
   getCompetenciesByTenant: (tenantId: string) => CompetencyMatrix[];
   getCompetenciesByOrganization: (organizationId: string) => CompetencyMatrix[];
+  
+  addProductionSite: (site: Omit<ProductionSite, 'id' | 'createdAt'>) => void;
+  updateProductionSite: (id: string, updates: Partial<ProductionSite>) => void;
+  deleteProductionSite: (id: string) => void;
+  getProductionSitesByOrganization: (organizationId: string) => ProductionSite[];
+  importProductionSites: (sites: Omit<ProductionSite, 'id' | 'createdAt'>[]) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
@@ -184,7 +191,8 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     set((state) => ({
       organizations: state.organizations.filter((org) => org.id !== id),
       departments: state.departments.filter((dept) => dept.organizationId !== id),
-      personnel: state.personnel.filter((p) => p.organizationId !== id)
+      personnel: state.personnel.filter((p) => p.organizationId !== id),
+      productionSites: state.productionSites.filter((site) => site.organizationId !== id)
     }));
   },
 
@@ -388,5 +396,80 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
 
   getCompetenciesByOrganization: (organizationId) => {
     return get().competencies.filter((comp) => comp.organizationId === organizationId);
+  },
+
+  productionSites: [
+    {
+      id: 'site-1',
+      tenantId: 'tenant-1',
+      organizationId: 'org-1',
+      name: 'Производственная площадка №1',
+      address: 'г. Москва, ул. Заводская, д. 10',
+      code: 'ПП-1',
+      head: 'Кузнецов А.В.',
+      phone: '+7 (999) 111-22-33',
+      status: 'active',
+      createdAt: new Date(Date.now() - 300 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'site-2',
+      tenantId: 'tenant-1',
+      organizationId: 'org-1',
+      name: 'Производственная площадка №2',
+      address: 'Московская обл., г. Подольск, ул. Промышленная, д. 5',
+      code: 'ПП-2',
+      head: 'Морозов В.И.',
+      phone: '+7 (999) 222-33-44',
+      status: 'active',
+      createdAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'site-3',
+      tenantId: 'tenant-1',
+      organizationId: 'org-2',
+      name: 'Сервисный центр',
+      address: 'г. Москва, пр. Индустриальный, д. 20',
+      code: 'СЦ-1',
+      status: 'active',
+      createdAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ],
+
+  addProductionSite: (site) => {
+    const newSite: ProductionSite = {
+      ...site,
+      id: `site-${Date.now()}`,
+      createdAt: new Date().toISOString()
+    };
+    set((state) => ({ productionSites: [...state.productionSites, newSite] }));
+  },
+
+  updateProductionSite: (id, updates) => {
+    set((state) => ({
+      productionSites: state.productionSites.map((site) =>
+        site.id === id ? { ...site, ...updates } : site
+      )
+    }));
+  },
+
+  deleteProductionSite: (id) => {
+    set((state) => ({
+      productionSites: state.productionSites.filter((site) => site.id !== id)
+    }));
+  },
+
+  getProductionSitesByOrganization: (organizationId) => {
+    return get().productionSites.filter((site) => site.organizationId === organizationId);
+  },
+
+  importProductionSites: (sites) => {
+    const newSites = sites.map((site, index) => ({
+      ...site,
+      id: `site-import-${Date.now()}-${index}`,
+      createdAt: new Date().toISOString()
+    }));
+    set((state) => ({
+      productionSites: [...state.productionSites, ...newSites]
+    }));
   }
 }), { name: 'settings-storage' }));

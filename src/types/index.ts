@@ -53,6 +53,19 @@ export interface Organization {
   createdAt: string;
 }
 
+export interface ProductionSite {
+  id: string;
+  tenantId: string;
+  organizationId: string;
+  name: string;
+  address: string;
+  code?: string;
+  head?: string;
+  phone?: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+}
+
 export interface Department {
   id: string;
   tenantId: string;
