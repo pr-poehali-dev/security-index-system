@@ -164,6 +164,8 @@ interface EmployeeAttestationsTabProps {
 export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttestationsTabProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [organizationFilter, setOrganizationFilter] = useState<string>('all');
+  const [verificationFilter, setVerificationFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [showImportDialog, setShowImportDialog] = useState(false);
@@ -189,14 +191,33 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
     setSelectedEmployee(updatedEmployee);
   };
 
+  const uniqueOrganizations = Array.from(new Set(mockEmployees.map(emp => emp.organization)));
+
   const filteredEmployees = mockEmployees.filter(emp => {
     const matchesSearch = emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          emp.position.toLowerCase().includes(searchQuery.toLowerCase());
+                          emp.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          emp.organization.toLowerCase().includes(searchQuery.toLowerCase());
     
-    if (statusFilter === 'all') return matchesSearch;
+    const matchesOrganization = organizationFilter === 'all' || emp.organization === organizationFilter;
     
-    const hasStatus = emp.certifications.some(cert => cert.status === statusFilter);
-    return matchesSearch && hasStatus;
+    const matchesStatus = statusFilter === 'all' || emp.certifications.some(cert => cert.status === statusFilter);
+    
+    const matchesVerification = verificationFilter === 'all' || (() => {
+      const verifiableCerts = emp.certifications.filter(cert => 
+        cert.protocolNumber && (cert.category === 'Промышленная безопасность' || cert.category === 'Энергобезопасность')
+      );
+      
+      if (verifiableCerts.length === 0) return verificationFilter === 'all';
+      
+      if (verificationFilter === 'verified') {
+        return verifiableCerts.some(cert => cert.verified === true);
+      } else if (verificationFilter === 'unverified') {
+        return verifiableCerts.some(cert => !cert.verified);
+      }
+      return true;
+    })();
+    
+    return matchesSearch && matchesOrganization && matchesStatus && matchesVerification;
   });
 
   const getEmployeeStatus = (employee: Employee): 'valid' | 'expiring_soon' | 'expired' => {
@@ -335,27 +356,79 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Поиск по ФИО или должности..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+          <div className="space-y-4 mb-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Поиск по ФИО, должности или организации..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Статус" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все статусы</SelectItem>
-                <SelectItem value="valid">Действующие</SelectItem>
-                <SelectItem value="expiring_soon">Истекают</SelectItem>
-                <SelectItem value="expired">Просрочены</SelectItem>
-              </SelectContent>
-            </Select>
+            
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Select value={organizationFilter} onValueChange={setOrganizationFilter}>
+                <SelectTrigger className="w-full sm:w-[250px]">
+                  <SelectValue placeholder="Организация" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    <div className="flex items-center gap-2">
+                      <Icon name="Building2" size={14} />
+                      Все организации
+                    </div>
+                  </SelectItem>
+                  {uniqueOrganizations.map((org) => (
+                    <SelectItem key={org} value={org}>
+                      <div className="flex items-center gap-2">
+                        <Icon name="Building2" size={14} />
+                        {org}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Статус аттестации" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все статусы</SelectItem>
+                  <SelectItem value="valid">Действующие</SelectItem>
+                  <SelectItem value="expiring_soon">Истекают</SelectItem>
+                  <SelectItem value="expired">Просрочены</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={verificationFilter} onValueChange={setVerificationFilter}>
+                <SelectTrigger className="w-full sm:w-[220px]">
+                  <SelectValue placeholder="Статус проверки" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    <div className="flex items-center gap-2">
+                      Все проверки
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="verified">
+                    <div className="flex items-center gap-2">
+                      <Icon name="CheckCircle2" size={14} className="text-emerald-600" />
+                      Проверенные
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="unverified">
+                    <div className="flex items-center gap-2">
+                      <Icon name="AlertCircle" size={14} className="text-amber-600" />
+                      Непроверенные
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {viewMode === 'cards' ? (
