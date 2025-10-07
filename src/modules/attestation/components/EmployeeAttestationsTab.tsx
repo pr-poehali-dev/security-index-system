@@ -46,6 +46,7 @@ interface Employee {
   name: string;
   position: string;
   department: string;
+  organization: string;
   certifications: Certification[];
 }
 
@@ -55,6 +56,7 @@ const mockEmployees: Employee[] = [
     name: 'Иванов Иван Иванович',
     position: 'Инженер',
     department: 'Производство',
+    organization: 'ООО "ПромСтройИнжиниринг"',
     certifications: [
       {
         id: '1-1',
@@ -100,6 +102,7 @@ const mockEmployees: Employee[] = [
     name: 'Петрова Анна Сергеевна',
     position: 'Начальник участка',
     department: 'Производство',
+    organization: 'ООО "ПромСтройИнжиниринг"',
     certifications: [
       {
         id: '2-1',
@@ -130,6 +133,7 @@ const mockEmployees: Employee[] = [
     name: 'Сидоров Петр Николаевич',
     position: 'Электромонтер',
     department: 'Энергетика',
+    organization: 'АО "ЭнергоСервис"',
     certifications: [
       {
         id: '3-1',
@@ -370,6 +374,10 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                               {getStatusLabel(status)}
                             </span>
                           </div>
+                          <p className="text-sm text-muted-foreground mb-1">
+                            <Icon name="Building2" size={14} className="inline mr-1" />
+                            {emp.organization}
+                          </p>
                           <p className="text-sm text-muted-foreground">{emp.position} • {emp.department}</p>
                           <p className="text-sm text-muted-foreground mt-1">
                             Аттестаций: {emp.certifications.length}
@@ -433,6 +441,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                 <thead className="border-b">
                   <tr className="text-left">
                     <th className="pb-3 font-medium">ФИО</th>
+                    <th className="pb-3 font-medium">Организация</th>
                     <th className="pb-3 font-medium">Должность</th>
                     <th className="pb-3 font-medium">Подразделение</th>
                     <th className="pb-3 font-medium">Аттестаций</th>
@@ -446,6 +455,12 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                     return (
                       <tr key={emp.id} className="border-b last:border-0">
                         <td className="py-3">{emp.name}</td>
+                        <td className="py-3 text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Icon name="Building2" size={14} />
+                            {emp.organization}
+                          </div>
+                        </td>
                         <td className="py-3 text-muted-foreground">{emp.position}</td>
                         <td className="py-3 text-muted-foreground">{emp.department}</td>
                         <td className="py-3">{emp.certifications.length}</td>
@@ -494,6 +509,10 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
             <div className="space-y-4">
               <div className="pb-4 border-b">
                 <h3 className="font-semibold text-lg">{selectedEmployee.name}</h3>
+                <p className="text-sm text-muted-foreground mb-1">
+                  <Icon name="Building2" size={14} className="inline mr-1" />
+                  {selectedEmployee.organization}
+                </p>
                 <p className="text-sm text-muted-foreground">
                   {selectedEmployee.position} • {selectedEmployee.department}
                 </p>
