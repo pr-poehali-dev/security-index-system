@@ -17,7 +17,7 @@ export function getPersonnelFullInfo(
 
   return {
     fullName: person ? `${person.lastName} ${person.firstName} ${person.middleName || ''}`.trim() : '—',
-    position: position?.title || '—',
+    position: position?.name || '—',
     personId: personnel.personId,
     positionId: personnel.positionId
   };

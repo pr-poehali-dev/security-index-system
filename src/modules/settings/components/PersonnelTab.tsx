@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 import { exportPersonnelToExcel, importPersonnelFromExcel } from '@/lib/exportUtils';
+import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 import type { Personnel } from '@/types';
 import {
   Table,
@@ -29,6 +30,8 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
   const user = useAuthStore((state) => state.user);
   const {
     organizations,
+    people,
+    positions,
     getDepartmentsByTenant,
     getPersonnelByTenant,
     getOrganizationsByTenant,
@@ -48,10 +51,24 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
   const tenantPersonnel = getPersonnelByTenant(user!.tenantId!);
   const tenantOrgs = getOrganizationsByTenant(user!.tenantId!);
 
-  const filteredPersonnel = tenantPersonnel.filter((person) => {
+  const personnelWithInfo = useMemo(() => {
+    return tenantPersonnel.map(personnel => {
+      const info = getPersonnelFullInfo(personnel, people, positions);
+      const person = people.find(p => p.id === personnel.personId);
+      return {
+        ...personnel,
+        fullName: info.fullName,
+        positionName: info.position,
+        email: person?.email,
+        phone: person?.phone
+      };
+    });
+  }, [tenantPersonnel, people, positions]);
+
+  const filteredPersonnel = personnelWithInfo.filter((person) => {
     const matchesSearch = 
       person.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      person.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      person.positionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       person.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       person.phone?.includes(searchTerm);
 
@@ -224,7 +241,7 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
                 filteredPersonnel.map((person) => (
                   <TableRow key={person.id}>
                     <TableCell className="font-medium">{person.fullName}</TableCell>
-                    <TableCell>{person.position}</TableCell>
+                    <TableCell>{person.positionName}</TableCell>
                     <TableCell>
                       <div className="text-sm">{getOrganizationName(person.organizationId)}</div>
                     </TableCell>
@@ -294,7 +311,7 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h3 className="font-semibold text-lg">{person.fullName}</h3>
-                      <p className="text-sm text-muted-foreground">{person.position}</p>
+                      <p className="text-sm text-muted-foreground">{person.positionName}</p>
                     </div>
                     <Badge variant={person.status === 'active' ? 'default' : 'secondary'}>
                       {person.status === 'active' ? 'Активен' : 'Неактивен'}

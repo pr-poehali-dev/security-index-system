@@ -14,10 +14,10 @@ import EditDepartmentDialog from '../components/EditDepartmentDialog';
 import EditPersonnelDialog from '../components/EditPersonnelDialog';
 import OrganizationsTab from '../components/OrganizationsTab';
 import DepartmentsTab from '../components/DepartmentsTab';
-import PersonnelTab from '@/components/settings/PersonnelTab';
+import PersonnelTab from '../components/PersonnelTab';
 import CompetenciesTab from '../components/CompetenciesTab';
-import PeopleDirectoryTab from '@/components/settings/PeopleDirectoryTab';
-import PositionsDirectoryTab from '@/components/settings/PositionsDirectoryTab';
+import PeopleDirectoryTab from '../components/PeopleDirectoryTab';
+import PositionsDirectoryTab from '../components/PositionsDirectoryTab';
 import ExternalOrganizationsTab from '../components/ExternalOrganizationsTab';
 import AddCompetencyDialog from '../components/AddCompetencyDialog';
 import EditCompetencyDialog from '../components/EditCompetencyDialog';
@@ -27,13 +27,15 @@ import SystemUsersTab from '../components/SystemUsersTab';
 import AddSystemUserDialog from '../components/AddSystemUserDialog';
 import EditSystemUserDialog from '../components/EditSystemUserDialog';
 import ExternalOrganizationDialog from '../components/ExternalOrganizationDialog';
-import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization } from '@/types';
+import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization, Person, Position } from '@/types';
 
 export default function SettingsPage() {
   const user = useAuthStore((state) => state.user);
   const {
     deleteOrganization,
     deleteDepartment,
+    deletePerson,
+    deletePosition,
     deletePersonnel,
     deleteCompetency,
     deleteProductionSite,
@@ -45,6 +47,8 @@ export default function SettingsPage() {
 
   const [showAddOrg, setShowAddOrg] = useState(false);
   const [showAddDept, setShowAddDept] = useState(false);
+  const [showAddPerson, setShowAddPerson] = useState(false);
+  const [showAddPosition, setShowAddPosition] = useState(false);
   const [showAddPersonnel, setShowAddPersonnel] = useState(false);
   const [showAddCompetency, setShowAddCompetency] = useState(false);
   const [showAddSite, setShowAddSite] = useState(false);
@@ -52,6 +56,8 @@ export default function SettingsPage() {
   const [showAddExternalOrg, setShowAddExternalOrg] = useState(false);
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
   const [editingDept, setEditingDept] = useState<Department | null>(null);
+  const [editingPersonObj, setEditingPersonObj] = useState<Person | null>(null);
+  const [editingPositionObj, setEditingPositionObj] = useState<Position | null>(null);
   const [editingPerson, setEditingPerson] = useState<Personnel | null>(null);
   const [editingCompetency, setEditingCompetency] = useState<CompetencyMatrix | null>(null);
   const [editingSite, setEditingSite] = useState<ProductionSite | null>(null);
@@ -110,6 +116,20 @@ export default function SettingsPage() {
     if (confirm('Удалить стороннюю организацию?')) {
       deleteExternalOrganization(id);
       toast({ title: 'Организация удалена' });
+    }
+  };
+
+  const handleDeletePersonObj = (id: string) => {
+    if (confirm('Удалить человека из справочника?')) {
+      deletePerson(id);
+      toast({ title: 'Человек удален' });
+    }
+  };
+
+  const handleDeletePositionObj = (id: string) => {
+    if (confirm('Удалить должность из справочника?')) {
+      deletePosition(id);
+      toast({ title: 'Должность удалена' });
     }
   };
 
@@ -195,11 +215,19 @@ export default function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="people">
-          <PeopleDirectoryTab />
+          <PeopleDirectoryTab
+            onAdd={() => setShowAddPerson(true)}
+            onEdit={setEditingPersonObj}
+            onDelete={handleDeletePersonObj}
+          />
         </TabsContent>
 
         <TabsContent value="positions">
-          <PositionsDirectoryTab />
+          <PositionsDirectoryTab
+            onAdd={() => setShowAddPosition(true)}
+            onEdit={setEditingPositionObj}
+            onDelete={handleDeletePositionObj}
+          />
         </TabsContent>
 
         <TabsContent value="personnel">
