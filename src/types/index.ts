@@ -21,6 +21,21 @@ export interface User {
   availableModules: ModuleType[];
 }
 
+export interface SystemUser {
+  id: string;
+  tenantId: string;
+  personnelId?: string;
+  email: string;
+  login: string;
+  passwordHash: string;
+  role: UserRole;
+  status: 'active' | 'inactive';
+  lastLogin?: string;
+  organizationAccess: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Tenant {
   id: string;
   name: string;

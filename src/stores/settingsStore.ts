@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite } from '@/types';
+import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser } from '@/types';
 
 interface SettingsState {
   organizations: Organization[];
@@ -8,6 +8,7 @@ interface SettingsState {
   personnel: Personnel[];
   competencies: CompetencyMatrix[];
   productionSites: ProductionSite[];
+  systemUsers: SystemUser[];
   
   addOrganization: (org: Omit<Organization, 'id' | 'createdAt'>) => void;
   updateOrganization: (id: string, updates: Partial<Organization>) => void;
@@ -42,6 +43,11 @@ interface SettingsState {
   deleteProductionSite: (id: string) => void;
   getProductionSitesByOrganization: (organizationId: string) => ProductionSite[];
   importProductionSites: (sites: Omit<ProductionSite, 'id' | 'createdAt'>[]) => void;
+  
+  addSystemUser: (user: Omit<SystemUser, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateSystemUser: (id: string, updates: Partial<SystemUser>) => void;
+  deleteSystemUser: (id: string) => void;
+  getSystemUsersByTenant: (tenantId: string) => SystemUser[];
 }
 
 export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
@@ -471,5 +477,35 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     set((state) => ({
       productionSites: [...state.productionSites, ...newSites]
     }));
+  },
+
+  systemUsers: [],
+
+  addSystemUser: (user) => {
+    const newUser: SystemUser = {
+      ...user,
+      id: `user-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    set((state) => ({ systemUsers: [...state.systemUsers, newUser] }));
+  },
+
+  updateSystemUser: (id, updates) => {
+    set((state) => ({
+      systemUsers: state.systemUsers.map((user) =>
+        user.id === id ? { ...user, ...updates, updatedAt: new Date().toISOString() } : user
+      )
+    }));
+  },
+
+  deleteSystemUser: (id) => {
+    set((state) => ({
+      systemUsers: state.systemUsers.filter((user) => user.id !== id)
+    }));
+  },
+
+  getSystemUsersByTenant: (tenantId) => {
+    return get().systemUsers.filter((user) => user.tenantId === tenantId);
   }
 }), { name: 'settings-storage' }));

@@ -21,7 +21,10 @@ import AddCompetencyDialog from '../components/AddCompetencyDialog';
 import EditCompetencyDialog from '../components/EditCompetencyDialog';
 import ProductionSitesTab from '../components/ProductionSitesTab';
 import ProductionSiteDialog from '../components/ProductionSiteDialog';
-import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite } from '@/types';
+import SystemUsersTab from '../components/SystemUsersTab';
+import AddSystemUserDialog from '../components/AddSystemUserDialog';
+import EditSystemUserDialog from '../components/EditSystemUserDialog';
+import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser } from '@/types';
 
 export default function SettingsPage() {
   const user = useAuthStore((state) => state.user);
@@ -30,7 +33,8 @@ export default function SettingsPage() {
     deleteDepartment,
     deletePersonnel,
     deleteCompetency,
-    deleteProductionSite
+    deleteProductionSite,
+    deleteSystemUser
   } = useSettingsStore();
   
   const { toast } = useToast();
@@ -40,11 +44,13 @@ export default function SettingsPage() {
   const [showAddPersonnel, setShowAddPersonnel] = useState(false);
   const [showAddCompetency, setShowAddCompetency] = useState(false);
   const [showAddSite, setShowAddSite] = useState(false);
+  const [showAddUser, setShowAddUser] = useState(false);
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
   const [editingDept, setEditingDept] = useState<Department | null>(null);
   const [editingPerson, setEditingPerson] = useState<Personnel | null>(null);
   const [editingCompetency, setEditingCompetency] = useState<CompetencyMatrix | null>(null);
   const [editingSite, setEditingSite] = useState<ProductionSite | null>(null);
+  const [editingUser, setEditingUser] = useState<SystemUser | null>(null);
 
   const isReadOnly = user?.role !== 'TenantAdmin';
   
@@ -84,6 +90,13 @@ export default function SettingsPage() {
     if (confirm('Удалить производственную площадку?')) {
       deleteProductionSite(id);
       toast({ title: 'Производственная площадка удалена' });
+    }
+  };
+
+  const handleDeleteUser = (id: string) => {
+    if (confirm('Удалить пользователя из системы?')) {
+      deleteSystemUser(id);
+      toast({ title: 'Пользователь удален' });
     }
   };
 
@@ -130,6 +143,10 @@ export default function SettingsPage() {
             <Icon name="BarChart3" size={16} />
             Анализ пробелов
           </TabsTrigger>
+          <TabsTrigger value="system-users" className="gap-2">
+            <Icon name="UserCog" size={16} />
+            Пользователи системы
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="organizations">
@@ -174,6 +191,14 @@ export default function SettingsPage() {
 
         <TabsContent value="gap-analysis">
           <CompetencyGapAnalysisTab />
+        </TabsContent>
+
+        <TabsContent value="system-users">
+          <SystemUsersTab
+            onAdd={() => setShowAddUser(true)}
+            onEdit={setEditingUser}
+            onDelete={handleDeleteUser}
+          />
         </TabsContent>
       </Tabs>
 
@@ -239,6 +264,19 @@ export default function SettingsPage() {
         }}
         site={editingSite || undefined}
       />
+
+      <AddSystemUserDialog 
+        open={showAddUser} 
+        onOpenChange={setShowAddUser}
+      />
+
+      {editingUser && (
+        <EditSystemUserDialog 
+          user={editingUser}
+          open={!!editingUser}
+          onOpenChange={(open) => !open && setEditingUser(null)}
+        />
+      )}
     </div>
   );
 }
