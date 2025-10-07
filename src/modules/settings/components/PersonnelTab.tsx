@@ -35,7 +35,9 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
     getDepartmentsByTenant,
     getPersonnelByTenant,
     getOrganizationsByTenant,
-    importPersonnel
+    importPersonnel,
+    getCertificationsByPerson,
+    competencies
   } = useSettingsStore();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -223,6 +225,7 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
                 <TableHead>Должность</TableHead>
                 <TableHead>Организация</TableHead>
                 <TableHead>Подразделение</TableHead>
+                <TableHead>Области аттестации</TableHead>
                 <TableHead>Контакты</TableHead>
                 <TableHead className="text-center">Роль</TableHead>
                 <TableHead className="text-center">Статус</TableHead>
@@ -232,7 +235,7 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
             <TableBody>
               {filteredPersonnel.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center py-12 text-muted-foreground">
                     <Icon name="Search" size={48} className="mx-auto mb-4 opacity-20" />
                     <p>Сотрудники не найдены</p>
                   </TableCell>
@@ -247,6 +250,32 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">{getDepartmentName(person.departmentId)}</div>
+                    </TableCell>
+                    <TableCell>
+                      {(() => {
+                        const certs = getCertificationsByPerson(person.personId);
+                        if (certs.length === 0) {
+                          return <span className="text-sm text-muted-foreground">—</span>;
+                        }
+                        return (
+                          <div className="flex flex-wrap gap-1">
+                            {certs.map((cert) => {
+                              const comp = competencies.find(c => c.id === cert.competencyId);
+                              const isExpired = new Date(cert.expiryDate) < new Date();
+                              const isExpiring = !isExpired && new Date(cert.expiryDate) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                              return (
+                                <Badge 
+                                  key={cert.id} 
+                                  variant={isExpired ? 'destructive' : isExpiring ? 'secondary' : 'default'}
+                                  className="text-xs"
+                                >
+                                  {comp?.code || '—'}
+                                </Badge>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell>
                       <div className="text-sm space-y-1">
