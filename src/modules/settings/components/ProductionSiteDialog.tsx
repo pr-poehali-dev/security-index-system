@@ -31,6 +31,8 @@ export default function ProductionSiteDialog({ open, onOpenChange, site }: Produ
   const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
 
   useEffect(() => {
+    if (!open) return;
+    
     if (site) {
       setFormData({
         organizationId: site.organizationId,
@@ -52,7 +54,7 @@ export default function ProductionSiteDialog({ open, onOpenChange, site }: Produ
         status: 'active'
       });
     }
-  }, [site, open, organizations]);
+  }, [site, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

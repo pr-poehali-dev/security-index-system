@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
-import { exportOrganizationsToCSV, downloadCSV, importOrganizationsFromCSV } from '@/lib/exportUtils';
+import { exportOrganizationsToExcel, importOrganizationsFromExcel } from '@/lib/exportUtils';
 import type { Organization } from '@/types';
 import {
   Table,
@@ -28,12 +28,12 @@ export default function OrganizationsTab({ onAdd, onEdit, onDelete }: Organizati
   const user = useAuthStore((state) => state.user);
   const {
     personnel,
+    productionSites,
     getOrganizationsByTenant,
     getDepartmentsByTenant,
     getDepartmentsByOrganization,
     getProductionSitesByOrganization,
-    importOrganizations,
-    importDepartments
+    importOrganizations
   } = useSettingsStore();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -53,8 +53,7 @@ export default function OrganizationsTab({ onAdd, onEdit, onDelete }: Organizati
   );
 
   const handleExport = () => {
-    const csv = exportOrganizationsToCSV(tenantOrgs, tenantDepts);
-    downloadCSV(csv, `organizations_${new Date().toISOString().split('T')[0]}.csv`);
+    exportOrganizationsToExcel(filteredOrgs, tenantDepts, personnel, productionSites);
     toast({ title: 'Экспорт завершен', description: 'Файл организаций загружен' });
   };
 
@@ -63,10 +62,9 @@ export default function OrganizationsTab({ onAdd, onEdit, onDelete }: Organizati
     if (!file) return;
 
     try {
-      const { organizations: orgs, departments: depts } = await importOrganizationsFromCSV(file, user!.tenantId!);
+      const orgs = await importOrganizationsFromExcel(file, user!.tenantId!);
       importOrganizations(orgs);
-      importDepartments(depts);
-      toast({ title: 'Импорт завершен', description: `Добавлено: ${orgs.length} организаций, ${depts.length} подразделений` });
+      toast({ title: 'Импорт завершен', description: `Добавлено: ${orgs.length} организаций` });
     } catch (error) {
       toast({ title: 'Ошибка импорта', description: 'Проверьте формат файла', variant: 'destructive' });
     }
@@ -131,7 +129,7 @@ export default function OrganizationsTab({ onAdd, onEdit, onDelete }: Organizati
           <input
             ref={fileInputRef}
             type="file"
-            accept=".csv"
+            accept=".xlsx,.xls"
             onChange={handleImport}
             className="hidden"
           />

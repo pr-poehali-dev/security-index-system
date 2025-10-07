@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
+import { useToast } from '@/hooks/use-toast';
+import { exportDepartmentsToExcel, importDepartmentsFromExcel } from '@/lib/exportUtils';
 import type { Department } from '@/types';
 
 interface DepartmentsTabProps {
@@ -20,13 +22,40 @@ export default function DepartmentsTab({ onAdd, onEdit, onDelete }: DepartmentsT
     departments,
     personnel,
     getOrganizationsByTenant,
-    getDepartmentsByTenant
+    getDepartmentsByTenant,
+    importDepartments
   } = useSettingsStore();
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
 
   const tenantOrgs = getOrganizationsByTenant(user!.tenantId!);
   const tenantDepts = getDepartmentsByTenant(user!.tenantId!);
+
+  const filteredDepts = selectedOrg ? tenantDepts.filter(d => d.organizationId === selectedOrg) : tenantDepts;
+
+  const handleExport = () => {
+    exportDepartmentsToExcel(filteredDepts, organizations, personnel);
+    toast({ title: 'Экспорт завершен', description: 'Файл подразделений загружен' });
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const depts = await importDepartmentsFromExcel(file, user!.tenantId!, organizations, departments);
+      importDepartments(depts);
+      toast({ title: 'Импорт завершен', description: `Добавлено: ${depts.length} подразделений` });
+    } catch (error) {
+      toast({ title: 'Ошибка импорта', description: 'Проверьте формат файла', variant: 'destructive' });
+    }
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -46,14 +75,44 @@ export default function DepartmentsTab({ onAdd, onEdit, onDelete }: DepartmentsT
             ))}
           </select>
         </div>
-        <Button onClick={onAdd} size="sm" className="gap-2">
-          <Icon name="Plus" size={14} />
-          Добавить подразделение
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
+            <Icon name="Download" size={14} />
+            Экспорт
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            className="gap-2"
+          >
+            <Icon name="Upload" size={14} />
+            Импорт
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleImport}
+            className="hidden"
+          />
+          <Button onClick={onAdd} size="sm" className="gap-2">
+            <Icon name="Plus" size={14} />
+            Добавить подразделение
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4">
-        {(selectedOrg ? tenantDepts.filter(d => d.organizationId === selectedOrg) : tenantDepts).map((dept) => {
+        {filteredDepts.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <Icon name="Search" size={48} className="mx-auto mb-4 opacity-20" />
+              <p>Подразделения не найдены</p>
+            </CardContent>
+          </Card>
+        ) : (
+          filteredDepts.map((dept) => {
           const org = organizations.find(o => o.id === dept.organizationId);
           const parentDept = departments.find(d => d.id === dept.parentId);
           const deptPersonnel = personnel.filter(p => p.departmentId === dept.id);
@@ -127,7 +186,8 @@ export default function DepartmentsTab({ onAdd, onEdit, onDelete }: DepartmentsT
               </CardContent>
             </Card>
           );
-        })}
+        })
+        )}
       </div>
     </div>
   );

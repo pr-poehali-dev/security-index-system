@@ -1,5 +1,63 @@
 import type { Organization, Department, Personnel, ProductionSite } from '@/types';
 
+export function exportOrganizationsToExcel(
+  organizations: Organization[],
+  departments: Department[],
+  personnel: Personnel[],
+  sites: ProductionSite[]
+) {
+  const data = organizations.map((org) => {
+    const orgDepts = departments.filter((d) => d.organizationId === org.id);
+    const orgPersonnel = personnel.filter((p) => p.organizationId === org.id);
+    const orgSites = sites.filter((s) => s.organizationId === org.id);
+
+    return {
+      'Название': org.name,
+      'ИНН': org.inn,
+      'КПП': org.kpp || '',
+      'Адрес': org.address || '',
+      'Количество площадок': orgSites.length,
+      'Количество подразделений': orgDepts.length,
+      'Количество персонала': orgPersonnel.length,
+      'Статус': org.status === 'active' ? 'Активна' : 'Неактивна',
+      'Дата создания': new Date(org.createdAt).toLocaleDateString('ru-RU')
+    };
+  });
+
+  exportToExcel(data, 'Организации');
+}
+
+export async function importOrganizationsFromExcel(
+  file: File,
+  tenantId: string
+): Promise<Omit<Organization, 'id' | 'createdAt'>[]> {
+  const XLSX = await import('xlsx');
+  const buffer = await file.arrayBuffer();
+  const workbook = XLSX.read(buffer, { type: 'array' });
+  const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows: any[] = XLSX.utils.sheet_to_json(worksheet);
+
+  const orgs: Omit<Organization, 'id' | 'createdAt'>[] = [];
+
+  for (const row of rows) {
+    const name = row['Название']?.toString().trim();
+    const inn = row['ИНН']?.toString().trim();
+
+    if (!name || !inn) continue;
+
+    orgs.push({
+      tenantId,
+      name,
+      inn,
+      kpp: row['КПП']?.toString().trim() || undefined,
+      address: row['Адрес']?.toString().trim() || undefined,
+      status: row['Статус'] === 'Неактивна' ? 'inactive' : 'active'
+    });
+  }
+
+  return orgs;
+}
+
 export function exportOrganizationsToCSV(
   organizations: Organization[],
   departments: Department[]
@@ -277,4 +335,163 @@ export async function importProductionSitesFromExcel(
   }
 
   return sites;
+}
+
+export function exportDepartmentsToExcel(
+  departments: Department[],
+  organizations: Organization[],
+  personnel: Personnel[]
+) {
+  const data = departments.map((dept) => {
+    const org = organizations.find((o) => o.id === dept.organizationId);
+    const parent = departments.find((d) => d.id === dept.parentId);
+    const deptPersonnel = personnel.filter((p) => p.departmentId === dept.id);
+    const childCount = departments.filter((d) => d.parentId === dept.id).length;
+
+    return {
+      'Организация': org?.name || '—',
+      'Название подразделения': dept.name,
+      'Код': dept.code || '',
+      'Родительское подразделение': parent?.name || '',
+      'Руководитель': dept.head || '',
+      'Количество персонала': deptPersonnel.length,
+      'Вложенных подразделений': childCount,
+      'Статус': dept.status === 'active' ? 'Активно' : 'Неактивно',
+      'Дата создания': new Date(dept.createdAt).toLocaleDateString('ru-RU')
+    };
+  });
+
+  exportToExcel(data, 'Подразделения');
+}
+
+export async function importDepartmentsFromExcel(
+  file: File,
+  tenantId: string,
+  organizations: Organization[],
+  departments: Department[]
+): Promise<Omit<Department, 'id' | 'createdAt'>[]> {
+  const XLSX = await import('xlsx');
+  const buffer = await file.arrayBuffer();
+  const workbook = XLSX.read(buffer, { type: 'array' });
+  const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows: any[] = XLSX.utils.sheet_to_json(worksheet);
+
+  const newDepts: Omit<Department, 'id' | 'createdAt'>[] = [];
+
+  for (const row of rows) {
+    const orgName = row['Организация']?.toString().trim();
+    const name = row['Название подразделения']?.toString().trim();
+
+    if (!orgName || !name) continue;
+
+    const org = organizations.find(o => o.name === orgName);
+    if (!org) continue;
+
+    const parentName = row['Родительское подразделение']?.toString().trim();
+    const parent = parentName ? departments.find(d => d.name === parentName && d.organizationId === org.id) : undefined;
+
+    newDepts.push({
+      tenantId,
+      organizationId: org.id,
+      parentId: parent?.id,
+      name,
+      code: row['Код']?.toString().trim() || undefined,
+      head: row['Руководитель']?.toString().trim() || undefined,
+      status: row['Статус'] === 'Неактивно' ? 'inactive' : 'active'
+    });
+  }
+
+  return newDepts;
+}
+
+export function exportPersonnelToExcel(
+  personnel: Personnel[],
+  organizations: Organization[],
+  departments: Department[]
+) {
+  const data = personnel.map((person) => {
+    const org = organizations.find((o) => o.id === person.organizationId);
+    const dept = departments.find((d) => d.id === person.departmentId);
+
+    return {
+      'Организация': org?.name || 'Не указана',
+      'Подразделение': dept?.name || 'Не указано',
+      'ФИО': person.fullName,
+      'Должность': person.position,
+      'Роль': person.role === 'Auditor' ? 'Аудитор' : person.role === 'Manager' ? 'Менеджер' : 'Директор',
+      'Статус': person.status === 'active' ? 'Действующий' : 'Уволен',
+      'Email': person.email || '',
+      'Телефон': person.phone || '',
+      'Дата приема': person.hireDate ? new Date(person.hireDate).toLocaleDateString('ru-RU') : '',
+      'Дата увольнения': person.dismissalDate ? new Date(person.dismissalDate).toLocaleDateString('ru-RU') : ''
+    };
+  });
+
+  exportToExcel(data, 'Персонал');
+}
+
+export async function importPersonnelFromExcel(
+  file: File,
+  tenantId: string,
+  organizations: Organization[],
+  departments: Department[]
+): Promise<Omit<Personnel, 'id' | 'createdAt'>[]> {
+  const XLSX = await import('xlsx');
+  const buffer = await file.arrayBuffer();
+  const workbook = XLSX.read(buffer, { type: 'array' });
+  const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows: any[] = XLSX.utils.sheet_to_json(worksheet);
+
+  const personnel: Omit<Personnel, 'id' | 'createdAt'>[] = [];
+
+  const roleMap: Record<string, 'Auditor' | 'Manager' | 'Director'> = {
+    'Аудитор': 'Auditor',
+    'Менеджер': 'Manager',
+    'Директор': 'Director'
+  };
+
+  for (const row of rows) {
+    const fullName = row['ФИО']?.toString().trim();
+    const position = row['Должность']?.toString().trim();
+
+    if (!fullName || !position) continue;
+
+    const orgName = row['Организация']?.toString().trim();
+    const deptName = row['Подразделение']?.toString().trim();
+
+    const org = orgName ? organizations.find(o => o.name === orgName) : undefined;
+    const dept = deptName && org ? departments.find(d => d.name === deptName && d.organizationId === org.id) : undefined;
+
+    const roleStr = row['Роль']?.toString().trim();
+    const hireDateStr = row['Дата приема']?.toString().trim();
+    const dismissalDateStr = row['Дата увольнения']?.toString().trim();
+
+    personnel.push({
+      tenantId,
+      organizationId: org?.id,
+      departmentId: dept?.id,
+      fullName,
+      position,
+      role: roleMap[roleStr] || 'Manager',
+      status: row['Статус'] === 'Уволен' ? 'dismissed' : 'active',
+      email: row['Email']?.toString().trim() || undefined,
+      phone: row['Телефон']?.toString().trim() || undefined,
+      hireDate: hireDateStr ? parseDateString(hireDateStr) : undefined,
+      dismissalDate: dismissalDateStr ? parseDateString(dismissalDateStr) : undefined
+    });
+  }
+
+  return personnel;
+}
+
+function parseDateString(dateStr: string): string | undefined {
+  try {
+    if (dateStr.includes('.')) {
+      const parts = dateStr.split('.');
+      return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).toISOString();
+    }
+    return new Date(dateStr).toISOString();
+  } catch {
+    return undefined;
+  }
 }

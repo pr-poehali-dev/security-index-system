@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
-import { exportPersonnelToCSV, downloadCSV, importPersonnelFromCSV } from '@/lib/exportUtils';
+import { exportPersonnelToExcel, importPersonnelFromExcel } from '@/lib/exportUtils';
 import type { Personnel } from '@/types';
 import {
   Table,
@@ -62,8 +62,7 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
   });
 
   const handleExport = () => {
-    const csv = exportPersonnelToCSV(tenantPersonnel, organizations, tenantDepts);
-    downloadCSV(csv, `personnel_${new Date().toISOString().split('T')[0]}.csv`);
+    exportPersonnelToExcel(filteredPersonnel, organizations, tenantDepts);
     toast({ title: 'Экспорт завершен', description: 'Файл персонала загружен' });
   };
 
@@ -72,7 +71,7 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
     if (!file) return;
 
     try {
-      const people = await importPersonnelFromCSV(file, user!.tenantId!, organizations, tenantDepts);
+      const people = await importPersonnelFromExcel(file, user!.tenantId!, organizations, tenantDepts);
       importPersonnel(people);
       toast({ title: 'Импорт завершен', description: `Добавлено сотрудников: ${people.length}` });
     } catch (error) {
@@ -186,7 +185,7 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
           <input
             ref={fileInputRef}
             type="file"
-            accept=".csv"
+            accept=".xlsx,.xls"
             onChange={handleImport}
             className="hidden"
           />

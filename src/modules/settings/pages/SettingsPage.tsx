@@ -230,17 +230,15 @@ export default function SettingsPage() {
       )}
 
       <ProductionSiteDialog 
-        open={showAddSite} 
-        onOpenChange={setShowAddSite}
+        open={showAddSite || !!editingSite} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowAddSite(false);
+            setEditingSite(null);
+          }
+        }}
+        site={editingSite || undefined}
       />
-
-      {editingSite && (
-        <ProductionSiteDialog 
-          site={editingSite}
-          open={!!editingSite}
-          onOpenChange={(open) => !open && setEditingSite(null)}
-        />
-      )}
     </div>
   );
 }
