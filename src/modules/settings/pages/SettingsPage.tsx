@@ -14,8 +14,10 @@ import EditDepartmentDialog from '../components/EditDepartmentDialog';
 import EditPersonnelDialog from '../components/EditPersonnelDialog';
 import OrganizationsTab from '../components/OrganizationsTab';
 import DepartmentsTab from '../components/DepartmentsTab';
-import PersonnelTab from '../components/PersonnelTab';
+import PersonnelTab from '@/components/settings/PersonnelTab';
 import CompetenciesTab from '../components/CompetenciesTab';
+import PeopleDirectoryTab from '@/components/settings/PeopleDirectoryTab';
+import PositionsDirectoryTab from '@/components/settings/PositionsDirectoryTab';
 import ExternalOrganizationsTab from '../components/ExternalOrganizationsTab';
 import AddCompetencyDialog from '../components/AddCompetencyDialog';
 import EditCompetencyDialog from '../components/EditCompetencyDialog';
@@ -142,6 +144,14 @@ export default function SettingsPage() {
             <Icon name="Building" size={16} />
             Подразделения
           </TabsTrigger>
+          <TabsTrigger value="people" className="gap-2">
+            <Icon name="User" size={16} />
+            Справочник людей
+          </TabsTrigger>
+          <TabsTrigger value="positions" className="gap-2">
+            <Icon name="Briefcase" size={16} />
+            Справочник должностей
+          </TabsTrigger>
           <TabsTrigger value="personnel" className="gap-2">
             <Icon name="Users" size={16} />
             Персонал
@@ -182,6 +192,14 @@ export default function SettingsPage() {
             onEdit={setEditingDept}
             onDelete={handleDeleteDept}
           />
+        </TabsContent>
+
+        <TabsContent value="people">
+          <PeopleDirectoryTab />
+        </TabsContent>
+
+        <TabsContent value="positions">
+          <PositionsDirectoryTab />
         </TabsContent>
 
         <TabsContent value="personnel">

@@ -1,4 +1,7 @@
 import { useState, useMemo } from 'react';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { useAttestationStore } from '@/stores/attestationStore';
+import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/personnelUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,141 +34,35 @@ import MassActionDialog from './MassActionDialog';
 import ExportReportDialog from './ExportReportDialog';
 import AddEmployeeDialog from './AddEmployeeDialog';
 
-interface Certification {
-  id: string;
-  category: string;
-  area: string;
-  issueDate: string;
-  expiryDate: string;
-  protocolNumber?: string;
-  protocolDate?: string;
-  verified?: boolean;
-  verifiedDate?: string;
-  status: 'valid' | 'expiring_soon' | 'expired';
-  daysLeft: number;
-}
-
 interface Employee {
   id: string;
   name: string;
   position: string;
   department: string;
   organization: string;
-  certifications: Certification[];
+  certifications: Array<{
+    id: string;
+    category: string;
+    area: string;
+    issueDate: string;
+    expiryDate: string;
+    protocolNumber?: string;
+    protocolDate?: string;
+    verified?: boolean;
+    verifiedDate?: string;
+    status: 'valid' | 'expiring_soon' | 'expired';
+    daysLeft: number;
+  }>;
 }
-
-const mockEmployees: Employee[] = [
-  {
-    id: '1',
-    name: 'Иванов Иван Иванович',
-    position: 'Инженер',
-    department: 'Производство',
-    organization: 'ООО "ПромСтройИнжиниринг"',
-    certifications: [
-      {
-        id: '1-1',
-        category: 'Промышленная безопасность',
-        area: 'А.1 Основы промышленной безопасности',
-        issueDate: '2023-01-01',
-        expiryDate: '2028-01-01',
-        protocolNumber: 'ПБ-123/2023',
-        protocolDate: '2023-01-01',
-        verified: true,
-        verifiedDate: '2024-03-15',
-        status: 'valid',
-        daysLeft: 1182
-      },
-      {
-        id: '1-2',
-        category: 'Промышленная безопасность',
-        area: 'Б.3 Эксплуатация объектов электроэнергетики',
-        issueDate: '2021-09-15',
-        expiryDate: '2026-09-14',
-        protocolNumber: 'ПБ-456/2021',
-        protocolDate: '2021-09-15',
-        verified: false,
-        status: 'valid',
-        daysLeft: 342
-      },
-      {
-        id: '1-3',
-        category: 'Энергобезопасность',
-        area: 'Электропотребители промышленные 5 группа до и выше 1000В',
-        issueDate: '2025-02-17',
-        expiryDate: '2026-02-17',
-        protocolNumber: 'ЭБ-789/2025',
-        protocolDate: '2025-02-17',
-        verified: false,
-        status: 'valid',
-        daysLeft: 133
-      }
-    ]
-  },
-  {
-    id: '2',
-    name: 'Петрова Анна Сергеевна',
-    position: 'Начальник участка',
-    department: 'Производство',
-    organization: 'ООО "ПромСтройИнжиниринг"',
-    certifications: [
-      {
-        id: '2-1',
-        category: 'Промышленная безопасность',
-        area: 'А.1 Основы промышленной безопасности',
-        issueDate: '2020-03-10',
-        expiryDate: '2025-03-10',
-        protocolNumber: 'ПБ-234/2020',
-        protocolDate: '2020-03-10',
-        verified: true,
-        verifiedDate: '2020-03-15',
-        status: 'expired',
-        daysLeft: -211
-      },
-      {
-        id: '2-2',
-        category: 'Электробезопасность',
-        area: 'V группа до 1000В',
-        issueDate: '2024-06-15',
-        expiryDate: '2025-06-15',
-        status: 'expiring_soon',
-        daysLeft: 251
-      }
-    ]
-  },
-  {
-    id: '3',
-    name: 'Сидоров Петр Николаевич',
-    position: 'Электромонтер',
-    department: 'Энергетика',
-    organization: 'АО "ЭнергоСервис"',
-    certifications: [
-      {
-        id: '3-1',
-        category: 'Электробезопасность',
-        area: 'III группа до 1000В',
-        issueDate: '2023-05-20',
-        expiryDate: '2025-11-20',
-        status: 'expiring_soon',
-        daysLeft: 44
-      },
-      {
-        id: '3-2',
-        category: 'Работы на высоте',
-        area: '2 группа без применения средств подмащивания',
-        issueDate: '2022-08-01',
-        expiryDate: '2025-08-01',
-        status: 'expired',
-        daysLeft: -67
-      }
-    ]
-  }
-];
 
 interface EmployeeAttestationsTabProps {
   onAddEmployee?: () => void;
 }
 
 export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttestationsTabProps) {
+  const { personnel, people, positions, tenants } = useSettingsStore();
+  const { certifications, updateCertification } = useAttestationStore();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [organizationFilter, setOrganizationFilter] = useState<string>('all');
@@ -182,24 +79,53 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [showAddEmployeeDialog, setShowAddEmployeeDialog] = useState(false);
 
-  const handleVerificationToggle = (certId: string) => {
-    if (!selectedEmployee) return;
-    
-    const updatedEmployee = {
-      ...selectedEmployee,
-      certifications: selectedEmployee.certifications.map(cert => {
-        if (cert.id === certId) {
-          return {
-            ...cert,
-            verified: !cert.verified,
-            verifiedDate: !cert.verified ? new Date().toISOString().split('T')[0] : undefined
+  const mockEmployees = useMemo(() => {
+    return personnel.map(p => {
+      const info = getPersonnelFullInfo(p, people, positions);
+      const tenant = tenants.find(t => t.id === p.tenantId);
+      const personnelCerts = certifications.filter(c => c.personnelId === p.id);
+
+      return {
+        id: p.id,
+        name: info.fullName,
+        position: info.position,
+        department: '—',
+        organization: tenant?.name || '—',
+        certifications: personnelCerts.map(cert => {
+          const { status, daysLeft } = getCertificationStatus(cert.expiryDate);
+          const categoryMap: Record<string, string> = {
+            industrial_safety: 'Промышленная безопасность',
+            energy_safety: 'Энергобезопасность',
+            labor_safety: 'Охрана труда',
+            ecology: 'Экология'
           };
-        }
-        return cert;
-      })
-    };
+          return {
+            id: cert.id,
+            category: categoryMap[cert.category] || cert.category,
+            area: cert.area,
+            issueDate: cert.issueDate,
+            expiryDate: cert.expiryDate,
+            protocolNumber: cert.protocolNumber,
+            protocolDate: cert.protocolDate,
+            verified: cert.verified,
+            verifiedDate: cert.verifiedDate,
+            status,
+            daysLeft
+          };
+        })
+      };
+    });
+  }, [personnel, people, positions, tenants, certifications]);
+
+  const handleVerificationToggle = (certId: string) => {
+    const cert = certifications.find(c => c.id === certId);
+    if (!cert) return;
     
-    setSelectedEmployee(updatedEmployee);
+    updateCertification(certId, {
+      verified: !cert.verified,
+      verifiedDate: !cert.verified ? new Date().toISOString() : undefined,
+      verifiedBy: !cert.verified ? 'Текущий пользователь' : undefined
+    });
   };
 
   const handleSelectEmployee = (employeeId: string, checked: boolean) => {
@@ -285,7 +211,9 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
     return mockEmployees.filter(emp => selectedEmployeeIds.has(emp.id));
   }, [selectedEmployeeIds]);
 
-  const uniqueOrganizations = Array.from(new Set(mockEmployees.map(emp => emp.organization)));
+  const uniqueOrganizations = useMemo(() => {
+    return Array.from(new Set(mockEmployees.map(emp => emp.organization)));
+  }, [mockEmployees]);
 
   const filteredEmployees = mockEmployees.filter(emp => {
     const matchesSearch = emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
