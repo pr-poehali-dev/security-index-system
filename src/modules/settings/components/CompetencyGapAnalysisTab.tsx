@@ -1,5 +1,6 @@
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useTaskStore } from '@/stores/taskStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +12,7 @@ import { analyzePersonnelCompetencies, getRiskLevelColor, getRiskLevelLabel } fr
 import { CERTIFICATION_CATEGORIES } from '@/lib/constants';
 import { exportToExcel } from '@/lib/exportUtils';
 import { Progress } from '@/components/ui/progress';
+import { toast } from 'sonner';
 
 export default function CompetencyGapAnalysisTab() {
   const user = useAuthStore((state) => state.user);
@@ -20,6 +22,7 @@ export default function CompetencyGapAnalysisTab() {
     getOrganizationsByTenant,
     getPersonnelByTenant 
   } = useSettingsStore();
+  const addTask = useTaskStore((state) => state.addTask);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRisk, setFilterRisk] = useState<string>('all');
@@ -63,6 +66,54 @@ export default function CompetencyGapAnalysisTab() {
     });
 
     exportToExcel(data, 'Анализ_пробелов_компетенций');
+  };
+
+  const handleCreateTask = (gap: typeof report.gaps[0]) => {
+    if (!user?.id || !user?.tenantId || gap.missingAreas.length === 0) return;
+
+    const employee = personnel.find((p) => p.id === gap.employeeId);
+    if (!employee) return;
+
+    const missingAreasText = gap.missingAreas.map((miss) => {
+      const category = CERTIFICATION_CATEGORIES.find((c) => c.value === miss.category);
+      return `${category?.label} (${category?.code}): ${miss.areas.join(', ')}`;
+    }).join('\n');
+
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 30);
+
+    const taskId = addTask({
+      tenantId: user.tenantId,
+      title: `Аттестация: ${gap.fullName}`,
+      description: `Необходимо провести аттестацию сотрудника по следующим областям:\n\n${missingAreasText}\n\nСотрудник: ${gap.fullName}\nДолжность: ${gap.position}\nОрганизация: ${gap.organizationName}\nУровень риска: ${getRiskLevelLabel(gap.riskLevel)}\nТекущее соответствие: ${gap.completionRate}%`,
+      priority: gap.riskLevel === 'critical' ? 'critical' : gap.riskLevel === 'high' ? 'high' : 'medium',
+      status: 'new',
+      type: 'certification',
+      source: 'certification',
+      sourceId: gap.employeeId,
+      createdBy: user.id,
+      createdByName: user.fullName,
+      dueDate: dueDate.toISOString(),
+      objectId: gap.organizationId,
+      objectName: gap.organizationName,
+      comments: [],
+      attachments: [],
+      timeline: [
+        {
+          id: crypto.randomUUID(),
+          taskId: taskId,
+          eventType: 'created',
+          description: 'Задача создана из анализа пробелов компетенций',
+          userId: user.id,
+          userName: user.fullName,
+          createdAt: new Date().toISOString()
+        }
+      ]
+    });
+
+    toast.success('Задача на аттестацию создана', {
+      description: `Создана задача для аттестации ${gap.fullName}`
+    });
   };
 
   return (
@@ -313,6 +364,20 @@ export default function CompetencyGapAnalysisTab() {
                           Проверено: {new Date(gap.lastChecked).toLocaleString('ru-RU')}
                         </div>
                       </div>
+                      
+                      {gap.missingAreas.length > 0 && (
+                        <div className="flex-shrink-0">
+                          <Button
+                            onClick={() => handleCreateTask(gap)}
+                            size="sm"
+                            variant="default"
+                            className="gap-2"
+                          >
+                            <Icon name="Plus" size={16} />
+                            Создать задачу
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

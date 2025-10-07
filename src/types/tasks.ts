@@ -1,6 +1,7 @@
 export type TaskStatus = 'new' | 'assigned' | 'in_progress' | 'under_review' | 'completed' | 'cancelled';
 export type TaskPriority = 'critical' | 'high' | 'medium' | 'low';
 export type TaskSource = 'manual' | 'incident' | 'checklist' | 'certification' | 'examination' | 'automated';
+export type TaskType = 'inspection' | 'corrective_action' | 'preventive_action' | 'certification' | 'training' | 'audit' | 'other';
 
 export interface Task {
   id: string;
@@ -9,6 +10,7 @@ export interface Task {
   description: string;
   priority: TaskPriority;
   status: TaskStatus;
+  type: TaskType;
   source: TaskSource;
   sourceId?: string;
   createdBy: string;
