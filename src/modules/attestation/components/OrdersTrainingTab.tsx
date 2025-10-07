@@ -304,7 +304,7 @@ export default function OrdersTrainingTab() {
   };
 
   const handleDownloadOrderPDF = (orderId: string) => {
-    const order = mockOrders.find(o => o.id === orderId);
+    const order = orders.find(o => o.id === orderId);
     toast({
       title: "Загрузка PDF",
       description: `Приказ №${order?.number} будет загружен в формате PDF`,
@@ -319,7 +319,7 @@ export default function OrdersTrainingTab() {
   };
 
   const handleDeleteOrder = (orderId: string) => {
-    const order = mockOrders.find(o => o.id === orderId);
+    const order = orders.find(o => o.id === orderId);
     toast({
       title: "Удаление приказа",
       description: `Приказ №${order?.number} будет удален`,
@@ -328,7 +328,7 @@ export default function OrdersTrainingTab() {
   };
 
   const handleViewTraining = (trainingId: string) => {
-    const training = mockTrainings.find(t => t.id === trainingId);
+    const training = trainings.find(t => t.id === trainingId);
     toast({
       title: "Просмотр обучения",
       description: training?.title,
@@ -343,7 +343,7 @@ export default function OrdersTrainingTab() {
   };
 
   const handleViewDocuments = (trainingId: string) => {
-    const training = mockTrainings.find(t => t.id === trainingId);
+    const training = trainings.find(t => t.id === trainingId);
     toast({
       title: "Документы обучения",
       description: `Документов: ${training?.documents?.length || 0}`,
@@ -351,15 +351,15 @@ export default function OrdersTrainingTab() {
   };
 
   const handleViewParticipants = (trainingId: string) => {
-    const training = mockTrainings.find(t => t.id === trainingId);
+    const training = trainings.find(t => t.id === trainingId);
     toast({
       title: "Список участников",
-      description: `Участников: ${training?.employees.length}`,
+      description: `Участников: ${training?.employeeIds.length}`,
     });
   };
 
   const handleDuplicateTraining = (trainingId: string) => {
-    const training = mockTrainings.find(t => t.id === trainingId);
+    const training = trainings.find(t => t.id === trainingId);
     toast({
       title: "Дублирование обучения",
       description: `Создана копия: ${training?.title}`,
@@ -367,7 +367,7 @@ export default function OrdersTrainingTab() {
   };
 
   const handleDeleteTraining = (trainingId: string) => {
-    const training = mockTrainings.find(t => t.id === trainingId);
+    const training = trainings.find(t => t.id === trainingId);
     toast({
       title: "Удаление обучения",
       description: `${training?.title} будет удалено`,
@@ -509,17 +509,17 @@ export default function OrdersTrainingTab() {
   };
 
   const orderStats = {
-    total: mockOrders.length,
-    draft: mockOrders.filter(o => o.status === 'draft').length,
-    active: mockOrders.filter(o => o.status === 'active').length,
-    completed: mockOrders.filter(o => o.status === 'completed').length,
+    total: tenantOrders.length,
+    draft: tenantOrders.filter(o => o.status === 'draft').length,
+    active: tenantOrders.filter(o => o.status === 'active').length,
+    completed: tenantOrders.filter(o => o.status === 'completed').length,
   };
 
   const trainingStats = {
-    total: mockTrainings.length,
-    planned: mockTrainings.filter(t => t.status === 'planned').length,
-    inProgress: mockTrainings.filter(t => t.status === 'in_progress').length,
-    totalCost: mockTrainings.reduce((sum, t) => sum + t.cost, 0),
+    total: tenantTrainings.length,
+    planned: tenantTrainings.filter(t => t.status === 'planned').length,
+    inProgress: tenantTrainings.filter(t => t.status === 'in_progress').length,
+    totalCost: tenantTrainings.reduce((sum, t) => sum + t.cost, 0),
   };
 
   return (
@@ -790,7 +790,7 @@ export default function OrdersTrainingTab() {
                           <td className="py-3 text-muted-foreground text-sm">
                             {new Date(order.date).toLocaleDateString('ru')}
                           </td>
-                          <td className="py-3 text-center">{order.employees.length}</td>
+                          <td className="py-3 text-center">{order.employeeIds.length}</td>
                           <td className="py-3">
                             <Select value={order.status} onValueChange={(value) => handleChangeOrderStatus(order.id, value)}>
                               <SelectTrigger className="w-[140px] h-8 text-xs">
@@ -1077,7 +1077,8 @@ export default function OrdersTrainingTab() {
                     </thead>
                     <tbody>
                       {filteredTrainings.map((training) => {
-                        const costPerPerson = Math.round(training.cost / training.employees.length);
+                        const org = trainingOrgs.find(o => o.id === training.organizationId);
+                        const costPerPerson = Math.round(training.cost / training.employeeIds.length);
                         
                         return (
                           <tr key={training.id} className="border-b last:border-0 hover:bg-muted/50">
@@ -1094,12 +1095,12 @@ export default function OrdersTrainingTab() {
                                 {training.type}
                               </Badge>
                             </td>
-                            <td className="py-3 text-muted-foreground text-sm">{training.organization}</td>
+                            <td className="py-3 text-muted-foreground text-sm">{org?.name || '—'}</td>
                             <td className="py-3 text-muted-foreground text-sm">
                               <div>{new Date(training.startDate).toLocaleDateString('ru', { day: '2-digit', month: '2-digit' })}</div>
                               <div>{new Date(training.endDate).toLocaleDateString('ru', { day: '2-digit', month: '2-digit' })}</div>
                             </td>
-                            <td className="py-3 text-center">{training.employees.length}</td>
+                            <td className="py-3 text-center">{training.employeeIds.length}</td>
                             <td className="py-3 text-muted-foreground text-sm">
                               <div className="font-medium">{training.cost.toLocaleString('ru')} ₽</div>
                               <div className="text-xs">{costPerPerson.toLocaleString('ru')} ₽/чел</div>
