@@ -27,6 +27,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import ImportCertificationsDialog from './ImportCertificationsDialog';
 import AddCertificationDialog from './AddCertificationDialog';
+import MassActionDialog from './MassActionDialog';
 
 interface Certification {
   id: string;
@@ -174,6 +175,8 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<Set<string>>(new Set());
   const [showOrderDialog, setShowOrderDialog] = useState(false);
   const [orderType, setOrderType] = useState<string>('');
+  const [showMassActionDialog, setShowMassActionDialog] = useState(false);
+  const [massActionType, setMassActionType] = useState<string>('');
 
   const handleVerificationToggle = (certId: string) => {
     if (!selectedEmployee) return;
@@ -214,8 +217,8 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
   };
 
   const handleCreateOrder = (type: string) => {
-    setOrderType(type);
-    setShowOrderDialog(true);
+    setMassActionType(type);
+    setShowMassActionDialog(true);
   };
 
   const handleExportToExcel = async () => {
@@ -924,75 +927,12 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
         employeeName={selectedEmployee?.name}
       />
 
-      <Dialog open={showOrderDialog} onOpenChange={setShowOrderDialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Формирование приказа</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-lg">
-              <h4 className="font-medium mb-2">Тип приказа:</h4>
-              <p className="text-sm">
-                {orderType === 'sdo' && 'О подготовке в СДО Интеллектуальная система подготовки'}
-                {orderType === 'training_center' && 'О подготовке в учебный центр'}
-                {orderType === 'internal_attestation' && 'О аттестации в ЕПТ организации'}
-                {orderType === 'rostechnadzor' && 'О направлении на аттестацию в Ростехнадзор'}
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <h4 className="font-medium">Выбранные сотрудники ({selectedEmployees.length}):</h4>
-              <div className="max-h-60 overflow-y-auto space-y-1 p-3 border rounded-lg">
-                {selectedEmployees.map((emp) => (
-                  <div key={emp.id} className="flex items-start justify-between py-2 border-b last:border-0">
-                    <div>
-                      <p className="font-medium">{emp.name}</p>
-                      <p className="text-sm text-muted-foreground">{emp.position}</p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleSelectEmployee(emp.id, false)}
-                    >
-                      <Icon name="X" size={14} />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="order-date">Дата приказа</Label>
-              <Input
-                id="order-date"
-                type="date"
-                defaultValue={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="order-number">Номер приказа (опционально)</Label>
-              <Input
-                id="order-number"
-                placeholder="№ автоматически"
-              />
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4 border-t">
-              <Button variant="outline" onClick={() => setShowOrderDialog(false)}>
-                Отмена
-              </Button>
-              <Button onClick={() => {
-                setShowOrderDialog(false);
-                setSelectedEmployeeIds(new Set());
-              }} className="gap-2">
-                <Icon name="FileText" size={16} />
-                Сформировать приказ
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <MassActionDialog
+        open={showMassActionDialog}
+        onOpenChange={setShowMassActionDialog}
+        actionType={massActionType}
+        employees={selectedEmployees}
+      />
     </div>
   );
 }
