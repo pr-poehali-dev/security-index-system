@@ -261,8 +261,8 @@ export default function OrdersTrainingTab() {
   const handleSendToSDO = (orderId: string) => {
     const order = orders.find(o => o.id === orderId);
     toast({
-      title: "Отправка в СДО",
-      description: `${order?.employeeIds.length} сотрудников направлены в систему дистанционного обучения`,
+      title: "Направление в СДО «Интеллектуальные системы подготовки»",
+      description: `Приказ №${order?.number}: ${order?.employeeIds.length} сотрудников направлены на обучение в систему дистанционного обучения`,
     });
   };
 
@@ -270,21 +270,23 @@ export default function OrdersTrainingTab() {
     const order = orders.find(o => o.id === orderId);
     toast({
       title: "Направление в учебный центр",
-      description: `${order?.employeeIds.length} сотрудников направлены в учебный центр`,
+      description: `Приказ №${order?.number}: ${order?.employeeIds.length} сотрудников направлены на подготовку в учебный центр`,
     });
   };
 
   const handleScheduleAttestation = (orderId: string) => {
+    const order = orders.find(o => o.id === orderId);
     toast({
-      title: "Назначение даты аттестации",
-      description: "Откроется форма выбора даты и времени проведения аттестации",
+      title: "Направление на аттестацию в ЕПТ организации",
+      description: `Приказ №${order?.number}: ${order?.employeeIds.length} сотрудников направлены на аттестацию в единой платформе тестирования организации`,
     });
   };
 
   const handleRegisterRostechnadzor = (orderId: string) => {
+    const order = orders.find(o => o.id === orderId);
     toast({
-      title: "Регистрация в Ростехнадзоре",
-      description: "Данные подготовлены для отправки в систему Ростехнадзора",
+      title: "Направление на аттестацию в Ростехнадзоре",
+      description: `Приказ №${order?.number}: ${order?.employeeIds.length} сотрудников направлены на аттестацию в системе Ростехнадзора`,
     });
   };
 
@@ -469,38 +471,23 @@ export default function OrdersTrainingTab() {
       );
     }
 
-    if (order.type === 'sdo') {
+    if (order.status === 'approved') {
       actions.push(
         <Button key="send-sdo" variant="outline" size="sm" className="gap-1" onClick={() => handleSendToSDO(order.id)}>
-          <Icon name="Send" size={14} />
-          Отправить в СДО
-        </Button>
-      );
-    }
-
-    if (order.type === 'training_center') {
-      actions.push(
+          <Icon name="Monitor" size={14} />
+          СДО ИСП
+        </Button>,
         <Button key="send-tc" variant="outline" size="sm" className="gap-1" onClick={() => handleSendToTrainingCenter(order.id)}>
-          <Icon name="Send" size={14} />
-          Отправить в УЦ
-        </Button>
-      );
-    }
-
-    if (order.type === 'internal_attestation') {
-      actions.push(
-        <Button key="schedule" variant="outline" size="sm" className="gap-1" onClick={() => handleScheduleAttestation(order.id)}>
-          <Icon name="Calendar" size={14} />
-          Назначить дату
-        </Button>
-      );
-    }
-
-    if (order.type === 'rostechnadzor') {
-      actions.push(
-        <Button key="register" variant="outline" size="sm" className="gap-1" onClick={() => handleRegisterRostechnadzor(order.id)}>
-          <Icon name="ExternalLink" size={14} />
-          Зарегистрировать
+          <Icon name="Building2" size={14} />
+          Учебный центр
+        </Button>,
+        <Button key="send-rostechnadzor" variant="outline" size="sm" className="gap-1" onClick={() => handleRegisterRostechnadzor(order.id)}>
+          <Icon name="Shield" size={14} />
+          Ростехнадзор
+        </Button>,
+        <Button key="send-internal" variant="outline" size="sm" className="gap-1" onClick={() => handleScheduleAttestation(order.id)}>
+          <Icon name="ClipboardCheck" size={14} />
+          ЕПТ организации
         </Button>
       );
     }
@@ -705,6 +692,8 @@ export default function OrdersTrainingTab() {
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="draft">Черновик</SelectItem>
+                                <SelectItem value="prepared">Подготовлен</SelectItem>
+                                <SelectItem value="approved">Согласован</SelectItem>
                                 <SelectItem value="active">Активен</SelectItem>
                                 <SelectItem value="completed">Исполнен</SelectItem>
                                 <SelectItem value="cancelled">Отменен</SelectItem>
@@ -712,6 +701,30 @@ export default function OrdersTrainingTab() {
                             </Select>
                           </div>
                         </div>
+
+                        {order.status === 'approved' && (
+                          <div className="pt-3 border-t">
+                            <p className="text-sm font-medium text-muted-foreground mb-3">Направить на:</p>
+                            <div className="grid grid-cols-2 gap-2">
+                              <Button variant="outline" size="sm" className="gap-2 justify-start" onClick={() => handleSendToSDO(order.id)}>
+                                <Icon name="Monitor" size={14} />
+                                СДО ИСП
+                              </Button>
+                              <Button variant="outline" size="sm" className="gap-2 justify-start" onClick={() => handleSendToTrainingCenter(order.id)}>
+                                <Icon name="Building2" size={14} />
+                                Учебный центр
+                              </Button>
+                              <Button variant="outline" size="sm" className="gap-2 justify-start" onClick={() => handleRegisterRostechnadzor(order.id)}>
+                                <Icon name="Shield" size={14} />
+                                Ростехнадзор
+                              </Button>
+                              <Button variant="outline" size="sm" className="gap-2 justify-start" onClick={() => handleScheduleAttestation(order.id)}>
+                                <Icon name="ClipboardCheck" size={14} />
+                                ЕПТ организации
+                              </Button>
+                            </div>
+                          </div>
+                        )}
 
                         <div className="flex items-center justify-between pt-3 border-t">
                           <div className="flex items-center gap-2 text-sm">
@@ -1013,6 +1026,47 @@ export default function OrdersTrainingTab() {
                             </Badge>
                           </div>
 
+                          {training.status === 'in_progress' && training.sdoProgress !== undefined && (
+                            <div className="pt-3 border-t">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-medium">Прогресс в СДО ИСП</span>
+                                <span className="text-sm font-semibold text-primary">{training.sdoProgress}%</span>
+                              </div>
+                              <div className="w-full bg-muted rounded-full h-2 mb-2">
+                                <div 
+                                  className="bg-primary rounded-full h-2 transition-all duration-300" 
+                                  style={{ width: `${training.sdoProgress}%` }}
+                                />
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                Пройдено уроков: {training.sdoCompletedLessons} из {training.sdoTotalLessons}
+                              </p>
+                            </div>
+                          )}
+
+                          {training.status === 'completed' && training.certificateNumber && (
+                            <div className="pt-3 border-t bg-emerald-50 dark:bg-emerald-950/20 -mx-4 px-4 pb-3 mt-3">
+                              <div className="flex items-start gap-2">
+                                <Icon name="Award" size={16} className="text-emerald-600 mt-0.5" />
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-emerald-900 dark:text-emerald-100">
+                                    Удостоверение о повышении квалификации
+                                  </p>
+                                  <div className="mt-1 space-y-1">
+                                    <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                                      Номер: <span className="font-semibold">{training.certificateNumber}</span>
+                                    </p>
+                                    {training.certificateIssueDate && (
+                                      <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                                        Дата выдачи: {new Date(training.certificateIssueDate).toLocaleDateString('ru')}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
                           <div className="flex items-center justify-between pt-3 border-t">
                             <div className="flex items-center gap-2 text-sm">
                               <span className="text-muted-foreground">Сотрудников:</span>
@@ -1161,6 +1215,27 @@ export default function OrdersTrainingTab() {
                   <p className="text-sm text-muted-foreground">Измените параметры поиска или запланируйте новое обучение</p>
                 </div>
               )}
+
+              <Card className="mt-6 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <Icon name="Info" size={20} className="text-blue-600 dark:text-blue-400 mt-0.5" />
+                    <div>
+                      <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                        Интеграция с СДО и учебными центрами
+                      </h4>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 mb-2">
+                        Система автоматически отслеживает прогресс обучения в СДО «Интеллектуальные системы подготовки» 
+                        и получает данные об удостоверениях из учебных центров.
+                      </p>
+                      <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1 ml-4">
+                        <li>• Обучения со статусом "В процессе" показывают прогресс в СДО</li>
+                        <li>• Завершённые обучения отображают номер и дату выдачи удостоверения</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </CardContent>
           </Card>
         </TabsContent>

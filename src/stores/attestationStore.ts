@@ -59,9 +59,14 @@ export interface Training {
   employeeIds: string[];
   organizationId: string;
   cost: number;
-  status: 'planned' | 'ongoing' | 'completed' | 'cancelled';
+  status: 'planned' | 'ongoing' | 'completed' | 'cancelled' | 'in_progress';
   program?: string;
   documentUrl?: string;
+  certificateNumber?: string;
+  certificateIssueDate?: string;
+  sdoProgress?: number;
+  sdoCompletedLessons?: number;
+  sdoTotalLessons?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -449,8 +454,43 @@ export const useAttestationStore = create<AttestationState>()(persist((set, get)
       organizationId: 'external-org-2',
       cost: 12000,
       status: 'completed',
+      certificateNumber: 'УПК-2024-15487',
+      certificateIssueDate: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
       createdAt: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'training-4',
+      tenantId: 'tenant-1',
+      title: 'Промышленная безопасность А.1 (СДО)',
+      type: 'periodic',
+      startDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+      endDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+      employeeIds: ['personnel-2', 'personnel-3'],
+      organizationId: 'external-org-1',
+      cost: 8000,
+      status: 'in_progress',
+      sdoProgress: 65,
+      sdoCompletedLessons: 13,
+      sdoTotalLessons: 20,
+      createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'training-5',
+      tenantId: 'tenant-1',
+      title: 'Электробезопасность 4 группа до 1000В',
+      type: 'initial',
+      startDate: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+      endDate: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString(),
+      employeeIds: ['personnel-1', 'personnel-2'],
+      organizationId: 'external-org-1',
+      cost: 24000,
+      status: 'completed',
+      certificateNumber: 'ЭБ-2024-09234',
+      certificateIssueDate: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString(),
+      createdAt: new Date(Date.now() - 50 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString()
     }
   ],
 
