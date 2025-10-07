@@ -27,6 +27,7 @@ export default function CompetencyGapAnalysisTab() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRisk, setFilterRisk] = useState<string>('all');
   const [filterOrg, setFilterOrg] = useState<string>('all');
+  const [isCreatingBulk, setIsCreatingBulk] = useState(false);
 
   const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
   const tenantPersonnel = user?.tenantId ? getPersonnelByTenant(user.tenantId) : [];
@@ -116,6 +117,100 @@ export default function CompetencyGapAnalysisTab() {
     });
   };
 
+  const handleCreateBulkTasks = (riskLevel: 'critical' | 'high' | 'all') => {
+    if (!user?.id || !user?.tenantId || isCreatingBulk) return;
+
+    const gapsToProcess = report.gaps.filter((gap) => {
+      if (gap.missingAreas.length === 0) return false;
+      if (riskLevel === 'all') return gap.riskLevel === 'critical' || gap.riskLevel === 'high';
+      return gap.riskLevel === riskLevel;
+    });
+
+    if (gapsToProcess.length === 0) {
+      toast.info('Нет сотрудников для создания задач', {
+        description: 'Все сотрудники соответствуют требованиям или задачи уже созданы'
+      });
+      return;
+    }
+
+    setIsCreatingBulk(true);
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    gapsToProcess.forEach((gap) => {
+      try {
+        const employee = personnel.find((p) => p.id === gap.employeeId);
+        if (!employee) {
+          errorCount++;
+          return;
+        }
+
+        const missingAreasText = gap.missingAreas.map((miss) => {
+          const category = CERTIFICATION_CATEGORIES.find((c) => c.value === miss.category);
+          return `${category?.label} (${category?.code}): ${miss.areas.join(', ')}`;
+        }).join('\n');
+
+        const dueDate = new Date();
+        if (gap.riskLevel === 'critical') {
+          dueDate.setDate(dueDate.getDate() + 14);
+        } else if (gap.riskLevel === 'high') {
+          dueDate.setDate(dueDate.getDate() + 30);
+        } else {
+          dueDate.setDate(dueDate.getDate() + 60);
+        }
+
+        const taskId = addTask({
+          tenantId: user.tenantId,
+          title: `Аттестация: ${gap.fullName}`,
+          description: `Необходимо провести аттестацию сотрудника по следующим областям:\n\n${missingAreasText}\n\nСотрудник: ${gap.fullName}\nДолжность: ${gap.position}\nОрганизация: ${gap.organizationName}\nУровень риска: ${getRiskLevelLabel(gap.riskLevel)}\nТекущее соответствие: ${gap.completionRate}%`,
+          priority: gap.riskLevel === 'critical' ? 'critical' : gap.riskLevel === 'high' ? 'high' : 'medium',
+          status: 'new',
+          type: 'certification',
+          source: 'certification',
+          sourceId: gap.employeeId,
+          createdBy: user.id,
+          createdByName: user.fullName,
+          dueDate: dueDate.toISOString(),
+          objectId: gap.organizationId,
+          objectName: gap.organizationName,
+          comments: [],
+          attachments: [],
+          timeline: [
+            {
+              id: crypto.randomUUID(),
+              taskId: taskId,
+              eventType: 'created',
+              description: 'Задача создана массово из анализа пробелов компетенций',
+              userId: user.id,
+              userName: user.fullName,
+              createdAt: new Date().toISOString()
+            }
+          ]
+        });
+
+        successCount++;
+      } catch (error) {
+        errorCount++;
+        console.error('Ошибка создания задачи для:', gap.fullName, error);
+      }
+    });
+
+    setIsCreatingBulk(false);
+
+    if (successCount > 0) {
+      toast.success(`Создано задач: ${successCount}`, {
+        description: errorCount > 0 
+          ? `Успешно создано ${successCount} задач. Ошибок: ${errorCount}`
+          : `Успешно создано ${successCount} задач на аттестацию`
+      });
+    } else {
+      toast.error('Не удалось создать задачи', {
+        description: 'Проверьте данные и попробуйте снова'
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -171,16 +266,28 @@ export default function CompetencyGapAnalysisTab() {
       {report.criticalGaps > 0 && (
         <Card className="border-red-500 bg-red-50 dark:bg-red-900/20">
           <CardContent className="pt-6">
-            <div className="flex items-start gap-3">
-              <Icon name="AlertCircle" className="text-red-600 mt-0.5" size={20} />
-              <div>
-                <p className="font-medium text-red-900 dark:text-red-200">
-                  Критические пробелы: {report.criticalGaps} сотрудников
-                </p>
-                <p className="text-sm text-red-800 dark:text-red-300 mt-1">
-                  Требуется срочная аттестация. Соответствие менее 50%.
-                </p>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 flex-1">
+                <Icon name="AlertCircle" className="text-red-600 mt-0.5" size={20} />
+                <div>
+                  <p className="font-medium text-red-900 dark:text-red-200">
+                    Критические пробелы: {report.criticalGaps} сотрудников
+                  </p>
+                  <p className="text-sm text-red-800 dark:text-red-300 mt-1">
+                    Требуется срочная аттестация. Соответствие менее 50%.
+                  </p>
+                </div>
               </div>
+              <Button
+                onClick={() => handleCreateBulkTasks('critical')}
+                disabled={isCreatingBulk}
+                size="sm"
+                variant="destructive"
+                className="gap-2 flex-shrink-0"
+              >
+                <Icon name="ListChecks" size={16} />
+                {isCreatingBulk ? 'Создание...' : 'Создать задачи'}
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -251,10 +358,24 @@ export default function CompetencyGapAnalysisTab() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Детальный анализ пробелов</CardTitle>
-            <Button onClick={handleExport} variant="outline" size="sm" className="gap-2">
-              <Icon name="Download" size={16} />
-              Экспорт
-            </Button>
+            <div className="flex items-center gap-2">
+              {report.gaps.filter(g => g.missingAreas.length > 0 && (g.riskLevel === 'critical' || g.riskLevel === 'high')).length > 0 && (
+                <Button 
+                  onClick={() => handleCreateBulkTasks('all')} 
+                  disabled={isCreatingBulk}
+                  variant="default" 
+                  size="sm" 
+                  className="gap-2"
+                >
+                  <Icon name="ListChecks" size={16} />
+                  {isCreatingBulk ? 'Создание...' : 'Создать все задачи'}
+                </Button>
+              )}
+              <Button onClick={handleExport} variant="outline" size="sm" className="gap-2">
+                <Icon name="Download" size={16} />
+                Экспорт
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
