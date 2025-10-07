@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 interface ComplianceData {
   personnelName: string;
@@ -55,6 +56,7 @@ const mockData: ComplianceData[] = [
 ];
 
 export default function ComplianceAnalysisTab() {
+  const { toast } = useToast();
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
   const [complianceFilter, setComplianceFilter] = useState<string>('all');
 
@@ -234,11 +236,30 @@ export default function ComplianceAnalysisTab() {
 
                   {(item.expiringCertifications.length > 0 || item.missingCertifications.length > 0) && (
                     <div className="mt-4 pt-4 border-t flex items-center justify-end gap-2">
-                      <Button variant="outline" size="sm" className="gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="gap-2"
+                        onClick={() => {
+                          toast({
+                            title: "Формирование приказа",
+                            description: `Приказ для ${item.personnelName} будет сформирован`,
+                          });
+                        }}
+                      >
                         <Icon name="FileText" size={14} />
                         Сформировать приказ
                       </Button>
-                      <Button size="sm" className="gap-2">
+                      <Button 
+                        size="sm" 
+                        className="gap-2"
+                        onClick={() => {
+                          toast({
+                            title: "Направление на обучение",
+                            description: `${item.personnelName} направлен на обучение`,
+                          });
+                        }}
+                      >
                         <Icon name="GraduationCap" size={14} />
                         Направить на обучение
                       </Button>

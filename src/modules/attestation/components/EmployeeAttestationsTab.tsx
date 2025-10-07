@@ -29,6 +29,7 @@ import ImportCertificationsDialog from './ImportCertificationsDialog';
 import AddCertificationDialog from './AddCertificationDialog';
 import MassActionDialog from './MassActionDialog';
 import ExportReportDialog from './ExportReportDialog';
+import AddEmployeeDialog from './AddEmployeeDialog';
 
 interface Certification {
   id: string;
@@ -179,6 +180,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
   const [showMassActionDialog, setShowMassActionDialog] = useState(false);
   const [massActionType, setMassActionType] = useState<string>('');
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [showAddEmployeeDialog, setShowAddEmployeeDialog] = useState(false);
 
   const handleVerificationToggle = (certId: string) => {
     if (!selectedEmployee) return;
@@ -461,7 +463,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={onAddEmployee}>
+                  <DropdownMenuItem onClick={() => setShowAddEmployeeDialog(true)}>
                     <Icon name="UserPlus" size={16} className="mr-2" />
                     Добавить сотрудника
                   </DropdownMenuItem>
@@ -943,6 +945,11 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
         open={showExportDialog}
         onOpenChange={setShowExportDialog}
         employees={mockEmployees}
+      />
+
+      <AddEmployeeDialog
+        open={showAddEmployeeDialog}
+        onOpenChange={setShowAddEmployeeDialog}
       />
     </div>
   );
