@@ -70,10 +70,19 @@ export default function ChecklistsPage() {
       )}
 
       <Tabs value={currentTab} onValueChange={setCurrentTab}>
-        <TabsList>
-          <TabsTrigger value="checklists">Чек-листы ({checklists.length})</TabsTrigger>
-          <TabsTrigger value="audits">Аудиты ({audits.length})</TabsTrigger>
-          <TabsTrigger value="upcoming">Предстоящие ({upcomingAudits.length})</TabsTrigger>
+        <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+          <TabsTrigger value="checklists" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="ClipboardCheck" size={20} />
+            <span className="text-xs font-medium">Чек-листы ({checklists.length})</span>
+          </TabsTrigger>
+          <TabsTrigger value="audits" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Search" size={20} />
+            <span className="text-xs font-medium">Аудиты ({audits.length})</span>
+          </TabsTrigger>
+          <TabsTrigger value="upcoming" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Calendar" size={20} />
+            <span className="text-xs font-medium">Предстоящие ({upcomingAudits.length})</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="checklists" className="mt-6">

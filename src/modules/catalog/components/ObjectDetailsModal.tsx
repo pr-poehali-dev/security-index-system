@@ -139,16 +139,18 @@ export default function ObjectDetailsModal({ open, onOpenChange, object, onEdit 
         </DialogHeader>
 
         <Tabs defaultValue="general" className="mt-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="general">Основное</TabsTrigger>
-            <TabsTrigger value="dates">Контроль сроков</TabsTrigger>
-            <TabsTrigger value="documents">
-              Документы
-              {documents.length > 0 && (
-                <Badge variant="secondary" className="ml-2">
-                  {documents.length}
-                </Badge>
-              )}
+          <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+            <TabsTrigger value="general" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Icon name="Info" size={20} />
+              <span className="text-xs font-medium">Основное</span>
+            </TabsTrigger>
+            <TabsTrigger value="dates" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Icon name="Calendar" size={20} />
+              <span className="text-xs font-medium text-center leading-tight">Контроль<br/>сроков</span>
+            </TabsTrigger>
+            <TabsTrigger value="documents" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Icon name="FileText" size={20} />
+              <span className="text-xs font-medium">Документы ({documents.length})</span>
             </TabsTrigger>
           </TabsList>
 

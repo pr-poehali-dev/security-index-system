@@ -525,16 +525,14 @@ export default function OrdersTrainingTab() {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="orders" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="orders" className="gap-2">
-            <Icon name="FileText" size={16} />
-            Приказы
-            <Badge variant="secondary" className="ml-1">{orderStats.total}</Badge>
+        <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+          <TabsTrigger value="orders" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="FileText" size={20} />
+            <span className="text-xs font-medium">Приказы ({orderStats.total})</span>
           </TabsTrigger>
-          <TabsTrigger value="trainings" className="gap-2">
-            <Icon name="GraduationCap" size={16} />
-            Обучения
-            <Badge variant="secondary" className="ml-1">{trainingStats.total}</Badge>
+          <TabsTrigger value="trainings" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="GraduationCap" size={20} />
+            <span className="text-xs font-medium">Обучения ({trainingStats.total})</span>
           </TabsTrigger>
         </TabsList>
 

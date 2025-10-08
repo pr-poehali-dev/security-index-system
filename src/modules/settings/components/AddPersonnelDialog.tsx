@@ -182,10 +182,19 @@ export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelD
 
         <form onSubmit={handleSubmit}>
           <Tabs defaultValue="personal" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="personal">Личные данные</TabsTrigger>
-              <TabsTrigger value="position">Должность</TabsTrigger>
-              <TabsTrigger value="certifications">Аттестации</TabsTrigger>
+            <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+              <TabsTrigger value="personal" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <Icon name="User" size={20} />
+                <span className="text-xs font-medium text-center leading-tight">Личные<br/>данные</span>
+              </TabsTrigger>
+              <TabsTrigger value="position" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <Icon name="Briefcase" size={20} />
+                <span className="text-xs font-medium">Должность</span>
+              </TabsTrigger>
+              <TabsTrigger value="certifications" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <Icon name="Award" size={20} />
+                <span className="text-xs font-medium">Аттестации</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="personal" className="space-y-4 mt-4">

@@ -20,38 +20,38 @@ export default function AttestationPage() {
       />
 
       <Tabs defaultValue="employees" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="employees" className="gap-2">
-            <Icon name="Users" size={16} />
-            Сотрудники и аттестации
+        <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+          <TabsTrigger value="employees" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Users" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Сотрудники и<br/>аттестации</span>
           </TabsTrigger>
-          <TabsTrigger value="tasks" className="gap-2">
-            <Icon name="ListTodo" size={16} />
-            Задачи
+          <TabsTrigger value="tasks" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="ListTodo" size={20} />
+            <span className="text-xs font-medium">Задачи</span>
           </TabsTrigger>
-          <TabsTrigger value="calendar" className="gap-2">
-            <Icon name="CalendarDays" size={16} />
-            Календарь-планировщик
+          <TabsTrigger value="calendar" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="CalendarDays" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Календарь-<br/>планировщик</span>
           </TabsTrigger>
-          <TabsTrigger value="compliance" className="gap-2">
-            <Icon name="Target" size={16} />
-            Анализ соответствия
+          <TabsTrigger value="compliance" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Target" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Анализ<br/>соответствия</span>
           </TabsTrigger>
-          <TabsTrigger value="orders" className="gap-2">
-            <Icon name="FileText" size={16} />
-            Приказы и обучения
+          <TabsTrigger value="orders" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="FileText" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Приказы и<br/>обучения</span>
           </TabsTrigger>
-          <TabsTrigger value="reports" className="gap-2">
-            <Icon name="BarChart3" size={16} />
-            Отчеты
+          <TabsTrigger value="reports" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="BarChart3" size={20} />
+            <span className="text-xs font-medium">Отчеты</span>
           </TabsTrigger>
-          <TabsTrigger value="directories" className="gap-2">
-            <Icon name="BookOpen" size={16} />
-            Справочники
+          <TabsTrigger value="directories" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="BookOpen" size={20} />
+            <span className="text-xs font-medium">Справочники</span>
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="gap-2">
-            <Icon name="Bell" size={16} />
-            Уведомления
+          <TabsTrigger value="notifications" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Bell" size={20} />
+            <span className="text-xs font-medium">Уведомления</span>
           </TabsTrigger>
         </TabsList>
 

@@ -256,11 +256,23 @@ export default function TasksPage() {
       </Card>
 
       <Tabs value={currentTab} onValueChange={setCurrentTab}>
-        <TabsList>
-          <TabsTrigger value="all">Все ({filteredTasks.length})</TabsTrigger>
-          <TabsTrigger value="open">Открытые ({stats.open})</TabsTrigger>
-          <TabsTrigger value="in_progress">В работе ({stats.inProgress})</TabsTrigger>
-          <TabsTrigger value="overdue" className="text-red-600">Просроченные ({stats.overdue})</TabsTrigger>
+        <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+          <TabsTrigger value="all" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="ListTodo" size={20} />
+            <span className="text-xs font-medium">Все ({filteredTasks.length})</span>
+          </TabsTrigger>
+          <TabsTrigger value="open" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Circle" size={20} />
+            <span className="text-xs font-medium">Открытые ({stats.open})</span>
+          </TabsTrigger>
+          <TabsTrigger value="in_progress" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Clock" size={20} />
+            <span className="text-xs font-medium">В работе ({stats.inProgress})</span>
+          </TabsTrigger>
+          <TabsTrigger value="overdue" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground">
+            <Icon name="AlertTriangle" size={20} />
+            <span className="text-xs font-medium">Просроченные ({stats.overdue})</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value={currentTab} className="mt-6">

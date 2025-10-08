@@ -128,18 +128,18 @@ export default function NotificationsTab() {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="rules" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="rules" className="gap-2">
-            <Icon name="Settings" size={16} />
-            Правила уведомлений
+        <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+          <TabsTrigger value="rules" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Settings" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Правила<br/>уведомлений</span>
           </TabsTrigger>
-          <TabsTrigger value="history" className="gap-2">
-            <Icon name="History" size={16} />
-            История отправки
+          <TabsTrigger value="history" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="History" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">История<br/>отправки</span>
           </TabsTrigger>
-          <TabsTrigger value="settings" className="gap-2">
-            <Icon name="Mail" size={16} />
-            Настройки email
+          <TabsTrigger value="settings" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Mail" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Настройки<br/>email</span>
           </TabsTrigger>
         </TabsList>
 

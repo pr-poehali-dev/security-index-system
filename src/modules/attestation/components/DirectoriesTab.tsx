@@ -49,18 +49,18 @@ export default function DirectoriesTab() {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="cert-types" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="cert-types" className="gap-2">
-            <Icon name="Award" size={16} />
-            Виды аттестаций
+        <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+          <TabsTrigger value="cert-types" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Award" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Виды<br/>аттестаций</span>
           </TabsTrigger>
-          <TabsTrigger value="organizations" className="gap-2">
-            <Icon name="Building2" size={16} />
-            Учебные центры
+          <TabsTrigger value="organizations" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Building2" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Учебные<br/>центры</span>
           </TabsTrigger>
-          <TabsTrigger value="templates" className="gap-2">
-            <Icon name="FileCheck" size={16} />
-            Требования к должностям
+          <TabsTrigger value="templates" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="FileCheck" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Требования к<br/>должностям</span>
           </TabsTrigger>
         </TabsList>
 

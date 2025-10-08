@@ -120,11 +120,23 @@ export default function IncidentDetailsDialog({ incident, open, onOpenChange }: 
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="details">Основное</TabsTrigger>
-            <TabsTrigger value="timeline">Хронология</TabsTrigger>
-            <TabsTrigger value="resolution">Решение</TabsTrigger>
-            <TabsTrigger value="comments">Комментарии ({incident.comments?.length || 0})</TabsTrigger>
+          <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+            <TabsTrigger value="details" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Icon name="Info" size={20} />
+              <span className="text-xs font-medium">Основное</span>
+            </TabsTrigger>
+            <TabsTrigger value="timeline" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Icon name="Clock" size={20} />
+              <span className="text-xs font-medium">Хронология</span>
+            </TabsTrigger>
+            <TabsTrigger value="resolution" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Icon name="CheckCircle2" size={20} />
+              <span className="text-xs font-medium">Решение</span>
+            </TabsTrigger>
+            <TabsTrigger value="comments" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Icon name="MessageSquare" size={20} />
+              <span className="text-xs font-medium">Комментарии ({incident.comments?.length || 0})</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="details" className="space-y-4 mt-6">
