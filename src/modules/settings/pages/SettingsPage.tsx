@@ -153,7 +153,8 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="organizations" className="space-y-6">
-        <TabsList>
+        <div className="overflow-x-auto -mx-6 px-6">
+          <TabsList className="w-max min-w-full justify-start">
           <TabsTrigger value="organizations" className="gap-2">
             <Icon name="Building2" size={16} />
             Организации
@@ -191,6 +192,7 @@ export default function SettingsPage() {
             Пользователи системы
           </TabsTrigger>
         </TabsList>
+        </div>
 
         <TabsContent value="organizations">
           <OrganizationsTab
