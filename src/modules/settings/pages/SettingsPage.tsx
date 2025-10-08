@@ -153,46 +153,44 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="organizations" className="space-y-6">
-        <div className="overflow-x-auto -mx-6 px-6">
-          <TabsList className="w-max min-w-full justify-start">
-          <TabsTrigger value="organizations" className="gap-2">
-            <Icon name="Building2" size={16} />
-            Организации
+        <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+          <TabsTrigger value="organizations" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Building2" size={20} />
+            <span className="text-xs font-medium">Организации</span>
           </TabsTrigger>
-          <TabsTrigger value="production-sites" className="gap-2">
-            <Icon name="Factory" size={16} />
-            Производственные площадки
+          <TabsTrigger value="production-sites" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Factory" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Производственные<br/>площадки</span>
           </TabsTrigger>
-          <TabsTrigger value="departments" className="gap-2">
-            <Icon name="Building" size={16} />
-            Подразделения
+          <TabsTrigger value="departments" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Building" size={20} />
+            <span className="text-xs font-medium">Подразделения</span>
           </TabsTrigger>
-          <TabsTrigger value="people" className="gap-2">
-            <Icon name="User" size={16} />
-            Справочник людей
+          <TabsTrigger value="people" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="User" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Справочник<br/>людей</span>
           </TabsTrigger>
-          <TabsTrigger value="positions" className="gap-2">
-            <Icon name="Briefcase" size={16} />
-            Справочник должностей
+          <TabsTrigger value="positions" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Briefcase" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Справочник<br/>должностей</span>
           </TabsTrigger>
-          <TabsTrigger value="personnel" className="gap-2">
-            <Icon name="Users" size={16} />
-            Персонал
+          <TabsTrigger value="personnel" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Users" size={20} />
+            <span className="text-xs font-medium">Персонал</span>
           </TabsTrigger>
-          <TabsTrigger value="competencies" className="gap-2">
-            <Icon name="GraduationCap" size={16} />
-            Справочник компетенций
+          <TabsTrigger value="competencies" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="GraduationCap" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Справочник<br/>компетенций</span>
           </TabsTrigger>
-          <TabsTrigger value="external-orgs" className="gap-2">
-            <Icon name="Briefcase" size={16} />
-            Сторонние организации
+          <TabsTrigger value="external-orgs" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Building2" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Сторонние<br/>организации</span>
           </TabsTrigger>
-          <TabsTrigger value="system-users" className="gap-2">
-            <Icon name="UserCog" size={16} />
-            Пользователи системы
+          <TabsTrigger value="system-users" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="UserCog" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Пользователи<br/>системы</span>
           </TabsTrigger>
         </TabsList>
-        </div>
 
         <TabsContent value="organizations">
           <OrganizationsTab
