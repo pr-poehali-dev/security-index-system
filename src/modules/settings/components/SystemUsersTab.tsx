@@ -40,10 +40,19 @@ export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersT
   const systemUsers = getSystemUsersByTenant(user!.tenantId!);
   const personnel = getPersonnelByTenant(user!.tenantId!);
 
-  const getPersonnelName = (personnelId?: string) => {
-    if (!personnelId) return '—';
+  const getPersonnelInfo = (personnelId?: string) => {
+    if (!personnelId) return { name: '—', orgName: '' };
     const person = personnel.find(p => p.id === personnelId);
-    return person?.fullName || '—';
+    if (!person) return { name: '—', orgName: '' };
+    
+    const org = person.organizationId 
+      ? organizations.find(o => o.id === person.organizationId)
+      : null;
+    
+    return {
+      name: person.fullName || '—',
+      orgName: org?.name || ''
+    };
   };
 
   const getOrgNames = (orgIds: string[]) => {
@@ -54,11 +63,12 @@ export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersT
   };
 
   const filteredUsers = systemUsers.filter((sysUser) => {
-    const personnelName = getPersonnelName(sysUser.personnelId);
+    const personnelInfo = getPersonnelInfo(sysUser.personnelId);
     const matchesSearch = 
       sysUser.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       sysUser.login.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      personnelName.toLowerCase().includes(searchTerm.toLowerCase());
+      personnelInfo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      personnelInfo.orgName.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = filterStatus === 'all' || sysUser.status === filterStatus;
     const matchesRole = filterRole === 'all' || sysUser.role === filterRole;
@@ -83,15 +93,19 @@ export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersT
   };
 
   const handleExport = () => {
-    const exportData = filteredUsers.map(sysUser => ({
-      'Login': sysUser.login,
-      'Email': sysUser.email,
-      'Роль': sysUser.role,
-      'Сотрудник': getPersonnelName(sysUser.personnelId),
-      'Доступ к организациям': getOrgNames(sysUser.accessibleOrganizations),
-      'Статус': sysUser.status === 'active' ? 'Активен' : 'Заблокирован',
-      'Дата создания': new Date(sysUser.createdAt).toLocaleDateString('ru-RU')
-    }));
+    const exportData = filteredUsers.map(sysUser => {
+      const personnelInfo = getPersonnelInfo(sysUser.personnelId);
+      return {
+        'Login': sysUser.login,
+        'Email': sysUser.email,
+        'Роль': sysUser.role,
+        'Сотрудник': personnelInfo.name,
+        'Организация сотрудника': personnelInfo.orgName || '—',
+        'Доступ к организациям': getOrgNames(sysUser.organizationAccess),
+        'Статус': sysUser.status === 'active' ? 'Активен' : 'Заблокирован',
+        'Дата создания': new Date(sysUser.createdAt).toLocaleDateString('ru-RU')
+      };
+    });
     exportToExcel(exportData, 'Пользователи_системы');
     toast({ title: 'Экспорт завершен', description: `Экспортировано: ${exportData.length} пользователей` });
   };
@@ -202,10 +216,19 @@ export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersT
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredUsers.map((sysUser) => (
+                filteredUsers.map((sysUser) => {
+                  const personnelInfo = getPersonnelInfo(sysUser.personnelId);
+                  return (
                   <TableRow key={sysUser.id}>
                     <TableCell className="font-medium">
-                      {getPersonnelName(sysUser.personnelId)}
+                      <div>
+                        <div>{personnelInfo.name}</div>
+                        {personnelInfo.orgName && (
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            {personnelInfo.orgName}
+                          </div>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>{sysUser.email}</TableCell>
                     <TableCell>
@@ -251,7 +274,8 @@ export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersT
                       </div>
                     </TableCell>
                   </TableRow>
-                ))
+                  );
+                })
               )}
             </TableBody>
           </Table>
@@ -263,14 +287,21 @@ export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersT
               Нет пользователей
             </div>
           ) : (
-            filteredUsers.map((sysUser) => (
+            filteredUsers.map((sysUser) => {
+              const personnelInfo = getPersonnelInfo(sysUser.personnelId);
+              return (
               <Card key={sysUser.id}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <h3 className="font-semibold mb-1">
-                        {getPersonnelName(sysUser.personnelId)}
+                        {personnelInfo.name}
                       </h3>
+                      {personnelInfo.orgName && (
+                        <p className="text-xs text-muted-foreground mb-2">
+                          {personnelInfo.orgName}
+                        </p>
+                      )}
                       <p className="text-sm text-muted-foreground mb-2">
                         {sysUser.email}
                       </p>
@@ -324,7 +355,8 @@ export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersT
                   </div>
                 </CardContent>
               </Card>
-            ))
+              );
+            })
           )}
         </div>
       )}
