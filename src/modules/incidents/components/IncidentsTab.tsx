@@ -286,6 +286,9 @@ export default function IncidentsTab() {
                       <TableCell>
                         <div className="flex gap-2">
                           <Button variant="ghost" size="sm" onClick={() => setEditingIncident(incident)}>
+                            <Icon name="Eye" size={14} />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => setEditingIncident(incident)}>
                             <Icon name="Edit" size={14} />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => handleDelete(incident.id)}>
