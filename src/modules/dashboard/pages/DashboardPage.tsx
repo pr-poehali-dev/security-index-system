@@ -24,6 +24,7 @@ import {
   type ReportPeriod
 } from '@/utils/reportGenerator';
 import ReportPeriodSelector from '@/components/dashboard/ReportPeriodSelector';
+import NotificationsWidget from '@/components/dashboard/NotificationsWidget';
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -485,6 +486,10 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       )}
+
+      <div className="mb-6">
+        <NotificationsWidget />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <Card>
