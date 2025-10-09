@@ -35,6 +35,8 @@ export default function Sidebar() {
   if (!user) return null;
   
   const incidentNotifications = getNotificationsBySource('incident').filter(n => !n.isRead);
+  const attestationNotifications = getNotificationsBySource('attestation').filter(n => !n.isRead);
+  const catalogNotifications = getNotificationsBySource('catalog').filter(n => !n.isRead);
 
   const getInitials = (name: string) => {
     return name
@@ -102,7 +104,13 @@ export default function Sidebar() {
           
           const module = MODULES[moduleKey];
           const route = MODULE_ROUTES[moduleKey];
-          const hasNotifications = moduleKey === 'incidents' && incidentNotifications.length > 0;
+          
+          let notifications: any[] = [];
+          if (moduleKey === 'incidents') notifications = incidentNotifications;
+          if (moduleKey === 'attestation') notifications = attestationNotifications;
+          if (moduleKey === 'catalog') notifications = catalogNotifications;
+          
+          const hasNotifications = notifications.length > 0;
           
           return (
             <NavLink
@@ -121,14 +129,14 @@ export default function Sidebar() {
                   {module.name}
                   {hasNotifications && (
                     <Badge variant="destructive" className="h-5 min-w-5 flex items-center justify-center p-0 text-xs">
-                      {incidentNotifications.length > 99 ? '99+' : incidentNotifications.length}
+                      {notifications.length > 99 ? '99+' : notifications.length}
                     </Badge>
                   )}
                 </span>
               )}
               {sidebarCollapsed && hasNotifications && (
                 <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-[10px]">
-                  {incidentNotifications.length > 9 ? '9+' : incidentNotifications.length}
+                  {notifications.length > 9 ? '9+' : notifications.length}
                 </Badge>
               )}
             </NavLink>
