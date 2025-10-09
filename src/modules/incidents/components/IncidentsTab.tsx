@@ -25,6 +25,7 @@ import {
 import type { Incident, IncidentStatus } from '@/types';
 import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 import IncidentDialog from './IncidentDialog';
+import * as XLSX from 'xlsx';
 
 export default function IncidentsTab() {
   const user = useAuthStore((state) => state.user);
@@ -128,6 +129,63 @@ export default function IncidentsTab() {
     }
   };
 
+  const handleExportToExcel = () => {
+    const statusLabels: Record<IncidentStatus, string> = {
+      created: 'Создано',
+      in_progress: 'В работе',
+      awaiting: 'Ожидает исполнения',
+      overdue: 'Просрочено',
+      completed: 'Исполнено',
+      completed_late: 'Исполнено с нарушением срока'
+    };
+
+    const exportData = filteredIncidents.map((inc, index) => ({
+      '№': index + 1,
+      'Организация': getOrganizationName(inc.organizationId),
+      'Площадка': getProductionSiteName(inc.productionSiteId),
+      'Дата': new Date(inc.reportDate).toLocaleDateString('ru-RU'),
+      'Источник': getSourceName(inc.sourceId),
+      'Направление': getDirectionName(inc.directionId),
+      'Описание': inc.description,
+      'Корректирующее мероприятие': inc.correctiveAction,
+      'Категория': getCategoryName(inc.categoryId),
+      'Подкатегория': getSubcategoryName(inc.subcategoryId),
+      'Обеспечение работ': getFundingTypeName(inc.fundingTypeId),
+      'Ответственный': getResponsibleName(inc.responsiblePersonnelId),
+      'Плановая дата': new Date(inc.plannedDate).toLocaleDateString('ru-RU'),
+      'Дней осталось': inc.daysLeft,
+      'Статус': statusLabels[inc.status],
+      'Комментарий': inc.comments || ''
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Инциденты');
+    
+    const colWidths = [
+      { wch: 5 },
+      { wch: 20 },
+      { wch: 20 },
+      { wch: 12 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 40 },
+      { wch: 40 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 12 },
+      { wch: 10 },
+      { wch: 25 },
+      { wch: 30 }
+    ];
+    worksheet['!cols'] = colWidths;
+    
+    const fileName = `Инциденты_${new Date().toLocaleDateString('ru-RU').replace(/\./g, '-')}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
+
   const stats = useMemo(() => ({
     total: incidents.length,
     inProgress: incidents.filter(i => i.status === 'in_progress' || i.status === 'awaiting').length,
@@ -191,10 +249,16 @@ export default function IncidentsTab() {
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold">Список инцидентов и мероприятий</h3>
-            <Button onClick={() => setShowAddDialog(true)}>
-              <Icon name="Plus" size={16} />
-              Добавить инцидент
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleExportToExcel}>
+                <Icon name="Download" size={16} />
+                Выгрузить в Excel
+              </Button>
+              <Button onClick={() => setShowAddDialog(true)}>
+                <Icon name="Plus" size={16} />
+                Добавить инцидент
+              </Button>
+            </div>
           </div>
 
           <div className="flex gap-4 mb-4 flex-wrap">
