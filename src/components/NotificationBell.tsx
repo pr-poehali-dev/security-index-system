@@ -16,7 +16,7 @@ import { ru } from 'date-fns/locale';
 export default function NotificationBell() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const { notifications, markAsRead, markAllAsRead, deleteNotification, getUnreadCount } = useNotificationsStore();
+  const { notifications, markAsRead, markAllAsRead, deleteNotification, clearAll, getUnreadCount } = useNotificationsStore();
 
   const unreadCount = getUnreadCount();
 
@@ -76,16 +76,31 @@ export default function NotificationBell() {
       <DropdownMenuContent align="end" className="w-96 p-0">
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-semibold">Уведомления</h3>
-          {unreadCount > 0 && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={markAllAsRead}
-              className="text-xs"
-            >
-              Прочитать все
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {unreadCount > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={markAllAsRead}
+                className="text-xs"
+              >
+                Прочитать все
+              </Button>
+            )}
+            {notifications.length > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => {
+                  clearAll();
+                }}
+                className="text-xs text-destructive hover:text-destructive"
+              >
+                <Icon name="Trash2" size={14} className="mr-1" />
+                Очистить
+              </Button>
+            )}
+          </div>
         </div>
 
         {sortedNotifications.length === 0 ? (
