@@ -31,6 +31,7 @@ import {
 } from 'recharts';
 import * as XLSX from 'xlsx';
 import type { IncidentStatus } from '@/types';
+import RiskMatrix from './RiskMatrix';
 
 const STATUS_COLORS: Record<IncidentStatus, string> = {
   created: '#94a3b8',
@@ -144,6 +145,20 @@ export default function ReportsTab() {
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
   }, [filteredIncidents, categories]);
+
+  const organizationData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    
+    filteredIncidents.forEach((inc) => {
+      const orgName = organizations.find(o => o.id === inc.organizationId)?.name || 'Без организации';
+      counts[orgName] = (counts[orgName] || 0) + 1;
+    });
+
+    return Object.entries(counts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+  }, [filteredIncidents, organizations]);
 
   const timelineData = useMemo(() => {
     const onTime = filteredIncidents.filter(inc => inc.status === 'completed').length;
@@ -293,12 +308,48 @@ export default function ReportsTab() {
     XLSX.writeFile(wb, fileName);
   };
 
-  const stats = useMemo(() => ({
-    total: filteredIncidents.length,
-    completed: filteredIncidents.filter(inc => inc.status === 'completed' || inc.status === 'completed_late').length,
-    overdue: filteredIncidents.filter(inc => inc.status === 'overdue').length,
-    inProgress: filteredIncidents.filter(inc => inc.status === 'in_progress').length,
-  }), [filteredIncidents]);
+  const stats = useMemo(() => {
+    const total = filteredIncidents.length;
+    const completed = filteredIncidents.filter(inc => inc.status === 'completed' || inc.status === 'completed_late').length;
+    const overdue = filteredIncidents.filter(inc => inc.status === 'overdue').length;
+    const inProgress = filteredIncidents.filter(inc => inc.status === 'in_progress').length;
+    const awaiting = filteredIncidents.filter(inc => inc.status === 'awaiting').length;
+    const created = filteredIncidents.filter(inc => inc.status === 'created').length;
+    
+    const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+    const overdueRate = total > 0 ? Math.round((overdue / total) * 100) : 0;
+    const onTimeCompleted = filteredIncidents.filter(inc => inc.status === 'completed').length;
+    const lateCompleted = filteredIncidents.filter(inc => inc.status === 'completed_late').length;
+    const onTimeRate = completed > 0 ? Math.round((onTimeCompleted / completed) * 100) : 0;
+
+    const avgDaysToComplete = completed > 0 
+      ? Math.round(
+          filteredIncidents
+            .filter(inc => inc.status === 'completed' || inc.status === 'completed_late')
+            .reduce((sum, inc) => {
+              const reportDate = new Date(inc.reportDate);
+              const plannedDate = new Date(inc.plannedDate);
+              const daysDiff = Math.ceil((plannedDate.getTime() - reportDate.getTime()) / (1000 * 60 * 60 * 24));
+              return sum + daysDiff;
+            }, 0) / completed
+        )
+      : 0;
+
+    return { 
+      total, 
+      completed, 
+      overdue, 
+      inProgress, 
+      awaiting,
+      created,
+      completionRate, 
+      overdueRate,
+      onTimeCompleted,
+      lateCompleted,
+      onTimeRate,
+      avgDaysToComplete
+    };
+  }, [filteredIncidents]);
 
   return (
     <div className="space-y-6">
@@ -391,6 +442,9 @@ export default function ReportsTab() {
               <div>
                 <p className="text-sm text-muted-foreground">Всего инцидентов</p>
                 <p className="text-3xl font-bold mt-1">{stats.total}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  За выбранный период
+                </p>
               </div>
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
                 <Icon name="FileText" size={24} className="text-primary" />
@@ -403,11 +457,48 @@ export default function ReportsTab() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Исполнено</p>
-                <p className="text-3xl font-bold mt-1 text-green-600">{stats.completed}</p>
+                <p className="text-sm text-muted-foreground">Процент исполнения</p>
+                <p className="text-3xl font-bold mt-1 text-green-600">{stats.completionRate}%</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stats.completed} из {stats.total} инцидентов
+                </p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <Icon name="CheckCircle" size={24} className="text-green-600" />
+                <Icon name="TrendingUp" size={24} className="text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Исполнено в срок</p>
+                <p className="text-3xl font-bold mt-1 text-blue-600">{stats.onTimeRate}%</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stats.onTimeCompleted} вовремя, {stats.lateCompleted} с опозданием
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <Icon name="Clock" size={24} className="text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Средний срок выполнения</p>
+                <p className="text-3xl font-bold mt-1 text-purple-600">{stats.avgDaysToComplete}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  дней на инцидент
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <Icon name="Calendar" size={24} className="text-purple-600" />
               </div>
             </div>
           </CardContent>
@@ -419,6 +510,9 @@ export default function ReportsTab() {
               <div>
                 <p className="text-sm text-muted-foreground">Просрочено</p>
                 <p className="text-3xl font-bold mt-1 text-red-600">{stats.overdue}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stats.overdueRate}% от общего числа
+                </p>
               </div>
               <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
                 <Icon name="AlertCircle" size={24} className="text-red-600" />
@@ -433,9 +527,46 @@ export default function ReportsTab() {
               <div>
                 <p className="text-sm text-muted-foreground">В работе</p>
                 <p className="text-3xl font-bold mt-1 text-blue-600">{stats.inProgress}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Активных инцидентов
+                </p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <Icon name="Clock" size={24} className="text-blue-600" />
+                <Icon name="Activity" size={24} className="text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Ожидает исполнения</p>
+                <p className="text-3xl font-bold mt-1 text-orange-600">{stats.awaiting}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Требуют внимания
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                <Icon name="AlertTriangle" size={24} className="text-orange-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Создано</p>
+                <p className="text-3xl font-bold mt-1 text-gray-600">{stats.created}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Новых инцидентов
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                <Icon name="FilePlus" size={24} className="text-gray-600" />
               </div>
             </div>
           </CardContent>
@@ -563,6 +694,8 @@ export default function ReportsTab() {
         </CardContent>
       </Card>
 
+      <RiskMatrix incidents={filteredIncidents} categories={categories} />
+
       <Card>
         <CardHeader>
           <CardTitle>Топ-10 направлений по количеству инцидентов</CardTitle>
@@ -586,28 +719,53 @@ export default function ReportsTab() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Топ-10 категорий по количеству инцидентов</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {categoryData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={categoryData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="#10b981" name="Количество инцидентов" />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[400px] flex items-center justify-center text-muted-foreground">
-              Нет данных для отображения
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Топ-10 категорий по количеству инцидентов</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {categoryData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={categoryData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#10b981" name="Количество инцидентов" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[400px] flex items-center justify-center text-muted-foreground">
+                Нет данных для отображения
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Топ-10 организаций по количеству инцидентов</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {organizationData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={organizationData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#f59e0b" name="Количество инцидентов" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[400px] flex items-center justify-center text-muted-foreground">
+                Нет данных для отображения
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

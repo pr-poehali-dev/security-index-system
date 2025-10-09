@@ -26,6 +26,7 @@ import {
 import type { Incident, IncidentStatus } from '@/types';
 import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 import IncidentDialog from './IncidentDialog';
+import IncidentsDashboard from './IncidentsDashboard';
 import * as XLSX from 'xlsx';
 
 export default function IncidentsTab() {
@@ -54,6 +55,7 @@ export default function IncidentsTab() {
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showDashboard, setShowDashboard] = useState(true);
 
   const incidents = user?.tenantId ? getIncidentsByTenant(user.tenantId) : [];
 
@@ -260,70 +262,28 @@ export default function IncidentsTab() {
     XLSX.writeFile(workbook, fileName);
   };
 
-  const stats = useMemo(() => ({
-    total: incidents.length,
-    inProgress: incidents.filter(i => i.status === 'in_progress' || i.status === 'awaiting').length,
-    overdue: incidents.filter(i => i.status === 'overdue').length,
-    completed: incidents.filter(i => i.status === 'completed' || i.status === 'completed_late').length
-  }), [incidents]);
-
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Всего</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
-              </div>
-              <Icon name="FileText" size={24} className="text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">В работе</p>
-                <p className="text-2xl font-bold">{stats.inProgress}</p>
-              </div>
-              <Icon name="Clock" size={24} className="text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Просрочено</p>
-                <p className="text-2xl font-bold text-red-600">{stats.overdue}</p>
-              </div>
-              <Icon name="AlertTriangle" size={24} className="text-red-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Выполнено</p>
-                <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
-              </div>
-              <Icon name="CheckCircle" size={24} className="text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {showDashboard && (
+        <IncidentsDashboard 
+          incidents={incidents}
+          directions={directions}
+          categories={categories}
+        />
+      )}
 
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold">Список инцидентов и мероприятий</h3>
             <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowDashboard(!showDashboard)}
+              >
+                <Icon name={showDashboard ? "EyeOff" : "Eye"} size={16} />
+                {showDashboard ? "Скрыть аналитику" : "Показать аналитику"}
+              </Button>
               {selectedIds.length > 0 && (
                 <>
                   <Button variant="outline" onClick={handleBulkExport}>
