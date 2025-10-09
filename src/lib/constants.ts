@@ -113,7 +113,8 @@ export const ROUTES = {
   EXAMINATION: '/examination',
   MAINTENANCE: '/maintenance',
   BUDGET: '/budget',
-  TRAINING_CENTER: '/training-center'
+  TRAINING_CENTER: '/training-center',
+  NOTIFICATIONS: '/notifications'
 };
 
 export const INDUSTRIAL_SAFETY_AREAS = [

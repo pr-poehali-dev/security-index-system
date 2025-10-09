@@ -18,6 +18,7 @@ import { ChecklistsPage } from "@/modules/checklists";
 import { AttestationPage } from "@/modules/attestation";
 import { TasksPage } from "@/modules/tasks";
 import { ExaminationPage } from "@/modules/examination";
+import { NotificationsPage } from "@/modules/notifications";
 import { MaintenancePage } from "@/modules/maintenance";
 import { BudgetPage } from "@/modules/budget";
 import TrainingCenterPage from "@/modules/training-center/pages/TrainingCenterPage";
@@ -195,6 +196,16 @@ const App = () => {
                 <ProtectedRoute>
                   <AuthenticatedLayout>
                     <TrainingCenterPage />
+                  </AuthenticatedLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.NOTIFICATIONS}
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedLayout>
+                    <NotificationsPage />
                   </AuthenticatedLayout>
                 </ProtectedRoute>
               }
