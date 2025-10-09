@@ -15,7 +15,7 @@ const MOCK_USERS: User[] = [
     email: 'superadmin@system.ru',
     name: 'Суперадминистратор',
     role: 'SuperAdmin',
-    availableModules: ['tenants', 'attestation', 'catalog', 'incidents', 'checklists', 'tasks', 'examination', 'maintenance', 'budget', 'settings']
+    availableModules: ['tenants', 'attestation', 'catalog', 'incidents', 'checklists', 'tasks', 'examination', 'maintenance', 'budget', 'training-center', 'settings']
   },
   {
     id: '2',
@@ -23,7 +23,7 @@ const MOCK_USERS: User[] = [
     name: 'Администратор Тенанта',
     role: 'TenantAdmin',
     tenantId: 'tenant-1',
-    availableModules: ['attestation', 'catalog', 'incidents', 'checklists', 'tasks', 'examination', 'maintenance', 'budget', 'settings']
+    availableModules: ['attestation', 'catalog', 'incidents', 'checklists', 'tasks', 'examination', 'maintenance', 'budget', 'training-center', 'settings']
   },
   {
     id: '3',
@@ -48,6 +48,14 @@ const MOCK_USERS: User[] = [
     role: 'Director',
     tenantId: 'tenant-1',
     availableModules: ['attestation', 'incidents', 'budget']
+  },
+  {
+    id: '6',
+    email: 'training@company.ru',
+    name: 'Менеджер Учебного Центра',
+    role: 'TrainingCenterManager',
+    tenantId: 'tenant-1',
+    availableModules: ['training-center', 'attestation']
   }
 ];
 
