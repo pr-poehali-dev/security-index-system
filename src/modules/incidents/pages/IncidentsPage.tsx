@@ -5,6 +5,7 @@ import { Navigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/constants';
 import PageHeader from '@/components/layout/PageHeader';
 import IncidentsTab from '../components/IncidentsTab';
+import AnalyticsTab from '../components/AnalyticsTab';
 import ReportsTab from '../components/ReportsTab';
 import DirectoriesTab from '../components/DirectoriesTab';
 
@@ -29,6 +30,10 @@ export default function IncidentsPage() {
             <Icon name="AlertTriangle" size={20} />
             <span className="text-xs font-medium text-center leading-tight">Инциденты и<br/>мероприятия</span>
           </TabsTrigger>
+          <TabsTrigger value="analytics" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="BarChart3" size={20} />
+            <span className="text-xs font-medium">Аналитика</span>
+          </TabsTrigger>
           <TabsTrigger value="reports" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="FileText" size={20} />
             <span className="text-xs font-medium">Отчеты</span>
@@ -41,6 +46,10 @@ export default function IncidentsPage() {
 
         <TabsContent value="incidents">
           <IncidentsTab />
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <AnalyticsTab />
         </TabsContent>
 
         <TabsContent value="reports">

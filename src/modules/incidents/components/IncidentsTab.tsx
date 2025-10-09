@@ -26,7 +26,6 @@ import {
 import type { Incident, IncidentStatus } from '@/types';
 import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 import IncidentDialog from './IncidentDialog';
-import IncidentsDashboard from './IncidentsDashboard';
 import * as XLSX from 'xlsx';
 
 export default function IncidentsTab() {
@@ -55,7 +54,6 @@ export default function IncidentsTab() {
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [showDashboard, setShowDashboard] = useState(true);
 
   const incidents = user?.tenantId ? getIncidentsByTenant(user.tenantId) : [];
 
@@ -264,26 +262,11 @@ export default function IncidentsTab() {
 
   return (
     <div className="space-y-6">
-      {showDashboard && (
-        <IncidentsDashboard 
-          incidents={incidents}
-          directions={directions}
-          categories={categories}
-        />
-      )}
-
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold">Список инцидентов и мероприятий</h3>
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setShowDashboard(!showDashboard)}
-              >
-                <Icon name={showDashboard ? "EyeOff" : "Eye"} size={16} />
-                {showDashboard ? "Скрыть аналитику" : "Показать аналитику"}
-              </Button>
               {selectedIds.length > 0 && (
                 <>
                   <Button variant="outline" onClick={handleBulkExport}>
