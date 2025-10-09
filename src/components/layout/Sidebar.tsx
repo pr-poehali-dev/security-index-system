@@ -51,7 +51,10 @@ export default function Sidebar() {
       sidebarCollapsed ? "w-16" : "w-64"
     )}>
       <div className="p-4 border-b border-gray-800">
-        <div className="flex items-center justify-between">
+        <div className={cn(
+          "flex items-center",
+          sidebarCollapsed ? "flex-col gap-2" : "justify-between"
+        )}>
           {!sidebarCollapsed && (
             <div className="flex items-center gap-2 animate-fade-in">
               <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
@@ -63,8 +66,11 @@ export default function Sidebar() {
               </div>
             </div>
           )}
-          <div className="flex items-center gap-1">
-            {!sidebarCollapsed && <NotificationBell />}
+          <div className={cn(
+            "flex items-center gap-1",
+            sidebarCollapsed && "flex-col"
+          )}>
+            <NotificationBell />
             <Button
               variant="ghost"
               size="icon"
