@@ -596,4 +596,4 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
   getCertificationsByTenant: (tenantId) => {
     return get().certifications.filter((cert) => cert.tenantId === tenantId);
   }
-}), { name: 'settings-storage-v2' }));
+}), { name: 'settings-storage-v3' }));
