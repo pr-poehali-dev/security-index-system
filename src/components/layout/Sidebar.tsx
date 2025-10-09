@@ -1,11 +1,14 @@
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
+import { useNotificationsStore } from '@/stores/notificationsStore';
 import { MODULES, ROUTES } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
+import NotificationBell from '@/components/NotificationBell';
 import { cn } from '@/lib/utils';
 import type { ModuleType } from '@/types';
 
@@ -27,8 +30,11 @@ export default function Sidebar() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const { theme, toggleTheme, sidebarCollapsed, toggleSidebar } = useUIStore();
+  const { getNotificationsBySource } = useNotificationsStore();
 
   if (!user) return null;
+  
+  const incidentNotifications = getNotificationsBySource('incident').filter(n => !n.isRead);
 
   const getInitials = (name: string) => {
     return name
@@ -57,14 +63,17 @@ export default function Sidebar() {
               </div>
             </div>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleSidebar}
-            className="text-gray-400 hover:text-white hover:bg-gray-800"
-          >
-            <Icon name={sidebarCollapsed ? "ChevronRight" : "ChevronLeft"} size={20} />
-          </Button>
+          <div className="flex items-center gap-1">
+            {!sidebarCollapsed && <NotificationBell />}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleSidebar}
+              className="text-gray-400 hover:text-white hover:bg-gray-800"
+            >
+              <Icon name={sidebarCollapsed ? "ChevronRight" : "ChevronLeft"} size={20} />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -87,23 +96,38 @@ export default function Sidebar() {
           
           const module = MODULES[moduleKey];
           const route = MODULE_ROUTES[moduleKey];
+          const hasNotifications = moduleKey === 'incidents' && incidentNotifications.length > 0;
           
           return (
             <NavLink
               key={moduleKey}
               to={route}
               className={({ isActive }) => cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors relative",
                 isActive 
                   ? "bg-emerald-600 text-white" 
                   : "text-gray-300 hover:bg-gray-800 hover:text-white"
               )}
             >
               <Icon name={module.icon as any} size={20} />
-              {!sidebarCollapsed && <span className="text-sm font-medium">{module.name}</span>}
+              {!sidebarCollapsed && (
+                <span className="text-sm font-medium flex items-center gap-2">
+                  {module.name}
+                  {hasNotifications && (
+                    <Badge variant="destructive" className="h-5 min-w-5 flex items-center justify-center p-0 text-xs">
+                      {incidentNotifications.length > 99 ? '99+' : incidentNotifications.length}
+                    </Badge>
+                  )}
+                </span>
+              )}
+              {sidebarCollapsed && hasNotifications && (
+                <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-[10px]">
+                  {incidentNotifications.length > 9 ? '9+' : incidentNotifications.length}
+                </Badge>
+              )}
             </NavLink>
           );
-        })}
+        })
       </nav>
 
       <div className="border-t border-gray-800 p-4 space-y-3">

@@ -593,3 +593,20 @@ export interface OrganizationTrainingRequest {
   createdAt: string;
   updatedAt: string;
 }
+
+export type NotificationType = 'critical' | 'warning' | 'info' | 'success';
+export type NotificationSource = 'incident' | 'certification' | 'task' | 'audit' | 'system';
+
+export interface Notification {
+  id: string;
+  tenantId: string;
+  userId?: string;
+  type: NotificationType;
+  source: NotificationSource;
+  sourceId?: string;
+  title: string;
+  message: string;
+  link?: string;
+  isRead: boolean;
+  createdAt: string;
+}
