@@ -84,10 +84,10 @@ export default function ProgramsTab() {
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold">Учебные программы</h3>
+            <h3 className="text-lg font-semibold">Перечень курсов Интеллектуальной системы подготовки</h3>
             <Button onClick={() => setShowAddDialog(true)}>
               <Icon name="Plus" size={16} />
-              Добавить программу
+              Добавить курс
             </Button>
           </div>
 

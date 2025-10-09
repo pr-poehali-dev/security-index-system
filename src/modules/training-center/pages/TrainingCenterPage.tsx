@@ -24,7 +24,7 @@ export default function TrainingCenterPage() {
         <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
           <TabsTrigger value="programs" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="BookOpen" size={20} />
-            <span className="text-xs font-medium">Программы</span>
+            <span className="text-xs font-medium text-center leading-tight">Курсы<br/>подготовки</span>
           </TabsTrigger>
           <TabsTrigger value="groups" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="Users" size={20} />
