@@ -281,9 +281,45 @@ export default function OrdersTrainingTab() {
 
   const handleSendToTrainingCenter = (orderId: string) => {
     const order = orders.find(o => o.id === orderId);
+    if (!order || !user?.tenantId) return;
+
+    const { addRequest } = useTrainingCenterStore.getState();
+    
+    const employeesList = order.employeeIds.map(empId => {
+      const emp = personnel.find(p => p.id === empId);
+      const person = people.find(p => p.id === emp?.personId);
+      const position = positions.find(pos => pos.id === emp?.positionId);
+      
+      return {
+        personnelId: empId,
+        fullName: person ? `${person.lastName} ${person.firstName} ${person.middleName || ''}`.trim() : 'Неизвестный',
+        position: position?.name || 'Не указана',
+        department: undefined
+      };
+    });
+
+    const request: any = {
+      id: `req-${Date.now()}`,
+      tenantId: user.tenantId,
+      organizationId: order.organizationId || '',
+      organizationName: 'Основная организация',
+      programId: '',
+      programName: order.title,
+      requestDate: new Date().toISOString(),
+      studentsCount: employeesList.length,
+      students: employeesList,
+      contactPerson: order.createdBy,
+      status: 'new',
+      notes: `Заявка создана из приказа №${order.number}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    addRequest(request);
+
     toast({
-      title: "Направление в учебный центр",
-      description: `Приказ №${order?.number}: ${order?.employeeIds.length} сотрудников направлены на подготовку в учебный центр`,
+      title: "Заявка отправлена в учебный центр",
+      description: `Приказ №${order.number}: ${order.employeeIds.length} сотрудников направлены на подготовку в учебный центр`,
     });
   };
 
