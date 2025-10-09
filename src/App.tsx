@@ -24,6 +24,8 @@ import TrainingCenterPage from "@/modules/training-center/pages/TrainingCenterPa
 import Sidebar from "@/components/layout/Sidebar";
 import { NotFoundPage } from "@/modules/common";
 import { useIncidentNotifications } from "@/hooks/useIncidentNotifications";
+import { useAttestationNotifications } from "@/hooks/useAttestationNotifications";
+import { useCatalogNotifications } from "@/hooks/useCatalogNotifications";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
   useIncidentNotifications();
+  useAttestationNotifications();
+  useCatalogNotifications();
   
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">

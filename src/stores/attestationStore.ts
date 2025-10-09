@@ -199,7 +199,7 @@ export const useAttestationStore = create<AttestationState>()(persist((set, get)
       category: 'industrial_safety',
       area: 'А.1 Основы промышленной безопасности',
       issueDate: '2020-03-10',
-      expiryDate: '2025-03-10',
+      expiryDate: '2024-03-10',
       protocolNumber: 'ПБ-234/2020',
       protocolDate: '2020-03-10',
       verified: true,
@@ -214,7 +214,7 @@ export const useAttestationStore = create<AttestationState>()(persist((set, get)
       category: 'energy_safety',
       area: 'V группа до 1000В',
       issueDate: '2024-06-15',
-      expiryDate: '2025-06-15',
+      expiryDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       verified: false,
       createdAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toISOString()

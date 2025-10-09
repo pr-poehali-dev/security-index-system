@@ -120,7 +120,7 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
         coordinates: { lat: 59.9342802, lng: 30.3350986 }
       },
       responsiblePerson: 'Кузнецов А.В.',
-      nextExpertiseDate: '2026-06-15',
+      nextExpertiseDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       nextDiagnosticDate: '2025-12-15',
       description: 'Котельная производительностью 50 Гкал/ч',
       createdAt: '2020-03-15T00:00:00Z',
@@ -142,7 +142,7 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
         coordinates: { lat: 60.0074123, lng: 30.2962334 }
       },
       responsiblePerson: 'Смирнов В.Г.',
-      nextExpertiseDate: '2025-08-20',
+      nextExpertiseDate: '2024-08-20',
       nextTestDate: '2025-05-01',
       description: 'Водозаборное сооружение, класс III',
       createdAt: '2020-04-10T00:00:00Z',
