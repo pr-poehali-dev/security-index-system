@@ -1,4 +1,4 @@
-export type UserRole = 'SuperAdmin' | 'TenantAdmin' | 'Auditor' | 'Manager' | 'Director';
+export type UserRole = 'SuperAdmin' | 'TenantAdmin' | 'Auditor' | 'Manager' | 'Director' | 'TrainingCenterManager';
 
 export type ModuleType = 
   | 'tenants'
@@ -10,6 +10,7 @@ export type ModuleType =
   | 'examination'
   | 'maintenance'
   | 'budget'
+  | 'training-center'
   | 'settings';
 
 export interface User {
@@ -469,4 +470,98 @@ export interface DashboardStats {
   overdueIncidents: number;
   upcomingTasks: number;
   budgetUtilization: number;
+}
+
+export type TrainingProgramStatus = 'active' | 'inactive' | 'archived';
+
+export interface TrainingProgram {
+  id: string;
+  tenantId: string;
+  name: string;
+  code: string;
+  category: 'industrial_safety' | 'labor_safety' | 'energy_safety' | 'ecology' | 'professional' | 'other';
+  durationHours: number;
+  validityMonths: number;
+  description?: string;
+  competencyIds: string[];
+  minStudents: number;
+  maxStudents: number;
+  cost: number;
+  requiresExam: boolean;
+  status: TrainingProgramStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type TrainingGroupStatus = 'planned' | 'in_progress' | 'completed' | 'cancelled';
+
+export interface TrainingGroup {
+  id: string;
+  tenantId: string;
+  programId: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  schedule: string;
+  instructorId?: string;
+  locationId?: string;
+  maxStudents: number;
+  enrolledCount: number;
+  status: TrainingGroupStatus;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type EnrollmentStatus = 'enrolled' | 'in_progress' | 'completed' | 'failed' | 'cancelled';
+
+export interface TrainingEnrollment {
+  id: string;
+  tenantId: string;
+  groupId: string;
+  studentId: string;
+  enrolledDate: string;
+  status: EnrollmentStatus;
+  attendanceRate?: number;
+  examScore?: number;
+  certificateNumber?: string;
+  certificateIssueDate?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TrainingLocation {
+  id: string;
+  tenantId: string;
+  name: string;
+  address: string;
+  capacity: number;
+  equipment?: string[];
+  status: 'active' | 'inactive';
+  createdAt: string;
+}
+
+export interface TrainingInstructor {
+  id: string;
+  tenantId: string;
+  personnelId: string;
+  specializations: string[];
+  certifications: string[];
+  status: 'active' | 'inactive';
+  createdAt: string;
+}
+
+export interface TrainingScheduleEntry {
+  id: string;
+  tenantId: string;
+  groupId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  topic: string;
+  instructorId?: string;
+  locationId?: string;
+  type: 'lecture' | 'practice' | 'exam';
+  completed: boolean;
 }

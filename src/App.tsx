@@ -20,6 +20,7 @@ import { TasksPage } from "@/modules/tasks";
 import { ExaminationPage } from "@/modules/examination";
 import { MaintenancePage } from "@/modules/maintenance";
 import { BudgetPage } from "@/modules/budget";
+import TrainingCenterPage from "@/modules/training-center/pages/TrainingCenterPage";
 import Sidebar from "@/components/layout/Sidebar";
 import { NotFoundPage } from "@/modules/common";
 
@@ -178,6 +179,16 @@ const App = () => {
                 <ProtectedRoute>
                   <AuthenticatedLayout>
                     <BudgetPage />
+                  </AuthenticatedLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.TRAINING_CENTER}
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedLayout>
+                    <TrainingCenterPage />
                   </AuthenticatedLayout>
                 </ProtectedRoute>
               }

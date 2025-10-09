@@ -46,6 +46,11 @@ export const MODULES: Record<ModuleType, { name: string; description: string; ic
     description: 'Бюджетирование затрат',
     icon: 'Wallet'
   },
+  'training-center': {
+    name: 'Учебный центр',
+    description: 'Управление учебными программами и обучением',
+    icon: 'BookOpen'
+  },
   settings: {
     name: 'Настройки',
     description: 'Управление организациями, персоналом и компетенциями',
@@ -64,6 +69,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, ModuleType[]> = {
     'examination',
     'maintenance',
     'budget',
+    'training-center',
     'settings'
   ],
   TenantAdmin: [
@@ -75,11 +81,13 @@ export const ROLE_PERMISSIONS: Record<UserRole, ModuleType[]> = {
     'examination',
     'maintenance',
     'budget',
+    'training-center',
     'settings'
   ],
   Auditor: ['attestation', 'catalog', 'incidents', 'checklists', 'examination'],
   Manager: ['attestation', 'catalog', 'tasks', 'maintenance'],
-  Director: ['attestation', 'incidents', 'budget']
+  Director: ['attestation', 'incidents', 'budget'],
+  TrainingCenterManager: ['training-center', 'attestation']
 };
 
 export const CERTIFICATION_CATEGORIES = [
@@ -104,7 +112,8 @@ export const ROUTES = {
   TASKS: '/tasks',
   EXAMINATION: '/examination',
   MAINTENANCE: '/maintenance',
-  BUDGET: '/budget'
+  BUDGET: '/budget',
+  TRAINING_CENTER: '/training-center'
 };
 
 export const INDUSTRIAL_SAFETY_AREAS = [
