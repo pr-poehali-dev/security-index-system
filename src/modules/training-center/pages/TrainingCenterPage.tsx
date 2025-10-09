@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Icon from '@/components/ui/icon';
 import ProgramsTab from '../components/ProgramsTab';
 import GroupsTab from '../components/GroupsTab';
 import EnrollmentsTab from '../components/EnrollmentsTab';
@@ -11,22 +12,40 @@ export default function TrainingCenterPage() {
   const [activeTab, setActiveTab] = useState('programs');
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Учебный центр</h1>
-        <p className="text-muted-foreground mt-1">
+        <h1 className="text-3xl font-bold tracking-tight">Учебный центр</h1>
+        <p className="text-muted-foreground mt-2">
           Управление учебными программами, группами и обучающимися
         </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="programs">Программы</TabsTrigger>
-          <TabsTrigger value="groups">Группы</TabsTrigger>
-          <TabsTrigger value="enrollments">Обучающиеся</TabsTrigger>
-          <TabsTrigger value="schedule">Расписание</TabsTrigger>
-          <TabsTrigger value="reports">Отчёты</TabsTrigger>
-          <TabsTrigger value="directories">Справочники</TabsTrigger>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+          <TabsTrigger value="programs" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="BookOpen" size={20} />
+            <span className="text-xs font-medium">Программы</span>
+          </TabsTrigger>
+          <TabsTrigger value="groups" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Users" size={20} />
+            <span className="text-xs font-medium">Группы</span>
+          </TabsTrigger>
+          <TabsTrigger value="enrollments" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="UserCheck" size={20} />
+            <span className="text-xs font-medium">Обучающиеся</span>
+          </TabsTrigger>
+          <TabsTrigger value="schedule" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Calendar" size={20} />
+            <span className="text-xs font-medium">Расписание</span>
+          </TabsTrigger>
+          <TabsTrigger value="reports" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="FileText" size={20} />
+            <span className="text-xs font-medium">Отчёты</span>
+          </TabsTrigger>
+          <TabsTrigger value="directories" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="FolderOpen" size={20} />
+            <span className="text-xs font-medium">Справочники</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="programs">
