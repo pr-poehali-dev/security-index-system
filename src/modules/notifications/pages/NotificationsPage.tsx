@@ -88,7 +88,7 @@ export default function NotificationsPage() {
         action={
           <Button 
             variant="outline" 
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/dashboard')}
             className="gap-2"
           >
             <Icon name="ArrowLeft" size={16} />
