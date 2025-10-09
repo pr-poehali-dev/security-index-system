@@ -23,6 +23,7 @@ import { BudgetPage } from "@/modules/budget";
 import TrainingCenterPage from "@/modules/training-center/pages/TrainingCenterPage";
 import Sidebar from "@/components/layout/Sidebar";
 import { NotFoundPage } from "@/modules/common";
+import { useIncidentNotifications } from "@/hooks/useIncidentNotifications";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
+  useIncidentNotifications();
   
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">

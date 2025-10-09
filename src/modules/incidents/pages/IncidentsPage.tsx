@@ -8,11 +8,9 @@ import IncidentsTab from '../components/IncidentsTab';
 import AnalyticsTab from '../components/AnalyticsTab';
 import ReportsTab from '../components/ReportsTab';
 import DirectoriesTab from '../components/DirectoriesTab';
-import { useIncidentNotifications } from '@/hooks/useIncidentNotifications';
 
 export default function IncidentsPage() {
   const user = useAuthStore((state) => state.user);
-  useIncidentNotifications();
 
   if (!user || !user.availableModules.includes('incidents')) {
     return <Navigate to={ROUTES.DASHBOARD} replace />;
