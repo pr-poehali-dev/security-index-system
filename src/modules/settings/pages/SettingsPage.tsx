@@ -16,7 +16,7 @@ import OrganizationsTab from '../components/OrganizationsTab';
 import DepartmentsTab from '../components/DepartmentsTab';
 import PersonnelTab from '../components/PersonnelTab';
 import CompetenciesTab from '../components/CompetenciesTab';
-import PeopleDirectoryTab from '../components/PeopleDirectoryTab';
+
 import PositionsDirectoryTab from '../components/PositionsDirectoryTab';
 import ExternalOrganizationsTab from '../components/ExternalOrganizationsTab';
 import AddCompetencyDialog from '../components/AddCompetencyDialog';
@@ -27,9 +27,9 @@ import SystemUsersTab from '../components/SystemUsersTab';
 import AddSystemUserDialog from '../components/AddSystemUserDialog';
 import EditSystemUserDialog from '../components/EditSystemUserDialog';
 import ExternalOrganizationDialog from '../components/ExternalOrganizationDialog';
-import PersonDialog from '../components/PersonDialog';
+
 import PositionDialog from '../components/PositionDialog';
-import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization, Person, Position } from '@/types';
+import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization, Position } from '@/types';
 
 export default function SettingsPage() {
   const user = useAuthStore((state) => state.user);
@@ -49,7 +49,7 @@ export default function SettingsPage() {
 
   const [showAddOrg, setShowAddOrg] = useState(false);
   const [showAddDept, setShowAddDept] = useState(false);
-  const [showAddPerson, setShowAddPerson] = useState(false);
+
   const [showAddPosition, setShowAddPosition] = useState(false);
   const [showAddPersonnel, setShowAddPersonnel] = useState(false);
   const [showAddCompetency, setShowAddCompetency] = useState(false);
@@ -58,7 +58,7 @@ export default function SettingsPage() {
   const [showAddExternalOrg, setShowAddExternalOrg] = useState(false);
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
   const [editingDept, setEditingDept] = useState<Department | null>(null);
-  const [editingPersonObj, setEditingPersonObj] = useState<Person | null>(null);
+
   const [editingPositionObj, setEditingPositionObj] = useState<Position | null>(null);
   const [editingPerson, setEditingPerson] = useState<Personnel | null>(null);
   const [editingCompetency, setEditingCompetency] = useState<CompetencyMatrix | null>(null);
@@ -121,12 +121,7 @@ export default function SettingsPage() {
     }
   };
 
-  const handleDeletePersonObj = (id: string) => {
-    if (confirm('Удалить человека из справочника?')) {
-      deletePerson(id);
-      toast({ title: 'Человек удален' });
-    }
-  };
+
 
   const handleDeletePositionObj = (id: string) => {
     if (confirm('Удалить должность из справочника?')) {
@@ -166,17 +161,13 @@ export default function SettingsPage() {
             <Icon name="Building" size={20} />
             <span className="text-xs font-medium">Подразделения</span>
           </TabsTrigger>
-          <TabsTrigger value="people" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="User" size={20} />
-            <span className="text-xs font-medium text-center leading-tight">Справочник<br/>людей</span>
+          <TabsTrigger value="personnel" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Users" size={20} />
+            <span className="text-xs font-medium">Персонал</span>
           </TabsTrigger>
           <TabsTrigger value="positions" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="Briefcase" size={20} />
             <span className="text-xs font-medium text-center leading-tight">Справочник<br/>должностей</span>
-          </TabsTrigger>
-          <TabsTrigger value="personnel" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="Users" size={20} />
-            <span className="text-xs font-medium">Персонал</span>
           </TabsTrigger>
           <TabsTrigger value="competencies" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="GraduationCap" size={20} />
@@ -216,11 +207,11 @@ export default function SettingsPage() {
           />
         </TabsContent>
 
-        <TabsContent value="people">
-          <PeopleDirectoryTab
-            onAdd={() => setShowAddPerson(true)}
-            onEdit={setEditingPersonObj}
-            onDelete={handleDeletePersonObj}
+        <TabsContent value="personnel">
+          <PersonnelTab
+            onAdd={() => setShowAddPersonnel(true)}
+            onEdit={setEditingPerson}
+            onDelete={handleDeletePerson}
           />
         </TabsContent>
 
@@ -280,18 +271,7 @@ export default function SettingsPage() {
         onOpenChange={setShowAddPersonnel}
       />
 
-      <PersonDialog 
-        open={showAddPerson} 
-        onOpenChange={setShowAddPerson}
-      />
 
-      {editingPersonObj && (
-        <PersonDialog 
-          person={editingPersonObj}
-          open={!!editingPersonObj}
-          onOpenChange={(open) => !open && setEditingPersonObj(null)}
-        />
-      )}
 
       <PositionDialog 
         open={showAddPosition} 

@@ -10,7 +10,7 @@ import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 import { exportPersonnelToExcel, importPersonnelFromExcel } from '@/lib/exportUtils';
 import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
-import type { Personnel } from '@/types';
+import type { Personnel, PersonnelType } from '@/types';
 import {
   Table,
   TableBody,
@@ -30,6 +30,7 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
   const user = useAuthStore((state) => state.user);
   const {
     organizations,
+    externalOrganizations,
     people,
     positions,
     getDepartmentsByTenant,
@@ -44,6 +45,7 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
   const [searchTerm, setSearchTerm] = useState('');
   const [filterOrg, setFilterOrg] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterType, setFilterType] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'table' | 'cards'>(() => {
     const saved = localStorage.getItem('personnel-view-mode');
     return (saved as 'table' | 'cards') || 'table';
@@ -76,8 +78,9 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
 
     const matchesOrg = filterOrg === 'all' || person.organizationId === filterOrg;
     const matchesStatus = filterStatus === 'all' || person.status === filterStatus;
+    const matchesType = filterType === 'all' || person.personnelType === filterType;
 
-    return matchesSearch && matchesOrg && matchesStatus;
+    return matchesSearch && matchesOrg && matchesStatus && matchesType;
   });
 
   const handleExport = () => {
@@ -106,20 +109,31 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
     const variants = {
       Auditor: 'default',
       Manager: 'secondary',
-      Director: 'destructive'
+      Director: 'destructive',
+      Contractor: 'outline'
     } as const;
     
     const labels = {
       Auditor: 'Аудитор',
       Manager: 'Менеджер',
-      Director: 'Директор'
+      Director: 'Директор',
+      Contractor: 'Подрядчик'
     };
 
     return <Badge variant={variants[role]}>{labels[role]}</Badge>;
   };
 
+  const getTypeBadge = (type: PersonnelType) => {
+    return type === 'employee' 
+      ? <Badge variant="default" className="text-xs">Штатный</Badge>
+      : <Badge variant="secondary" className="text-xs">Подрядчик</Badge>;
+  };
+
   const getOrganizationName = (orgId: string) => {
-    return organizations.find(o => o.id === orgId)?.name || '—';
+    const org = organizations.find(o => o.id === orgId);
+    if (org) return org.name;
+    const extOrg = externalOrganizations.find(o => o.id === orgId);
+    return extOrg?.name || '—';
   };
 
   const getDepartmentName = (deptId: string) => {
@@ -160,6 +174,16 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
               <SelectItem value="all">Все статусы</SelectItem>
               <SelectItem value="active">Активные</SelectItem>
               <SelectItem value="inactive">Неактивные</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={filterType} onValueChange={setFilterType}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Тип" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Все типы</SelectItem>
+              <SelectItem value="employee">Штатные</SelectItem>
+              <SelectItem value="contractor">Подрядчики</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -222,6 +246,7 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
             <TableHeader>
               <TableRow>
                 <TableHead>ФИО</TableHead>
+                <TableHead>Тип</TableHead>
                 <TableHead>Должность</TableHead>
                 <TableHead>Организация</TableHead>
                 <TableHead>Подразделение</TableHead>
@@ -235,7 +260,7 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
             <TableBody>
               {filteredPersonnel.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={10} className="text-center py-12 text-muted-foreground">
                     <Icon name="Search" size={48} className="mx-auto mb-4 opacity-20" />
                     <p>Сотрудники не найдены</p>
                   </TableCell>
@@ -244,12 +269,13 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
                 filteredPersonnel.map((person) => (
                   <TableRow key={person.id}>
                     <TableCell className="font-medium">{person.fullName}</TableCell>
+                    <TableCell>{getTypeBadge(person.personnelType)}</TableCell>
                     <TableCell>{person.positionName}</TableCell>
                     <TableCell>
                       <div className="text-sm">{getOrganizationName(person.organizationId)}</div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">{getDepartmentName(person.departmentId)}</div>
+                      <div className="text-sm">{person.personnelType === 'employee' ? getDepartmentName(person.departmentId) : '—'}</div>
                     </TableCell>
                     <TableCell>
                       {(() => {
@@ -339,7 +365,10 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
                 <CardContent className="pt-6 space-y-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-lg">{person.fullName}</h3>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-lg">{person.fullName}</h3>
+                        {getTypeBadge(person.personnelType)}
+                      </div>
                       <p className="text-sm text-muted-foreground">{person.positionName}</p>
                     </div>
                     <Badge variant={person.status === 'active' ? 'default' : 'secondary'}>
@@ -352,10 +381,12 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
                       <Icon name="Building2" size={14} />
                       <span>{getOrganizationName(person.organizationId)}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Icon name="Building" size={14} />
-                      <span>{getDepartmentName(person.departmentId)}</span>
-                    </div>
+                    {person.personnelType === 'employee' && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Icon name="Building" size={14} />
+                        <span>{getDepartmentName(person.departmentId)}</span>
+                      </div>
+                    )}
                     {person.email && (
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Icon name="Mail" size={14} />

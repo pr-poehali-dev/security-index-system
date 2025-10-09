@@ -127,6 +127,8 @@ export interface Position {
   updatedAt: string;
 }
 
+export type PersonnelType = 'employee' | 'contractor';
+
 export interface Personnel {
   id: string;
   tenantId: string;
@@ -134,7 +136,8 @@ export interface Personnel {
   positionId: string;
   organizationId?: string;
   departmentId?: string;
-  role: 'Auditor' | 'Manager' | 'Director';
+  personnelType: PersonnelType;
+  role: 'Auditor' | 'Manager' | 'Director' | 'Contractor';
   requiredCompetencies?: string[];
   status: 'active' | 'dismissed';
   hireDate?: string;

@@ -48,6 +48,38 @@ export const mockPeople: Person[] = [
     status: 'active',
     createdAt: new Date(Date.now() - 560 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'person-4',
+    tenantId: 'tenant-1',
+    lastName: 'Волков',
+    firstName: 'Сергей',
+    middleName: 'Петрович',
+    birthDate: '1982-05-10',
+    snils: '456-789-012 33',
+    inn: '770334567890',
+    email: 'volkov@stroymontazh.ru',
+    phone: '+7 (999) 456-78-90',
+    educationLevel: 'secondary',
+    status: 'active',
+    createdAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'person-5',
+    tenantId: 'tenant-1',
+    lastName: 'Козлов',
+    firstName: 'Дмитрий',
+    middleName: 'Александрович',
+    birthDate: '1988-09-25',
+    snils: '567-890-123 44',
+    inn: '770445678901',
+    email: 'kozlov@stroymontazh.ru',
+    phone: '+7 (999) 567-89-01',
+    educationLevel: 'secondary',
+    status: 'active',
+    createdAt: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
   }
 ];
 
@@ -95,6 +127,28 @@ export const mockPositions: Position[] = [
     status: 'active',
     createdAt: new Date(Date.now() - 440 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 70 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'pos-5',
+    tenantId: 'tenant-1',
+    name: 'Монтажник',
+    code: 'MONTAZH',
+    category: 'worker',
+    description: 'Монтажник строительных конструкций',
+    status: 'active',
+    createdAt: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'pos-6',
+    tenantId: 'tenant-1',
+    name: 'Сварщик',
+    code: 'SVAR',
+    category: 'worker',
+    description: 'Электрогазосварщик',
+    status: 'active',
+    createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
   }
 ];
 
@@ -106,6 +160,7 @@ export const mockPersonnel: Personnel[] = [
     positionId: 'pos-1',
     organizationId: 'org-1',
     departmentId: 'dept-1',
+    personnelType: 'employee',
     role: 'Manager',
     requiredCompetencies: ['comp-1', 'comp-3'],
     status: 'active',
@@ -120,6 +175,7 @@ export const mockPersonnel: Personnel[] = [
     positionId: 'pos-4',
     organizationId: 'org-1',
     departmentId: 'dept-1',
+    personnelType: 'employee',
     role: 'Director',
     requiredCompetencies: ['comp-3'],
     status: 'active',
@@ -134,11 +190,40 @@ export const mockPersonnel: Personnel[] = [
     positionId: 'pos-2',
     organizationId: 'org-1',
     departmentId: 'dept-2',
+    personnelType: 'employee',
     role: 'Manager',
     requiredCompetencies: ['comp-1', 'comp-2'],
     status: 'active',
     hireDate: '2018-05-20',
     createdAt: new Date(Date.now() - 560 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'personnel-4',
+    tenantId: 'tenant-1',
+    personId: 'person-4',
+    positionId: 'pos-5',
+    organizationId: 'ext-org-6',
+    personnelType: 'contractor',
+    role: 'Contractor',
+    requiredCompetencies: ['comp-1', 'comp-2'],
+    status: 'active',
+    hireDate: '2023-06-01',
+    createdAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'personnel-5',
+    tenantId: 'tenant-1',
+    personId: 'person-5',
+    positionId: 'pos-6',
+    organizationId: 'ext-org-6',
+    personnelType: 'contractor',
+    role: 'Contractor',
+    requiredCompetencies: ['comp-2', 'comp-4'],
+    status: 'active',
+    hireDate: '2023-08-15',
+    createdAt: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
   }
 ];

@@ -11,7 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
-import type { EducationLevel } from '@/types';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import type { EducationLevel, PersonnelType } from '@/types';
 
 interface AddPersonnelDialogProps {
   open: boolean;
@@ -32,7 +33,8 @@ export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelD
     addPerson, 
     addPersonnel,
     addCertification,
-    getOrganizationsByTenant, 
+    getOrganizationsByTenant,
+    getExternalOrganizationsByType,
     getDepartmentsByOrganization,
     getPositionsByTenant,
     getCompetenciesDirByTenant
@@ -40,8 +42,11 @@ export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelD
   const { toast } = useToast();
 
   const tenantOrgs = getOrganizationsByTenant(user!.tenantId!);
+  const contractorOrgs = getExternalOrganizationsByType(user!.tenantId!, 'contractor');
   const tenantPositions = getPositionsByTenant(user!.tenantId!);
   const tenantCompetencies = getCompetenciesDirByTenant(user!.tenantId!);
+
+  const [personnelType, setPersonnelType] = useState<PersonnelType>('employee');
 
   const [personData, setPersonData] = useState({
     lastName: '',
@@ -60,7 +65,7 @@ export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelD
     organizationId: '',
     departmentId: '',
     positionId: '',
-    role: 'Manager' as 'Auditor' | 'Manager' | 'Director',
+    role: 'Manager' as 'Auditor' | 'Manager' | 'Director' | 'Contractor',
     hireDate: '',
     requiredCompetencies: [] as string[]
   });
@@ -117,7 +122,8 @@ export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelD
       positionId: personnelData.positionId,
       organizationId: personnelData.organizationId,
       departmentId: personnelData.departmentId || undefined,
-      role: personnelData.role,
+      personnelType,
+      role: personnelType === 'contractor' ? 'Contractor' : personnelData.role,
       requiredCompetencies: personnelData.requiredCompetencies.length > 0 ? personnelData.requiredCompetencies : undefined,
       status: 'active',
       hireDate: personnelData.hireDate || undefined
@@ -139,7 +145,7 @@ export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelD
 
     toast({
       title: 'Успешно',
-      description: 'Сотрудник добавлен в систему'
+      description: personnelType === 'employee' ? 'Сотрудник добавлен в систему' : 'Сотрудник подрядчика добавлен в систему'
     });
 
     resetForm();
@@ -147,6 +153,7 @@ export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelD
   };
 
   const resetForm = () => {
+    setPersonnelType('employee');
     setPersonData({
       lastName: '',
       firstName: '',
@@ -181,6 +188,37 @@ export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelD
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
+          <div className="mb-6">
+            <Label className="text-base font-semibold mb-3 block">Тип персонала</Label>
+            <RadioGroup value={personnelType} onValueChange={(value: PersonnelType) => {
+              setPersonnelType(value);
+              setPersonnelData({ ...personnelData, organizationId: '', departmentId: '', role: value === 'contractor' ? 'Contractor' : 'Manager' });
+            }}>
+              <div className="flex gap-4">
+                <div className="flex items-center space-x-2 border rounded-lg p-4 flex-1 cursor-pointer hover:bg-accent" onClick={() => {
+                  setPersonnelType('employee');
+                  setPersonnelData({ ...personnelData, organizationId: '', departmentId: '', role: 'Manager' });
+                }}>
+                  <RadioGroupItem value="employee" id="employee" />
+                  <div className="flex-1">
+                    <Label htmlFor="employee" className="cursor-pointer font-medium">Штатный сотрудник</Label>
+                    <p className="text-xs text-muted-foreground mt-1">Сотрудник вашей организации</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2 border rounded-lg p-4 flex-1 cursor-pointer hover:bg-accent" onClick={() => {
+                  setPersonnelType('contractor');
+                  setPersonnelData({ ...personnelData, organizationId: '', departmentId: '', role: 'Contractor' });
+                }}>
+                  <RadioGroupItem value="contractor" id="contractor" />
+                  <div className="flex-1">
+                    <Label htmlFor="contractor" className="cursor-pointer font-medium">Сотрудник подрядчика</Label>
+                    <p className="text-xs text-muted-foreground mt-1">Работник внешней организации</p>
+                  </div>
+                </div>
+              </div>
+            </RadioGroup>
+          </div>
+
           <Tabs defaultValue="personal" className="w-full">
             <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
               <TabsTrigger value="personal" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
@@ -314,44 +352,55 @@ export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelD
             <TabsContent value="position" className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="organizationId">Организация <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="organizationId">
+                    {personnelType === 'employee' ? 'Организация' : 'Организация-подрядчик'} <span className="text-destructive">*</span>
+                  </Label>
                   <Select
                     value={personnelData.organizationId}
                     onValueChange={(value) => setPersonnelData({ ...personnelData, organizationId: value, departmentId: '' })}
                     required
                   >
                     <SelectTrigger id="organizationId">
-                      <SelectValue placeholder="Выберите организацию" />
+                      <SelectValue placeholder={personnelType === 'employee' ? 'Выберите организацию' : 'Выберите подрядчика'} />
                     </SelectTrigger>
                     <SelectContent>
-                      {tenantOrgs.map((org) => (
-                        <SelectItem key={org.id} value={org.id}>
-                          {org.name}
-                        </SelectItem>
-                      ))}
+                      {personnelType === 'employee' 
+                        ? tenantOrgs.map((org) => (
+                            <SelectItem key={org.id} value={org.id}>
+                              {org.name}
+                            </SelectItem>
+                          ))
+                        : contractorOrgs.map((org) => (
+                            <SelectItem key={org.id} value={org.id}>
+                              {org.name}
+                            </SelectItem>
+                          ))
+                      }
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="departmentId">Подразделение</Label>
-                  <Select
-                    value={personnelData.departmentId}
-                    onValueChange={(value) => setPersonnelData({ ...personnelData, departmentId: value })}
-                    disabled={!personnelData.organizationId}
-                  >
-                    <SelectTrigger id="departmentId">
-                      <SelectValue placeholder="Выберите подразделение" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {departments.map((dept) => (
-                        <SelectItem key={dept.id} value={dept.id}>
-                          {dept.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {personnelType === 'employee' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="departmentId">Подразделение</Label>
+                    <Select
+                      value={personnelData.departmentId}
+                      onValueChange={(value) => setPersonnelData({ ...personnelData, departmentId: value })}
+                      disabled={!personnelData.organizationId}
+                    >
+                      <SelectTrigger id="departmentId">
+                        <SelectValue placeholder="Выберите подразделение" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {departments.map((dept) => (
+                          <SelectItem key={dept.id} value={dept.id}>
+                            {dept.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -376,20 +425,29 @@ export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelD
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="role">Роль</Label>
-                  <Select
-                    value={personnelData.role}
-                    onValueChange={(value: 'Auditor' | 'Manager' | 'Director') => setPersonnelData({ ...personnelData, role: value })}
-                  >
-                    <SelectTrigger id="role">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Manager">Менеджер</SelectItem>
-                      <SelectItem value="Director">Руководитель</SelectItem>
-                      <SelectItem value="Auditor">Аудитор</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="role">Роль в системе</Label>
+                  {personnelType === 'contractor' ? (
+                    <Input
+                      id="role"
+                      value="Подрядчик (только чтение)"
+                      disabled
+                      className="bg-muted"
+                    />
+                  ) : (
+                    <Select
+                      value={personnelData.role}
+                      onValueChange={(value: 'Auditor' | 'Manager' | 'Director') => setPersonnelData({ ...personnelData, role: value })}
+                    >
+                      <SelectTrigger id="role">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Manager">Менеджер</SelectItem>
+                        <SelectItem value="Director">Руководитель</SelectItem>
+                        <SelectItem value="Auditor">Аудитор</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
               </div>
 
