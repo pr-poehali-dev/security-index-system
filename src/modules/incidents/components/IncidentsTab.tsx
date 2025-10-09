@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/components/ui/icon';
 import {
   Table,
@@ -52,6 +53,7 @@ export default function IncidentsTab() {
   const [directionFilter, setDirectionFilter] = useState<string>('all');
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const incidents = user?.tenantId ? getIncidentsByTenant(user.tenantId) : [];
 
@@ -127,6 +129,78 @@ export default function IncidentsTab() {
     if (confirm('Удалить запись об инциденте?')) {
       deleteIncident(id);
     }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(filteredIncidents.map(inc => inc.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedIds([...selectedIds, id]);
+    } else {
+      setSelectedIds(selectedIds.filter(selId => selId !== id));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    if (confirm(`Удалить выбранные записи (${selectedIds.length} шт.)?`)) {
+      selectedIds.forEach(id => deleteIncident(id));
+      setSelectedIds([]);
+    }
+  };
+
+  const handleBulkExport = () => {
+    if (selectedIds.length === 0) return;
+    
+    const statusLabels: Record<IncidentStatus, string> = {
+      created: 'Создано',
+      in_progress: 'В работе',
+      awaiting: 'Ожидает исполнения',
+      overdue: 'Просрочено',
+      completed: 'Исполнено',
+      completed_late: 'Исполнено с нарушением срока'
+    };
+
+    const selectedIncidents = filteredIncidents.filter(inc => selectedIds.includes(inc.id));
+    const exportData = selectedIncidents.map((inc, index) => ({
+      '№': index + 1,
+      'Организация': getOrganizationName(inc.organizationId),
+      'Площадка': getProductionSiteName(inc.productionSiteId),
+      'Дата': new Date(inc.reportDate).toLocaleDateString('ru-RU'),
+      'Источник': getSourceName(inc.sourceId),
+      'Направление': getDirectionName(inc.directionId),
+      'Описание': inc.description,
+      'Корректирующее мероприятие': inc.correctiveAction,
+      'Категория': getCategoryName(inc.categoryId),
+      'Подкатегория': getSubcategoryName(inc.subcategoryId),
+      'Обеспечение работ': getFundingTypeName(inc.fundingTypeId),
+      'Ответственный': getResponsibleName(inc.responsiblePersonnelId),
+      'Плановая дата': new Date(inc.plannedDate).toLocaleDateString('ru-RU'),
+      'Дней осталось': inc.daysLeft,
+      'Статус': statusLabels[inc.status],
+      'Комментарий': inc.comments || ''
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Инциденты');
+    
+    const colWidths = [
+      { wch: 5 }, { wch: 20 }, { wch: 20 }, { wch: 12 },
+      { wch: 15 }, { wch: 15 }, { wch: 40 }, { wch: 40 },
+      { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 20 },
+      { wch: 12 }, { wch: 10 }, { wch: 25 }, { wch: 30 }
+    ];
+    worksheet['!cols'] = colWidths;
+    
+    const fileName = `Инциденты_выбранные_${new Date().toLocaleDateString('ru-RU').replace(/\./g, '-')}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
   };
 
   const handleExportToExcel = () => {
@@ -250,6 +324,18 @@ export default function IncidentsTab() {
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold">Список инцидентов и мероприятий</h3>
             <div className="flex gap-2">
+              {selectedIds.length > 0 && (
+                <>
+                  <Button variant="outline" onClick={handleBulkExport}>
+                    <Icon name="Download" size={16} />
+                    Экспорт выбранных ({selectedIds.length})
+                  </Button>
+                  <Button variant="destructive" onClick={handleBulkDelete}>
+                    <Icon name="Trash2" size={16} />
+                    Удалить выбранные ({selectedIds.length})
+                  </Button>
+                </>
+              )}
               <Button variant="outline" onClick={handleExportToExcel}>
                 <Icon name="Download" size={16} />
                 Выгрузить в Excel
@@ -297,6 +383,12 @@ export default function IncidentsTab() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={selectedIds.length === filteredIncidents.length && filteredIncidents.length > 0}
+                      onCheckedChange={handleSelectAll}
+                    />
+                  </TableHead>
                   <TableHead className="w-12">№</TableHead>
                   <TableHead>Организация</TableHead>
                   <TableHead>Площадка</TableHead>
@@ -315,13 +407,19 @@ export default function IncidentsTab() {
               <TableBody>
                 {filteredIncidents.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={13} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={14} className="text-center text-muted-foreground py-8">
                       Нет данных
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredIncidents.map((incident, index) => (
                     <TableRow key={incident.id}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedIds.includes(incident.id)}
+                          onCheckedChange={(checked) => handleSelectOne(incident.id, checked as boolean)}
+                        />
+                      </TableCell>
                       <TableCell>{index + 1}</TableCell>
                       <TableCell className="text-sm">{getOrganizationName(incident.organizationId)}</TableCell>
                       <TableCell className="text-sm">{getProductionSiteName(incident.productionSiteId)}</TableCell>
