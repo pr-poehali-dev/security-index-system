@@ -223,14 +223,6 @@ export default function SettingsPage() {
           />
         </TabsContent>
 
-        <TabsContent value="personnel">
-          <PersonnelTab
-            onAdd={() => setShowAddPersonnel(true)}
-            onEdit={setEditingPerson}
-            onDelete={handleDeletePerson}
-          />
-        </TabsContent>
-
         <TabsContent value="competencies">
           <CompetenciesTab
             onAdd={() => setShowAddCompetency(true)}
