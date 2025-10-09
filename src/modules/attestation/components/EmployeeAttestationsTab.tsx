@@ -80,18 +80,20 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
   const [showAddEmployeeDialog, setShowAddEmployeeDialog] = useState(false);
 
   const mockEmployees = useMemo(() => {
-    return personnel.map(p => {
-      const info = getPersonnelFullInfo(p, people, positions);
-      const org = organizations.find(o => o.id === p.organizationId);
-      const personnelCerts = certifications.filter(c => c.personnelId === p.id);
+    return personnel
+      .filter(p => p.personnelType === 'employee')
+      .map(p => {
+        const info = getPersonnelFullInfo(p, people, positions);
+        const org = organizations.find(o => o.id === p.organizationId);
+        const personnelCerts = certifications.filter(c => c.personnelId === p.id);
 
-      return {
-        id: p.id,
-        name: info.fullName,
-        position: info.position,
-        department: '—',
-        organization: org?.name || '—',
-        certifications: personnelCerts.map(cert => {
+        return {
+          id: p.id,
+          name: info.fullName,
+          position: info.position,
+          department: '—',
+          organization: org?.name || '—',
+          certifications: personnelCerts.map(cert => {
           const { status, daysLeft } = getCertificationStatus(cert.expiryDate);
           const categoryMap: Record<string, string> = {
             industrial_safety: 'Промышленная безопасность',

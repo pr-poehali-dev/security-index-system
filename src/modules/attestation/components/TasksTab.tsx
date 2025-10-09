@@ -221,7 +221,9 @@ export default function TasksTab() {
 
   const tasks = useMemo(() => {
     const result: Task[] = [];
-    const tenantPersonnel = user?.tenantId ? personnel.filter(p => p.tenantId === user.tenantId) : [];
+    const tenantPersonnel = user?.tenantId 
+      ? personnel.filter(p => p.tenantId === user.tenantId && p.personnelType === 'employee') 
+      : [];
     
     tenantPersonnel.forEach(p => {
       const info = getPersonnelFullInfo(p, people, positions);

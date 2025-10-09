@@ -37,7 +37,9 @@ export default function ComplianceAnalysisTab() {
   const [complianceFilter, setComplianceFilter] = useState<string>('all');
 
   const tenantPersonnel = useMemo(() => {
-    return user?.tenantId ? personnel.filter(p => p.tenantId === user.tenantId) : [];
+    return user?.tenantId 
+      ? personnel.filter(p => p.tenantId === user.tenantId && p.personnelType === 'employee') 
+      : [];
   }, [personnel, user?.tenantId]);
 
   const complianceData = useMemo(() => {
