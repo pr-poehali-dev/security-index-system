@@ -127,7 +127,7 @@ export default function Sidebar() {
               )}
             </NavLink>
           );
-        })
+        })}
       </nav>
 
       <div className="border-t border-gray-800 p-4 space-y-3">
