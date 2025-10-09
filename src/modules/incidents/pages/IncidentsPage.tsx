@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { Navigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/constants';
+import PageHeader from '@/components/layout/PageHeader';
 import IncidentsTab from '../components/IncidentsTab';
 import DirectoriesTab from '../components/DirectoriesTab';
 
@@ -14,25 +15,22 @@ export default function IncidentsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Учет инцидентов</h1>
-          <p className="text-muted-foreground mt-2">
-            Фиксация и учет нарушений/отклонений от требований в области ОТ, ПБ и ЭБ
-          </p>
-        </div>
-      </div>
+    <div>
+      <PageHeader
+        title="Учет инцидентов"
+        description="Фиксация и учет нарушений/отклонений от требований в области ОТ, ПБ и ЭБ"
+        icon="AlertTriangle"
+      />
 
       <Tabs defaultValue="incidents" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="incidents" className="gap-2">
-            <Icon name="AlertTriangle" size={16} />
-            Инциденты и мероприятия
+        <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+          <TabsTrigger value="incidents" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="AlertTriangle" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Инциденты и<br/>мероприятия</span>
           </TabsTrigger>
-          <TabsTrigger value="directories" className="gap-2">
-            <Icon name="FolderOpen" size={16} />
-            Справочники
+          <TabsTrigger value="directories" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="FolderOpen" size={20} />
+            <span className="text-xs font-medium">Справочники</span>
           </TabsTrigger>
         </TabsList>
 

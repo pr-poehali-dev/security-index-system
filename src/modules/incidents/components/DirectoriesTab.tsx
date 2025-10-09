@@ -8,22 +8,22 @@ import CategoriesDirectory from './CategoriesDirectory';
 export default function DirectoriesTab() {
   return (
     <Tabs defaultValue="sources" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="sources" className="gap-2">
-          <Icon name="Inbox" size={14} />
-          Источники
+      <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+        <TabsTrigger value="sources" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <Icon name="Inbox" size={20} />
+          <span className="text-xs font-medium">Источники</span>
         </TabsTrigger>
-        <TabsTrigger value="directions" className="gap-2">
-          <Icon name="Compass" size={14} />
-          Направления
+        <TabsTrigger value="directions" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <Icon name="Compass" size={20} />
+          <span className="text-xs font-medium">Направления</span>
         </TabsTrigger>
-        <TabsTrigger value="funding" className="gap-2">
-          <Icon name="Wallet" size={14} />
-          Обеспечение работ
+        <TabsTrigger value="funding" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <Icon name="Wallet" size={20} />
+          <span className="text-xs font-medium text-center leading-tight">Обеспечение<br/>работ</span>
         </TabsTrigger>
-        <TabsTrigger value="categories" className="gap-2">
-          <Icon name="FolderTree" size={14} />
-          Категории
+        <TabsTrigger value="categories" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <Icon name="FolderTree" size={20} />
+          <span className="text-xs font-medium">Категории</span>
         </TabsTrigger>
       </TabsList>
 
