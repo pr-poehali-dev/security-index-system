@@ -85,6 +85,16 @@ export default function NotificationsPage() {
       <PageHeader
         title="Уведомления"
         description="Все системные уведомления и оповещения"
+        action={
+          <Button 
+            variant="outline" 
+            onClick={() => navigate(-1)}
+            className="gap-2"
+          >
+            <Icon name="ArrowLeft" size={16} />
+            Назад
+          </Button>
+        }
       />
 
       <div className="flex items-center justify-between gap-4 flex-wrap">
