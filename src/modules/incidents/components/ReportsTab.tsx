@@ -19,6 +19,8 @@ import {
   Bar,
   PieChart,
   Pie,
+  LineChart,
+  Line,
   Cell,
   XAxis,
   YAxis,
@@ -157,6 +159,98 @@ export default function ReportsTab() {
       { name: 'Просрочено', value: overdue, color: '#ef4444' },
       { name: 'В работе', value: inProgress, color: '#3b82f6' },
     ].filter(item => item.value > 0);
+  }, [filteredIncidents]);
+
+  const monthlyDynamicsData = useMemo(() => {
+    const monthlyStats: Record<string, {
+      total: number;
+      created: number;
+      completed: number;
+      overdue: number;
+    }> = {};
+
+    filteredIncidents.forEach((inc) => {
+      const date = new Date(inc.reportDate);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      
+      if (!monthlyStats[monthKey]) {
+        monthlyStats[monthKey] = { total: 0, created: 0, completed: 0, overdue: 0 };
+      }
+      
+      monthlyStats[monthKey].total++;
+      
+      if (inc.status === 'created') {
+        monthlyStats[monthKey].created++;
+      } else if (inc.status === 'completed' || inc.status === 'completed_late') {
+        monthlyStats[monthKey].completed++;
+      } else if (inc.status === 'overdue') {
+        monthlyStats[monthKey].overdue++;
+      }
+    });
+
+    const months = Object.keys(monthlyStats).sort();
+    
+    return months.map(monthKey => {
+      const [year, month] = monthKey.split('-');
+      const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+      const monthName = `${monthNames[parseInt(month) - 1]} ${year}`;
+      
+      return {
+        month: monthName,
+        'Всего': monthlyStats[monthKey].total,
+        'Создано': monthlyStats[monthKey].created,
+        'Исполнено': monthlyStats[monthKey].completed,
+        'Просрочено': monthlyStats[monthKey].overdue,
+      };
+    });
+  }, [filteredIncidents]);
+
+  const cumulativeDynamicsData = useMemo(() => {
+    const monthlyStats: Record<string, {
+      created: number;
+      completed: number;
+    }> = {};
+
+    filteredIncidents.forEach((inc) => {
+      const date = new Date(inc.reportDate);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      
+      if (!monthlyStats[monthKey]) {
+        monthlyStats[monthKey] = { created: 0, completed: 0 };
+      }
+      
+      monthlyStats[monthKey].created++;
+      
+      if (inc.status === 'completed' || inc.status === 'completed_late') {
+        const completedDate = new Date(inc.plannedDate);
+        const completedMonthKey = `${completedDate.getFullYear()}-${String(completedDate.getMonth() + 1).padStart(2, '0')}`;
+        
+        if (!monthlyStats[completedMonthKey]) {
+          monthlyStats[completedMonthKey] = { created: 0, completed: 0 };
+        }
+        monthlyStats[completedMonthKey].completed++;
+      }
+    });
+
+    const months = Object.keys(monthlyStats).sort();
+    let cumulativeCreated = 0;
+    let cumulativeCompleted = 0;
+    
+    return months.map(monthKey => {
+      const [year, month] = monthKey.split('-');
+      const monthNames = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+      const monthName = `${monthNames[parseInt(month) - 1]} ${year}`;
+      
+      cumulativeCreated += monthlyStats[monthKey].created;
+      cumulativeCompleted += monthlyStats[monthKey].completed;
+      
+      return {
+        month: monthName,
+        'Создано накопительно': cumulativeCreated,
+        'Исполнено накопительно': cumulativeCompleted,
+        'Открытых инцидентов': cumulativeCreated - cumulativeCompleted,
+      };
+    });
   }, [filteredIncidents]);
 
   const handleExportReport = () => {
@@ -415,6 +509,59 @@ export default function ReportsTab() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Динамика инцидентов по месяцам</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {monthlyDynamicsData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={monthlyDynamicsData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="Всего" stroke="#3b82f6" strokeWidth={2} />
+                <Line type="monotone" dataKey="Создано" stroke="#8b5cf6" strokeWidth={2} />
+                <Line type="monotone" dataKey="Исполнено" stroke="#10b981" strokeWidth={2} />
+                <Line type="monotone" dataKey="Просрочено" stroke="#ef4444" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[400px] flex items-center justify-center text-muted-foreground">
+              Нет данных для отображения
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Накопительная динамика и баланс инцидентов</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {cumulativeDynamicsData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={cumulativeDynamicsData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="Создано накопительно" stroke="#3b82f6" strokeWidth={2} />
+                <Line type="monotone" dataKey="Исполнено накопительно" stroke="#10b981" strokeWidth={2} />
+                <Line type="monotone" dataKey="Открытых инцидентов" stroke="#f59e0b" strokeWidth={2} strokeDasharray="5 5" />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[400px] flex items-center justify-center text-muted-foreground">
+              Нет данных для отображения
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
