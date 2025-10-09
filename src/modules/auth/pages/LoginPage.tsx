@@ -14,7 +14,8 @@ const testUsers = [
   { email: 'admin@company.ru', role: 'TenantAdmin', description: 'Настройки, организации, персонал' },
   { email: 'auditor@company.ru', role: 'Auditor', description: 'Проверки и инциденты' },
   { email: 'manager@company.ru', role: 'Manager', description: 'Задачи и обслуживание' },
-  { email: 'director@company.ru', role: 'Director', description: 'Аналитика и бюджет' }
+  { email: 'director@company.ru', role: 'Director', description: 'Аналитика и бюджет' },
+  { email: 'training@company.ru', role: 'TrainingCenterManager', description: 'Учебный центр и аттестация' }
 ];
 
 export default function LoginPage() {
