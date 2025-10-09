@@ -372,6 +372,10 @@ export default function DashboardPage() {
         }
       />
 
+      <div className="mb-6">
+        <NotificationsWidget />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {stats.map((stat, index) => (
           <Card 
@@ -486,10 +490,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       )}
-
-      <div className="mb-6">
-        <NotificationsWidget />
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <Card>
