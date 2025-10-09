@@ -279,22 +279,76 @@ export interface CompetencyGapReport {
   }[];
 }
 
+export interface IncidentSource {
+  id: string;
+  tenantId: string;
+  name: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+}
+
+export interface IncidentDirection {
+  id: string;
+  tenantId: string;
+  name: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+}
+
+export interface IncidentFundingType {
+  id: string;
+  tenantId: string;
+  name: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+}
+
+export interface IncidentCategory {
+  id: string;
+  tenantId: string;
+  name: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+}
+
+export interface IncidentSubcategory {
+  id: string;
+  tenantId: string;
+  categoryId: string;
+  name: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+}
+
+export type IncidentStatus = 
+  | 'created' 
+  | 'in_progress' 
+  | 'awaiting' 
+  | 'overdue' 
+  | 'completed' 
+  | 'completed_late';
+
 export interface Incident {
   id: string;
   tenantId: string;
   organizationId: string;
-  title: string;
+  productionSiteId: string;
+  reportDate: string;
+  sourceId: string;
+  directionId: string;
   description: string;
-  type: 'accident' | 'near_miss' | 'violation' | 'equipment_failure';
-  severity: 'critical' | 'high' | 'medium' | 'low';
-  status: 'reported' | 'investigating' | 'resolved' | 'closed';
-  reportedBy: string;
-  assignedTo?: string;
-  occurredAt: string;
-  reportedAt: string;
-  resolvedAt?: string;
-  rootCause?: string;
-  correctiveActions?: string;
+  correctiveAction: string;
+  fundingTypeId: string;
+  categoryId: string;
+  subcategoryId: string;
+  responsiblePersonnelId: string;
+  plannedDate: string;
+  completedDate?: string;
+  daysLeft: number;
+  status: IncidentStatus;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Checklist {
