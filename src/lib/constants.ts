@@ -87,7 +87,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, ModuleType[]> = {
   Auditor: ['attestation', 'catalog', 'incidents', 'checklists', 'examination'],
   Manager: ['attestation', 'catalog', 'tasks', 'maintenance'],
   Director: ['attestation', 'incidents', 'budget'],
-  TrainingCenterManager: ['training-center', 'attestation']
+  TrainingCenterManager: ['training-center']
 };
 
 export const CERTIFICATION_CATEGORIES = [

@@ -55,7 +55,7 @@ const MOCK_USERS: User[] = [
     name: 'Менеджер Учебного Центра',
     role: 'TrainingCenterManager',
     tenantId: 'tenant-1',
-    availableModules: ['training-center', 'attestation']
+    availableModules: ['training-center']
   }
 ];
 
