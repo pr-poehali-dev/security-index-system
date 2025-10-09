@@ -6,6 +6,7 @@ import type {
   TrainingLocation,
   TrainingInstructor,
   TrainingScheduleEntry,
+  OrganizationTrainingRequest,
 } from '@/types';
 
 interface TrainingCenterState {
@@ -15,6 +16,7 @@ interface TrainingCenterState {
   locations: TrainingLocation[];
   instructors: TrainingInstructor[];
   scheduleEntries: TrainingScheduleEntry[];
+  requests: OrganizationTrainingRequest[];
   
   addProgram: (program: TrainingProgram) => void;
   updateProgram: (id: string, updates: Partial<TrainingProgram>) => void;
@@ -45,6 +47,11 @@ interface TrainingCenterState {
   updateScheduleEntry: (id: string, updates: Partial<TrainingScheduleEntry>) => void;
   deleteScheduleEntry: (id: string) => void;
   getScheduleByGroup: (groupId: string) => TrainingScheduleEntry[];
+  
+  addRequest: (request: OrganizationTrainingRequest) => void;
+  updateRequest: (id: string, updates: Partial<OrganizationTrainingRequest>) => void;
+  deleteRequest: (id: string) => void;
+  getRequestsByTenant: (tenantId: string) => OrganizationTrainingRequest[];
 }
 
 export const useTrainingCenterStore = create<TrainingCenterState>((set, get) => ({
@@ -54,6 +61,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>((set, get) => 
   locations: [],
   instructors: [],
   scheduleEntries: [],
+  requests: [],
 
   addProgram: (program) => set((state) => ({
     programs: [...state.programs, program],
@@ -185,5 +193,23 @@ export const useTrainingCenterStore = create<TrainingCenterState>((set, get) => 
 
   getScheduleByGroup: (groupId) => {
     return get().scheduleEntries.filter((e) => e.groupId === groupId);
+  },
+
+  addRequest: (request) => set((state) => ({
+    requests: [...state.requests, request],
+  })),
+
+  updateRequest: (id, updates) => set((state) => ({
+    requests: state.requests.map((r) =>
+      r.id === id ? { ...r, ...updates, updatedAt: new Date().toISOString() } : r
+    ),
+  })),
+
+  deleteRequest: (id) => set((state) => ({
+    requests: state.requests.filter((r) => r.id !== id),
+  })),
+
+  getRequestsByTenant: (tenantId) => {
+    return get().requests.filter((r) => r.tenantId === tenantId);
   },
 }));

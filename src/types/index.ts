@@ -565,3 +565,31 @@ export interface TrainingScheduleEntry {
   type: 'lecture' | 'practice' | 'exam';
   completed: boolean;
 }
+
+export type OrganizationRequestStatus = 'new' | 'in_review' | 'approved' | 'rejected' | 'completed';
+
+export interface OrganizationTrainingRequest {
+  id: string;
+  tenantId: string;
+  organizationId: string;
+  organizationName: string;
+  programId: string;
+  programName: string;
+  requestDate: string;
+  studentsCount: number;
+  students: {
+    personnelId: string;
+    fullName: string;
+    position: string;
+    department?: string;
+  }[];
+  contactPerson: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  preferredStartDate?: string;
+  status: OrganizationRequestStatus;
+  notes?: string;
+  reviewNotes?: string;
+  createdAt: string;
+  updatedAt: string;
+}

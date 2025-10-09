@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import ProgramsTab from '../components/ProgramsTab';
-import GroupsTab from '../components/GroupsTab';
+import RequestsTab from '../components/RequestsTab';
 import EnrollmentsTab from '../components/EnrollmentsTab';
 import ScheduleTab from '../components/ScheduleTab';
 import DirectoriesTab from '../components/DirectoriesTab';
@@ -16,7 +16,7 @@ export default function TrainingCenterPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Учебный центр</h1>
         <p className="text-muted-foreground mt-2">
-          Управление учебными программами, группами и обучающимися
+          Управление учебными программами и заявками на обучение
         </p>
       </div>
 
@@ -26,9 +26,9 @@ export default function TrainingCenterPage() {
             <Icon name="BookOpen" size={20} />
             <span className="text-xs font-medium text-center leading-tight">Курсы<br/>подготовки</span>
           </TabsTrigger>
-          <TabsTrigger value="groups" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="Users" size={20} />
-            <span className="text-xs font-medium">Группы</span>
+          <TabsTrigger value="requests" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="FileText" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Заявки<br/>организаций</span>
           </TabsTrigger>
           <TabsTrigger value="enrollments" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="UserCheck" size={20} />
@@ -39,7 +39,7 @@ export default function TrainingCenterPage() {
             <span className="text-xs font-medium">Расписание</span>
           </TabsTrigger>
           <TabsTrigger value="reports" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="FileText" size={20} />
+            <Icon name="BarChart3" size={20} />
             <span className="text-xs font-medium">Отчёты</span>
           </TabsTrigger>
           <TabsTrigger value="directories" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
@@ -52,8 +52,8 @@ export default function TrainingCenterPage() {
           <ProgramsTab />
         </TabsContent>
 
-        <TabsContent value="groups">
-          <GroupsTab />
+        <TabsContent value="requests">
+          <RequestsTab />
         </TabsContent>
 
         <TabsContent value="enrollments">
