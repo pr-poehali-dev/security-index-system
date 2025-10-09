@@ -23,7 +23,6 @@ import {
 } from 'recharts';
 import type { IncidentStatus } from '@/types';
 import RiskMatrix from './RiskMatrix';
-import { exportToPDF } from '@/lib/utils/pdfExport';
 
 const STATUS_COLORS: Record<IncidentStatus, string> = {
   created: '#94a3b8',
@@ -51,77 +50,7 @@ export default function AnalyticsTab() {
 
   const incidents = user?.tenantId ? getIncidentsByTenant(user.tenantId) : [];
 
-  const handleExportPDF = async () => {
-    try {
-      await exportToPDF({
-        title: 'Аналитика инцидентов',
-        subtitle: 'Сводный отчет по инцидентам и мероприятиям в области ОТ, ПБ и ЭБ',
-        stats: [
-          { label: 'Всего инцидентов', value: stats.total },
-          { label: 'За последние 30 дней', value: stats.last30Days },
-          { label: 'Процент исполнения', value: `${stats.completionRate}%` },
-          { label: 'Исполнено в срок', value: `${stats.onTimeRate}%` },
-          { label: 'Требует внимания', value: stats.urgentIncidents },
-          { label: 'Просрочено', value: `${stats.overdue} (${stats.overdueRate}%)` },
-          { label: 'В работе', value: stats.inProgress },
-          { label: 'Ожидает исполнения', value: stats.awaiting },
-          { label: 'Средний срок выполнения', value: `${stats.avgDaysToComplete} дн.` },
-          { label: 'Создано новых', value: stats.created },
-        ],
-        tables: [
-          {
-            title: 'ТОП-10 направлений по количеству инцидентов',
-            headers: ['№', 'Направление', 'Количество инцидентов'],
-            data: topDirections.map((dir, index) => [
-              String(index + 1),
-              dir.name,
-              String(dir.count),
-            ]),
-          },
-          {
-            title: 'ТОП-10 категорий инцидентов',
-            headers: ['№', 'Категория', 'Количество инцидентов'],
-            data: topCategories.map((cat, index) => [
-              String(index + 1),
-              cat.name,
-              String(cat.count),
-            ]),
-          },
-          {
-            title: 'ТОП-10 организаций по количеству инцидентов',
-            headers: ['№', 'Организация', 'Количество инцидентов'],
-            data: organizationData.map((org, index) => [
-              String(index + 1),
-              org.name,
-              String(org.count),
-            ]),
-          },
-          {
-            title: 'Распределение по статусам',
-            headers: ['Статус', 'Количество', 'Процент от общего'],
-            data: statusData.map((status) => [
-              status.name,
-              String(status.value),
-              `${Math.round((status.value / stats.total) * 100)}%`,
-            ]),
-          },
-        ],
-        footer: 'Документ создан автоматически системой учета инцидентов',
-      });
 
-      toast({
-        title: 'Экспорт завершен',
-        description: 'PDF-отчет успешно сформирован и загружен',
-      });
-    } catch (error) {
-      console.error('Ошибка экспорта в PDF:', error);
-      toast({
-        title: 'Ошибка экспорта',
-        description: 'Не удалось создать PDF-отчет',
-        variant: 'destructive',
-      });
-    }
-  };
 
   const stats = useMemo(() => {
     const total = incidents.length;
@@ -311,13 +240,6 @@ export default function AnalyticsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end mb-4">
-        <Button onClick={handleExportPDF}>
-          <Icon name="FileDown" size={16} />
-          Экспорт в PDF
-        </Button>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-6">
