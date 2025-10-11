@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -12,133 +11,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import CreateOrderDialog from './CreateOrderDialog';
 import CreateTrainingDialog from './CreateTrainingDialog';
+import OrdersStats from './OrdersStats';
+import TrainingsStats from './TrainingsStats';
+import OrdersCardView from './OrdersCardView';
+import OrdersTableView from './OrdersTableView';
+import TrainingsCardView from './TrainingsCardView';
+import TrainingsTableView from './TrainingsTableView';
 import { useAuthStore } from '@/stores/authStore';
 import { useAttestationStore } from '@/stores/attestationStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
-
-const OLD_mockOrders = [
-  {
-    id: '1',
-    number: '15-А',
-    date: '2025-10-01',
-    type: 'attestation',
-    title: 'О проведении аттестации по электробезопасности',
-    employees: ['Иванов И.И.', 'Петрова А.С.', 'Сидоров К.П.'],
-    status: 'active',
-    createdBy: 'Смирнов А.В.',
-    description: 'Проведение внеочередной аттестации по электробезопасности на 4 группу'
-  },
-  {
-    id: '2',
-    number: '14-О',
-    date: '2025-09-25',
-    type: 'training',
-    title: 'О направлении на обучение по промышленной безопасности',
-    employees: ['Сидоров П.Н.'],
-    status: 'completed',
-    createdBy: 'Смирнов А.В.',
-    description: 'Направление на обучение в УЦ "Профессионал"'
-  },
-  {
-    id: '3',
-    number: '13-С',
-    date: '2025-09-20',
-    type: 'suspension',
-    title: 'Об отстранении от работы',
-    employees: ['Морозова Е.П.'],
-    status: 'active',
-    createdBy: 'Смирнов А.В.',
-    description: 'Отстранение до прохождения аттестации'
-  },
-  {
-    id: '4',
-    number: '12-А',
-    date: '2025-09-15',
-    type: 'sdo',
-    title: 'О направлении на обучение в СДО',
-    employees: ['Кузнецов А.В.', 'Васильев И.И.'],
-    status: 'prepared',
-    createdBy: 'Смирнов А.В.',
-    description: 'Обучение охране труда через систему дистанционного обучения'
-  },
-  {
-    id: '5',
-    number: '11-А',
-    date: '2025-09-10',
-    type: 'internal_attestation',
-    title: 'О проведении внутренней аттестации',
-    employees: ['Соколов М.А.', 'Павлова Н.В.', 'Федоров Д.С.'],
-    status: 'draft',
-    createdBy: 'Смирнов А.В.',
-    description: 'Аттестация в единой платформе тестирования организации'
-  },
-];
-
-const mockTrainings: Training[] = [
-  {
-    id: '1',
-    title: 'Промышленная безопасность',
-    type: 'Повышение квалификации',
-    startDate: '2025-10-15',
-    endDate: '2025-10-20',
-    employees: ['Сидоров П.Н.', 'Кузнецов А.В.'],
-    organization: 'УЦ "Профессионал"',
-    cost: 15000,
-    status: 'planned',
-    program: 'А.1 Общие требования промышленной безопасности',
-    documents: ['Договор', 'Программа обучения']
-  },
-  {
-    id: '2',
-    title: 'Работы на высоте 2 группа',
-    type: 'Первичная подготовка',
-    startDate: '2025-10-05',
-    endDate: '2025-10-10',
-    employees: ['Морозова Е.П.'],
-    organization: 'Центр ОТ',
-    cost: 8000,
-    status: 'in_progress',
-    program: 'Работы на высоте с применением СИЗ от падения',
-    documents: ['Договор', 'Программа обучения', 'Удостоверение']
-  },
-  {
-    id: '3',
-    title: 'Электробезопасность 4 группа до 1000В',
-    type: 'Повышение квалификации',
-    startDate: '2025-09-01',
-    endDate: '2025-09-05',
-    employees: ['Иванов И.И.', 'Петрова А.С.'],
-    organization: 'Энергетический центр',
-    cost: 12000,
-    status: 'completed',
-    program: 'Электробезопасность для электротехнического персонала',
-    documents: ['Договор', 'Программа обучения', 'Удостоверение', 'Протокол']
-  },
-  {
-    id: '4',
-    title: 'Охрана труда для руководителей',
-    type: 'Повышение квалификации',
-    startDate: '2025-11-10',
-    endDate: '2025-11-15',
-    employees: ['Смирнов А.В.', 'Соколов М.А.'],
-    organization: 'УЦ "Охрана труда"',
-    cost: 18000,
-    status: 'planned',
-    program: 'Обучение по охране труда руководителей и специалистов',
-    documents: ['Заявка']
-  },
-];
+import { useTrainingCenterStore } from '@/stores/trainingCenterStore';
+import type { Order } from '@/types';
 
 export default function OrdersTrainingTab() {
   const { toast } = useToast();
@@ -188,78 +74,11 @@ export default function OrdersTrainingTab() {
     return matchesSearch && matchesStatus;
   });
 
-  const getOrderTypeLabel = (type: string) => {
-    switch (type) {
-      case 'attestation': return 'Аттестация';
-      case 'training': return 'Обучение';
-      case 'suspension': return 'Отстранение';
-      case 'sdo': return 'СДО';
-      case 'training_center': return 'Учебный центр';
-      case 'internal_attestation': return 'ЕПТ организации';
-      case 'rostechnadzor': return 'Ростехнадзор';
-      default: return type;
-    }
-  };
-
-  const getOrderTypeIcon = (type: string) => {
-    switch (type) {
-      case 'attestation': return 'Award';
-      case 'training': return 'GraduationCap';
-      case 'suspension': return 'Ban';
-      case 'sdo': return 'Monitor';
-      case 'training_center': return 'Building2';
-      case 'internal_attestation': return 'ClipboardCheck';
-      case 'rostechnadzor': return 'Shield';
-      default: return 'FileText';
-    }
-  };
-
-  const getOrderTypeColor = (type: string) => {
-    switch (type) {
-      case 'attestation': return 'text-blue-600 bg-blue-100 dark:bg-blue-900/30';
-      case 'training': return 'text-purple-600 bg-purple-100 dark:bg-purple-900/30';
-      case 'suspension': return 'text-red-600 bg-red-100 dark:bg-red-900/30';
-      case 'sdo': return 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30';
-      case 'training_center': return 'text-violet-600 bg-violet-100 dark:bg-violet-900/30';
-      case 'internal_attestation': return 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30';
-      case 'rostechnadzor': return 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30';
-      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900/30';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'draft': return 'Черновик';
-      case 'prepared': return 'Подготовлен';
-      case 'approved': return 'Согласован';
-      case 'active': return 'Активен';
-      case 'completed': return 'Исполнен';
-      case 'cancelled': return 'Отменен';
-      case 'planned': return 'Запланировано';
-      case 'in_progress': return 'В процессе';
-      default: return status;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'draft': return 'text-gray-600 bg-gray-100 dark:bg-gray-900/30';
-      case 'prepared': return 'text-blue-600 bg-blue-100 dark:bg-blue-900/30';
-      case 'approved': return 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30';
-      case 'active': return 'text-blue-600 bg-blue-100 dark:bg-blue-900/30';
-      case 'completed': return 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30';
-      case 'cancelled': return 'text-red-600 bg-red-100 dark:bg-red-900/30';
-      case 'planned': return 'text-blue-600 bg-blue-100 dark:bg-blue-900/30';
-      case 'in_progress': return 'text-amber-600 bg-amber-100 dark:bg-amber-900/30';
-      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900/30';
-    }
-  };
-
   const handleChangeOrderStatus = (orderId: string, newStatus: string) => {
     const order = orders.find(o => o.id === orderId);
     toast({
       title: "Статус изменен",
-      description: `Приказ №${order?.number}: ${getStatusLabel(newStatus)}`,
+      description: `Приказ №${order?.number}: ${newStatus}`,
     });
   };
 
@@ -267,7 +86,7 @@ export default function OrdersTrainingTab() {
     const training = trainings.find(t => t.id === trainingId);
     toast({
       title: "Статус изменен",
-      description: `Обучение "${training?.title}": ${getStatusLabel(newStatus)}`,
+      description: `Обучение "${training?.title}": ${newStatus}`,
     });
   };
 
@@ -432,9 +251,9 @@ export default function OrdersTrainingTab() {
     const exportData = filteredOrders.map(order => ({
       'Номер приказа': order.number,
       'Дата': new Date(order.date).toLocaleDateString('ru'),
-      'Тип': getOrderTypeLabel(order.type),
+      'Тип': order.type,
       'Название': order.title,
-      'Статус': getStatusLabel(order.status),
+      'Статус': order.status,
       'Количество сотрудников': order.employeeIds.length,
       'Создал': order.createdBy,
       'Описание': order.description || ''
@@ -474,7 +293,7 @@ export default function OrdersTrainingTab() {
         'Дата начала': new Date(training.startDate).toLocaleDateString('ru'),
         'Дата окончания': new Date(training.endDate).toLocaleDateString('ru'),
         'Длительность (дней)': Math.ceil((new Date(training.endDate).getTime() - new Date(training.startDate).getTime()) / (1000 * 60 * 60 * 24)),
-        'Статус': getStatusLabel(training.status),
+        'Статус': training.status,
         'Количество сотрудников': training.employeeIds.length,
         'Стоимость': training.cost,
         'Стоимость на человека': Math.round(training.cost / training.employeeIds.length),
@@ -591,52 +410,12 @@ export default function OrdersTrainingTab() {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Всего приказов</p>
-                    <p className="text-2xl font-bold">{orderStats.total}</p>
-                  </div>
-                  <Icon name="FileText" size={24} className="text-muted-foreground" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Черновики</p>
-                    <p className="text-2xl font-bold">{orderStats.draft}</p>
-                  </div>
-                  <Icon name="FilePen" size={24} className="text-gray-500" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Активные</p>
-                    <p className="text-2xl font-bold">{orderStats.active}</p>
-                  </div>
-                  <Icon name="CheckCircle2" size={24} className="text-blue-500" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Исполнено</p>
-                    <p className="text-2xl font-bold">{orderStats.completed}</p>
-                  </div>
-                  <Icon name="CheckCheck" size={24} className="text-emerald-500" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <OrdersStats 
+            total={orderStats.total}
+            draft={orderStats.draft}
+            active={orderStats.active}
+            completed={orderStats.completed}
+          />
 
           <Card>
             <CardHeader>
@@ -715,196 +494,26 @@ export default function OrdersTrainingTab() {
               </div>
 
               {orderViewMode === 'cards' ? (
-                <div className="space-y-3">
-                  {filteredOrders.map((order) => (
-                    <Card key={order.id} className="hover:shadow-md transition-shadow">
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Icon name={getOrderTypeIcon(order.type)} size={18} className="text-muted-foreground" />
-                              <span className="font-semibold text-lg">Приказ №{order.number}</span>
-                              <Badge className={getOrderTypeColor(order.type)}>
-                                {getOrderTypeLabel(order.type)}
-                              </Badge>
-                            </div>
-                            <h3 className="font-medium mb-2">{order.title}</h3>
-                            {order.description && (
-                              <p className="text-sm text-muted-foreground mb-3">{order.description}</p>
-                            )}
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
-                              <span className="flex items-center gap-1">
-                                <Icon name="Calendar" size={14} />
-                                {new Date(order.date).toLocaleDateString('ru')}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Icon name="User" size={14} />
-                                {order.createdBy}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Icon name="Users" size={14} />
-                                {order.employeeIds.length} чел.
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-end gap-2">
-                            <Badge className={getStatusColor(order.status)}>
-                              {getStatusLabel(order.status)}
-                            </Badge>
-                            <Select value={order.status} onValueChange={(value) => handleChangeOrderStatus(order.id, value)}>
-                              <SelectTrigger className="w-[140px] h-8 text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="draft">Черновик</SelectItem>
-                                <SelectItem value="prepared">Подготовлен</SelectItem>
-                                <SelectItem value="approved">Согласован</SelectItem>
-                                <SelectItem value="active">Активен</SelectItem>
-                                <SelectItem value="completed">Исполнен</SelectItem>
-                                <SelectItem value="cancelled">Отменен</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between pt-3 border-t">
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="text-muted-foreground">Сотрудников:</span>
-                            <span className="font-medium">{order.employeeIds.length}</span>
-                          </div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {getOrderActions(order)}
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <Icon name="MoreVertical" size={16} />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleViewOrder(order.id)}>
-                                  <Icon name="Eye" size={14} className="mr-2" />
-                                  Просмотр
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleEditOrder(order.id)}>
-                                  <Icon name="Edit" size={14} className="mr-2" />
-                                  Редактировать
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleDownloadOrderPDF(order.id)}>
-                                  <Icon name="Download" size={14} className="mr-2" />
-                                  Скачать PDF
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handlePrintOrder(order.id)}>
-                                  <Icon name="Printer" size={14} className="mr-2" />
-                                  Печать
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteOrder(order.id)}>
-                                  <Icon name="Trash2" size={14} className="mr-2" />
-                                  Удалить
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                <OrdersCardView
+                  orders={filteredOrders}
+                  onChangeStatus={handleChangeOrderStatus}
+                  onView={handleViewOrder}
+                  onEdit={handleEditOrder}
+                  onDownloadPDF={handleDownloadOrderPDF}
+                  onPrint={handlePrintOrder}
+                  onDelete={handleDeleteOrder}
+                  getOrderActions={getOrderActions}
+                />
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="border-b">
-                      <tr className="text-left">
-                        <th className="pb-3 font-medium">Номер</th>
-                        <th className="pb-3 font-medium">Название</th>
-                        <th className="pb-3 font-medium">Тип</th>
-                        <th className="pb-3 font-medium">Дата</th>
-                        <th className="pb-3 font-medium">Сотрудников</th>
-                        <th className="pb-3 font-medium">Статус</th>
-                        <th className="pb-3 font-medium">Действия</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredOrders.map((order) => (
-                        <tr key={order.id} className="border-b last:border-0 hover:bg-muted/50">
-                          <td className="py-3 font-medium">№{order.number}</td>
-                          <td className="py-3">
-                            <div>
-                              <div className="font-medium">{order.title}</div>
-                              {order.description && (
-                                <div className="text-xs text-muted-foreground mt-1">{order.description}</div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-3">
-                            <Badge className={getOrderTypeColor(order.type)}>
-                              {getOrderTypeLabel(order.type)}
-                            </Badge>
-                          </td>
-                          <td className="py-3 text-muted-foreground text-sm">
-                            {new Date(order.date).toLocaleDateString('ru')}
-                          </td>
-                          <td className="py-3 text-center">{order.employeeIds.length}</td>
-                          <td className="py-3">
-                            <Select value={order.status} onValueChange={(value) => handleChangeOrderStatus(order.id, value)}>
-                              <SelectTrigger className="w-[140px] h-8 text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="draft">Черновик</SelectItem>
-                                <SelectItem value="prepared">Подготовлен</SelectItem>
-                                <SelectItem value="approved">Согласован</SelectItem>
-                                <SelectItem value="active">Активен</SelectItem>
-                                <SelectItem value="completed">Исполнен</SelectItem>
-                                <SelectItem value="cancelled">Отменен</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </td>
-                          <td className="py-3">
-                            <div className="flex items-center gap-1">
-                              <Button variant="ghost" size="sm" title="Просмотр" onClick={() => handleViewOrder(order.id)}>
-                                <Icon name="Eye" size={16} />
-                              </Button>
-                              <Button variant="ghost" size="sm" title="Редактировать" onClick={() => handleEditOrder(order.id)}>
-                                <Icon name="Edit" size={16} />
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
-                                    <Icon name="MoreVertical" size={16} />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => handleDownloadOrderPDF(order.id)}>
-                                    <Icon name="Download" size={14} className="mr-2" />
-                                    Скачать PDF
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handlePrintOrder(order.id)}>
-                                    <Icon name="Printer" size={14} className="mr-2" />
-                                    Печать
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteOrder(order.id)}>
-                                    <Icon name="Trash2" size={14} className="mr-2" />
-                                    Удалить
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {filteredOrders.length === 0 && (
-                <div className="text-center py-12">
-                  <Icon name="FileText" size={48} className="mx-auto text-muted-foreground mb-4" />
-                  <p className="text-lg font-medium mb-2">Приказы не найдены</p>
-                  <p className="text-sm text-muted-foreground">Измените параметры поиска или создайте новый приказ</p>
-                </div>
+                <OrdersTableView
+                  orders={filteredOrders}
+                  onChangeStatus={handleChangeOrderStatus}
+                  onView={handleViewOrder}
+                  onEdit={handleEditOrder}
+                  onDownloadPDF={handleDownloadOrderPDF}
+                  onPrint={handlePrintOrder}
+                  onDelete={handleDeleteOrder}
+                />
               )}
             </CardContent>
           </Card>
@@ -929,52 +538,12 @@ export default function OrdersTrainingTab() {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Всего обучений</p>
-                    <p className="text-2xl font-bold">{trainingStats.total}</p>
-                  </div>
-                  <Icon name="GraduationCap" size={24} className="text-muted-foreground" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Запланировано</p>
-                    <p className="text-2xl font-bold">{trainingStats.planned}</p>
-                  </div>
-                  <Icon name="CalendarClock" size={24} className="text-blue-500" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">В процессе</p>
-                    <p className="text-2xl font-bold">{trainingStats.inProgress}</p>
-                  </div>
-                  <Icon name="Clock" size={24} className="text-amber-500" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Бюджет</p>
-                    <p className="text-2xl font-bold">{trainingStats.totalCost.toLocaleString('ru')} ₽</p>
-                  </div>
-                  <Icon name="Wallet" size={24} className="text-emerald-500" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <TrainingsStats
+            total={trainingStats.total}
+            planned={trainingStats.planned}
+            inProgress={trainingStats.inProgress}
+            totalCost={trainingStats.totalCost}
+          />
 
           <Card>
             <CardHeader>
@@ -1036,322 +605,32 @@ export default function OrdersTrainingTab() {
               </div>
 
               {trainingViewMode === 'cards' ? (
-                <div className="space-y-3">
-                  {filteredTrainings.map((training) => {
-                    const org = trainingOrgs.find(o => o.id === training.organizationId);
-                    const duration = Math.ceil((new Date(training.endDate).getTime() - new Date(training.startDate).getTime()) / (1000 * 60 * 60 * 24));
-                    const costPerPerson = Math.round(training.cost / training.employeeIds.length);
-                    
-                    return (
-                      <Card key={training.id} className="hover:shadow-md transition-shadow">
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Icon name="GraduationCap" size={18} className="text-muted-foreground" />
-                                <h3 className="font-semibold text-lg">{training.title}</h3>
-                              </div>
-                              <Badge className="mb-3 text-purple-600 bg-purple-100 dark:bg-purple-900/30">
-                                {training.type}
-                              </Badge>
-                              {training.program && (
-                                <p className="text-sm text-muted-foreground mb-3">{training.program}</p>
-                              )}
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
-                                <span className="flex items-center gap-1">
-                                  <Icon name="Building2" size={14} />
-                                  {org?.name || '—'}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Icon name="Wallet" size={14} />
-                                  {training.cost.toLocaleString('ru')} ₽ ({costPerPerson.toLocaleString('ru')} ₽/чел)
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Icon name="Calendar" size={14} />
-                                  {new Date(training.startDate).toLocaleDateString('ru')} - {new Date(training.endDate).toLocaleDateString('ru')}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Icon name="Clock" size={14} />
-                                  {duration} {duration === 1 ? 'день' : duration < 5 ? 'дня' : 'дней'}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Icon name="Users" size={14} />
-                                  {training.employeeIds.length} чел.
-                                </span>
-                              </div>
-                            </div>
-                            <Badge className={getStatusColor(training.status)}>
-                              {getStatusLabel(training.status)}
-                            </Badge>
-                          </div>
-
-                          {training.status === 'in_progress' && training.sdoProgress !== undefined && (
-                            <div className="pt-3 border-t">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-medium">Прогресс в СДО ИСП</span>
-                                <span className="text-sm font-semibold text-primary">{training.sdoProgress}%</span>
-                              </div>
-                              <div className="w-full bg-muted rounded-full h-2 mb-2">
-                                <div 
-                                  className="bg-primary rounded-full h-2 transition-all duration-300" 
-                                  style={{ width: `${training.sdoProgress}%` }}
-                                />
-                              </div>
-                              <p className="text-xs text-muted-foreground">
-                                Пройдено уроков: {training.sdoCompletedLessons} из {training.sdoTotalLessons}
-                              </p>
-                            </div>
-                          )}
-
-                          {training.status === 'completed' && training.certificateNumber && (
-                            <div className="pt-3 border-t bg-emerald-50 dark:bg-emerald-950/20 -mx-4 px-4 pb-3 mt-3">
-                              <div className="flex items-start gap-2">
-                                <Icon name="Award" size={16} className="text-emerald-600 mt-0.5" />
-                                <div className="flex-1">
-                                  <p className="text-sm font-medium text-emerald-900 dark:text-emerald-100">
-                                    Удостоверение о повышении квалификации
-                                  </p>
-                                  <div className="mt-1 space-y-1">
-                                    <p className="text-xs text-emerald-700 dark:text-emerald-300">
-                                      Номер: <span className="font-semibold">{training.certificateNumber}</span>
-                                    </p>
-                                    {training.certificateIssueDate && (
-                                      <p className="text-xs text-emerald-700 dark:text-emerald-300">
-                                        Дата выдачи: {new Date(training.certificateIssueDate).toLocaleDateString('ru')}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          <div className="flex items-center justify-between pt-3 border-t">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="gap-2 flex-1 justify-start"
-                              onClick={() => toggleTrainingExpanded(training.id)}
-                            >
-                              <Icon 
-                                name={expandedTrainings.has(training.id) ? "ChevronDown" : "ChevronRight"} 
-                                size={16} 
-                              />
-                              <span className="text-muted-foreground">Сотрудников:</span>
-                              <span className="font-medium">{training.employeeIds.length}</span>
-                            </Button>
-                            <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm" className="gap-2" onClick={() => handleEditTraining(training.id)}>
-                                <Icon name="Edit" size={14} />
-                                Изменить
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
-                                    <Icon name="MoreVertical" size={16} />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => handleViewTraining(training.id)}>
-                                    <Icon name="Eye" size={14} className="mr-2" />
-                                    Просмотр
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleViewDocuments(training.id)}>
-                                    <Icon name="FileText" size={14} className="mr-2" />
-                                    Документы
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleViewParticipants(training.id)}>
-                                    <Icon name="Users" size={14} className="mr-2" />
-                                    Список участников
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem onClick={() => handleDuplicateTraining(training.id)}>
-                                    <Icon name="Copy" size={14} className="mr-2" />
-                                    Дублировать
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteTraining(training.id)}>
-                                    <Icon name="Trash2" size={14} className="mr-2" />
-                                    Удалить
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </div>
-
-                          {expandedTrainings.has(training.id) && training.participants && training.participants.length > 0 && (
-                            <div className="pt-3 border-t bg-muted/30">
-                              <h4 className="text-sm font-medium mb-3 px-4">Список обучающихся</h4>
-                              <div className="space-y-2 px-4 pb-3">
-                                {training.participants.map((participant) => {
-                                  const employeePersonnel = personnel.find(p => p.id === participant.employeeId);
-                                  const employeePerson = people.find(p => p.id === employeePersonnel?.personId);
-                                  const employeePosition = positions.find(pos => pos.id === employeePersonnel?.positionId);
-                                  const fullName = employeePerson ? `${employeePerson.lastName} ${employeePerson.firstName} ${employeePerson.middleName || ''}`.trim() : 'Неизвестный сотрудник';
-
-                                  return (
-                                    <div key={participant.employeeId} className="bg-background rounded-lg p-3 border">
-                                      <div className="flex items-start justify-between mb-2">
-                                        <div className="flex-1">
-                                          <p className="font-medium text-sm">{fullName}</p>
-                                          {employeePosition && (
-                                            <p className="text-xs text-muted-foreground">{employeePosition.name}</p>
-                                          )}
-                                        </div>
-                                        <Badge className={
-                                          participant.status === 'completed' 
-                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                            : participant.status === 'in_progress'
-                                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                                            : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                        }>
-                                          {participant.status === 'completed' ? 'Обучение завершено' : 
-                                           participant.status === 'in_progress' ? 'Обучается' : 'Не завершено'}
-                                        </Badge>
-                                      </div>
-                                      
-                                      {participant.progress !== undefined && (
-                                        <div className="mb-2">
-                                          <div className="flex items-center justify-between mb-1">
-                                            <span className="text-xs text-muted-foreground">Прогресс</span>
-                                            <span className="text-xs font-medium">{participant.progress}%</span>
-                                          </div>
-                                          <div className="w-full bg-muted rounded-full h-1.5">
-                                            <div 
-                                              className="bg-primary rounded-full h-1.5 transition-all" 
-                                              style={{ width: `${participant.progress}%` }}
-                                            />
-                                          </div>
-                                        </div>
-                                      )}
-
-                                      {participant.testScore !== undefined && participant.testMaxScore && (
-                                        <div className="flex items-center gap-2 text-xs">
-                                          <Icon name="ClipboardCheck" size={12} className="text-muted-foreground" />
-                                          <span className="text-muted-foreground">Итоговый тест:</span>
-                                          <span className="font-semibold">
-                                            {participant.testScore} из {participant.testMaxScore}
-                                          </span>
-                                        </div>
-                                      )}
-
-                                      {participant.completedAt && (
-                                        <div className="flex items-center gap-2 text-xs mt-1">
-                                          <Icon name="Calendar" size={12} className="text-muted-foreground" />
-                                          <span className="text-muted-foreground">Завершено:</span>
-                                          <span>{new Date(participant.completedAt).toLocaleDateString('ru')}</span>
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
+                <TrainingsCardView
+                  trainings={filteredTrainings}
+                  trainingOrgs={trainingOrgs}
+                  personnel={personnel}
+                  people={people}
+                  positions={positions}
+                  expandedTrainings={expandedTrainings}
+                  onToggleExpanded={toggleTrainingExpanded}
+                  onEdit={handleEditTraining}
+                  onView={handleViewTraining}
+                  onViewDocuments={handleViewDocuments}
+                  onViewParticipants={handleViewParticipants}
+                  onDuplicate={handleDuplicateTraining}
+                  onDelete={handleDeleteTraining}
+                />
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="border-b">
-                      <tr className="text-left">
-                        <th className="pb-3 font-medium">Название</th>
-                        <th className="pb-3 font-medium">Тип</th>
-                        <th className="pb-3 font-medium">Организация</th>
-                        <th className="pb-3 font-medium">Даты</th>
-                        <th className="pb-3 font-medium">Сотрудников</th>
-                        <th className="pb-3 font-medium">Стоимость</th>
-                        <th className="pb-3 font-medium">Статус</th>
-                        <th className="pb-3 font-medium">Действия</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredTrainings.map((training) => {
-                        const org = trainingOrgs.find(o => o.id === training.organizationId);
-                        const costPerPerson = Math.round(training.cost / training.employeeIds.length);
-                        
-                        return (
-                          <tr key={training.id} className="border-b last:border-0 hover:bg-muted/50">
-                            <td className="py-3">
-                              <div>
-                                <div className="font-medium">{training.title}</div>
-                                {training.program && (
-                                  <div className="text-xs text-muted-foreground mt-1">{training.program}</div>
-                                )}
-                              </div>
-                            </td>
-                            <td className="py-3">
-                              <Badge className="text-purple-600 bg-purple-100 dark:bg-purple-900/30">
-                                {training.type}
-                              </Badge>
-                            </td>
-                            <td className="py-3 text-muted-foreground text-sm">{org?.name || '—'}</td>
-                            <td className="py-3 text-muted-foreground text-sm">
-                              <div>{new Date(training.startDate).toLocaleDateString('ru', { day: '2-digit', month: '2-digit' })}</div>
-                              <div>{new Date(training.endDate).toLocaleDateString('ru', { day: '2-digit', month: '2-digit' })}</div>
-                            </td>
-                            <td className="py-3 text-center">{training.employeeIds.length}</td>
-                            <td className="py-3 text-muted-foreground text-sm">
-                              <div className="font-medium">{training.cost.toLocaleString('ru')} ₽</div>
-                              <div className="text-xs">{costPerPerson.toLocaleString('ru')} ₽/чел</div>
-                            </td>
-                            <td className="py-3">
-                              <Badge className={getStatusColor(training.status)}>
-                                {getStatusLabel(training.status)}
-                              </Badge>
-                            </td>
-                            <td className="py-3">
-                              <div className="flex items-center gap-1">
-                                <Button variant="ghost" size="sm" title="Просмотр" onClick={() => handleViewTraining(training.id)}>
-                                  <Icon name="Eye" size={16} />
-                                </Button>
-                                <Button variant="ghost" size="sm" title="Редактировать" onClick={() => handleEditTraining(training.id)}>
-                                  <Icon name="Edit" size={16} />
-                                </Button>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm">
-                                      <Icon name="MoreVertical" size={16} />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => handleViewDocuments(training.id)}>
-                                      <Icon name="FileText" size={14} className="mr-2" />
-                                      Документы
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => handleViewParticipants(training.id)}>
-                                      <Icon name="Users" size={14} className="mr-2" />
-                                      Список участников
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => handleDuplicateTraining(training.id)}>
-                                      <Icon name="Copy" size={14} className="mr-2" />
-                                      Дублировать
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteTraining(training.id)}>
-                                      <Icon name="Trash2" size={14} className="mr-2" />
-                                      Удалить
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {filteredTrainings.length === 0 && (
-                <div className="text-center py-12">
-                  <Icon name="GraduationCap" size={48} className="mx-auto text-muted-foreground mb-4" />
-                  <p className="text-lg font-medium mb-2">Обучения не найдены</p>
-                  <p className="text-sm text-muted-foreground">Измените параметры поиска или запланируйте новое обучение</p>
-                </div>
+                <TrainingsTableView
+                  trainings={filteredTrainings}
+                  trainingOrgs={trainingOrgs}
+                  onView={handleViewTraining}
+                  onEdit={handleEditTraining}
+                  onViewDocuments={handleViewDocuments}
+                  onViewParticipants={handleViewParticipants}
+                  onDuplicate={handleDuplicateTraining}
+                  onDelete={handleDeleteTraining}
+                />
               )}
 
               <Card className="mt-6 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
