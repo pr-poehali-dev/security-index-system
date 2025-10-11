@@ -52,6 +52,8 @@ export default function IncidentsTab() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [directionFilter, setDirectionFilter] = useState<string>('all');
+  const [organizationFilter, setOrganizationFilter] = useState<string>('all');
+  const [siteFilter, setSiteFilter] = useState<string>('all');
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -65,10 +67,12 @@ export default function IncidentsTab() {
                            inc.correctiveAction.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'all' || inc.status === statusFilter;
       const matchesDirection = directionFilter === 'all' || inc.directionId === directionFilter;
+      const matchesOrganization = organizationFilter === 'all' || inc.organizationId === organizationFilter;
+      const matchesSite = siteFilter === 'all' || inc.productionSiteId === siteFilter;
       
-      return matchesSearch && matchesStatus && matchesDirection;
+      return matchesSearch && matchesStatus && matchesDirection && matchesOrganization && matchesSite;
     });
-  }, [incidents, searchTerm, statusFilter, directionFilter]);
+  }, [incidents, searchTerm, statusFilter, directionFilter, organizationFilter, siteFilter]);
 
   const getStatusBadge = (status: IncidentStatus) => {
     const variants: Record<IncidentStatus, any> = {
@@ -353,13 +357,35 @@ export default function IncidentsTab() {
                 className="max-w-sm"
               />
               <Select value={directionFilter} onValueChange={setDirectionFilter}>
-                <SelectTrigger className="w-64">
+                <SelectTrigger className="w-48">
                   <SelectValue placeholder="Направление" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Все направления</SelectItem>
                   {directions.filter(d => d.status === 'active').map((dir) => (
                     <SelectItem key={dir.id} value={dir.id}>{dir.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={organizationFilter} onValueChange={setOrganizationFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Организация" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все организации</SelectItem>
+                  {organizations.filter(o => o.status === 'active').map((org) => (
+                    <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={siteFilter} onValueChange={setSiteFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Площадка" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все площадки</SelectItem>
+                  {productionSites.filter(s => s.status === 'active').map((site) => (
+                    <SelectItem key={site.id} value={site.id}>{site.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -458,6 +484,8 @@ export default function IncidentsTab() {
             <IncidentKanbanBoard 
               searchTerm={searchTerm}
               directionFilter={directionFilter}
+              organizationFilter={organizationFilter}
+              siteFilter={siteFilter}
             />
           )}
         </CardContent>

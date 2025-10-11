@@ -29,9 +29,16 @@ const KANBAN_COLUMNS: KanbanColumn[] = [
 interface IncidentKanbanBoardProps {
   searchTerm?: string;
   directionFilter?: string;
+  organizationFilter?: string;
+  siteFilter?: string;
 }
 
-export default function IncidentKanbanBoard({ searchTerm = '', directionFilter = 'all' }: IncidentKanbanBoardProps) {
+export default function IncidentKanbanBoard({ 
+  searchTerm = '', 
+  directionFilter = 'all',
+  organizationFilter = 'all',
+  siteFilter = 'all'
+}: IncidentKanbanBoardProps) {
   const user = useAuthStore((state) => state.user);
   const { getIncidentsByTenant, updateIncident, directions } = useIncidentsStore();
   const { organizations, productionSites, personnel, people, positions } = useSettingsStore();
@@ -44,10 +51,12 @@ export default function IncidentKanbanBoard({ searchTerm = '', directionFilter =
       const matchesSearch = inc.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            inc.correctiveAction.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesDirection = directionFilter === 'all' || inc.directionId === directionFilter;
+      const matchesOrganization = organizationFilter === 'all' || inc.organizationId === organizationFilter;
+      const matchesSite = siteFilter === 'all' || inc.productionSiteId === siteFilter;
       
-      return matchesSearch && matchesDirection;
+      return matchesSearch && matchesDirection && matchesOrganization && matchesSite;
     });
-  }, [incidents, searchTerm, directionFilter]);
+  }, [incidents, searchTerm, directionFilter, organizationFilter, siteFilter]);
 
   const incidentsByStatus = useMemo(() => {
     const grouped: Record<IncidentStatus, Incident[]> = {
