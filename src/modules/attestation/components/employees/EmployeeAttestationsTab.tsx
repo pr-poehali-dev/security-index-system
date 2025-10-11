@@ -12,10 +12,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
-import ImportCertificationsDialog from '../certifications/ImportCertificationsDialog';
+import ImportCertificationsDialog from '../ImportCertificationsDialog';
 import AddCertificationDialog from '../certifications/AddCertificationDialog';
 import MassActionDialog from '../orders/MassActionDialog';
-import ExportReportDialog from '../certifications/ExportReportDialog';
+import ExportReportDialog from '../ExportReportDialog';
 import AddEmployeeDialog from './AddEmployeeDialog';
 import EmployeeStatisticsCards from './EmployeeStatisticsCards';
 import EmployeeFilters from './EmployeeFilters';
