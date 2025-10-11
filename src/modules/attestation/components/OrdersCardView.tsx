@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { getOrderTypeLabel, getOrderTypeIcon, getOrderTypeColor, getStatusLabel, getStatusColor } from '../utils/orderUtils';
-import type { Order } from '@/types';
+import type { Order } from '@/stores/attestationStore';
 
 interface OrdersCardViewProps {
   orders: Order[];

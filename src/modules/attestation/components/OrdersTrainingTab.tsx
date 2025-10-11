@@ -12,7 +12,7 @@ import { createOrderHandlers } from './orders/orderHandlers';
 import { createTrainingHandlers } from './orders/trainingHandlers';
 import OrdersTab from './orders/OrdersTab';
 import TrainingsTab from './orders/TrainingsTab';
-import type { Order } from '@/types';
+import type { Order } from '@/stores/attestationStore';
 
 export default function OrdersTrainingTab() {
   const { toast } = useToast();
