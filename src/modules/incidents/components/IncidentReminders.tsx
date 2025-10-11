@@ -1,8 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
 import type { Incident } from '@/types';
+import funcUrls from '../../../../backend/func2url.json';
 
 interface IncidentRemindersProps {
   incidents: Incident[];
@@ -17,6 +20,9 @@ export default function IncidentReminders({
   getDirectionName,
   onIncidentClick
 }: IncidentRemindersProps) {
+  const [email, setEmail] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
   const reminders = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -38,6 +44,42 @@ export default function IncidentReminders({
     return { critical, warning, all: urgentReminders };
   }, [incidents]);
 
+  const sendEmailReminder = async () => {
+    if (!email || reminders.all.length === 0) return;
+    
+    setSending(true);
+    setSent(false);
+    
+    try {
+      const incidentsData = reminders.all.map(inc => ({
+        description: inc.description,
+        organization: getOrganizationName(inc.organizationId),
+        direction: getDirectionName(inc.directionId),
+        daysLeft: inc.daysLeft
+      }));
+      
+      const response = await fetch(funcUrls['send-reminders'], {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          incidents: incidentsData
+        })
+      });
+      
+      if (response.ok) {
+        setSent(true);
+        setTimeout(() => setSent(false), 3000);
+      }
+    } catch (error) {
+      console.error('Failed to send email:', error);
+    } finally {
+      setSending(false);
+    }
+  };
+
   if (reminders.all.length === 0) {
     return null;
   }
@@ -45,11 +87,37 @@ export default function IncidentReminders({
   return (
     <Card className="border-orange-200 bg-orange-50 dark:bg-orange-950/20">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-2">
-          <Icon name="Bell" size={18} className="text-orange-600" />
-          Напоминания о сроках
-          <Badge variant="secondary">{reminders.all.length}</Badge>
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Icon name="Bell" size={18} className="text-orange-600" />
+            Напоминания о сроках
+            <Badge variant="secondary">{reminders.all.length}</Badge>
+          </CardTitle>
+          <div className="flex gap-2">
+            <Input
+              type="email"
+              placeholder="Email для уведомлений"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-64"
+            />
+            <Button
+              onClick={sendEmailReminder}
+              disabled={!email || sending}
+              size="sm"
+              variant={sent ? 'default' : 'outline'}
+            >
+              {sending ? (
+                <Icon name="Loader2" size={16} className="animate-spin" />
+              ) : sent ? (
+                <Icon name="Check" size={16} />
+              ) : (
+                <Icon name="Mail" size={16} />
+              )}
+              {sending ? 'Отправка...' : sent ? 'Отправлено' : 'Отправить'}
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-2">
         {reminders.critical.length > 0 && (

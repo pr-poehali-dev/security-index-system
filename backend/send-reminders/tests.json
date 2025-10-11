@@ -1,0 +1,45 @@
+{
+  "tests": [
+    {
+      "name": "Send reminder email test",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "email": "test@example.com",
+        "incidents": [
+          {
+            "description": "Тестовый инцидент 1",
+            "organization": "Организация А",
+            "direction": "Промышленная безопасность",
+            "daysLeft": 2
+          },
+          {
+            "description": "Тестовый инцидент 2",
+            "organization": "Организация Б",
+            "direction": "Охрана труда",
+            "daysLeft": 5
+          }
+        ]
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "incidents_count": 2
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Missing email parameter",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "incidents": []
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

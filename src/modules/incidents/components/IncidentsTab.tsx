@@ -13,7 +13,6 @@ import IncidentsTableFilters from './IncidentsTableFilters';
 import IncidentsKanbanFilters from './IncidentsKanbanFilters';
 import IncidentsTableView from './IncidentsTableView';
 import IncidentReminders from './IncidentReminders';
-import IncidentHeatmap from './IncidentHeatmap';
 import IncidentsPagination from './IncidentsPagination';
 import { useIncidentsExport } from './useIncidentsExport';
 
@@ -169,19 +168,12 @@ export default function IncidentsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <IncidentReminders
-            incidents={incidents}
-            getOrganizationName={getOrganizationName}
-            getDirectionName={getDirectionName}
-            onIncidentClick={setEditingIncident}
-          />
-        </div>
-        <div>
-          <IncidentHeatmap incidents={incidents} />
-        </div>
-      </div>
+      <IncidentReminders
+        incidents={incidents}
+        getOrganizationName={getOrganizationName}
+        getDirectionName={getDirectionName}
+        onIncidentClick={setEditingIncident}
+      />
 
       <Card>
         <CardContent className="p-6">

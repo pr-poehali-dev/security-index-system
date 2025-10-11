@@ -8,6 +8,7 @@ import IncidentsTab from '../components/IncidentsTab';
 import AnalyticsTab from '../components/AnalyticsTab';
 import ReportsTab from '../components/ReportsTab';
 import DirectoriesTab from '../components/DirectoriesTab';
+import HeatmapTab from '../components/HeatmapTab';
 
 export default function IncidentsPage() {
   const user = useAuthStore((state) => state.user);
@@ -30,6 +31,10 @@ export default function IncidentsPage() {
             <Icon name="AlertTriangle" size={20} />
             <span className="text-xs font-medium text-center leading-tight">Инциденты и<br/>мероприятия</span>
           </TabsTrigger>
+          <TabsTrigger value="heatmap" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Flame" size={20} />
+            <span className="text-xs font-medium">Тепловая карта</span>
+          </TabsTrigger>
           <TabsTrigger value="analytics" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="BarChart3" size={20} />
             <span className="text-xs font-medium">Аналитика</span>
@@ -46,6 +51,10 @@ export default function IncidentsPage() {
 
         <TabsContent value="incidents">
           <IncidentsTab />
+        </TabsContent>
+
+        <TabsContent value="heatmap">
+          <HeatmapTab />
         </TabsContent>
 
         <TabsContent value="analytics">

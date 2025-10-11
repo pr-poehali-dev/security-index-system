@@ -43,14 +43,54 @@ export default function IncidentHeatmap({ incidents }: IncidentHeatmapProps) {
     return 'bg-blue-200 dark:bg-blue-800';
   };
 
+  const totalIncidents = incidents.length;
+  const peakDay = DAYS[heatmapData.dayData.indexOf(Math.max(...heatmapData.dayData))];
+  const peakHour = heatmapData.hourData.indexOf(Math.max(...heatmapData.hourData));
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <Icon name="BarChart3" size={18} />
-          Тепловая карта инцидентов
-        </CardTitle>
-      </CardHeader>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Всего инцидентов</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{totalIncidents}</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Пик активности (день)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{peakDay}</div>
+            <div className="text-sm text-muted-foreground mt-1">
+              {Math.max(...heatmapData.dayData)} инцидентов
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Пик активности (час)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{peakHour}:00</div>
+            <div className="text-sm text-muted-foreground mt-1">
+              {Math.max(...heatmapData.hourData)} инцидентов
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Icon name="Flame" size={18} />
+            Тепловая карта инцидентов
+          </CardTitle>
+        </CardHeader>
       <CardContent className="space-y-6">
         <div>
           <div className="text-sm font-medium mb-3">По дням недели</div>
@@ -111,5 +151,6 @@ export default function IncidentHeatmap({ incidents }: IncidentHeatmapProps) {
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 }
