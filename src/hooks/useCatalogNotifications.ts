@@ -68,5 +68,5 @@ export function useCatalogNotifications() {
         isRead: false,
       });
     });
-  }, [user?.tenantId, user?.id, objects, addNotification, notifications]);
+  }, [user?.tenantId, user?.id, objects, addNotification]);
 }

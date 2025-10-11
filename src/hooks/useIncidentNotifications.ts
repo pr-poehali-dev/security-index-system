@@ -55,5 +55,5 @@ export function useIncidentNotifications() {
         isRead: false,
       });
     });
-  }, [user?.tenantId, user?.id, getIncidentsByTenant, addNotification, notifications]);
+  }, [user?.tenantId, user?.id, getIncidentsByTenant, addNotification]);
 }

@@ -40,7 +40,8 @@ const buildTree = (organizations: Organization[]): Organization[] => {
   });
 
   organizations.forEach(org => {
-    const node = orgMap.get(org.id)!;
+    const node = orgMap.get(org.id);
+    if (!node) return;
     if (org.parentId) {
       const parent = orgMap.get(org.parentId);
       if (parent) {

@@ -223,12 +223,13 @@ export const useIncidentsStore = create<IncidentsState>()(persist((set, get) => 
   },
 
   updateIncident: (id, updates) => {
+    const store = get();
     set((state) => ({
       incidents: state.incidents.map((inc) => {
         if (inc.id !== id) return inc;
         const updated = { ...inc, ...updates, updatedAt: new Date().toISOString() };
-        updated.daysLeft = get().calculateDaysLeft(updated.plannedDate, updated.completedDate);
-        updated.status = get().calculateStatus(updated.plannedDate, updated.completedDate);
+        updated.daysLeft = store.calculateDaysLeft(updated.plannedDate, updated.completedDate);
+        updated.status = store.calculateStatus(updated.plannedDate, updated.completedDate);
         return updated;
       })
     }));
@@ -366,7 +367,7 @@ export const useIncidentsStore = create<IncidentsState>()(persist((set, get) => 
     const planned = new Date(plannedDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const diff = Math.ceil((planned.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const diff = Math.round((planned.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     return diff;
   },
 

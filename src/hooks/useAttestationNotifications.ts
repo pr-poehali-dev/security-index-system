@@ -66,5 +66,5 @@ export function useAttestationNotifications() {
         isRead: false,
       });
     });
-  }, [user?.tenantId, user?.id, getCertificationsByTenant, addNotification, notifications]);
+  }, [user?.tenantId, user?.id, getCertificationsByTenant, addNotification]);
 }
