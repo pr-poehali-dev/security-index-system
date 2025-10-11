@@ -3,9 +3,9 @@ import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import type { Training } from '@/stores/attestationStore';
 import type { ExternalOrganization, Personnel, Person, Position } from '@/stores/settingsStore';
-import TrainingsStats from '../TrainingsStats';
-import TrainingsCardView from '../TrainingsCardView';
-import TrainingsTableView from '../TrainingsTableView';
+import TrainingsStats from './TrainingsStats';
+import TrainingsCardView from './TrainingsCardView';
+import TrainingsTableView from './TrainingsTableView';
 import TrainingFilters from './TrainingFilters';
 
 interface TrainingsTabProps {
