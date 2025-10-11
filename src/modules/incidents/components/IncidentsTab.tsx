@@ -26,6 +26,7 @@ import {
 import type { Incident, IncidentStatus } from '@/types';
 import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 import IncidentDialog from './IncidentDialog';
+import IncidentKanbanBoard from './IncidentKanbanBoard';
 import * as XLSX from 'xlsx';
 
 export default function IncidentsTab() {
@@ -54,6 +55,7 @@ export default function IncidentsTab() {
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
 
   const incidents = user?.tenantId ? getIncidentsByTenant(user.tenantId) : [];
 
@@ -267,6 +269,24 @@ export default function IncidentsTab() {
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold">Список инцидентов и мероприятий</h3>
             <div className="flex gap-2">
+              <div className="flex gap-1 border rounded-md p-1">
+                <Button
+                  variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('table')}
+                >
+                  <Icon name="Table" size={16} />
+                  Таблица
+                </Button>
+                <Button
+                  variant={viewMode === 'kanban' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('kanban')}
+                >
+                  <Icon name="Kanban" size={16} />
+                  Kanban
+                </Button>
+              </div>
               {selectedIds.length > 0 && (
                 <>
                   <Button variant="outline" onClick={handleBulkExport}>
@@ -290,39 +310,64 @@ export default function IncidentsTab() {
             </div>
           </div>
 
-          <div className="flex gap-4 mb-4 flex-wrap">
-            <Input
-              placeholder="Поиск по описанию..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-sm"
-            />
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Статус" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все статусы</SelectItem>
-                <SelectItem value="in_progress">В работе</SelectItem>
-                <SelectItem value="awaiting">Ожидает</SelectItem>
-                <SelectItem value="overdue">Просрочено</SelectItem>
-                <SelectItem value="completed">Исполнено</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={directionFilter} onValueChange={setDirectionFilter}>
-              <SelectTrigger className="w-64">
-                <SelectValue placeholder="Направление" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все направления</SelectItem>
-                {directions.filter(d => d.status === 'active').map((dir) => (
-                  <SelectItem key={dir.id} value={dir.id}>{dir.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {viewMode === 'table' && (
+            <div className="flex gap-4 mb-4 flex-wrap">
+              <Input
+                placeholder="Поиск по описанию..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="max-w-sm"
+              />
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Статус" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все статусы</SelectItem>
+                  <SelectItem value="in_progress">В работе</SelectItem>
+                  <SelectItem value="awaiting">Ожидает</SelectItem>
+                  <SelectItem value="overdue">Просрочено</SelectItem>
+                  <SelectItem value="completed">Исполнено</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={directionFilter} onValueChange={setDirectionFilter}>
+                <SelectTrigger className="w-64">
+                  <SelectValue placeholder="Направление" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все направления</SelectItem>
+                  {directions.filter(d => d.status === 'active').map((dir) => (
+                    <SelectItem key={dir.id} value={dir.id}>{dir.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
-          <div className="rounded-md border overflow-x-auto">
+          {viewMode === 'kanban' && (
+            <div className="flex gap-4 mb-4 flex-wrap">
+              <Input
+                placeholder="Поиск по описанию..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="max-w-sm"
+              />
+              <Select value={directionFilter} onValueChange={setDirectionFilter}>
+                <SelectTrigger className="w-64">
+                  <SelectValue placeholder="Направление" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все направления</SelectItem>
+                  {directions.filter(d => d.status === 'active').map((dir) => (
+                    <SelectItem key={dir.id} value={dir.id}>{dir.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {viewMode === 'table' && (
+            <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -406,7 +451,15 @@ export default function IncidentsTab() {
                 )}
               </TableBody>
             </Table>
-          </div>
+            </div>
+          )}
+
+          {viewMode === 'kanban' && (
+            <IncidentKanbanBoard 
+              searchTerm={searchTerm}
+              directionFilter={directionFilter}
+            />
+          )}
         </CardContent>
       </Card>
 
