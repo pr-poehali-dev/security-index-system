@@ -4,23 +4,7 @@ import { useAttestationStore } from '@/stores/attestationStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/personnelUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,27 +17,12 @@ import AddCertificationDialog from './AddCertificationDialog';
 import MassActionDialog from './MassActionDialog';
 import ExportReportDialog from './ExportReportDialog';
 import AddEmployeeDialog from './AddEmployeeDialog';
-
-interface Employee {
-  id: string;
-  name: string;
-  position: string;
-  department: string;
-  organization: string;
-  certifications: Array<{
-    id: string;
-    category: string;
-    area: string;
-    issueDate: string;
-    expiryDate: string;
-    protocolNumber?: string;
-    protocolDate?: string;
-    verified?: boolean;
-    verifiedDate?: string;
-    status: 'valid' | 'expiring_soon' | 'expired';
-    daysLeft: number;
-  }>;
-}
+import EmployeeStatisticsCards from './EmployeeStatisticsCards';
+import EmployeeFilters from './EmployeeFilters';
+import EmployeeCardItem from './EmployeeCardItem';
+import EmployeeTableRow from './EmployeeTableRow';
+import EmployeeDetailsDialog from './EmployeeDetailsDialog';
+import type { Employee } from '../utils/employeeUtils';
 
 interface EmployeeAttestationsTabProps {
   onAddEmployee?: () => void;
@@ -72,8 +41,6 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showAddCertDialog, setShowAddCertDialog] = useState(false);
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<Set<string>>(new Set());
-  const [showOrderDialog, setShowOrderDialog] = useState(false);
-  const [orderType, setOrderType] = useState<string>('');
   const [showMassActionDialog, setShowMassActionDialog] = useState(false);
   const [massActionType, setMassActionType] = useState<string>('');
   const [showExportDialog, setShowExportDialog] = useState(false);
@@ -182,20 +149,9 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
     const ws = utils.json_to_sheet(exportData);
     
     const colWidths = [
-      { wch: 30 }, // ФИО
-      { wch: 25 }, // Должность
-      { wch: 20 }, // Подразделение
-      { wch: 35 }, // Организация
-      { wch: 25 }, // Категория
-      { wch: 40 }, // Область
-      { wch: 12 }, // Дата выдачи
-      { wch: 15 }, // Срок действия
-      { wch: 12 }, // Осталось дней
-      { wch: 12 }, // Статус
-      { wch: 18 }, // Номер протокола
-      { wch: 15 }, // Дата протокола
-      { wch: 15 }, // Верифицирован
-      { wch: 15 }  // Дата верификации
+      { wch: 30 }, { wch: 25 }, { wch: 20 }, { wch: 35 }, { wch: 25 }, { wch: 40 },
+      { wch: 12 }, { wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 18 }, { wch: 15 },
+      { wch: 15 }, { wch: 15 }
     ];
     ws['!cols'] = colWidths;
 
@@ -211,7 +167,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
 
   const selectedEmployees = useMemo(() => {
     return mockEmployees.filter(emp => selectedEmployeeIds.has(emp.id));
-  }, [selectedEmployeeIds]);
+  }, [selectedEmployeeIds, mockEmployees]);
 
   const uniqueOrganizations = useMemo(() => {
     return Array.from(new Set(mockEmployees.map(emp => emp.organization)));
@@ -244,43 +200,6 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
     return matchesSearch && matchesOrganization && matchesStatus && matchesVerification;
   });
 
-  const getEmployeeStatus = (employee: Employee): 'valid' | 'expiring_soon' | 'expired' => {
-    const hasExpired = employee.certifications.some(c => c.status === 'expired');
-    if (hasExpired) return 'expired';
-    
-    const hasExpiring = employee.certifications.some(c => c.status === 'expiring_soon');
-    if (hasExpiring) return 'expiring_soon';
-    
-    return 'valid';
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'valid': return 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30';
-      case 'expiring_soon': return 'text-amber-600 bg-amber-100 dark:bg-amber-900/30';
-      case 'expired': return 'text-red-600 bg-red-100 dark:bg-red-900/30';
-      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900/30';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'valid': return 'Действующие';
-      case 'expiring_soon': return 'Истекают';
-      case 'expired': return 'Просрочены';
-      default: return status;
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'valid': return 'CheckCircle2';
-      case 'expiring_soon': return 'AlertTriangle';
-      case 'expired': return 'XCircle';
-      default: return 'Circle';
-    }
-  };
-
   const totalCertifications = mockEmployees.reduce((sum, emp) => sum + emp.certifications.length, 0);
   const validCertifications = mockEmployees.reduce((sum, emp) => 
     sum + emp.certifications.filter(c => c.status === 'valid').length, 0);
@@ -291,44 +210,12 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-2">
-              <Icon name="Award" className="text-blue-600" size={24} />
-              <span className="text-2xl font-bold">{totalCertifications}</span>
-            </div>
-            <p className="text-sm text-muted-foreground">Всего аттестаций</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-2">
-              <Icon name="CheckCircle2" className="text-emerald-600" size={24} />
-              <span className="text-2xl font-bold">{validCertifications}</span>
-            </div>
-            <p className="text-sm text-muted-foreground">Действующие допуски</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-2">
-              <Icon name="AlertTriangle" className="text-amber-600" size={24} />
-              <span className="text-2xl font-bold">{expiringCertifications}</span>
-            </div>
-            <p className="text-sm text-muted-foreground">Истекают (30 дней)</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-2">
-              <Icon name="XCircle" className="text-red-600" size={24} />
-              <span className="text-2xl font-bold">{expiredCertifications}</span>
-            </div>
-            <p className="text-sm text-muted-foreground">Просрочено</p>
-          </CardContent>
-        </Card>
-      </div>
+      <EmployeeStatisticsCards
+        totalCertifications={totalCertifications}
+        validCertifications={validCertifications}
+        expiringCertifications={expiringCertifications}
+        expiredCertifications={expiredCertifications}
+      />
 
       <Card>
         <CardHeader>
@@ -411,79 +298,18 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4 mb-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Поиск по ФИО, должности или организации..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Select value={organizationFilter} onValueChange={setOrganizationFilter}>
-                <SelectTrigger className="w-full sm:w-[250px]">
-                  <SelectValue placeholder="Организация" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">
-                    <div className="flex items-center gap-2">
-                      <Icon name="Building2" size={14} />
-                      Все организации
-                    </div>
-                  </SelectItem>
-                  {uniqueOrganizations.map((org) => (
-                    <SelectItem key={org} value={org}>
-                      <div className="flex items-center gap-2">
-                        <Icon name="Building2" size={14} />
-                        {org}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Статус аттестации" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Все статусы</SelectItem>
-                  <SelectItem value="valid">Действующие</SelectItem>
-                  <SelectItem value="expiring_soon">Истекают</SelectItem>
-                  <SelectItem value="expired">Просрочены</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={verificationFilter} onValueChange={setVerificationFilter}>
-                <SelectTrigger className="w-full sm:w-[220px]">
-                  <SelectValue placeholder="Статус проверки" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">
-                    <div className="flex items-center gap-2">
-                      Все проверки
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="verified">
-                    <div className="flex items-center gap-2">
-                      <Icon name="CheckCircle2" size={14} className="text-emerald-600" />
-                      Проверенные
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="unverified">
-                    <div className="flex items-center gap-2">
-                      <Icon name="AlertCircle" size={14} className="text-amber-600" />
-                      Непроверенные
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="mb-6">
+            <EmployeeFilters
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              organizationFilter={organizationFilter}
+              setOrganizationFilter={setOrganizationFilter}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              verificationFilter={verificationFilter}
+              setVerificationFilter={setVerificationFilter}
+              uniqueOrganizations={uniqueOrganizations}
+            />
           </div>
 
           {selectedEmployeeIds.size > 0 && (
@@ -524,88 +350,15 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
 
           {viewMode === 'cards' ? (
             <div className="space-y-4">
-              {filteredEmployees.map((emp) => {
-                const status = getEmployeeStatus(emp);
-                const isSelected = selectedEmployeeIds.has(emp.id);
-                return (
-                  <Card key={emp.id} className={`hover:shadow-md transition-all ${isSelected ? 'ring-2 ring-blue-500 shadow-md' : ''}`}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-start gap-3 flex-1">
-                          <Checkbox
-                            checked={isSelected}
-                            onCheckedChange={(checked) => handleSelectEmployee(emp.id, checked as boolean)}
-                            className="mt-1"
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold text-lg">{emp.name}</h3>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
-                              <Icon name={getStatusIcon(status) as any} size={12} className="inline mr-1" />
-                              {getStatusLabel(status)}
-                            </span>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-1">
-                            <Icon name="Building2" size={14} className="inline mr-1" />
-                            {emp.organization}
-                          </p>
-                          <p className="text-sm text-muted-foreground">{emp.position} • {emp.department}</p>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Аттестаций: {emp.certifications.length}
-                          </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => setSelectedEmployee(emp)}
-                            className="gap-2"
-                          >
-                            <Icon name="Eye" size={14} />
-                            Подробнее
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Icon name="Edit" size={16} />
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="pt-3 border-t space-y-2">
-                        {emp.certifications.slice(0, 2).map((cert) => (
-                          <div key={cert.id} className="flex items-start justify-between text-sm">
-                            <div className="flex-1">
-                              <p className="font-medium">{cert.category}</p>
-                              <p className="text-muted-foreground text-xs">{cert.area}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className={`text-xs font-medium ${
-                                cert.status === 'valid' ? 'text-emerald-600' :
-                                cert.status === 'expiring_soon' ? 'text-amber-600' : 'text-red-600'
-                              }`}>
-                                до {new Date(cert.expiryDate).toLocaleDateString('ru')}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {cert.daysLeft > 0 ? `${cert.daysLeft} дн.` : 'Просрочено'}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                        {emp.certifications.length > 2 && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="w-full text-xs"
-                            onClick={() => setSelectedEmployee(emp)}
-                          >
-                            Показать все ({emp.certifications.length})
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+              {filteredEmployees.map((emp) => (
+                <EmployeeCardItem
+                  key={emp.id}
+                  employee={emp}
+                  isSelected={selectedEmployeeIds.has(emp.id)}
+                  onSelect={(checked) => handleSelectEmployee(emp.id, checked)}
+                  onViewDetails={() => setSelectedEmployee(emp)}
+                />
+              ))}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -628,50 +381,15 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredEmployees.map((emp) => {
-                    const status = getEmployeeStatus(emp);
-                    const isSelected = selectedEmployeeIds.has(emp.id);
-                    return (
-                      <tr key={emp.id} className={`border-b last:border-0 ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}>
-                        <td className="py-3">
-                          <Checkbox
-                            checked={isSelected}
-                            onCheckedChange={(checked) => handleSelectEmployee(emp.id, checked as boolean)}
-                          />
-                        </td>
-                        <td className="py-3 font-medium">{emp.name}</td>
-                        <td className="py-3 text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Icon name="Building2" size={14} />
-                            {emp.organization}
-                          </div>
-                        </td>
-                        <td className="py-3 text-muted-foreground">{emp.position}</td>
-                        <td className="py-3 text-muted-foreground">{emp.department}</td>
-                        <td className="py-3">{emp.certifications.length}</td>
-                        <td className="py-3">
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
-                            <Icon name={getStatusIcon(status) as any} size={12} />
-                            {getStatusLabel(status)}
-                          </span>
-                        </td>
-                        <td className="py-3">
-                          <div className="flex items-center gap-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => setSelectedEmployee(emp)}
-                            >
-                              <Icon name="Eye" size={16} />
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <Icon name="Edit" size={16} />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {filteredEmployees.map((emp) => (
+                    <EmployeeTableRow
+                      key={emp.id}
+                      employee={emp}
+                      isSelected={selectedEmployeeIds.has(emp.id)}
+                      onSelect={(checked) => handleSelectEmployee(emp.id, checked)}
+                      onViewDetails={() => setSelectedEmployee(emp)}
+                    />
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -685,173 +403,14 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
         </CardContent>
       </Card>
 
-      <Dialog open={!!selectedEmployee} onOpenChange={(open) => !open && setSelectedEmployee(null)}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Аттестации сотрудника</DialogTitle>
-          </DialogHeader>
-          {selectedEmployee && (
-            <div className="space-y-4">
-              <div className="pb-4 border-b">
-                <h3 className="font-semibold text-lg">{selectedEmployee.name}</h3>
-                <p className="text-sm text-muted-foreground mb-1">
-                  <Icon name="Building2" size={14} className="inline mr-1" />
-                  {selectedEmployee.organization}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {selectedEmployee.position} • {selectedEmployee.department}
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                {selectedEmployee.certifications.map((cert) => (
-                  <Card key={cert.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <h4 className="font-semibold">{cert.category}</h4>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(cert.status)}`}>
-                              <Icon name={getStatusIcon(cert.status) as any} size={12} className="inline mr-1" />
-                              {getStatusLabel(cert.status)}
-                            </span>
-                            {cert.verified && cert.protocolNumber && (cert.category === 'Промышленная безопасность' || cert.category === 'Энергобезопасность') && (
-                              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                <Icon name="CheckCircle2" size={12} className="inline mr-1" />
-                                Проверено
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-3">{cert.area}</p>
-                          <div className="grid grid-cols-2 gap-3 text-sm">
-                            <div>
-                              <p className="text-muted-foreground">Дата аттестации:</p>
-                              <p className="font-medium">{new Date(cert.issueDate).toLocaleDateString('ru')}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">Действителен до:</p>
-                              <p className={`font-medium ${
-                                cert.status === 'valid' ? 'text-emerald-600' :
-                                cert.status === 'expiring_soon' ? 'text-amber-600' : 'text-red-600'
-                              }`}>
-                                {new Date(cert.expiryDate).toLocaleDateString('ru')}
-                              </p>
-                            </div>
-                            {cert.protocolNumber && (
-                              <>
-                                <div>
-                                  <p className="text-muted-foreground">Номер протокола:</p>
-                                  <p className="font-medium">{cert.protocolNumber}</p>
-                                </div>
-                                <div>
-                                  <p className="text-muted-foreground">Дата протокола:</p>
-                                  <p className="font-medium">{cert.protocolDate ? new Date(cert.protocolDate).toLocaleDateString('ru') : '—'}</p>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                          {cert.daysLeft > 0 ? (
-                            <p className="text-sm text-muted-foreground mt-2">
-                              Осталось: {cert.daysLeft} дней
-                            </p>
-                          ) : (
-                            <p className="text-sm text-red-600 font-medium mt-2">
-                              Просрочено на {Math.abs(cert.daysLeft)} дней
-                            </p>
-                          )}
-                          
-                          {cert.protocolNumber && (cert.category === 'Промышленная безопасность' || cert.category === 'Энергобезопасность') && (
-                            <div className="space-y-3 mt-3 pt-3 border-t">
-                              <div className="flex items-center gap-2">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  className="gap-2"
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(cert.protocolNumber || '');
-                                    alert('Номер протокола скопирован');
-                                  }}
-                                >
-                                  <Icon name="Copy" size={14} />
-                                  Скопировать номер протокола
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  className="gap-2"
-                                  onClick={() => window.open('https://qr.gosnadzor.ru/prombez', '_blank')}
-                                >
-                                  <Icon name="ExternalLink" size={14} />
-                                  Проверить в Ростехнадзоре
-                                </Button>
-                              </div>
-                              
-                              <div className={`flex items-center justify-between p-3 rounded-lg ${
-                                cert.verified 
-                                  ? 'bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900' 
-                                  : 'bg-slate-50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-900'
-                              }`}>
-                                <div className="flex items-center gap-3">
-                                  <Icon 
-                                    name={cert.verified ? "CheckCircle2" : "AlertCircle"} 
-                                    size={20} 
-                                    className={cert.verified ? "text-emerald-600" : "text-slate-400"}
-                                  />
-                                  <div>
-                                    <Label htmlFor={`verify-${cert.id}`} className="text-sm font-medium cursor-pointer">
-                                      {cert.verified ? 'Проверено в реестре Ростехнадзора' : 'Не проверено в реестре'}
-                                    </Label>
-                                    {cert.verified && cert.verifiedDate && (
-                                      <p className="text-xs text-muted-foreground mt-0.5">
-                                        Проверено: {new Date(cert.verifiedDate).toLocaleDateString('ru')}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                                <Switch 
-                                  id={`verify-${cert.id}`}
-                                  checked={cert.verified || false}
-                                  onCheckedChange={() => handleVerificationToggle(cert.id)}
-                                />
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
-                            <Icon name="Edit" size={16} />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Icon name="FileText" size={16} />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-
-              <div className="pt-4 border-t flex items-center justify-end gap-2">
-                <Button 
-                  variant="outline" 
-                  className="gap-2"
-                  onClick={() => setShowExportDialog(true)}
-                >
-                  <Icon name="Download" size={16} />
-                  Экспорт отчёта
-                </Button>
-                <Button 
-                  className="gap-2"
-                  onClick={() => setShowAddCertDialog(true)}
-                >
-                  <Icon name="Plus" size={16} />
-                  Добавить аттестацию
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <EmployeeDetailsDialog
+        employee={selectedEmployee}
+        open={!!selectedEmployee}
+        onClose={() => setSelectedEmployee(null)}
+        onVerificationToggle={handleVerificationToggle}
+        onShowExportDialog={() => setShowExportDialog(true)}
+        onShowAddCertDialog={() => setShowAddCertDialog(true)}
+      />
 
       <ImportCertificationsDialog 
         open={showImportDialog}
