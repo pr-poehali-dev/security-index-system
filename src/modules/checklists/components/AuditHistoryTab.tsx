@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useChecklistsStore } from '@/stores/checklistsStore';
-import { useOrganizationsStore } from '@/stores/organizationsStore';
+import { mockOrganizations } from '@/stores/mockData';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,7 +18,7 @@ import type { Audit } from '@/types';
 
 export default function AuditHistoryTab() {
   const { audits, checklists } = useChecklistsStore();
-  const { organizations } = useOrganizationsStore();
+  const organizations = mockOrganizations;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
