@@ -7,6 +7,7 @@ import type { Audit } from '@/types';
 interface AuditCardProps {
   audit: Audit;
   checklistName?: string;
+  onConduct: (audit: Audit) => void;
 }
 
 const getStatusColor = (status: Audit['status']) => {
@@ -31,7 +32,7 @@ const getPassRate = (audit: Audit) => {
   return Math.round((passed / audit.findings.length) * 100);
 };
 
-export default function AuditCard({ audit, checklistName }: AuditCardProps) {
+export default function AuditCard({ audit, checklistName, onConduct }: AuditCardProps) {
   const passRate = getPassRate(audit);
 
   return (
@@ -101,13 +102,13 @@ export default function AuditCard({ audit, checklistName }: AuditCardProps) {
             Подробнее
           </Button>
           {audit.status === 'scheduled' && (
-            <Button size="sm" variant="secondary">
+            <Button size="sm" variant="secondary" onClick={() => onConduct(audit)}>
               <Icon name="Play" className="mr-2" size={14} />
               Начать проверку
             </Button>
           )}
           {audit.status === 'in_progress' && (
-            <Button size="sm">
+            <Button size="sm" onClick={() => onConduct(audit)}>
               <Icon name="Save" className="mr-2" size={14} />
               Продолжить
             </Button>

@@ -7,18 +7,51 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import ChecklistCard from '../components/ChecklistCard';
+import ChecklistDialog from '../components/ChecklistDialog';
+import ScheduleAuditDialog from '../components/ScheduleAuditDialog';
+import AuditDialog from '../components/AuditDialog';
+import TemplatesDialog from '../components/TemplatesDialog';
 import AuditCard from '../components/AuditCard';
+import AuditReportsTab from '../components/AuditReportsTab';
+import AuditHistoryTab from '../components/AuditHistoryTab';
 import StatsCards from '../components/StatsCards';
+import type { Checklist, Audit } from '@/types';
 
 export default function ChecklistsPage() {
   const {
     checklists,
     audits,
     getAuditsByStatus,
-    getUpcomingAudits
+    getUpcomingAudits,
+    deleteChecklist
   } = useChecklistsStore();
 
   const [currentTab, setCurrentTab] = useState('checklists');
+  const [checklistDialogOpen, setChecklistDialogOpen] = useState(false);
+  const [editingChecklist, setEditingChecklist] = useState<Checklist | undefined>();
+  const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
+  const [conductingAudit, setConductingAudit] = useState<Audit | undefined>();
+  const [templatesDialogOpen, setTemplatesDialogOpen] = useState(false);
+
+  const handleCreateChecklist = () => {
+    setEditingChecklist(undefined);
+    setChecklistDialogOpen(true);
+  };
+
+  const handleEditChecklist = (checklist: Checklist) => {
+    setEditingChecklist(checklist);
+    setChecklistDialogOpen(true);
+  };
+
+  const handleDeleteChecklist = (id: string) => {
+    if (confirm('Удалить этот чек-лист?')) {
+      deleteChecklist(id);
+    }
+  };
+
+  const handleConductAudit = (audit: Audit) => {
+    setConductingAudit(audit);
+  };
 
   const scheduledAudits = getAuditsByStatus('scheduled');
   const inProgressAudits = getAuditsByStatus('in_progress');
@@ -33,11 +66,15 @@ export default function ChecklistsPage() {
         icon="ClipboardCheck"
         action={
           <div className="flex gap-2">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => setTemplatesDialogOpen(true)}>
+              <Icon name="FileText" size={18} />
+              Шаблоны
+            </Button>
+            <Button variant="outline" className="gap-2" onClick={handleCreateChecklist}>
               <Icon name="Plus" size={18} />
               Создать чек-лист
             </Button>
-            <Button className="gap-2">
+            <Button className="gap-2" onClick={() => setScheduleDialogOpen(true)}>
               <Icon name="Calendar" size={18} />
               Назначить аудит
             </Button>
@@ -83,12 +120,25 @@ export default function ChecklistsPage() {
             <Icon name="Calendar" size={20} />
             <span className="text-xs font-medium">Предстоящие ({upcomingAudits.length})</span>
           </TabsTrigger>
+          <TabsTrigger value="reports" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="BarChart3" size={20} />
+            <span className="text-xs font-medium">Отчеты</span>
+          </TabsTrigger>
+          <TabsTrigger value="history" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="History" size={20} />
+            <span className="text-xs font-medium">История</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="checklists" className="mt-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {checklists.map((checklist) => (
-              <ChecklistCard key={checklist.id} checklist={checklist} />
+              <ChecklistCard 
+                key={checklist.id} 
+                checklist={checklist}
+                onEdit={handleEditChecklist}
+                onDelete={handleDeleteChecklist}
+              />
             ))}
           </div>
         </TabsContent>
@@ -102,6 +152,7 @@ export default function ChecklistsPage() {
                   key={audit.id} 
                   audit={audit} 
                   checklistName={checklist?.name}
+                  onConduct={handleConductAudit}
                 />
               );
             })}
@@ -154,7 +205,39 @@ export default function ChecklistsPage() {
             )}
           </div>
         </TabsContent>
+
+        <TabsContent value="reports" className="mt-6">
+          <AuditReportsTab />
+        </TabsContent>
+
+        <TabsContent value="history" className="mt-6">
+          <AuditHistoryTab />
+        </TabsContent>
       </Tabs>
+
+      <ChecklistDialog
+        open={checklistDialogOpen}
+        onClose={() => setChecklistDialogOpen(false)}
+        checklist={editingChecklist}
+      />
+
+      <ScheduleAuditDialog
+        open={scheduleDialogOpen}
+        onClose={() => setScheduleDialogOpen(false)}
+      />
+
+      {conductingAudit && (
+        <AuditDialog
+          open={!!conductingAudit}
+          onClose={() => setConductingAudit(undefined)}
+          audit={conductingAudit}
+        />
+      )}
+
+      <TemplatesDialog
+        open={templatesDialogOpen}
+        onClose={() => setTemplatesDialogOpen(false)}
+      />
     </div>
   );
 }

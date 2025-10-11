@@ -1,11 +1,19 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import Icon from '@/components/ui/icon';
 import type { Checklist } from '@/types';
 
 interface ChecklistCardProps {
   checklist: Checklist;
+  onEdit: (checklist: Checklist) => void;
+  onDelete: (id: string) => void;
 }
 
 const getCategoryIcon = (category: string) => {
@@ -26,7 +34,7 @@ const getCategoryLabel = (category: string) => {
   }
 };
 
-export default function ChecklistCard({ checklist }: ChecklistCardProps) {
+export default function ChecklistCard({ checklist, onEdit, onDelete }: ChecklistCardProps) {
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardContent className="p-6">
@@ -36,6 +44,26 @@ export default function ChecklistCard({ checklist }: ChecklistCardProps) {
             <h3 className="font-semibold text-lg mb-1">{checklist.name}</h3>
             <Badge variant="outline">{getCategoryLabel(checklist.category)}</Badge>
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Icon name="MoreVertical" size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onEdit(checklist)}>
+                <Icon name="Pencil" size={14} className="mr-2" />
+                Редактировать
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => onDelete(checklist.id)}
+                className="text-red-600"
+              >
+                <Icon name="Trash2" size={14} className="mr-2" />
+                Удалить
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="space-y-2 mb-4">

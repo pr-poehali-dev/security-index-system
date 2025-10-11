@@ -380,6 +380,7 @@ export interface Audit {
   completedDate?: string;
   status: 'scheduled' | 'in_progress' | 'completed';
   findings: AuditFinding[];
+  auditorSignature?: string;
 }
 
 export interface AuditFinding {
