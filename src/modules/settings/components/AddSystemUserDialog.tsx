@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 import { generateLogin, generatePassword, hashPassword, copyToClipboard } from '@/lib/passwordUtils';
+import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 import type { UserRole } from '@/types';
 
 interface AddSystemUserDialogProps {
@@ -20,11 +21,19 @@ interface AddSystemUserDialogProps {
 
 export default function AddSystemUserDialog({ open, onOpenChange }: AddSystemUserDialogProps) {
   const user = useAuthStore((state) => state.user);
-  const { addSystemUser, getPersonnelByTenant, getOrganizationsByTenant } = useSettingsStore();
+  const { addSystemUser, getPersonnelByTenant, getOrganizationsByTenant, people, positions } = useSettingsStore();
   const { toast } = useToast();
 
   const personnel = getPersonnelByTenant(user!.tenantId!);
   const organizations = getOrganizationsByTenant(user!.tenantId!);
+  
+  const personnelWithInfo = useMemo(() => 
+    personnel.map(p => ({
+      ...p,
+      info: getPersonnelFullInfo(p, people, positions)
+    })), 
+    [personnel, people, positions]
+  );
 
   const [personnelId, setPersonnelId] = useState('');
   const [email, setEmail] = useState('');
@@ -37,10 +46,11 @@ export default function AddSystemUserDialog({ open, onOpenChange }: AddSystemUse
 
   const handlePersonnelChange = (value: string) => {
     setPersonnelId(value);
-    const person = personnel.find(p => p.id === value);
-    if (person) {
-      if (person.email) setEmail(person.email);
-      const generatedLogin = generateLogin(person.fullName);
+    const personnelRecord = personnelWithInfo.find(p => p.id === value);
+    if (personnelRecord) {
+      const person = people.find(p => p.id === personnelRecord.personId);
+      if (person?.email) setEmail(person.email);
+      const generatedLogin = generateLogin(personnelRecord.info.fullName);
       setLogin(generatedLogin);
     }
   };
@@ -155,11 +165,17 @@ export default function AddSystemUserDialog({ open, onOpenChange }: AddSystemUse
                 <SelectValue placeholder="Выберите сотрудника" />
               </SelectTrigger>
               <SelectContent>
-                {personnel.map((person) => (
-                  <SelectItem key={person.id} value={person.id}>
-                    {person.fullName} — {person.position}
-                  </SelectItem>
-                ))}
+                {personnelWithInfo.length === 0 ? (
+                  <div className="px-2 py-6 text-center text-sm text-muted-foreground">
+                    Нет доступных сотрудников
+                  </div>
+                ) : (
+                  personnelWithInfo.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.info.fullName} — {p.info.position}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground mt-1">
