@@ -9,13 +9,15 @@ interface AuditHistoryCardProps {
   checklist?: Checklist;
   organization?: Organization;
   onPrintReport: (audit: Audit) => void;
+  onDownloadPDF: (audit: Audit) => void;
 }
 
 export default function AuditHistoryCard({
   audit,
   checklist,
   organization,
-  onPrintReport
+  onPrintReport,
+  onDownloadPDF
 }: AuditHistoryCardProps) {
   const getStatusColor = (status: Audit['status']) => {
     switch (status) {
@@ -112,15 +114,26 @@ export default function AuditHistoryCard({
             Просмотр
           </Button>
           {audit.status === 'completed' && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="gap-2"
-              onClick={() => onPrintReport(audit)}
-            >
-              <Icon name="Printer" size={14} />
-              Печать отчета
-            </Button>
+            <>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2"
+                onClick={() => onPrintReport(audit)}
+              >
+                <Icon name="Printer" size={14} />
+                Печать
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2"
+                onClick={() => onDownloadPDF(audit)}
+              >
+                <Icon name="Download" size={14} />
+                PDF
+              </Button>
+            </>
           )}
         </div>
       </CardContent>

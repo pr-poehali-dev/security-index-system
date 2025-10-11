@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 import AuditFiltersCard from './AuditFiltersCard';
 import AuditHistoryCard from './AuditHistoryCard';
-import { generateAuditReport } from '../utils/auditReportGenerator';
+import { generateAuditReportPrint, generateAuditReportPDF } from '../utils/auditReportGenerator';
 
 export default function AuditHistoryTab() {
   const { audits, checklists } = useChecklistsStore();
@@ -54,7 +54,13 @@ export default function AuditHistoryTab() {
   const handlePrintReport = (audit: typeof audits[0]) => {
     const checklist = checklists.find(c => c.id === audit.checklistId);
     const organization = organizations.find(o => o.id === audit.organizationId);
-    generateAuditReport(audit, checklist, organization);
+    generateAuditReportPrint(audit, checklist, organization);
+  };
+
+  const handleDownloadPDF = (audit: typeof audits[0]) => {
+    const checklist = checklists.find(c => c.id === audit.checklistId);
+    const organization = organizations.find(o => o.id === audit.organizationId);
+    generateAuditReportPDF(audit, checklist, organization);
   };
 
   return (
@@ -104,6 +110,7 @@ export default function AuditHistoryTab() {
                 checklist={checklist}
                 organization={organization}
                 onPrintReport={handlePrintReport}
+                onDownloadPDF={handleDownloadPDF}
               />
             );
           })
