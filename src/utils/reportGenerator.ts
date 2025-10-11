@@ -1,8 +1,17 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import type { Task } from '@/types/tasks';
-import type { Incident } from '@/types/incidents';
-import type { IndustrialObject, Organization } from '@/types/catalog';
+import type { Task } from '@/types';
+import type { Incident } from '@/types';
+import type { Organization } from '@/types';
+
+interface IndustrialObject {
+  id: string;
+  organizationId: string;
+  name: string;
+  status: 'active' | 'inactive';
+  expertiseDate?: string;
+  nextExpertiseDate?: string;
+}
 
 export type ReportPeriod = 'week' | 'month' | 'quarter' | 'all';
 
@@ -242,17 +251,17 @@ export const generateIncidentsReport = async (incidents: Incident[], period: Rep
 
   // Статистика за период
   const total = filteredIncidents.length;
-  const critical = filteredIncidents.filter(i => i.priority === 'critical').length;
-  const high = filteredIncidents.filter(i => i.priority === 'high').length;
-  const open = filteredIncidents.filter(i => i.status === 'open').length;
-  const resolved = filteredIncidents.filter(i => i.status === 'resolved').length;
+  const overdue = filteredIncidents.filter(i => i.status === 'overdue').length;
+  const critical = filteredIncidents.filter(i => i.daysLeft < 0).length;
+  const inProgress = filteredIncidents.filter(i => i.status === 'in_progress').length;
+  const completed = filteredIncidents.filter(i => i.status === 'completed' || i.status === 'completed_late').length;
 
   const statsData = [
     ['Vsego incidentov', total.toString()],
+    ['Prosrochennykh', overdue.toString()],
     ['Kriticheskikh', critical.toString()],
-    ['Vysokogo prioriteta', high.toString()],
-    ['Otkrytykh', open.toString()],
-    ['Reshennykh', resolved.toString()]
+    ['V rabote', inProgress.toString()],
+    ['Ispolnennykh', completed.toString()]
   ];
 
   doc.autoTable({
@@ -268,19 +277,20 @@ export const generateIncidentsReport = async (incidents: Incident[], period: Rep
 
   // Таблица инцидентов за период
   const incidentsData = filteredIncidents.map(incident => [
-    incident.title.substring(0, 35),
-    incident.assignedToName?.substring(0, 20) || '-',
-    incident.priority === 'critical' ? 'Krit.' : 
-    incident.priority === 'high' ? 'Vys.' : 
-    incident.priority === 'medium' ? 'Sred.' : 'Niz.',
-    incident.status === 'open' ? 'Otkr.' : 
-    incident.status === 'in_progress' ? 'V rab.' : 'Resh.',
+    incident.description.substring(0, 35),
+    incident.responsiblePersonnelId?.substring(0, 20) || '-',
+    incident.daysLeft < 0 ? `Prosr. ${Math.abs(incident.daysLeft)}d` : `${incident.daysLeft}d`,
+    incident.status === 'created' ? 'Sozd.' :
+    incident.status === 'in_progress' ? 'V rab.' :
+    incident.status === 'awaiting' ? 'Ozhid.' :
+    incident.status === 'overdue' ? 'Prosr.' :
+    incident.status === 'completed' ? 'Isp.' : 'Isp.op.',
     new Date(incident.createdAt).toLocaleDateString('ru-RU')
   ]);
 
   doc.autoTable({
     startY: yPos,
-    head: [['Nazvanie', 'Otvetstvennyy', 'Prior.', 'Status', 'Data']],
+    head: [['Opisanie', 'Otvetstvennyy', 'Srok', 'Status', 'Data']],
     body: incidentsData,
     theme: 'striped',
     headStyles: { fillColor: [239, 68, 68] },

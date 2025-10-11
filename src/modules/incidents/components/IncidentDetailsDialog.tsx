@@ -270,7 +270,7 @@ export default function IncidentDetailsDialog({ incident, open, onOpenChange }: 
                     <div className="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/20 flex items-center justify-center">
                       <Icon name="Eye" size={16} className="text-yellow-600" />
                     </div>
-                    {incident.status !== 'under_review' && <div className="w-0.5 flex-1 bg-gray-200 dark:bg-gray-700 mt-2" />}
+                    {incident.status !== 'awaiting' && <div className="w-0.5 flex-1 bg-gray-200 dark:bg-gray-700 mt-2" />}
                   </div>
                   <div className="flex-1 pb-6">
                     <p className="font-medium text-sm">Отправлен на проверку</p>

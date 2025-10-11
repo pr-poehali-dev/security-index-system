@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
-import type { Incident } from '@/types/incidents';
+import type { Incident } from '@/types';
 
 interface IncidentCardProps {
   incident: Incident;
@@ -11,44 +11,41 @@ interface IncidentCardProps {
   onViewDetails: (incident: Incident) => void;
 }
 
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case 'critical': return 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400';
-    case 'high': return 'bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400';
-    case 'medium': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400';
-    case 'low': return 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400';
-    default: return 'bg-gray-100 text-gray-700';
-  }
+const getDaysLeftColor = (daysLeft: number) => {
+  if (daysLeft < 0) return 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400';
+  if (daysLeft <= 3) return 'bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400';
+  if (daysLeft <= 7) return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400';
+  return 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400';
 };
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'new': return 'bg-blue-100 text-blue-700';
+    case 'created': return 'bg-blue-100 text-blue-700';
     case 'in_progress': return 'bg-purple-100 text-purple-700';
-    case 'under_review': return 'bg-yellow-100 text-yellow-700';
-    case 'closed': return 'bg-emerald-100 text-emerald-700';
+    case 'awaiting': return 'bg-yellow-100 text-yellow-700';
+    case 'overdue': return 'bg-red-100 text-red-700';
+    case 'completed': return 'bg-emerald-100 text-emerald-700';
+    case 'completed_late': return 'bg-orange-100 text-orange-700';
     default: return 'bg-gray-100 text-gray-700';
   }
 };
 
 const getStatusLabel = (status: string) => {
   const labels: Record<string, string> = {
-    new: 'Новый',
+    created: 'Создано',
     in_progress: 'В работе',
-    under_review: 'На проверке',
-    closed: 'Закрыт'
+    awaiting: 'Ожидает',
+    overdue: 'Просрочено',
+    completed: 'Исполнено',
+    completed_late: 'Исполнено с опозданием'
   };
   return labels[status] || status;
 };
 
-const getPriorityLabel = (priority: string) => {
-  const labels: Record<string, string> = {
-    critical: 'Критический',
-    high: 'Высокий',
-    medium: 'Средний',
-    low: 'Низкий'
-  };
-  return labels[priority] || priority;
+const getDaysLeftLabel = (daysLeft: number) => {
+  if (daysLeft < 0) return `Просрочено на ${Math.abs(daysLeft)} дн.`;
+  if (daysLeft === 0) return 'Сегодня';
+  return `Осталось ${daysLeft} дн.`;
 };
 
 export default function IncidentCard({ 
@@ -64,14 +61,14 @@ export default function IncidentCard({
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                {incident.title}
+                {incident.description.length > 60 ? incident.description.slice(0, 60) + '...' : incident.description}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                {incident.description}
+                {incident.correctiveAction}
               </p>
             </div>
-            <Badge className={getPriorityColor(incident.priority)}>
-              {getPriorityLabel(incident.priority)}
+            <Badge className={getDaysLeftColor(incident.daysLeft)}>
+              {getDaysLeftLabel(incident.daysLeft)}
             </Badge>
           </div>
 
@@ -94,13 +91,13 @@ export default function IncidentCard({
             <div className="flex items-center gap-2">
               <Icon name="User" size={14} className="text-gray-500" />
               <span className="text-gray-700 dark:text-gray-300">
-                {incident.assignedToName || 'Не назначен'}
+                {incident.responsiblePersonnelId || 'Не назначен'}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <Icon name="Calendar" size={14} className="text-gray-500" />
               <span className="text-gray-700 dark:text-gray-300">
-                До: {new Date(incident.dueDate || '').toLocaleDateString('ru-RU')}
+                До: {new Date(incident.plannedDate).toLocaleDateString('ru-RU')}
               </span>
             </div>
           </div>
