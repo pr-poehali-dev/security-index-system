@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useIncidentStore } from '@/stores/incidentStore';
+import { useIncidentsStore } from '@/stores/incidentsStore';
 import { useCatalogStore } from '@/stores/catalogStore';
 import { useAuthStore } from '@/stores/authStore';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -20,14 +20,14 @@ interface IncidentDetailsDialogProps {
 }
 
 export default function IncidentDetailsDialog({ incident, open, onOpenChange }: IncidentDetailsDialogProps) {
-  const { updateIncident, incidentTypes } = useIncidentStore();
+  const { updateIncident } = useIncidentsStore();
   const { objects } = useCatalogStore();
   const user = useAuthStore((state) => state.user);
   const [activeTab, setActiveTab] = useState('details');
   const [newComment, setNewComment] = useState('');
   const [resolution, setResolution] = useState(incident.resolution || '');
 
-  const incidentType = incidentTypes.find(t => t.id === incident.typeId);
+  const incidentType = undefined;
   const object = objects.find(o => o.id === incident.objectId);
 
   const canEdit = user && (user.role === 'SuperAdmin' || user.role === 'TenantAdmin' || user.role === 'Auditor');

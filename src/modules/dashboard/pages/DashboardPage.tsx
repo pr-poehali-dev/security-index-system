@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useCatalogStore } from '@/stores/catalogStore';
 import { useTaskStore } from '@/stores/taskStore';
-import { useIncidentStore } from '@/stores/incidentStore';
+import { useIncidentsStore } from '@/stores/incidentsStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { analyzePersonnelCompetencies } from '@/lib/competencyAnalysis';
 import PageHeader from '@/components/layout/PageHeader';
@@ -33,7 +33,7 @@ export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
   const { objects, organizations } = useCatalogStore();
   const { tasks, getTaskStats, getOverdueTasks } = useTaskStore();
-  const { incidents, getIncidentsByStatus } = useIncidentStore();
+  const { incidents } = useIncidentsStore();
   const { 
     personnel, 
     competencies, 
@@ -45,8 +45,8 @@ export default function DashboardPage() {
 
   const taskStats = getTaskStats();
   const overdueTasks = getOverdueTasks();
-  const openIncidents = getIncidentsByStatus('open');
-  const inProgressIncidents = getIncidentsByStatus('in_progress');
+  const openIncidents = incidents.filter(inc => inc.status === 'new');
+  const inProgressIncidents = incidents.filter(inc => inc.status === 'in_progress');
 
   const tenantPersonnel = user?.tenantId ? getPersonnelByTenant(user.tenantId) : [];
   const tenantOrganizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
