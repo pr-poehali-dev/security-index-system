@@ -12,6 +12,9 @@ import IncidentKanbanBoard from './IncidentKanbanBoard';
 import IncidentsTableFilters from './IncidentsTableFilters';
 import IncidentsKanbanFilters from './IncidentsKanbanFilters';
 import IncidentsTableView from './IncidentsTableView';
+import IncidentReminders from './IncidentReminders';
+import IncidentHeatmap from './IncidentHeatmap';
+import IncidentsPagination from './IncidentsPagination';
 import { useIncidentsExport } from './useIncidentsExport';
 
 export default function IncidentsTab() {
@@ -43,6 +46,8 @@ export default function IncidentsTab() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   const incidents = user?.tenantId ? getIncidentsByTenant(user.tenantId) : [];
 
@@ -58,6 +63,14 @@ export default function IncidentsTab() {
       return matchesSearch && matchesStatus && matchesDirection && matchesOrganization && matchesSite;
     });
   }, [incidents, searchTerm, statusFilter, directionFilter, organizationFilter, siteFilter]);
+
+  const paginatedIncidents = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return filteredIncidents.slice(startIndex, endIndex);
+  }, [filteredIncidents, currentPage, pageSize]);
+
+  const totalPages = Math.ceil(filteredIncidents.length / pageSize);
 
   const getOrganizationName = (orgId: string) => {
     return organizations.find(o => o.id === orgId)?.name || '—';
@@ -113,7 +126,7 @@ export default function IncidentsTab() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds(filteredIncidents.map(inc => inc.id));
+      setSelectedIds(paginatedIncidents.map(inc => inc.id));
     } else {
       setSelectedIds([]);
     }
@@ -143,8 +156,33 @@ export default function IncidentsTab() {
     handleExportAll(filteredIncidents);
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    setSelectedIds([]);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setCurrentPage(1);
+    setSelectedIds([]);
+  };
+
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <IncidentReminders
+            incidents={incidents}
+            getOrganizationName={getOrganizationName}
+            getDirectionName={getDirectionName}
+            onIncidentClick={setEditingIncident}
+          />
+        </div>
+        <div>
+          <IncidentHeatmap incidents={incidents} />
+        </div>
+      </div>
+
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-6">
@@ -220,21 +258,32 @@ export default function IncidentsTab() {
           )}
 
           {viewMode === 'table' && (
-            <IncidentsTableView
-              filteredIncidents={filteredIncidents}
-              selectedIds={selectedIds}
-              handleSelectAll={handleSelectAll}
-              handleSelectOne={handleSelectOne}
-              getOrganizationName={getOrganizationName}
-              getProductionSiteName={getProductionSiteName}
-              getSourceName={getSourceName}
-              getDirectionName={getDirectionName}
-              getCategoryName={getCategoryName}
-              getSubcategoryName={getSubcategoryName}
-              getResponsibleName={getResponsibleName}
-              setEditingIncident={setEditingIncident}
-              handleDelete={handleDelete}
-            />
+            <>
+              <IncidentsTableView
+                filteredIncidents={paginatedIncidents}
+                selectedIds={selectedIds}
+                startIndex={(currentPage - 1) * pageSize}
+                handleSelectAll={handleSelectAll}
+                handleSelectOne={handleSelectOne}
+                getOrganizationName={getOrganizationName}
+                getProductionSiteName={getProductionSiteName}
+                getSourceName={getSourceName}
+                getDirectionName={getDirectionName}
+                getCategoryName={getCategoryName}
+                getSubcategoryName={getSubcategoryName}
+                getResponsibleName={getResponsibleName}
+                setEditingIncident={setEditingIncident}
+                handleDelete={handleDelete}
+              />
+              <IncidentsPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalItems={filteredIncidents.length}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+              />
+            </>
           )}
 
           {viewMode === 'kanban' && (

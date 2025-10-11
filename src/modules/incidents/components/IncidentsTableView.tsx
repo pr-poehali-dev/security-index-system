@@ -15,6 +15,7 @@ import type { Incident, IncidentStatus } from '@/types';
 interface IncidentsTableViewProps {
   filteredIncidents: Incident[];
   selectedIds: string[];
+  startIndex?: number;
   handleSelectAll: (checked: boolean) => void;
   handleSelectOne: (id: string, checked: boolean) => void;
   getOrganizationName: (orgId: string) => string;
@@ -31,6 +32,7 @@ interface IncidentsTableViewProps {
 export default function IncidentsTableView({
   filteredIncidents,
   selectedIds,
+  startIndex = 0,
   handleSelectAll,
   handleSelectOne,
   getOrganizationName,
@@ -107,7 +109,7 @@ export default function IncidentsTableView({
                     onCheckedChange={(checked) => handleSelectOne(incident.id, checked as boolean)}
                   />
                 </TableCell>
-                <TableCell>{index + 1}</TableCell>
+                <TableCell>{startIndex + index + 1}</TableCell>
                 <TableCell className="text-sm">{getOrganizationName(incident.organizationId)}</TableCell>
                 <TableCell className="text-sm">{getProductionSiteName(incident.productionSiteId)}</TableCell>
                 <TableCell className="text-sm whitespace-nowrap">

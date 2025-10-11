@@ -348,6 +348,7 @@ export interface Incident {
   daysLeft: number;
   status: IncidentStatus;
   notes?: string;
+  comments?: string;
   createdAt: string;
   updatedAt: string;
 }
