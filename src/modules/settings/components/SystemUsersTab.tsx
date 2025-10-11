@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 import { exportToExcel } from '@/lib/exportUtils';
+import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 import type { SystemUser } from '@/types';
 import {
   Table,
@@ -27,7 +28,7 @@ interface SystemUsersTabProps {
 
 export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersTabProps) {
   const user = useAuthStore((state) => state.user);
-  const { getSystemUsersByTenant, getPersonnelByTenant, organizations } = useSettingsStore();
+  const { getSystemUsersByTenant, getPersonnelByTenant, organizations, people, positions } = useSettingsStore();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -42,15 +43,16 @@ export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersT
 
   const getPersonnelInfo = (personnelId?: string) => {
     if (!personnelId) return { name: '—', orgName: '' };
-    const person = personnel.find(p => p.id === personnelId);
-    if (!person) return { name: '—', orgName: '' };
+    const personnelRecord = personnel.find(p => p.id === personnelId);
+    if (!personnelRecord) return { name: '—', orgName: '' };
     
-    const org = person.organizationId 
-      ? organizations.find(o => o.id === person.organizationId)
+    const info = getPersonnelFullInfo(personnelRecord, people, positions);
+    const org = personnelRecord.organizationId 
+      ? organizations.find(o => o.id === personnelRecord.organizationId)
       : null;
     
     return {
-      name: person.fullName || '—',
+      name: info.fullName,
       orgName: org?.name || ''
     };
   };

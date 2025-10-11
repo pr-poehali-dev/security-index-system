@@ -4,13 +4,18 @@ import type {
   Organization, 
   GapAnalysis, 
   CompetencyGapReport,
-  CompetencyAreaRequirement 
+  CompetencyAreaRequirement,
+  Person,
+  Position
 } from '@/types';
+import { getPersonnelFullInfo } from './utils/personnelUtils';
 
 export function analyzePersonnelCompetencies(
   personnel: Personnel[],
   competencies: CompetencyMatrix[],
-  organizations: Organization[]
+  organizations: Organization[],
+  people: Person[],
+  positions: Position[]
 ): CompetencyGapReport {
   const gaps: GapAnalysis[] = [];
 
@@ -20,15 +25,16 @@ export function analyzePersonnelCompetencies(
     const org = organizations.find((o) => o.id === person.organizationId);
     if (!org) return;
 
+    const info = getPersonnelFullInfo(person, people, positions);
     const competency = competencies.find(
-      (c) => c.organizationId === person.organizationId && c.position === person.position
+      (c) => c.organizationId === person.organizationId && c.position === info.position
     );
 
     if (!competency) {
       gaps.push({
         employeeId: person.id,
-        fullName: person.fullName,
-        position: person.position,
+        fullName: info.fullName,
+        position: info.position,
         organizationId: person.organizationId,
         organizationName: org.name,
         requiredAreas: [],
@@ -59,8 +65,8 @@ export function analyzePersonnelCompetencies(
 
     gaps.push({
       employeeId: person.id,
-      fullName: person.fullName,
-      position: person.position,
+      fullName: info.fullName,
+      position: info.position,
       organizationId: person.organizationId,
       organizationName: org.name,
       requiredAreas: competency.requiredAreas,

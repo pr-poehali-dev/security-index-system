@@ -78,7 +78,9 @@ export default function DashboardPage() {
     personnel, 
     competencies, 
     getOrganizationsByTenant, 
-    getPersonnelByTenant 
+    getPersonnelByTenant,
+    people,
+    positions
   } = useSettingsStore();
 
   const taskStats = getTaskStats();
@@ -91,8 +93,8 @@ export default function DashboardPage() {
   
   const competencyReport = useMemo(() => {
     if (!user?.availableModules.includes('settings')) return null;
-    return analyzePersonnelCompetencies(tenantPersonnel, competencies, tenantOrganizations);
-  }, [tenantPersonnel, competencies, tenantOrganizations, user]);
+    return analyzePersonnelCompetencies(tenantPersonnel, competencies, tenantOrganizations, people, positions);
+  }, [tenantPersonnel, competencies, tenantOrganizations, people, positions, user]);
 
   const objectsStats = useMemo(() => {
     const total = objects.length;

@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 import { generatePassword, hashPassword, copyToClipboard } from '@/lib/passwordUtils';
+import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 import type { UserRole, SystemUser } from '@/types';
 
 interface EditSystemUserDialogProps {
@@ -21,7 +22,7 @@ interface EditSystemUserDialogProps {
 
 export default function EditSystemUserDialog({ user: systemUser, open, onOpenChange }: EditSystemUserDialogProps) {
   const currentUser = useAuthStore((state) => state.user);
-  const { updateSystemUser, getPersonnelByTenant, getOrganizationsByTenant } = useSettingsStore();
+  const { updateSystemUser, getPersonnelByTenant, getOrganizationsByTenant, people, positions } = useSettingsStore();
   const { toast } = useToast();
 
   const personnel = getPersonnelByTenant(currentUser!.tenantId!);
@@ -51,8 +52,10 @@ export default function EditSystemUserDialog({ user: systemUser, open, onOpenCha
 
   const getPersonnelName = () => {
     if (!systemUser.personnelId) return '—';
-    const person = personnel.find(p => p.id === systemUser.personnelId);
-    return person?.fullName || '—';
+    const personnelRecord = personnel.find(p => p.id === systemUser.personnelId);
+    if (!personnelRecord) return '—';
+    const info = getPersonnelFullInfo(personnelRecord, people, positions);
+    return info.fullName;
   };
 
   const handleGeneratePassword = () => {
