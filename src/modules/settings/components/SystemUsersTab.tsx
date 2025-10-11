@@ -223,7 +223,7 @@ export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersT
                     <TableCell className="font-medium">
                       <div>
                         <div>{personnelInfo.name}</div>
-                        {personnelInfo.orgName && (
+                        {personnelInfo.name !== '—' && personnelInfo.orgName && (
                           <div className="text-xs text-muted-foreground mt-0.5">
                             {personnelInfo.orgName}
                           </div>
@@ -297,7 +297,7 @@ export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersT
                       <h3 className="font-semibold mb-1">
                         {personnelInfo.name}
                       </h3>
-                      {personnelInfo.orgName && (
+                      {personnelInfo.name !== '—' && personnelInfo.orgName && (
                         <p className="text-xs text-muted-foreground mb-2">
                           {personnelInfo.orgName}
                         </p>
