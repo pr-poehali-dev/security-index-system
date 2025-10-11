@@ -2,55 +2,23 @@ import { useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useIncidentsStore } from '@/stores/incidentsStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
-import { useToast } from '@/hooks/use-toast';
-import {
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  LineChart,
-  Line,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
 import type { IncidentStatus } from '@/types';
 import RiskMatrix from './RiskMatrix';
-
-const STATUS_COLORS: Record<IncidentStatus, string> = {
-  created: '#94a3b8',
-  in_progress: '#3b82f6',
-  awaiting: '#f59e0b',
-  overdue: '#ef4444',
-  completed: '#10b981',
-  completed_late: '#6366f1',
-};
-
-const STATUS_LABELS: Record<IncidentStatus, string> = {
-  created: 'Создано',
-  in_progress: 'В работе',
-  awaiting: 'Ожидает',
-  overdue: 'Просрочено',
-  completed: 'Исполнено',
-  completed_late: 'С опозданием',
-};
+import AnalyticsStatsGrid from './AnalyticsStatsGrid';
+import StatusDistributionCharts from './StatusDistributionCharts';
+import MonthlyDynamicsChart from './MonthlyDynamicsChart';
+import TopDirectionsChart from './TopDirectionsChart';
+import TopCategoriesOrganizationsCharts from './TopCategoriesOrganizationsCharts';
+import { STATUS_COLORS, STATUS_LABELS } from '../utils/analyticsUtils';
 
 export default function AnalyticsTab() {
   const user = useAuthStore((state) => state.user);
   const { getIncidentsByTenant, directions, categories } = useIncidentsStore();
   const { organizations } = useSettingsStore();
-  const { toast } = useToast();
 
   const incidents = user?.tenantId ? getIncidentsByTenant(user.tenantId) : [];
-
-
 
   const stats = useMemo(() => {
     const total = incidents.length;
@@ -240,304 +208,23 @@ export default function AnalyticsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Всего инцидентов</p>
-                <p className="text-3xl font-bold mt-1">{stats.total}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  +{stats.last30Days} за 30 дней
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                <Icon name="FileText" size={24} className="text-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Процент исполнения</p>
-                <p className="text-3xl font-bold mt-1 text-green-600">{stats.completionRate}%</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stats.completed} из {stats.total}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <Icon name="TrendingUp" size={24} className="text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Исполнено в срок</p>
-                <p className="text-3xl font-bold mt-1 text-blue-600">{stats.onTimeRate}%</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stats.onTimeCompleted} вовремя
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <Icon name="Clock" size={24} className="text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Требует внимания</p>
-                <p className="text-3xl font-bold mt-1 text-orange-600">{stats.urgentIncidents}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Срочные инциденты
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                <Icon name="AlertTriangle" size={24} className="text-orange-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Просрочено</p>
-                <p className="text-3xl font-bold mt-1 text-red-600">{stats.overdue}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stats.overdueRate}% от общего
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                <Icon name="AlertCircle" size={24} className="text-red-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">В работе</p>
-                <p className="text-3xl font-bold mt-1 text-blue-600">{stats.inProgress}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Активные задачи
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <Icon name="Activity" size={24} className="text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Ожидает исполнения</p>
-                <p className="text-3xl font-bold mt-1 text-orange-600">{stats.awaiting}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Запланировано
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                <Icon name="Clock" size={24} className="text-orange-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Средний срок</p>
-                <p className="text-3xl font-bold mt-1 text-purple-600">{stats.avgDaysToComplete}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  дней на инцидент
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                <Icon name="Calendar" size={24} className="text-purple-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <AnalyticsStatsGrid stats={stats} />
 
       <RiskMatrix incidents={incidents} categories={categories} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Распределение по статусам</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={statusData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  label={(entry) => `${entry.name}: ${entry.value}`}
-                >
-                  {statusData.map((entry, index) => (
-                    <Cell key={index} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      <StatusDistributionCharts 
+        statusData={statusData}
+        timelineData={timelineData}
+      />
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Выполнение по срокам</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {timelineData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={timelineData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                    label
-                  >
-                    {timelineData.map((entry, index) => (
-                      <Cell key={index} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                Нет данных
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      <MonthlyDynamicsChart data={monthlyDynamicsData} />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Динамика инцидентов по месяцам (последние 12 мес.)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {monthlyDynamicsData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={monthlyDynamicsData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="Всего" stroke="#3b82f6" strokeWidth={2} />
-                <Line type="monotone" dataKey="Создано" stroke="#8b5cf6" strokeWidth={2} />
-                <Line type="monotone" dataKey="Исполнено" stroke="#10b981" strokeWidth={2} />
-                <Line type="monotone" dataKey="Просрочено" stroke="#ef4444" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[400px] flex items-center justify-center text-muted-foreground">
-              Нет данных
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <TopDirectionsChart data={topDirections} />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>ТОП-10 направлений по количеству инцидентов</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {topDirections.length > 0 ? (
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={topDirections}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="#3b82f6" name="Количество" />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[400px] flex items-center justify-center text-muted-foreground">
-              Нет данных
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>ТОП-10 категорий инцидентов</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {topCategories.length > 0 ? (
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={topCategories}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#10b981" name="Количество" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[400px] flex items-center justify-center text-muted-foreground">
-                Нет данных
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>ТОП-10 организаций</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {organizationData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={organizationData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#f59e0b" name="Количество" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[400px] flex items-center justify-center text-muted-foreground">
-                Нет данных
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      <TopCategoriesOrganizationsCharts
+        categoriesData={topCategories}
+        organizationsData={organizationData}
+      />
     </div>
   );
 }
