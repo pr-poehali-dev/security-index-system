@@ -1,14 +1,14 @@
 import PageHeader from '@/components/layout/PageHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
-import EmployeeAttestationsTab from '../components/EmployeeAttestationsTab';
-import ComplianceAnalysisTab from '../components/ComplianceAnalysisTab';
-import OrdersTrainingTab from '../components/OrdersTrainingTab';
-import ReportsTab from '../components/ReportsTab';
-import DirectoriesTab from '../components/DirectoriesTab';
-import NotificationsTab from '../components/NotificationsTab';
-import AttestationCalendarTab from '../components/AttestationCalendarTab';
-import TasksTab from '../components/TasksTab';
+import EmployeeAttestationsTab from '../components/employees/EmployeeAttestationsTab';
+import ComplianceAnalysisTab from '../components/reports/ComplianceAnalysisTab';
+import OrdersTrainingTab from '../components/orders/OrdersTrainingTab';
+import ReportsTab from '../components/reports/ReportsTab';
+import DirectoriesTab from '../components/directories/DirectoriesTab';
+import NotificationsTab from '../components/notifications/NotificationsTab';
+import AttestationCalendarTab from '../components/calendar/AttestationCalendarTab';
+import TasksTab from '../components/tasks/TasksTab';
 
 export default function AttestationPage() {
   return (
