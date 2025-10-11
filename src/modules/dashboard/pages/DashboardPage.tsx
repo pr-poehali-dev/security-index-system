@@ -45,7 +45,7 @@ export default function DashboardPage() {
 
   const taskStats = getTaskStats();
   const overdueTasks = getOverdueTasks();
-  const openIncidents = incidents.filter(inc => inc.status === 'new');
+  const openIncidents = incidents.filter(inc => inc.status === 'created');
   const inProgressIncidents = incidents.filter(inc => inc.status === 'in_progress');
 
   const tenantPersonnel = user?.tenantId ? getPersonnelByTenant(user.tenantId) : [];
@@ -144,11 +144,10 @@ export default function DashboardPage() {
       activities.push({
         id: incident.id,
         type: 'incident',
-        title: incident.title,
-        subtitle: incident.assignedToName || 'Не назначено',
+        title: incident.description.length > 60 ? incident.description.slice(0, 60) + '...' : incident.description,
+        subtitle: 'Предписание',
         time: new Date(incident.updatedAt).toLocaleDateString('ru-RU'),
         status: incident.status,
-        priority: incident.priority,
         onClick: () => navigate(ROUTES.INCIDENTS)
       });
     });
@@ -238,17 +237,17 @@ export default function DashboardPage() {
         return incidentDate === dateStr;
       });
 
-      const critical = dayIncidents.filter(i => i.priority === 'critical').length;
-      const high = dayIncidents.filter(i => i.priority === 'high').length;
-      const medium = dayIncidents.filter(i => i.priority === 'medium').length;
-      const low = dayIncidents.filter(i => i.priority === 'low').length;
+      const created = dayIncidents.filter(i => i.status === 'created').length;
+      const inProgress = dayIncidents.filter(i => i.status === 'in_progress').length;
+      const overdue = dayIncidents.filter(i => i.status === 'overdue').length;
+      const completed = dayIncidents.filter(i => i.status === 'completed' || i.status === 'completed_late').length;
 
       return {
         date: date.getDate() + ' ' + date.toLocaleDateString('ru-RU', { month: 'short' }),
-        'Критический': critical,
-        'Высокий': high,
-        'Средний': medium,
-        'Низкий': low
+        'Создано': created,
+        'В работе': inProgress,
+        'Просрочено': overdue,
+        'Исполнено': completed
       };
     });
   }, [incidents]);
@@ -264,7 +263,7 @@ export default function DashboardPage() {
           tasksInProgress: taskStats.inProgress,
           overdueTasks: overdueTasks.length,
           openIncidents: openIncidents.length,
-          criticalIncidents: incidents.filter(i => i.priority === 'critical').length,
+          criticalIncidents: incidents.filter(i => i.status === 'overdue').length,
           expertiseOverdue: objectsStats.needsExpertise
         },
         tasks: criticalTasks,
