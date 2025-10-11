@@ -14,6 +14,7 @@ interface ChecklistCardProps {
   checklist: Checklist;
   onEdit: (checklist: Checklist) => void;
   onDelete: (id: string) => void;
+  onSaveAsTemplate: (checklist: Checklist) => void;
 }
 
 const getCategoryIcon = (category: string) => {
@@ -34,7 +35,7 @@ const getCategoryLabel = (category: string) => {
   }
 };
 
-export default function ChecklistCard({ checklist, onEdit, onDelete }: ChecklistCardProps) {
+export default function ChecklistCard({ checklist, onEdit, onDelete, onSaveAsTemplate }: ChecklistCardProps) {
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardContent className="p-6">
@@ -54,6 +55,10 @@ export default function ChecklistCard({ checklist, onEdit, onDelete }: Checklist
               <DropdownMenuItem onClick={() => onEdit(checklist)}>
                 <Icon name="Pencil" size={14} className="mr-2" />
                 Редактировать
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onSaveAsTemplate(checklist)}>
+                <Icon name="BookmarkPlus" size={14} className="mr-2" />
+                Сохранить как шаблон
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => onDelete(checklist.id)}

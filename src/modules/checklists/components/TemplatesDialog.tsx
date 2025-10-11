@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useChecklistsStore } from '@/stores/checklistsStore';
+import { useTemplatesStore } from '@/stores/templatesStore';
 import {
   Dialog,
   DialogContent,
@@ -11,8 +12,10 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { CHECKLIST_TEMPLATES } from '../data/templates';
+import type { ChecklistTemplate } from '../data/templates';
 
 interface TemplatesDialogProps {
   open: boolean;
@@ -45,14 +48,20 @@ const getCategoryLabel = (category: string) => {
 
 export default function TemplatesDialog({ open, onClose }: TemplatesDialogProps) {
   const { addChecklist } = useChecklistsStore();
+  const { customTemplates, deleteCustomTemplate } = useTemplatesStore();
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentTab, setCurrentTab] = useState('system');
 
-  const filteredTemplates = CHECKLIST_TEMPLATES.filter(template =>
+  const allTemplates = useMemo(() => {
+    return currentTab === 'system' ? CHECKLIST_TEMPLATES : customTemplates;
+  }, [currentTab, customTemplates]);
+
+  const filteredTemplates = allTemplates.filter(template =>
     template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     template.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleUseTemplate = (template: typeof CHECKLIST_TEMPLATES[0]) => {
+  const handleUseTemplate = (template: ChecklistTemplate) => {
     addChecklist({
       tenantId: 'tenant-1',
       name: template.name,
@@ -65,6 +74,12 @@ export default function TemplatesDialog({ open, onClose }: TemplatesDialogProps)
     onClose();
   };
 
+  const handleDeleteCustomTemplate = (templateName: string) => {
+    if (confirm(`Удалить шаблон "${templateName}"?`)) {
+      deleteCustomTemplate(templateName);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -75,18 +90,30 @@ export default function TemplatesDialog({ open, onClose }: TemplatesDialogProps)
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="relative">
-            <Icon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-            <Input
-              placeholder="Поиск шаблонов..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+        <Tabs value={currentTab} onValueChange={setCurrentTab} className="py-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="system">
+              <Icon name="FolderOpen" size={16} className="mr-2" />
+              Системные ({CHECKLIST_TEMPLATES.length})
+            </TabsTrigger>
+            <TabsTrigger value="custom">
+              <Icon name="Star" size={16} className="mr-2" />
+              Мои шаблоны ({customTemplates.length})
+            </TabsTrigger>
+          </TabsList>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="mt-4 space-y-4">
+            <div className="relative">
+              <Icon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <Input
+                placeholder="Поиск шаблонов..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredTemplates.map((template, index) => (
               <Card key={index} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
@@ -137,21 +164,33 @@ export default function TemplatesDialog({ open, onClose }: TemplatesDialogProps)
                       )}
                     </div>
 
-                    <Button 
-                      onClick={() => handleUseTemplate(template)}
-                      className="w-full gap-2"
-                      size="sm"
-                    >
-                      <Icon name="Plus" size={14} />
-                      Использовать шаблон
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={() => handleUseTemplate(template)}
+                        className="flex-1 gap-2"
+                        size="sm"
+                      >
+                        <Icon name="Plus" size={14} />
+                        Использовать
+                      </Button>
+                      {currentTab === 'custom' && (
+                        <Button 
+                          onClick={() => handleDeleteCustomTemplate(template.name)}
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600"
+                        >
+                          <Icon name="Trash2" size={14} />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
-          </div>
+            </div>
 
-          {filteredTemplates.length === 0 && (
+            {filteredTemplates.length === 0 && (
             <Card className="border-dashed">
               <CardContent className="p-12 text-center">
                 <Icon name="Search" className="mx-auto mb-4 text-gray-400" size={48} />
@@ -159,8 +198,9 @@ export default function TemplatesDialog({ open, onClose }: TemplatesDialogProps)
                 <p className="text-sm text-gray-400 mt-2">Попробуйте изменить запрос</p>
               </CardContent>
             </Card>
-          )}
-        </div>
+            )}
+          </div>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

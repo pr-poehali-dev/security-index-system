@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useChecklistsStore } from '@/stores/checklistsStore';
+import { useTemplatesStore } from '@/stores/templatesStore';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,23 @@ export default function ChecklistsPage() {
   const handleDeleteChecklist = (id: string) => {
     if (confirm('Удалить этот чек-лист?')) {
       deleteChecklist(id);
+    }
+  };
+
+  const handleSaveAsTemplate = (checklist: Checklist) => {
+    const templateName = prompt('Введите название шаблона:', checklist.name);
+    if (templateName) {
+      useTemplatesStore.getState().addCustomTemplate({
+        name: templateName,
+        category: checklist.category,
+        description: `Пользовательский шаблон на основе "${checklist.name}"`,
+        items: checklist.items.map(item => ({
+          question: item.question,
+          requiresComment: item.requiresComment,
+          criticalItem: item.criticalItem
+        }))
+      });
+      alert('Шаблон успешно сохранён!');
     }
   };
 
@@ -138,6 +156,7 @@ export default function ChecklistsPage() {
                 checklist={checklist}
                 onEdit={handleEditChecklist}
                 onDelete={handleDeleteChecklist}
+                onSaveAsTemplate={handleSaveAsTemplate}
               />
             ))}
           </div>
