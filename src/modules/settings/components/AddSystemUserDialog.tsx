@@ -96,7 +96,7 @@ export default function AddSystemUserDialog({ open, onOpenChange }: AddSystemUse
   };
 
   const handleSubmit = () => {
-    if (!email || !login || !password || !role) {
+    if (!personnelId || !email || !login || !password || !role) {
       toast({
         title: 'Ошибка',
         description: 'Заполните все обязательные поля',
@@ -111,7 +111,7 @@ export default function AddSystemUserDialog({ open, onOpenChange }: AddSystemUse
 
     addSystemUser({
       tenantId: user!.tenantId!,
-      personnelId: personnelId || undefined,
+      personnelId,
       email,
       login,
       passwordHash: hashPassword(password),
@@ -149,13 +149,12 @@ export default function AddSystemUserDialog({ open, onOpenChange }: AddSystemUse
 
         <div className="space-y-4">
           <div>
-            <Label>Выбрать из персонала (опционально)</Label>
+            <Label>Сотрудник *</Label>
             <Select value={personnelId} onValueChange={handlePersonnelChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Выберите сотрудника" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Не выбрано</SelectItem>
                 {personnel.map((person) => (
                   <SelectItem key={person.id} value={person.id}>
                     {person.fullName} — {person.position}
@@ -164,7 +163,7 @@ export default function AddSystemUserDialog({ open, onOpenChange }: AddSystemUse
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground mt-1">
-              При выборе автоматически подставятся email и логин
+              Email и логин подставятся автоматически
             </p>
           </div>
 
