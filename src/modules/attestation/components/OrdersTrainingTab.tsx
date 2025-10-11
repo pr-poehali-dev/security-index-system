@@ -1,29 +1,17 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import Icon from '@/components/ui/icon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 import CreateOrderDialog from './CreateOrderDialog';
 import CreateTrainingDialog from './CreateTrainingDialog';
-import OrdersStats from './OrdersStats';
-import TrainingsStats from './TrainingsStats';
-import OrdersCardView from './OrdersCardView';
-import OrdersTableView from './OrdersTableView';
-import TrainingsCardView from './TrainingsCardView';
-import TrainingsTableView from './TrainingsTableView';
 import { useAuthStore } from '@/stores/authStore';
 import { useAttestationStore } from '@/stores/attestationStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useTrainingCenterStore } from '@/stores/trainingCenterStore';
+import { createOrderHandlers } from './orders/orderHandlers';
+import { createTrainingHandlers } from './orders/trainingHandlers';
+import OrdersTab from './orders/OrdersTab';
+import TrainingsTab from './orders/TrainingsTab';
 import type { Order } from '@/types';
 
 export default function OrdersTrainingTab() {
@@ -74,176 +62,16 @@ export default function OrdersTrainingTab() {
     return matchesSearch && matchesStatus;
   });
 
-  const handleChangeOrderStatus = (orderId: string, newStatus: string) => {
-    const order = orders.find(o => o.id === orderId);
-    toast({
-      title: "Статус изменен",
-      description: `Приказ №${order?.number}: ${newStatus}`,
-    });
-  };
+  const orderHandlers = createOrderHandlers(
+    orders,
+    personnel,
+    people,
+    positions,
+    toast,
+    user?.tenantId
+  );
 
-  const handleChangeTrainingStatus = (trainingId: string, newStatus: string) => {
-    const training = trainings.find(t => t.id === trainingId);
-    toast({
-      title: "Статус изменен",
-      description: `Обучение "${training?.title}": ${newStatus}`,
-    });
-  };
-
-  const handleSendToSDO = (orderId: string) => {
-    const order = orders.find(o => o.id === orderId);
-    toast({
-      title: "Направление в СДО «Интеллектуальные системы подготовки»",
-      description: `Приказ №${order?.number}: ${order?.employeeIds.length} сотрудников направлены на обучение в систему дистанционного обучения`,
-    });
-  };
-
-  const handleSendToTrainingCenter = (orderId: string) => {
-    const order = orders.find(o => o.id === orderId);
-    if (!order || !user?.tenantId) return;
-
-    const { addRequest } = useTrainingCenterStore.getState();
-    
-    const employeesList = order.employeeIds.map(empId => {
-      const emp = personnel.find(p => p.id === empId);
-      const person = people.find(p => p.id === emp?.personId);
-      const position = positions.find(pos => pos.id === emp?.positionId);
-      
-      return {
-        personnelId: empId,
-        fullName: person ? `${person.lastName} ${person.firstName} ${person.middleName || ''}`.trim() : 'Неизвестный',
-        position: position?.name || 'Не указана',
-        department: undefined
-      };
-    });
-
-    const request: any = {
-      id: `req-${Date.now()}`,
-      tenantId: user.tenantId,
-      organizationId: order.organizationId || '',
-      organizationName: 'Основная организация',
-      programId: '',
-      programName: order.title,
-      requestDate: new Date().toISOString(),
-      studentsCount: employeesList.length,
-      students: employeesList,
-      contactPerson: order.createdBy,
-      status: 'new',
-      notes: `Заявка создана из приказа №${order.number}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    addRequest(request);
-
-    toast({
-      title: "Заявка отправлена в учебный центр",
-      description: `Приказ №${order.number}: ${order.employeeIds.length} сотрудников направлены на подготовку в учебный центр`,
-    });
-  };
-
-  const handleScheduleAttestation = (orderId: string) => {
-    const order = orders.find(o => o.id === orderId);
-    toast({
-      title: "Направление на аттестацию в ЕПТ организации",
-      description: `Приказ №${order?.number}: ${order?.employeeIds.length} сотрудников направлены на аттестацию в единой платформе тестирования организации`,
-    });
-  };
-
-  const handleRegisterRostechnadzor = (orderId: string) => {
-    const order = orders.find(o => o.id === orderId);
-    toast({
-      title: "Направление на аттестацию в Ростехнадзоре",
-      description: `Приказ №${order?.number}: ${order?.employeeIds.length} сотрудников направлены на аттестацию в системе Ростехнадзора`,
-    });
-  };
-
-  const handleViewOrder = (orderId: string) => {
-    const order = orders.find(o => o.id === orderId);
-    toast({
-      title: "Просмотр приказа",
-      description: `Приказ №${order?.number} - ${order?.title}`,
-    });
-  };
-
-  const handleEditOrder = (orderId: string) => {
-    toast({
-      title: "Редактирование приказа",
-      description: "Откроется форма редактирования приказа",
-    });
-  };
-
-  const handleDownloadOrderPDF = (orderId: string) => {
-    const order = orders.find(o => o.id === orderId);
-    toast({
-      title: "Загрузка PDF",
-      description: `Приказ №${order?.number} будет загружен в формате PDF`,
-    });
-  };
-
-  const handlePrintOrder = (orderId: string) => {
-    toast({
-      title: "Печать приказа",
-      description: "Откроется окно печати",
-    });
-  };
-
-  const handleDeleteOrder = (orderId: string) => {
-    const order = orders.find(o => o.id === orderId);
-    toast({
-      title: "Удаление приказа",
-      description: `Приказ №${order?.number} будет удален`,
-      variant: "destructive",
-    });
-  };
-
-  const handleViewTraining = (trainingId: string) => {
-    const training = trainings.find(t => t.id === trainingId);
-    toast({
-      title: "Просмотр обучения",
-      description: training?.title,
-    });
-  };
-
-  const handleEditTraining = (trainingId: string) => {
-    toast({
-      title: "Редактирование обучения",
-      description: "Откроется форма редактирования",
-    });
-  };
-
-  const handleViewDocuments = (trainingId: string) => {
-    const training = trainings.find(t => t.id === trainingId);
-    toast({
-      title: "Документы обучения",
-      description: `Документов: ${training?.documents?.length || 0}`,
-    });
-  };
-
-  const handleViewParticipants = (trainingId: string) => {
-    const training = trainings.find(t => t.id === trainingId);
-    toast({
-      title: "Список участников",
-      description: `Участников: ${training?.employeeIds.length}`,
-    });
-  };
-
-  const handleDuplicateTraining = (trainingId: string) => {
-    const training = trainings.find(t => t.id === trainingId);
-    toast({
-      title: "Дублирование обучения",
-      description: `Создана копия: ${training?.title}`,
-    });
-  };
-
-  const handleDeleteTraining = (trainingId: string) => {
-    const training = trainings.find(t => t.id === trainingId);
-    toast({
-      title: "Удаление обучения",
-      description: `${training?.title} будет удалено`,
-      variant: "destructive",
-    });
-  };
+  const trainingHandlers = createTrainingHandlers(trainings, toast);
 
   const handleExportOrdersToExcel = async () => {
     const { utils, writeFile } = await import('xlsx');
@@ -332,7 +160,7 @@ export default function OrdersTrainingTab() {
 
     if (order.status === 'prepared') {
       actions.push(
-        <Button key="approve" variant="outline" size="sm" className="gap-1" onClick={() => handleChangeOrderStatus(order.id, 'approved')}>
+        <Button key="approve" variant="outline" size="sm" className="gap-1" onClick={() => orderHandlers.handleChangeOrderStatus(order.id, 'approved')}>
           <Icon name="CheckCircle2" size={14} />
           Согласовать
         </Button>
@@ -341,19 +169,19 @@ export default function OrdersTrainingTab() {
 
     if (order.status === 'approved') {
       actions.push(
-        <Button key="send-sdo" variant="outline" size="sm" className="gap-1" onClick={() => handleSendToSDO(order.id)}>
+        <Button key="send-sdo" variant="outline" size="sm" className="gap-1" onClick={() => orderHandlers.handleSendToSDO(order.id)}>
           <Icon name="Monitor" size={14} />
           СДО ИСП
         </Button>,
-        <Button key="send-tc" variant="outline" size="sm" className="gap-1" onClick={() => handleSendToTrainingCenter(order.id)}>
+        <Button key="send-tc" variant="outline" size="sm" className="gap-1" onClick={() => orderHandlers.handleSendToTrainingCenter(order.id)}>
           <Icon name="Building2" size={14} />
           Учебный центр
         </Button>,
-        <Button key="send-rostechnadzor" variant="outline" size="sm" className="gap-1" onClick={() => handleRegisterRostechnadzor(order.id)}>
+        <Button key="send-rostechnadzor" variant="outline" size="sm" className="gap-1" onClick={() => orderHandlers.handleRegisterRostechnadzor(order.id)}>
           <Icon name="Shield" size={14} />
           Ростехнадзор
         </Button>,
-        <Button key="send-internal" variant="outline" size="sm" className="gap-1" onClick={() => handleScheduleAttestation(order.id)}>
+        <Button key="send-internal" variant="outline" size="sm" className="gap-1" onClick={() => orderHandlers.handleScheduleAttestation(order.id)}>
           <Icon name="ClipboardCheck" size={14} />
           ЕПТ организации
         </Button>
@@ -391,270 +219,55 @@ export default function OrdersTrainingTab() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="orders" className="space-y-4">
-          <Card className="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <Icon name="Construction" size={20} className="text-amber-600 dark:text-amber-400 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">
-                    Раздел находится в разработке
-                  </h4>
-                  <p className="text-sm text-amber-700 dark:text-amber-300">
-                    Функционал создания и управления приказами находится в стадии разработки. 
-                    В ближайшее время здесь появится возможность автоматического формирования приказов 
-                    на направление сотрудников на обучение и аттестацию.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <OrdersStats 
-            total={orderStats.total}
-            draft={orderStats.draft}
-            active={orderStats.active}
-            completed={orderStats.completed}
+        <TabsContent value="orders">
+          <OrdersTab
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            orderTypeFilter={orderTypeFilter}
+            setOrderTypeFilter={setOrderTypeFilter}
+            orderStatusFilter={orderStatusFilter}
+            setOrderStatusFilter={setOrderStatusFilter}
+            orderViewMode={orderViewMode}
+            setOrderViewMode={setOrderViewMode}
+            filteredOrders={filteredOrders}
+            orderStats={orderStats}
+            onChangeStatus={orderHandlers.handleChangeOrderStatus}
+            onView={orderHandlers.handleViewOrder}
+            onEdit={orderHandlers.handleEditOrder}
+            onDownloadPDF={orderHandlers.handleDownloadOrderPDF}
+            onPrint={orderHandlers.handlePrintOrder}
+            onDelete={orderHandlers.handleDeleteOrder}
+            onExportToExcel={handleExportOrdersToExcel}
+            onCreateOrder={() => setShowCreateOrderDialog(true)}
+            getOrderActions={getOrderActions}
           />
-
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <CardTitle>Список приказов</CardTitle>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Button
-                    variant={orderViewMode === 'cards' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setOrderViewMode('cards')}
-                    className="gap-2"
-                  >
-                    <Icon name="LayoutGrid" size={16} />
-                    Карточки
-                  </Button>
-                  <Button
-                    variant={orderViewMode === 'table' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setOrderViewMode('table')}
-                    className="gap-2"
-                  >
-                    <Icon name="Table" size={16} />
-                    Таблица
-                  </Button>
-                  <Button variant="outline" onClick={handleExportOrdersToExcel} className="gap-2">
-                    <Icon name="Download" size={16} />
-                    Экспорт
-                  </Button>
-                  <Button onClick={() => setShowCreateOrderDialog(true)} className="gap-2">
-                    <Icon name="Plus" size={16} />
-                    Создать приказ
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <div className="relative flex-1">
-                  <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Поиск по номеру, названию или сотрудникам..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <Select value={orderTypeFilter} onValueChange={setOrderTypeFilter}>
-                  <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue placeholder="Тип приказа" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Все типы</SelectItem>
-                    <SelectItem value="attestation">Аттестация</SelectItem>
-                    <SelectItem value="training">Обучение</SelectItem>
-                    <SelectItem value="suspension">Отстранение</SelectItem>
-                    <SelectItem value="sdo">СДО</SelectItem>
-                    <SelectItem value="training_center">Учебный центр</SelectItem>
-                    <SelectItem value="internal_attestation">ЕПТ организации</SelectItem>
-                    <SelectItem value="rostechnadzor">Ростехнадзор</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={orderStatusFilter} onValueChange={setOrderStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Статус" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Все статусы</SelectItem>
-                    <SelectItem value="draft">Черновик</SelectItem>
-                    <SelectItem value="prepared">Подготовлен</SelectItem>
-                    <SelectItem value="approved">Согласован</SelectItem>
-                    <SelectItem value="active">Активен</SelectItem>
-                    <SelectItem value="completed">Исполнен</SelectItem>
-                    <SelectItem value="cancelled">Отменен</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {orderViewMode === 'cards' ? (
-                <OrdersCardView
-                  orders={filteredOrders}
-                  onChangeStatus={handleChangeOrderStatus}
-                  onView={handleViewOrder}
-                  onEdit={handleEditOrder}
-                  onDownloadPDF={handleDownloadOrderPDF}
-                  onPrint={handlePrintOrder}
-                  onDelete={handleDeleteOrder}
-                  getOrderActions={getOrderActions}
-                />
-              ) : (
-                <OrdersTableView
-                  orders={filteredOrders}
-                  onChangeStatus={handleChangeOrderStatus}
-                  onView={handleViewOrder}
-                  onEdit={handleEditOrder}
-                  onDownloadPDF={handleDownloadOrderPDF}
-                  onPrint={handlePrintOrder}
-                  onDelete={handleDeleteOrder}
-                />
-              )}
-            </CardContent>
-          </Card>
         </TabsContent>
 
-        <TabsContent value="trainings" className="space-y-4">
-          <Card className="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <Icon name="Construction" size={20} className="text-amber-600 dark:text-amber-400 mt-0.5" />
-                <div>
-                  <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">
-                    Раздел находится в разработке
-                  </h4>
-                  <p className="text-sm text-amber-700 dark:text-amber-300">
-                    Функционал планирования и управления обучениями находится в стадии разработки. 
-                    В ближайшее время здесь появится возможность планировать обучения, отслеживать прогресс 
-                    и получать данные из СДО и учебных центров в автоматическом режиме.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <TrainingsStats
-            total={trainingStats.total}
-            planned={trainingStats.planned}
-            inProgress={trainingStats.inProgress}
-            totalCost={trainingStats.totalCost}
+        <TabsContent value="trainings">
+          <TrainingsTab
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            trainingStatusFilter={trainingStatusFilter}
+            setTrainingStatusFilter={setTrainingStatusFilter}
+            trainingViewMode={trainingViewMode}
+            setTrainingViewMode={setTrainingViewMode}
+            filteredTrainings={filteredTrainings}
+            trainingOrgs={trainingOrgs}
+            personnel={personnel}
+            people={people}
+            positions={positions}
+            expandedTrainings={expandedTrainings}
+            trainingStats={trainingStats}
+            onToggleExpanded={toggleTrainingExpanded}
+            onEdit={trainingHandlers.handleEditTraining}
+            onView={trainingHandlers.handleViewTraining}
+            onViewDocuments={trainingHandlers.handleViewDocuments}
+            onViewParticipants={trainingHandlers.handleViewParticipants}
+            onDuplicate={trainingHandlers.handleDuplicateTraining}
+            onDelete={trainingHandlers.handleDeleteTraining}
+            onExportToExcel={handleExportTrainingsToExcel}
+            onCreateTraining={() => setShowCreateTrainingDialog(true)}
           />
-
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <CardTitle>Список обучений</CardTitle>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Button
-                    variant={trainingViewMode === 'cards' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setTrainingViewMode('cards')}
-                    className="gap-2"
-                  >
-                    <Icon name="LayoutGrid" size={16} />
-                    Карточки
-                  </Button>
-                  <Button
-                    variant={trainingViewMode === 'table' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setTrainingViewMode('table')}
-                    className="gap-2"
-                  >
-                    <Icon name="Table" size={16} />
-                    Таблица
-                  </Button>
-                  <Button variant="outline" onClick={handleExportTrainingsToExcel} className="gap-2">
-                    <Icon name="Download" size={16} />
-                    Экспорт
-                  </Button>
-                  <Button onClick={() => setShowCreateTrainingDialog(true)} className="gap-2">
-                    <Icon name="Plus" size={16} />
-                    Запланировать обучение
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <div className="relative flex-1">
-                  <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Поиск по названию, организации или сотрудникам..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <Select value={trainingStatusFilter} onValueChange={setTrainingStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Статус" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Все статусы</SelectItem>
-                    <SelectItem value="planned">Запланировано</SelectItem>
-                    <SelectItem value="in_progress">В процессе</SelectItem>
-                    <SelectItem value="completed">Завершено</SelectItem>
-                    <SelectItem value="cancelled">Отменено</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {trainingViewMode === 'cards' ? (
-                <TrainingsCardView
-                  trainings={filteredTrainings}
-                  trainingOrgs={trainingOrgs}
-                  personnel={personnel}
-                  people={people}
-                  positions={positions}
-                  expandedTrainings={expandedTrainings}
-                  onToggleExpanded={toggleTrainingExpanded}
-                  onEdit={handleEditTraining}
-                  onView={handleViewTraining}
-                  onViewDocuments={handleViewDocuments}
-                  onViewParticipants={handleViewParticipants}
-                  onDuplicate={handleDuplicateTraining}
-                  onDelete={handleDeleteTraining}
-                />
-              ) : (
-                <TrainingsTableView
-                  trainings={filteredTrainings}
-                  trainingOrgs={trainingOrgs}
-                  onView={handleViewTraining}
-                  onEdit={handleEditTraining}
-                  onViewDocuments={handleViewDocuments}
-                  onViewParticipants={handleViewParticipants}
-                  onDuplicate={handleDuplicateTraining}
-                  onDelete={handleDeleteTraining}
-                />
-              )}
-
-              <Card className="mt-6 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <Icon name="Info" size={20} className="text-blue-600 dark:text-blue-400 mt-0.5" />
-                    <div>
-                      <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
-                        Интеграция с СДО и учебными центрами
-                      </h4>
-                      <p className="text-sm text-blue-700 dark:text-blue-300 mb-2">
-                        Система автоматически отслеживает прогресс обучения в СДО «Интеллектуальные системы подготовки» 
-                        и получает данные об удостоверениях из учебных центров.
-                      </p>
-                      <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1 ml-4">
-                        <li>• Обучения со статусом "В процессе" показывают прогресс в СДО</li>
-                        <li>• Завершённые обучения отображают номер и дату выдачи удостоверения</li>
-                      </ul>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </CardContent>
-          </Card>
         </TabsContent>
       </Tabs>
 
