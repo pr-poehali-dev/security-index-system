@@ -14,6 +14,7 @@ const mockSources: IncidentSource[] = [
   { id: 'src-1', tenantId: 'tenant-1', name: 'Внутренняя проверка', status: 'active', createdAt: '2024-01-01' },
   { id: 'src-2', tenantId: 'tenant-1', name: 'Внешняя проверка', status: 'active', createdAt: '2024-01-01' },
   { id: 'src-3', tenantId: 'tenant-1', name: 'Сообщение работника', status: 'active', createdAt: '2024-01-01' },
+  { id: 'src-4', tenantId: 'tenant-1', name: 'Аудит', status: 'active', createdAt: '2024-01-01' },
 ];
 
 const mockDirections: IncidentDirection[] = [
@@ -167,7 +168,7 @@ interface IncidentsState {
   categories: IncidentCategory[];
   subcategories: IncidentSubcategory[];
 
-  addIncident: (incident: Omit<Incident, 'id' | 'createdAt' | 'updatedAt' | 'daysLeft'>) => void;
+  addIncident: (incident: Omit<Incident, 'id' | 'createdAt' | 'updatedAt' | 'daysLeft'>) => Incident;
   updateIncident: (id: string, updates: Partial<Incident>) => void;
   deleteIncident: (id: string) => void;
   getIncidentsByTenant: (tenantId: string) => Incident[];
@@ -220,6 +221,7 @@ export const useIncidentsStore = create<IncidentsState>()(persist((set, get) => 
       updatedAt: new Date().toISOString()
     };
     set((state) => ({ incidents: [...state.incidents, newIncident] }));
+    return newIncident;
   },
 
   updateIncident: (id, updates) => {

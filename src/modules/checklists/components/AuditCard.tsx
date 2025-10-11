@@ -2,11 +2,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
+import { useIncidentsStore } from '@/stores/incidentsStore';
 import type { Audit } from '@/types';
 
 interface AuditCardProps {
   audit: Audit;
   checklistName?: string;
+  checklistCriticalCount?: number;
   onConduct: (audit: Audit) => void;
 }
 
@@ -32,8 +34,13 @@ const getPassRate = (audit: Audit) => {
   return Math.round((passed / audit.findings.length) * 100);
 };
 
-export default function AuditCard({ audit, checklistName, onConduct }: AuditCardProps) {
+export default function AuditCard({ audit, checklistName, checklistCriticalCount = 0, onConduct }: AuditCardProps) {
+  const { incidents } = useIncidentsStore();
   const passRate = getPassRate(audit);
+  
+  const criticalFailures = audit.findings.filter(f => f.result === 'fail').length;
+  const relatedIncidents = incidents.filter(inc => inc.sourceAuditId === audit.id);
+  const hasCreatedIncidents = relatedIncidents.length > 0;
 
   return (
     <Card>
@@ -68,8 +75,8 @@ export default function AuditCard({ audit, checklistName, onConduct }: AuditCard
         </div>
 
         {audit.findings.length > 0 && (
-          <div className="mb-4">
-            <h4 className="text-sm font-medium mb-2">Результаты проверки:</h4>
+          <div className="mb-4 space-y-3">
+            <h4 className="text-sm font-medium">Результаты проверки:</h4>
             <div className="grid grid-cols-3 gap-2 text-sm">
               <div className="p-2 bg-green-50 rounded text-center">
                 <Icon name="CheckCircle2" className="mx-auto mb-1 text-green-600" size={20} />
@@ -93,6 +100,22 @@ export default function AuditCard({ audit, checklistName, onConduct }: AuditCard
                 </p>
               </div>
             </div>
+            
+            {hasCreatedIncidents && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                <div className="flex items-center gap-2">
+                  <Icon name="AlertTriangle" className="text-orange-600" size={18} />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-orange-900">
+                      Создано инцидентов: {relatedIncidents.length}
+                    </p>
+                    <p className="text-xs text-orange-700">
+                      По критическим замечаниям автоматически созданы инциденты и задачи
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

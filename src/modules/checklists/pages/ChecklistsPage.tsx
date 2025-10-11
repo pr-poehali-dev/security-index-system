@@ -171,6 +171,7 @@ export default function ChecklistsPage() {
                   key={audit.id} 
                   audit={audit} 
                   checklistName={checklist?.name}
+                  checklistCriticalCount={checklist?.items.filter(i => i.criticalItem).length}
                   onConduct={handleConductAudit}
                 />
               );

@@ -349,6 +349,8 @@ export interface Incident {
   status: IncidentStatus;
   notes?: string;
   comments?: string;
+  sourceType?: 'audit' | 'manual';
+  sourceAuditId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -405,6 +407,9 @@ export interface Task {
   completedAt?: string;
   sourceType?: 'incident' | 'audit' | 'checklist';
   sourceId?: string;
+  incidentId?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Equipment {

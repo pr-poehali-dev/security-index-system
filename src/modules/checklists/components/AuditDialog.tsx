@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useChecklistsStore } from '@/stores/checklistsStore';
+import { useIncidentsStore } from '@/stores/incidentsStore';
+import { useTasksStore } from '@/stores/tasksStore';
+import { useOrganizationsStore } from '@/stores/organizationsStore';
 import {
   Dialog,
   DialogContent,
@@ -15,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import SignaturePad from '@/components/ui/signature-pad';
 import Icon from '@/components/ui/icon';
+import CriticalIssuesDialog from './CriticalIssuesDialog';
 import type { Audit, ChecklistItem } from '@/types';
 
 interface AuditDialogProps {
@@ -34,12 +38,17 @@ interface ItemResponse {
 
 export default function AuditDialog({ open, onClose, audit }: AuditDialogProps) {
   const { checklists, updateAuditFindings, completeAudit } = useChecklistsStore();
+  const { addIncident, sources, directions } = useIncidentsStore();
+  const { addTask } = useTasksStore();
+  const { organizations } = useOrganizationsStore();
   const checklist = checklists.find(c => c.id === audit.checklistId);
   
   const [responses, setResponses] = useState<ItemResponse[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showSignature, setShowSignature] = useState(false);
   const [signature, setSignature] = useState<string | undefined>(audit.auditorSignature);
+  const [showCriticalIssuesDialog, setShowCriticalIssuesDialog] = useState(false);
+  const [createdIssues, setCreatedIssues] = useState<Array<{ question: string; comment?: string; incidentId: string; taskId: string }>>([]);
 
   useEffect(() => {
     if (checklist && open) {
@@ -127,7 +136,82 @@ export default function AuditDialog({ open, onClose, audit }: AuditDialogProps) 
 
     updateAuditFindings(audit.id, findings);
     completeAudit(audit.id);
+
+    const criticalIssues = findings.filter(f => {
+      const item = checklist?.items.find(i => i.id === f.itemId);
+      return item?.criticalItem && f.result === 'fail';
+    });
+
+    if (criticalIssues.length > 0) {
+      createIncidentsAndTasks(criticalIssues);
+    }
+
     onClose();
+  };
+
+  const createIncidentsAndTasks = (criticalIssues: typeof responses) => {
+    const organization = organizations.find(org => org.id === audit.organizationId);
+    const auditSource = sources.find(s => s.name === 'Аудит') || sources[0];
+    const direction = directions[0];
+    const issues: typeof createdIssues = [];
+    
+    criticalIssues.forEach((issue) => {
+      const item = checklist?.items.find(i => i.id === issue.itemId);
+      if (!item) return;
+
+      const incident = addIncident({
+        tenantId: audit.tenantId,
+        organizationId: audit.organizationId,
+        productionSiteId: organization?.productionSites?.[0]?.id || 'site-1',
+        reportDate: new Date().toISOString().split('T')[0],
+        sourceId: auditSource?.id || 'src-1',
+        directionId: direction?.id || 'dir-1',
+        description: `Критическое замечание по аудиту: ${item.question}`,
+        correctiveAction: issue.comment || 'Требуется устранение выявленного нарушения',
+        fundingTypeId: 'fund-2',
+        categoryId: 'cat-1',
+        subcategoryId: 'sub-1-1',
+        responsiblePersonnelId: audit.auditorId,
+        plannedDate: getPlannedDate(7),
+        status: 'in_progress',
+        notes: `Создано автоматически из аудита #${audit.id}`,
+        sourceType: 'audit',
+        sourceAuditId: audit.id
+      });
+
+      const task = addTask({
+        tenantId: audit.tenantId,
+        title: `Устранить: ${item.question}`,
+        description: issue.comment || item.question,
+        type: 'corrective_action',
+        priority: 'critical',
+        status: 'open',
+        assignedTo: audit.auditorId,
+        createdBy: audit.auditorId,
+        dueDate: getPlannedDate(7),
+        sourceType: 'audit',
+        sourceId: audit.id,
+        incidentId: incident.id
+      });
+
+      issues.push({
+        question: item.question,
+        comment: issue.comment,
+        incidentId: incident.id,
+        taskId: task.id
+      });
+    });
+
+    if (issues.length > 0) {
+      setCreatedIssues(issues);
+      setShowCriticalIssuesDialog(true);
+    }
+  };
+
+  const getPlannedDate = (daysFromNow: number): string => {
+    const date = new Date();
+    date.setDate(date.getDate() + daysFromNow);
+    return date.toISOString().split('T')[0];
   };
 
   const canComplete = responses.every(r => r.result !== null);
@@ -369,6 +453,12 @@ export default function AuditDialog({ open, onClose, audit }: AuditDialogProps) 
           </div>
         </div>
       </DialogContent>
+
+      <CriticalIssuesDialog
+        open={showCriticalIssuesDialog}
+        onClose={() => setShowCriticalIssuesDialog(false)}
+        issues={createdIssues}
+      />
     </Dialog>
   );
 }
