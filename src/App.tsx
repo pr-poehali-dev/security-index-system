@@ -5,30 +5,42 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/lib/constants";
-import { LoginPage } from "@/modules/auth";
-import { DashboardPage } from "@/modules/dashboard";
-import { TenantsPage } from "@/modules/tenants";
-import { SettingsPage } from "@/modules/settings";
-import { CatalogPage } from "@/modules/catalog";
-import { IncidentsPage } from "@/modules/incidents";
-import { ChecklistsPage } from "@/modules/checklists";
-import { AttestationPage } from "@/modules/attestation";
-import { TasksPage } from "@/modules/tasks";
-import { ExaminationPage } from "@/modules/examination";
-import { NotificationsPage } from "@/modules/notifications";
-import { MaintenancePage } from "@/modules/maintenance";
-import { BudgetPage } from "@/modules/budget";
-import TrainingCenterPage from "@/modules/training-center/pages/TrainingCenterPage";
 import Sidebar from "@/components/layout/Sidebar";
-import { NotFoundPage } from "@/modules/common";
+
+const LoginPage = lazy(() => import("@/modules/auth").then(m => ({ default: m.LoginPage })));
+const DashboardPage = lazy(() => import("@/modules/dashboard").then(m => ({ default: m.DashboardPage })));
+const TenantsPage = lazy(() => import("@/modules/tenants").then(m => ({ default: m.TenantsPage })));
+const SettingsPage = lazy(() => import("@/modules/settings").then(m => ({ default: m.SettingsPage })));
+const CatalogPage = lazy(() => import("@/modules/catalog").then(m => ({ default: m.CatalogPage })));
+const IncidentsPage = lazy(() => import("@/modules/incidents").then(m => ({ default: m.IncidentsPage })));
+const ChecklistsPage = lazy(() => import("@/modules/checklists").then(m => ({ default: m.ChecklistsPage })));
+const AttestationPage = lazy(() => import("@/modules/attestation").then(m => ({ default: m.AttestationPage })));
+const TasksPage = lazy(() => import("@/modules/tasks").then(m => ({ default: m.TasksPage })));
+const ExaminationPage = lazy(() => import("@/modules/examination").then(m => ({ default: m.ExaminationPage })));
+const NotificationsPage = lazy(() => import("@/modules/notifications").then(m => ({ default: m.NotificationsPage })));
+const MaintenancePage = lazy(() => import("@/modules/maintenance").then(m => ({ default: m.MaintenancePage })));
+const BudgetPage = lazy(() => import("@/modules/budget").then(m => ({ default: m.BudgetPage })));
+const TrainingCenterPage = lazy(() => import("@/modules/training-center/pages/TrainingCenterPage"));
+const NotFoundPage = lazy(() => import("@/modules/common").then(m => ({ default: m.NotFoundPage })));
 import { useIncidentNotifications } from "@/hooks/useIncidentNotifications";
 import { useAttestationNotifications } from "@/hooks/useAttestationNotifications";
 import { useCatalogNotifications } from "@/hooks/useCatalogNotifications";
 
 const queryClient = new QueryClient();
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="flex flex-col items-center gap-4">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900 dark:border-gray-100"></div>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Загрузка...</p>
+      </div>
+    </div>
+  );
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -78,8 +90,9 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path={ROUTES.LOGIN} element={<LoginPage />} />
             <Route
               path={ROUTES.DASHBOARD}
               element={
@@ -210,9 +223,10 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
-            <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+              <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
