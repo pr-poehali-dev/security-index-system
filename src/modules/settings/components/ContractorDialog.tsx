@@ -110,7 +110,17 @@ export default function ContractorDialog({ open, onOpenChange, contractor }: Con
               </Select>
             </div>
 
-
+            <div>
+              <Label htmlFor="contractorTenantId">ID организации в системе (опционально)</Label>
+              <Input
+                id="contractorTenantId"
+                {...register('contractorTenantId')}
+                placeholder="Введите ID тенанта для автоматической интеграции"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Если контрагент зарегистрирован в системе, укажите его ID для автоматической передачи заявок
+              </p>
+            </div>
 
             <div>
               <Label htmlFor="contractorName">Название организации *</Label>
