@@ -1,15 +1,14 @@
-import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import { useCatalogStore } from '@/stores/catalogStore';
-import DocumentUploadModal from './DocumentUploadModal';
+import ObjectGeneralTab from './ObjectGeneralTab';
+import ObjectDatesTab from './ObjectDatesTab';
+import ObjectDocumentsTab from './ObjectDocumentsTab';
 import ObjectPersonnelWidget from './contractors/ObjectPersonnelWidget';
-import type { IndustrialObject, DocumentType, DocumentStatus } from '@/types/catalog';
+import type { IndustrialObject } from '@/types/catalog';
 
 interface ObjectDetailsModalProps {
   open: boolean;
@@ -42,73 +41,13 @@ const getTypeLabel = (type: IndustrialObject['type']) => {
   }
 };
 
-const InfoRow = ({ icon, label, value }: { icon: string; label: string; value: string | undefined }) => {
-  if (!value) return null;
-  
-  return (
-    <div className="flex items-start gap-3 py-2">
-      <Icon name={icon} size={18} className="text-muted-foreground mt-0.5 flex-shrink-0" />
-      <div className="flex-1 min-w-0">
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="font-medium break-words">{value}</p>
-      </div>
-    </div>
-  );
-};
-
-const documentTypeLabels: Record<DocumentType, string> = {
-  passport: 'Паспорт',
-  scheme: 'Схема',
-  permit: 'Разрешение',
-  protocol: 'Протокол',
-  certificate: 'Заключение',
-  other: 'Другое'
-};
-
-const documentStatusLabels: Record<DocumentStatus, string> = {
-  valid: 'Действителен',
-  expiring_soon: 'Истекает скоро',
-  expired: 'Истек'
-};
-
 export default function ObjectDetailsModal({ open, onOpenChange, object, onEdit }: ObjectDetailsModalProps) {
   const { organizations, getDocumentsByObject } = useCatalogStore();
-  const [uploadModalOpen, setUploadModalOpen] = useState(false);
-  const [documentTypeFilter, setDocumentTypeFilter] = useState<string>('all');
-  const [documentStatusFilter, setDocumentStatusFilter] = useState<string>('all');
-  
-  const organization = object ? organizations.find(org => org.id === object.organizationId) : null;
-  const allDocuments = object ? getDocumentsByObject(object.id) : [];
-  
-  const documents = useMemo(() => {
-    return allDocuments.filter(doc => {
-      const matchesType = documentTypeFilter === 'all' || doc.type === documentTypeFilter;
-      const matchesStatus = documentStatusFilter === 'all' || doc.status === documentStatusFilter;
-      return matchesType && matchesStatus;
-    });
-  }, [allDocuments, documentTypeFilter, documentStatusFilter]);
   
   if (!object) return null;
-
-  const formatDate = (date: string | undefined) => {
-    if (!date) return '-';
-    return new Date(date).toLocaleDateString('ru-RU', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  };
-
-  const isDateExpired = (date: string | undefined) => {
-    if (!date) return false;
-    return new Date(date) < new Date();
-  };
-
-  const isDateSoon = (date: string | undefined) => {
-    if (!date) return false;
-    const diffDays = Math.floor((new Date(date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-    return diffDays <= 90 && diffDays >= 0;
-  };
+  
+  const organization = organizations.find(org => org.id === object.organizationId);
+  const allDocuments = getDocumentsByObject(object.id);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -155,352 +94,32 @@ export default function ObjectDetailsModal({ open, onOpenChange, object, onEdit 
             </TabsTrigger>
             <TabsTrigger value="documents" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Icon name="FileText" size={20} />
-              <span className="text-xs font-medium">Документы ({documents.length})</span>
+              <span className="text-xs font-medium">Документы ({allDocuments.length})</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="general" className="space-y-4 mt-4">
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Icon name="Info" size={18} />
-                  Общая информация
-                </h3>
-                <div className="space-y-1 divide-y">
-                  <InfoRow
-                    icon="Building"
-                    label="Организация"
-                    value={organization?.name}
-                  />
-                  <InfoRow
-                    icon="Tag"
-                    label="Категория"
-                    value={object.category}
-                  />
-                  <InfoRow
-                    icon="Calendar"
-                    label="Дата ввода в эксплуатацию"
-                    value={formatDate(object.commissioningDate)}
-                  />
-                  <InfoRow
-                    icon="User"
-                    label="Ответственное лицо"
-                    value={object.responsiblePerson}
-                  />
-                  {object.description && (
-                    <InfoRow
-                      icon="FileText"
-                      label="Описание"
-                      value={object.description}
-                    />
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Icon name="MapPin" size={18} />
-                  Местоположение
-                </h3>
-                <div className="space-y-1 divide-y">
-                  <InfoRow
-                    icon="MapPin"
-                    label="Адрес"
-                    value={object.location.address}
-                  />
-                  {object.location.coordinates && (
-                    <>
-                      <InfoRow
-                        icon="Navigation"
-                        label="Координаты"
-                        value={`${object.location.coordinates.lat.toFixed(6)}, ${object.location.coordinates.lng.toFixed(6)}`}
-                      />
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="general" className="mt-4">
+            <ObjectGeneralTab object={object} organization={organization} />
           </TabsContent>
 
-          <TabsContent value="dates" className="space-y-4 mt-4">
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Icon name="Calendar" size={18} />
-                  Даты экспертиз и диагностики
-                </h3>
-                <div className="space-y-4">
-                  {object.nextExpertiseDate && (
-                    <div className="flex items-start gap-3 p-4 rounded-lg border">
-                      <Icon 
-                        name="FileCheck" 
-                        size={24} 
-                        className={`flex-shrink-0 mt-0.5 ${
-                          isDateExpired(object.nextExpertiseDate) 
-                            ? 'text-red-500' 
-                            : isDateSoon(object.nextExpertiseDate) 
-                            ? 'text-amber-500' 
-                            : 'text-blue-500'
-                        }`}
-                      />
-                      <div className="flex-1">
-                        <p className="font-medium">Экспертиза промышленной безопасности (ЭПБ)</p>
-                        <p className={`text-lg font-semibold mt-1 ${
-                          isDateExpired(object.nextExpertiseDate) 
-                            ? 'text-red-600' 
-                            : isDateSoon(object.nextExpertiseDate) 
-                            ? 'text-amber-600' 
-                            : ''
-                        }`}>
-                          {formatDate(object.nextExpertiseDate)}
-                        </p>
-                        {isDateExpired(object.nextExpertiseDate) && (
-                          <Badge className="mt-2 bg-red-100 text-red-700">
-                            <Icon name="AlertCircle" size={12} className="mr-1" />
-                            Просрочено
-                          </Badge>
-                        )}
-                        {isDateSoon(object.nextExpertiseDate) && !isDateExpired(object.nextExpertiseDate) && (
-                          <Badge className="mt-2 bg-amber-100 text-amber-700">
-                            <Icon name="Clock" size={12} className="mr-1" />
-                            Скоро истекает
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {object.nextDiagnosticDate && (
-                    <div className="flex items-start gap-3 p-4 rounded-lg border">
-                      <Icon 
-                        name="Stethoscope" 
-                        size={24} 
-                        className={`flex-shrink-0 mt-0.5 ${
-                          isDateExpired(object.nextDiagnosticDate) 
-                            ? 'text-red-500' 
-                            : isDateSoon(object.nextDiagnosticDate) 
-                            ? 'text-amber-500' 
-                            : 'text-green-500'
-                        }`}
-                      />
-                      <div className="flex-1">
-                        <p className="font-medium">Техническое диагностирование</p>
-                        <p className={`text-lg font-semibold mt-1 ${
-                          isDateExpired(object.nextDiagnosticDate) 
-                            ? 'text-red-600' 
-                            : isDateSoon(object.nextDiagnosticDate) 
-                            ? 'text-amber-600' 
-                            : ''
-                        }`}>
-                          {formatDate(object.nextDiagnosticDate)}
-                        </p>
-                        {isDateExpired(object.nextDiagnosticDate) && (
-                          <Badge className="mt-2 bg-red-100 text-red-700">
-                            <Icon name="AlertCircle" size={12} className="mr-1" />
-                            Просрочено
-                          </Badge>
-                        )}
-                        {isDateSoon(object.nextDiagnosticDate) && !isDateExpired(object.nextDiagnosticDate) && (
-                          <Badge className="mt-2 bg-amber-100 text-amber-700">
-                            <Icon name="Clock" size={12} className="mr-1" />
-                            Скоро истекает
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {object.nextTestDate && (
-                    <div className="flex items-start gap-3 p-4 rounded-lg border">
-                      <Icon 
-                        name="Gauge" 
-                        size={24} 
-                        className={`flex-shrink-0 mt-0.5 ${
-                          isDateExpired(object.nextTestDate) 
-                            ? 'text-red-500' 
-                            : isDateSoon(object.nextTestDate) 
-                            ? 'text-amber-500' 
-                            : 'text-purple-500'
-                        }`}
-                      />
-                      <div className="flex-1">
-                        <p className="font-medium">Испытания</p>
-                        <p className={`text-lg font-semibold mt-1 ${
-                          isDateExpired(object.nextTestDate) 
-                            ? 'text-red-600' 
-                            : isDateSoon(object.nextTestDate) 
-                            ? 'text-amber-600' 
-                            : ''
-                        }`}>
-                          {formatDate(object.nextTestDate)}
-                        </p>
-                        {isDateExpired(object.nextTestDate) && (
-                          <Badge className="mt-2 bg-red-100 text-red-700">
-                            <Icon name="AlertCircle" size={12} className="mr-1" />
-                            Просрочено
-                          </Badge>
-                        )}
-                        {isDateSoon(object.nextTestDate) && !isDateExpired(object.nextTestDate) && (
-                          <Badge className="mt-2 bg-amber-100 text-amber-700">
-                            <Icon name="Clock" size={12} className="mr-1" />
-                            Скоро истекает
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {!object.nextExpertiseDate && !object.nextDiagnosticDate && !object.nextTestDate && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Icon name="Calendar" className="mx-auto mb-2" size={48} />
-                      <p>Даты не указаны</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="dates" className="mt-4">
+            <ObjectDatesTab object={object} />
           </TabsContent>
 
-          <TabsContent value="personnel" className="space-y-4 mt-4">
+          <TabsContent value="personnel" className="mt-4">
             <ObjectPersonnelWidget 
               objectId={object.id} 
               objectName={object.name}
             />
           </TabsContent>
 
-          <TabsContent value="documents" className="space-y-4 mt-4">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold flex items-center gap-2">
-                    <Icon name="FileText" size={18} />
-                    Документация
-                  </h3>
-                  <Button size="sm" variant="outline" onClick={() => setUploadModalOpen(true)}>
-                    <Icon name="Upload" className="mr-2" size={16} />
-                    Загрузить документ
-                  </Button>
-                </div>
-
-                {allDocuments.length > 0 && (
-                  <div className="flex flex-col sm:flex-row gap-3 mb-4">
-                    <Select value={documentTypeFilter} onValueChange={setDocumentTypeFilter}>
-                      <SelectTrigger className="w-full sm:w-[200px]">
-                        <SelectValue placeholder="Тип документа" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Все типы</SelectItem>
-                        {Object.entries(documentTypeLabels).map(([value, label]) => (
-                          <SelectItem key={value} value={value}>
-                            {label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    
-                    <Select value={documentStatusFilter} onValueChange={setDocumentStatusFilter}>
-                      <SelectTrigger className="w-full sm:w-[200px]">
-                        <SelectValue placeholder="Статус" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Все статусы</SelectItem>
-                        {Object.entries(documentStatusLabels).map(([value, label]) => (
-                          <SelectItem key={value} value={value}>
-                            {label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    
-                    {(documentTypeFilter !== 'all' || documentStatusFilter !== 'all') && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setDocumentTypeFilter('all');
-                          setDocumentStatusFilter('all');
-                        }}
-                        className="gap-1"
-                      >
-                        <Icon name="X" size={14} />
-                        Сбросить
-                      </Button>
-                    )}
-                  </div>
-                )}
-
-                {allDocuments.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Icon name="FileText" className="mx-auto mb-2" size={48} />
-                    <p>Документы не загружены</p>
-                  </div>
-                ) : documents.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Icon name="Search" className="mx-auto mb-2" size={48} />
-                    <p>Документы не найдены</p>
-                    <p className="text-sm mt-1">Попробуйте изменить параметры фильтра</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="secondary">
-                        {documents.length} из {allDocuments.length} документ(ов)
-                      </Badge>
-                      {(documentTypeFilter !== 'all' || documentStatusFilter !== 'all') && (
-                        <Badge variant="outline" className="gap-1">
-                          <Icon name="Filter" size={12} />
-                          Активные фильтры
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="space-y-3">
-                      {documents.map((doc) => (
-                        <div
-                          key={doc.id}
-                          className="flex items-start gap-3 p-4 rounded-lg border hover:bg-muted/50 transition-colors"
-                        >
-                          <Icon name="File" size={24} className="text-blue-500 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium">{doc.title}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {doc.documentNumber && `№ ${doc.documentNumber} • `}
-                              Выдан: {formatDate(doc.issueDate)}
-                              {doc.expiryDate && ` • Действителен до: ${formatDate(doc.expiryDate)}`}
-                            </p>
-                            {doc.expiryDate && (
-                              <Badge className={`mt-2 ${
-                                doc.status === 'expired' 
-                                  ? 'bg-red-100 text-red-700' 
-                                  : doc.status === 'expiring_soon' 
-                                  ? 'bg-amber-100 text-amber-700' 
-                                  : 'bg-green-100 text-green-700'
-                              }`}>
-                                {doc.status === 'expired' && 'Истек'}
-                                {doc.status === 'expiring_soon' && 'Истекает скоро'}
-                                {doc.status === 'valid' && 'Действителен'}
-                              </Badge>
-                            )}
-                          </div>
-                          <Button variant="ghost" size="sm">
-                            <Icon name="Download" size={16} />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
+          <TabsContent value="documents" className="mt-4">
+            <ObjectDocumentsTab 
+              objectId={object.id} 
+              allDocuments={allDocuments}
+            />
           </TabsContent>
         </Tabs>
-
-        <DocumentUploadModal
-          open={uploadModalOpen}
-          onOpenChange={setUploadModalOpen}
-          objectId={object.id}
-        />
       </DialogContent>
     </Dialog>
   );
