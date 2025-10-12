@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { FixedSizeList as List } from 'react-window';
+import { List } from 'react-window';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
