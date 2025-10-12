@@ -70,19 +70,19 @@ export default function BudgetPage() {
         }
       />
 
-      <Tabs value={currentTab} onValueChange={setCurrentTab}>
-        <TabsList className="mb-6">
-          <TabsTrigger value="overview" className="gap-2">
-            <Icon name="PieChart" size={16} />
-            Обзор
+      <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
+        <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+          <TabsTrigger value="overview" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="PieChart" size={20} />
+            <span className="text-xs font-medium">Обзор</span>
           </TabsTrigger>
-          <TabsTrigger value="plans" className="gap-2">
-            <Icon name="Building2" size={16} />
-            Планы организаций
+          <TabsTrigger value="plans" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Building2" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Планы<br/>организаций</span>
           </TabsTrigger>
-          <TabsTrigger value="history" className="gap-2">
-            <Icon name="List" size={16} />
-            История расходов
+          <TabsTrigger value="history" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="List" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">История<br/>расходов</span>
           </TabsTrigger>
         </TabsList>
 
