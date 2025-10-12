@@ -43,21 +43,21 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
-      <div className="w-full max-w-6xl grid md:grid-cols-2 gap-8 items-center">
-        <div className="space-y-6 animate-fade-in">
+      <div className="w-full max-w-6xl grid md:grid-cols-2 gap-6 md:gap-8 items-center">
+        <div className="space-y-4 md:space-y-6 animate-fade-in hidden md:block">
           <div className="space-y-2">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-emerald-600 rounded-lg flex items-center justify-center">
-                <Icon name="Shield" className="text-white" size={28} />
+            <div className="flex items-center gap-3 mb-4 md:mb-6">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-600 rounded-lg flex items-center justify-center">
+                <Icon name="Shield" className="text-white" size={24} />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Индекс Безопасности</h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Система управления промышленной безопасностью</p>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Индекс Безопасности</h1>
+                <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">Система управления промышленной безопасностью</p>
               </div>
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             <div className="flex items-start gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <Icon name="Users" className="text-emerald-600 mt-1" size={20} />
               <div>

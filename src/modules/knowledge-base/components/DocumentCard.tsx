@@ -38,85 +38,81 @@ export default function DocumentCard({
   onViewVersions
 }: DocumentCardProps) {
   return (
-    <Card className="p-5 hover:shadow-md transition-shadow">
-      <div className="space-y-4">
-        <div className="flex items-start justify-between gap-4">
+    <Card className="p-3 sm:p-5 hover:shadow-md transition-shadow">
+      <div className="space-y-3 sm:space-y-4">
+        <div className="flex items-start gap-2 sm:gap-3">
+          <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg flex-shrink-0">
+            <Icon 
+              name={doc.fileName ? 'FileText' : 'BookText'} 
+              size={20} 
+              className="text-primary" 
+            />
+          </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                <Icon 
-                  name={doc.fileName ? 'FileText' : 'BookText'} 
-                  size={24} 
-                  className="text-primary" 
-                />
+            <h3 className="font-semibold text-base sm:text-lg mb-1">{doc.title}</h3>
+            {doc.description && (
+              <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">
+                {doc.description}
+              </p>
+            )}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Icon name="User" size={12} />
+                <span className="truncate max-w-[100px] sm:max-w-none">{doc.author}</span>
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-lg mb-1">{doc.title}</h3>
-                {doc.description && (
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {doc.description}
-                  </p>
-                )}
-                <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Icon name="User" size={14} />
-                    {doc.author}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Icon name="Calendar" size={14} />
-                    {format(new Date(doc.publishedAt || doc.createdAt), 'd MMM yyyy', { locale: ru })}
-                  </div>
-                  {doc.version && (
-                    <div className="flex items-center gap-1">
-                      <Icon name="GitBranch" size={14} />
-                      {doc.version}
-                    </div>
-                  )}
-                  {doc.fileName && (
-                    <div className="flex items-center gap-1">
-                      <Icon name="HardDrive" size={14} />
-                      {formatFileSize(doc.fileSize)}
-                    </div>
-                  )}
+              <div className="flex items-center gap-1">
+                <Icon name="Calendar" size={12} />
+                {format(new Date(doc.publishedAt || doc.createdAt), 'd MMM yyyy', { locale: ru })}
+              </div>
+              {doc.version && (
+                <div className="flex items-center gap-1">
+                  <Icon name="GitBranch" size={12} />
+                  {doc.version}
                 </div>
-              </div>
+              )}
+              {doc.fileName && (
+                <div className="flex items-center gap-1">
+                  <Icon name="HardDrive" size={12} />
+                  {formatFileSize(doc.fileSize)}
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {doc.tags && doc.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
             {doc.tags.map((tag, idx) => (
-              <Badge key={idx} variant="outline" className="text-xs">
-                <Icon name="Tag" size={12} className="mr-1" />
+              <Badge key={idx} variant="outline" className="text-[10px] sm:text-xs">
+                <Icon name="Tag" size={10} className="mr-1" />
                 {tag}
               </Badge>
             ))}
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-3 border-t">
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t">
+          <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
-              <Icon name="Eye" size={14} />
+              <Icon name="Eye" size={12} />
               {doc.viewsCount}
             </div>
             <div className="flex items-center gap-1">
-              <Icon name="Download" size={14} />
+              <Icon name="Download" size={12} />
               {doc.downloadsCount}
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {doc.content && (
               <Button 
                 size="sm" 
                 variant="outline"
                 onClick={() => onView(doc)}
-                className="gap-2"
+                className="gap-1.5 text-xs sm:text-sm"
               >
                 <Icon name="Eye" size={14} />
-                Просмотр
+                <span className="hidden sm:inline">Просмотр</span>
               </Button>
             )}
             {doc.fileName && (
@@ -124,10 +120,10 @@ export default function DocumentCard({
                 size="sm"
                 variant="outline"
                 onClick={() => onDownload(doc.id)}
-                className="gap-2"
+                className="gap-1.5 text-xs sm:text-sm"
               >
                 <Icon name="Download" size={14} />
-                Скачать
+                <span className="hidden sm:inline">Скачать</span>
               </Button>
             )}
             {canManage && (

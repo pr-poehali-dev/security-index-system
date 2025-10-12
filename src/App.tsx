@@ -57,6 +57,7 @@ const ProtectedRoute = memo(function ProtectedRoute({ children }: { children: Re
 
 const AuthenticatedLayout = memo(function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
+  const toggleSidebar = useUIStore((state) => state.toggleSidebar);
   useIncidentNotifications();
   useAttestationNotifications();
   useCatalogNotifications();
@@ -64,11 +65,18 @@ const AuthenticatedLayout = memo(function AuthenticatedLayout({ children }: { ch
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar />
+      {!sidebarCollapsed && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+          onClick={toggleSidebar}
+        />
+      )}
       <main className={cn(
         "flex-1 transition-all duration-300 overflow-x-hidden",
-        sidebarCollapsed ? "ml-16" : "ml-64"
+        "lg:ml-16",
+        !sidebarCollapsed && "lg:ml-64"
       )}>
-        <div className="p-8 max-w-[calc(100vw-4rem)] mx-auto">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-full">
           {children}
         </div>
       </main>

@@ -38,18 +38,20 @@ export default function KnowledgeBaseHeader({
       title="База знаний"
       description="Документация, инструкции и нормативные материалы"
       action={
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           {canManage && (
             <>
-              <Button onClick={onCreateDocument} className="gap-2">
+              <Button onClick={onCreateDocument} className="gap-2 w-full sm:w-auto">
                 <Icon name="Plus" size={16} />
-                Добавить документ
+                <span className="hidden sm:inline">Добавить документ</span>
+                <span className="sm:hidden">Добавить</span>
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2 w-full sm:w-auto">
                     <Icon name="Download" size={16} />
-                    Экспорт/Импорт
+                    <span className="hidden sm:inline">Экспорт/Импорт</span>
+                    <span className="sm:hidden">Экспорт</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -75,10 +77,10 @@ export default function KnowledgeBaseHeader({
           <Button 
             variant="outline" 
             onClick={() => navigate('/dashboard')}
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto"
           >
             <Icon name="ArrowLeft" size={16} />
-            Назад
+            <span>Назад</span>
           </Button>
         </div>
       }
