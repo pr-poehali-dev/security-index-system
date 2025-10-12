@@ -8,9 +8,9 @@ import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
 import type { EducationLevel, PersonnelType } from '@/types';
 import PersonnelTypeSelector from './PersonnelTypeSelector';
-import PersonalDataTab from './PersonalDataTab';
-import PositionDataTab from './PositionDataTab';
-import CertificationsTab from './CertificationsTab';
+import PersonalDataTab from './tabs/PersonalDataTab';
+import PositionDataTab from './tabs/PositionDataTab';
+import CertificationsTab from './tabs/CertificationsTab';
 
 interface AddPersonnelDialogProps {
   open: boolean;
