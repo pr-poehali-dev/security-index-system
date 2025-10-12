@@ -102,7 +102,84 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
   locations: [],
   instructors: [],
   scheduleEntries: [],
-  requests: [],
+  requests: [
+    {
+      id: 'req-training-1',
+      tenantId: 'external-org-1',
+      fromTenantId: 'tenant-1',
+      fromTenantName: 'ООО "ЭнергоПром"',
+      organizationId: 'org-1',
+      organizationName: 'ООО "ЭнергоПром"',
+      programId: 'program-1',
+      programName: 'О подготовке в учебный центр',
+      requestDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      requestType: 'full_training',
+      studentsCount: 3,
+      students: [
+        {
+          personnelId: 'personnel-3',
+          fullName: 'Сидоров Константин Петрович',
+          position: 'Электромонтер',
+          department: undefined
+        },
+        {
+          personnelId: 'personnel-5',
+          fullName: 'Смирнова Елена Николаевна',
+          position: 'Монтажник',
+          department: undefined
+        },
+        {
+          personnelId: 'personnel-7',
+          fullName: 'Федорова Татьяна Владимировна',
+          position: 'Инженер по газоснабжению',
+          department: undefined
+        }
+      ],
+      contactPerson: 'Специалист по ОТ А.С. Иванова',
+      contactEmail: 'ivanova@energoprom.ru',
+      preferredStartDate: undefined,
+      status: 'new',
+      notes: 'Направить на подготовку по недостающим областям аттестации: Б.1 Эксплуатация опасных производственных объектов, Б.7 Эксплуатация химически опасных производственных объектов',
+      orderId: 'order-4',
+      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'req-training-2',
+      tenantId: 'external-org-1',
+      fromTenantId: 'tenant-1',
+      fromTenantName: 'ООО "ЭнергоПром"',
+      organizationId: 'org-1',
+      organizationName: 'ООО "ЭнергоПром"',
+      programId: 'program-2',
+      programName: 'О подготовке в учебный центр',
+      requestDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      requestType: 'full_training',
+      studentsCount: 2,
+      students: [
+        {
+          personnelId: 'personnel-4',
+          fullName: 'Козлов Дмитрий Александрович',
+          position: 'Начальник отдела',
+          department: undefined
+        },
+        {
+          personnelId: 'personnel-6',
+          fullName: 'Морозова Мария Викторовна',
+          position: 'Сварщик',
+          department: undefined
+        }
+      ],
+      contactPerson: 'Специалист по ОТ А.С. Иванова',
+      contactEmail: 'ivanova@energoprom.ru',
+      preferredStartDate: undefined,
+      status: 'new',
+      notes: 'Направить на подготовку по недостающим областям: Охрана труда для руководителей и специалистов',
+      orderId: 'order-5',
+      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ],
   issuedCertificates: [
     {
       id: 'issued-1',
