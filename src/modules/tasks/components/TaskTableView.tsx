@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { FixedSizeList as List } from 'react-window';
+import { FixedSizeList } from 'react-window';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
@@ -309,7 +309,7 @@ export default function TaskTableView({ tasks, onTaskClick }: TaskTableViewProps
             </div>
 
             {useVirtualization ? (
-              <List
+              <FixedSizeList
                 height={600}
                 itemCount={sortedTasks.length}
                 itemSize={80}
@@ -317,7 +317,7 @@ export default function TaskTableView({ tasks, onTaskClick }: TaskTableViewProps
                 className="scrollbar-thin"
               >
                 {TaskRow}
-              </List>
+              </FixedSizeList>
             ) : (
               <div>
                 {sortedTasks.map((task, index) => (

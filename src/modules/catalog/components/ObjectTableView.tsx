@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { FixedSizeList as List } from 'react-window';
+import { FixedSizeList } from 'react-window';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
@@ -338,7 +338,7 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
             </div>
 
             {useVirtualization ? (
-              <List
+              <FixedSizeList
                 height={600}
                 itemCount={sortedObjects.length}
                 itemSize={80}
@@ -346,7 +346,7 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
                 className="scrollbar-thin"
               >
                 {TableRow}
-              </List>
+              </FixedSizeList>
             ) : (
               <div>
                 {sortedObjects.map((obj, index) => (
