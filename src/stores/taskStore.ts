@@ -134,7 +134,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         tasks: [...state.tasks, newTask],
         error: null
       }));
-      return id;
+      return newTask;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Ошибка при создании задачи';
       set({ error: errorMessage });
