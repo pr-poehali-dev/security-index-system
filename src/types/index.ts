@@ -521,15 +521,7 @@ export interface MaintenanceRecord {
   nextMaintenanceDate?: string;
 }
 
-export interface Budget {
-  id: string;
-  tenantId: string;
-  year: number;
-  category: 'attestation' | 'maintenance' | 'equipment' | 'training' | 'other';
-  planned: number;
-  actual: number;
-  quarter: 1 | 2 | 3 | 4;
-}
+
 
 export interface DashboardStats {
   totalEmployees: number;
