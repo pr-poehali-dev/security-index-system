@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotificationsStore } from '@/stores/notificationsStore';
+import { useTenantStore } from '@/stores/tenantStore';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Select,
   SelectContent,
@@ -18,15 +21,30 @@ import PageHeader from '@/components/layout/PageHeader';
 import type { NotificationType, NotificationSource } from '@/types';
 import { toast } from 'sonner';
 
+type RecipientType = 'all' | 'tenants' | 'users';
+
+const MOCK_USERS = [
+  { id: '1', name: 'Суперадминистратор', email: 'superadmin@system.ru', tenantId: null },
+  { id: '2', name: 'Администратор Тенанта', email: 'admin@company.ru', tenantId: 'tenant-1' },
+  { id: '3', name: 'Аудитор', email: 'auditor@company.ru', tenantId: 'tenant-1' },
+  { id: '4', name: 'Менеджер', email: 'manager@company.ru', tenantId: 'tenant-1' },
+  { id: '5', name: 'Директор', email: 'director@company.ru', tenantId: 'tenant-1' },
+  { id: '6', name: 'Менеджер Учебного Центра', email: 'training@company.ru', tenantId: 'tenant-1' },
+];
+
 export default function CreateNotificationPage() {
   const navigate = useNavigate();
   const { addNotification } = useNotificationsStore();
+  const { tenants } = useTenantStore();
   
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [type, setType] = useState<NotificationType>('info');
   const [source, setSource] = useState<NotificationSource>('platform_news');
   const [link, setLink] = useState('');
+  const [recipientType, setRecipientType] = useState<RecipientType>('all');
+  const [selectedTenants, setSelectedTenants] = useState<string[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const notificationTypes: { value: NotificationType; label: string; icon: string }[] = [
@@ -45,6 +63,22 @@ export default function CreateNotificationPage() {
     { value: 'audit', label: 'Аудит', description: 'Аудиторские проверки' },
   ];
 
+  const handleTenantToggle = (tenantId: string) => {
+    setSelectedTenants(prev => 
+      prev.includes(tenantId) 
+        ? prev.filter(id => id !== tenantId)
+        : [...prev, tenantId]
+    );
+  };
+
+  const handleUserToggle = (userId: string) => {
+    setSelectedUsers(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -53,21 +87,63 @@ export default function CreateNotificationPage() {
       return;
     }
 
+    if (recipientType === 'tenants' && selectedTenants.length === 0) {
+      toast.error('Выберите хотя бы одну организацию');
+      return;
+    }
+
+    if (recipientType === 'users' && selectedUsers.length === 0) {
+      toast.error('Выберите хотя бы одного пользователя');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      addNotification({
-        tenantId: 'global',
-        type,
-        source,
-        title: title.trim(),
-        message: message.trim(),
-        link: link.trim() || undefined,
-        isRead: false,
-      });
+      if (recipientType === 'all') {
+        addNotification({
+          tenantId: 'global',
+          type,
+          source,
+          title: title.trim(),
+          message: message.trim(),
+          link: link.trim() || undefined,
+          isRead: false,
+        });
+      } else if (recipientType === 'tenants') {
+        selectedTenants.forEach(tenantId => {
+          addNotification({
+            tenantId,
+            type,
+            source,
+            title: title.trim(),
+            message: message.trim(),
+            link: link.trim() || undefined,
+            isRead: false,
+          });
+        });
+      } else if (recipientType === 'users') {
+        selectedUsers.forEach(userId => {
+          addNotification({
+            tenantId: 'global',
+            userId,
+            type,
+            source,
+            title: title.trim(),
+            message: message.trim(),
+            link: link.trim() || undefined,
+            isRead: false,
+          });
+        });
+      }
+
+      const recipientCount = 
+        recipientType === 'all' ? 'всем пользователям' :
+        recipientType === 'tenants' ? `${selectedTenants.length} организациям` :
+        `${selectedUsers.length} пользователям`;
 
       toast.success('Уведомление успешно отправлено!', {
-        description: 'Все пользователи получат это уведомление',
+        description: `Отправлено ${recipientCount}`,
       });
 
       setTimeout(() => {
@@ -87,7 +163,7 @@ export default function CreateNotificationPage() {
     <div className="space-y-6 max-w-3xl">
       <PageHeader
         title="Создать уведомление"
-        description="Отправить уведомление всем пользователям системы"
+        description="Отправить уведомление пользователям системы"
         action={
           <Button 
             variant="outline" 
@@ -102,6 +178,110 @@ export default function CreateNotificationPage() {
 
       <Card className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-4">
+            <Label>
+              Получатели <span className="text-red-500">*</span>
+            </Label>
+            <RadioGroup value={recipientType} onValueChange={(v) => setRecipientType(v as RecipientType)}>
+              <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                <RadioGroupItem value="all" id="all" />
+                <Label htmlFor="all" className="flex-1 cursor-pointer">
+                  <div className="flex items-center gap-2">
+                    <Icon name="Users" size={16} />
+                    <span className="font-medium">Всем пользователям</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Уведомление получат все пользователи системы
+                  </p>
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                <RadioGroupItem value="tenants" id="tenants" />
+                <Label htmlFor="tenants" className="flex-1 cursor-pointer">
+                  <div className="flex items-center gap-2">
+                    <Icon name="Building2" size={16} />
+                    <span className="font-medium">Конкретным организациям</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Выберите организации-получатели
+                  </p>
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                <RadioGroupItem value="users" id="users" />
+                <Label htmlFor="users" className="flex-1 cursor-pointer">
+                  <div className="flex items-center gap-2">
+                    <Icon name="User" size={16} />
+                    <span className="font-medium">Конкретным пользователям</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Выберите пользователей-получателей
+                  </p>
+                </Label>
+              </div>
+            </RadioGroup>
+
+            {recipientType === 'tenants' && (
+              <Card className="p-4 bg-muted/30">
+                <Label className="mb-3 block">Выберите организации:</Label>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {tenants.map((tenant) => (
+                    <div key={tenant.id} className="flex items-center space-x-2 p-2 hover:bg-background rounded">
+                      <Checkbox
+                        id={`tenant-${tenant.id}`}
+                        checked={selectedTenants.includes(tenant.id)}
+                        onCheckedChange={() => handleTenantToggle(tenant.id)}
+                      />
+                      <Label
+                        htmlFor={`tenant-${tenant.id}`}
+                        className="flex-1 cursor-pointer text-sm"
+                      >
+                        <div className="font-medium">{tenant.name}</div>
+                        <div className="text-xs text-muted-foreground">ИНН: {tenant.inn}</div>
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+                {selectedTenants.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Выбрано: {selectedTenants.length} из {tenants.length}
+                  </p>
+                )}
+              </Card>
+            )}
+
+            {recipientType === 'users' && (
+              <Card className="p-4 bg-muted/30">
+                <Label className="mb-3 block">Выберите пользователей:</Label>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {MOCK_USERS.map((user) => (
+                    <div key={user.id} className="flex items-center space-x-2 p-2 hover:bg-background rounded">
+                      <Checkbox
+                        id={`user-${user.id}`}
+                        checked={selectedUsers.includes(user.id)}
+                        onCheckedChange={() => handleUserToggle(user.id)}
+                      />
+                      <Label
+                        htmlFor={`user-${user.id}`}
+                        className="flex-1 cursor-pointer text-sm"
+                      >
+                        <div className="font-medium">{user.name}</div>
+                        <div className="text-xs text-muted-foreground">{user.email}</div>
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+                {selectedUsers.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Выбрано: {selectedUsers.length} из {MOCK_USERS.length}
+                  </p>
+                )}
+              </Card>
+            )}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="type">
               Тип уведомления <span className="text-red-500">*</span>
@@ -142,9 +322,6 @@ export default function CreateNotificationPage() {
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-sm text-muted-foreground">
-              Выберите категорию для правильной группировки уведомления
-            </p>
           </div>
 
           <div className="space-y-2">
@@ -223,6 +400,16 @@ export default function CreateNotificationPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+              <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <p className="text-sm text-blue-900 dark:text-blue-100 flex items-start gap-2">
+                  <Icon name="Info" size={16} className="mt-0.5 flex-shrink-0" />
+                  <span>
+                    {recipientType === 'all' && 'Будет отправлено всем пользователям системы'}
+                    {recipientType === 'tenants' && `Будет отправлено пользователям ${selectedTenants.length} организаций`}
+                    {recipientType === 'users' && `Будет отправлено ${selectedUsers.length} пользователям`}
+                  </span>
+                </p>
               </div>
             </Card>
           </div>
