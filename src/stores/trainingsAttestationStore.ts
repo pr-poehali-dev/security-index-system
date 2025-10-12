@@ -157,6 +157,112 @@ export const useTrainingsAttestationStore = create<TrainingsAttestationState>()(
       ],
       createdAt: new Date(Date.now() - 50 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'training-6',
+      tenantId: 'tenant-1',
+      title: 'Аттестация Б.1.1 - Эксплуатация сетей газораспределения',
+      type: 'periodic',
+      startDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(),
+      endDate: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000).toISOString(),
+      employeeIds: ['personnel-6', 'personnel-8'],
+      organizationId: 'training-center-1',
+      cost: 45000,
+      status: 'planned',
+      program: 'Подготовка и аттестация в области промышленной безопасности - Б.1.1',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: 'training-7',
+      tenantId: 'tenant-1',
+      title: 'Аттестация Б.1.4 - Ремонт газового оборудования',
+      type: 'periodic',
+      startDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+      endDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(),
+      employeeIds: ['personnel-7', 'personnel-9'],
+      organizationId: 'training-center-1',
+      cost: 40000,
+      status: 'planned',
+      program: 'Подготовка и аттестация в области промышленной безопасности - Б.1.4',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: 'training-8',
+      tenantId: 'tenant-1',
+      title: 'Аттестация Б.1.3 - Диагностика газового оборудования',
+      type: 'initial',
+      startDate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+      endDate: new Date(Date.now() - 55 * 24 * 60 * 60 * 1000).toISOString(),
+      employeeIds: ['personnel-10'],
+      organizationId: 'training-center-1',
+      cost: 25000,
+      status: 'completed',
+      certificateNumber: 'РТН-2024-00345',
+      certificateIssueDate: new Date(Date.now() - 55 * 24 * 60 * 60 * 1000).toISOString(),
+      participants: [
+        {
+          employeeId: 'personnel-10',
+          status: 'completed',
+          progress: 100,
+          testScore: 19,
+          testMaxScore: 20,
+          completedAt: new Date(Date.now() - 55 * 24 * 60 * 60 * 1000).toISOString()
+        }
+      ],
+      createdAt: new Date(Date.now() - 65 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 55 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'training-9',
+      tenantId: 'tenant-1',
+      title: 'Охрана труда и промышленная безопасность',
+      type: 'periodic',
+      startDate: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+      endDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+      employeeIds: ['personnel-6', 'personnel-7', 'personnel-8', 'personnel-9'],
+      organizationId: 'external-org-2',
+      cost: 48000,
+      status: 'completed',
+      certificateNumber: 'ОТ-2024-12345',
+      certificateIssueDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+      participants: [
+        {
+          employeeId: 'personnel-6',
+          status: 'completed',
+          progress: 100,
+          testScore: 18,
+          testMaxScore: 20,
+          completedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          employeeId: 'personnel-7',
+          status: 'completed',
+          progress: 100,
+          testScore: 16,
+          testMaxScore: 20,
+          completedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          employeeId: 'personnel-8',
+          status: 'completed',
+          progress: 100,
+          testScore: 17,
+          testMaxScore: 20,
+          completedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          employeeId: 'personnel-9',
+          status: 'completed',
+          progress: 100,
+          testScore: 15,
+          testMaxScore: 20,
+          completedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
+        }
+      ],
+      createdAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
     }
   ],
 
