@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import ProgramDialog from './ProgramDialog';
+import ProgramDialog from '../programs/ProgramDialog';
 import type { TrainingProgram } from '@/types';
 
 const CATEGORY_LABELS: Record<string, string> = {

@@ -7,11 +7,11 @@ import { useCertificationStore } from '@/stores/certificationStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import BulkIssueCertificatesDialog from './BulkIssueCertificatesDialog';
 import ManualCertificateDialog from './ManualCertificateDialog';
-import CertificatesFilters from './registry/CertificatesFilters';
-import CertificatesTable from './registry/CertificatesTable';
-import GroupedCertificatesView from './registry/GroupedCertificatesView';
-import DocumentViewerDialog from './registry/DocumentViewerDialog';
-import { useCertificatesExport } from './registry/useCertificatesExport';
+import CertificatesFilters from '../registry/CertificatesFilters';
+import CertificatesTable from '../registry/CertificatesTable';
+import GroupedCertificatesView from '../registry/GroupedCertificatesView';
+import DocumentViewerDialog from '../registry/DocumentViewerDialog';
+import { useCertificatesExport } from '../registry/useCertificatesExport';
 
 const statusLabels = {
   issued: 'Выдано',

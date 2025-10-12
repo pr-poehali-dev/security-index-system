@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
-import ProgramsTab from '../components/ProgramsTab';
-import RequestsTab from '../components/RequestsTab';
-import EnrollmentsTab from '../components/EnrollmentsTab';
-import ScheduleTab from '../components/ScheduleTab';
-import DirectoriesTab from '../components/DirectoriesTab';
-import ReportsTab from '../components/ReportsTab';
-import IssuedCertificatesRegistry from '../components/IssuedCertificatesRegistry';
+import ProgramsTab from '../components/tabs/ProgramsTab';
+import RequestsTab from '../components/tabs/RequestsTab';
+import EnrollmentsTab from '../components/tabs/EnrollmentsTab';
+import ScheduleTab from '../components/tabs/ScheduleTab';
+import DirectoriesTab from '../components/tabs/DirectoriesTab';
+import ReportsTab from '../components/tabs/ReportsTab';
+import IssuedCertificatesRegistry from '../components/certificates/IssuedCertificatesRegistry';
 
 export default function TrainingCenterPage() {
   const [activeTab, setActiveTab] = useState('programs');

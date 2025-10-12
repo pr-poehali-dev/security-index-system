@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import LocationsDirectory from './LocationsDirectory';
-import InstructorsDirectory from './InstructorsDirectory';
+import LocationsDirectory from '../locations/LocationsDirectory';
+import InstructorsDirectory from '../instructors/InstructorsDirectory';
 
 export default function DirectoriesTab() {
   const [activeTab, setActiveTab] = useState('locations');

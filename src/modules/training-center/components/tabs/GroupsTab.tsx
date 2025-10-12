@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import GroupDialog from './GroupDialog';
+import GroupDialog from '../groups/GroupDialog';
 import type { TrainingGroup } from '@/types';
 
 const STATUS_LABELS: Record<string, string> = {
