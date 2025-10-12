@@ -21,6 +21,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCertificationStore } from '@/stores/certificationStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
+import { getCategoryForArea } from '@/stores/mockData/certificationAreas';
 import MassActionDialog from '../orders/MassActionDialog';
 
 interface ComplianceData {
@@ -158,16 +159,16 @@ export default function ComplianceAnalysisTab() {
         organization: '—',
         certifications: item.missingCertifications.map(area => ({
           id: `missing-${area}`,
-          category: '',
+          category: getCategoryForArea(area),
           area: area,
           issueDate: '',
-          expiryDate: '',
+          expiryDate: new Date(Date.now() - 86400000).toISOString(),
           protocolNumber: '',
           protocolDate: '',
           verified: false,
           verifiedDate: undefined,
           status: 'expired' as const,
-          daysLeft: 0
+          daysLeft: -1
         }))
       }));
   }, [filteredData, selectedPersonnelIds]);

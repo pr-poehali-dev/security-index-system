@@ -52,3 +52,19 @@ export const getAreasForCategory = (category: string): readonly string[] => {
       return [];
   }
 };
+
+export const getCategoryForArea = (area: string): string => {
+  if (industrialSafetyAreas.includes(area as any)) {
+    return 'Промышленная безопасность';
+  }
+  if (energySafetyAreas.includes(area as any)) {
+    return 'Энергобезопасность';
+  }
+  if (electricalSafetyAreas.includes(area as any)) {
+    return 'Электробезопасность';
+  }
+  if (heightWorkAreas.includes(area as any)) {
+    return 'Работы на высоте';
+  }
+  return 'Промышленная безопасность';
+};

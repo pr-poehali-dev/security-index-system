@@ -108,7 +108,7 @@ export default function MassActionDialog({
   }, [employees]);
 
   const uniqueCategories = useMemo(() => {
-    return Array.from(new Set(allCertifications.map(c => c.category)));
+    return Array.from(new Set(allCertifications.map(c => c.category))).filter(cat => cat && cat.trim() !== '');
   }, [allCertifications]);
 
   const filteredCertifications = useMemo(() => {
