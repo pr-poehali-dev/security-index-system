@@ -1,4 +1,5 @@
 // src/types/tasks.ts
+// Описание: Типы данных для задач - статусы, приоритеты и комментарии
 export type TaskStatus = 'new' | 'assigned' | 'in_progress' | 'under_review' | 'completed' | 'cancelled';
 export type TaskPriority = 'critical' | 'high' | 'medium' | 'low';
 export type TaskSource = 'manual' | 'incident' | 'checklist' | 'certification' | 'examination' | 'automated';

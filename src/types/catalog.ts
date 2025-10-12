@@ -1,4 +1,5 @@
 // src/types/catalog.ts
+// Описание: Типы данных для каталога - организации, промышленные объекты и документы
 export type HazardClass = 'I' | 'II' | 'III' | 'IV';
 export type ObjectType = 'opo' | 'gts' | 'building';
 export type ObjectStatus = 'active' | 'conservation' | 'liquidated';

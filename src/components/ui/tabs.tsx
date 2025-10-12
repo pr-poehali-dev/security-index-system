@@ -1,3 +1,5 @@
+// src/components/ui/tabs.tsx
+// Описание: UI компонент вкладок для переключения между разделами
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
 

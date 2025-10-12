@@ -1,4 +1,5 @@
 // src/lib/exportUtils.ts
+// Описание: Утилиты для экспорта данных в Excel файлы
 import type { Organization, Department, Personnel, ProductionSite } from '@/types';
 
 export function exportOrganizationsToExcel(

@@ -1,4 +1,5 @@
 // src/stores/budgetStore.ts
+// Описание: Zustand store для управления бюджетом и расходами
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { BudgetCategory, BudgetExpense, BudgetSummary, OrganizationBudgetPlan } from '@/types';

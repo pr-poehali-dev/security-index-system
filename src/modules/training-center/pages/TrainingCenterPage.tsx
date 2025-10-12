@@ -1,4 +1,5 @@
 // src/modules/training-center/pages/TrainingCenterPage.tsx
+// Описание: Страница учебного центра - программы, группы, сертификаты и записи
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';

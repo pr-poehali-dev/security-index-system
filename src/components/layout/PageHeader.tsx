@@ -1,3 +1,5 @@
+// src/components/layout/PageHeader.tsx
+// Описание: Компонент заголовка страницы с хлебными крошками
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';

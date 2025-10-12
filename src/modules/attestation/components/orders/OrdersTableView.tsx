@@ -1,4 +1,5 @@
 // src/modules/attestation/components/orders/OrdersTableView.tsx
+// Описание: Табличное представление приказов с сортировкой и фильтрацией
 import { useState, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

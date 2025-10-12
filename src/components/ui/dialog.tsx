@@ -1,3 +1,5 @@
+// src/components/ui/dialog.tsx
+// Описание: UI компонент модального диалогового окна
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"

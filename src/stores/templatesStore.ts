@@ -1,4 +1,5 @@
 // src/stores/templatesStore.ts
+// Описание: Zustand store для управления шаблонами чек-листов
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { ChecklistTemplate } from '@/modules/checklists/data/templates';

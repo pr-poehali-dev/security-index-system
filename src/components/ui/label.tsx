@@ -1,3 +1,5 @@
+// src/components/ui/label.tsx
+// Описание: UI компонент подписей для полей формы
 import * as React from "react"
 import * as LabelPrimitive from "@radix-ui/react-label"
 import { cva, type VariantProps } from "class-variance-authority"

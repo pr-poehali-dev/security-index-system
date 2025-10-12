@@ -1,4 +1,5 @@
 // src/lib/passwordUtils.ts
+// Описание: Утилиты для генерации логинов и паролей пользователей
 export function generateLogin(fullName: string): string {
   const parts = fullName.trim().split(' ').filter(Boolean);
   

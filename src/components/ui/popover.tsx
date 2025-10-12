@@ -1,3 +1,5 @@
+// src/components/ui/popover.tsx
+// Описание: UI компонент всплывающего окна с контентом
 import * as React from "react"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
 

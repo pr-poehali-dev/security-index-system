@@ -1,4 +1,5 @@
 // src/stores/trainingsAttestationStore.ts
+// Описание: Zustand store для управления обучением для аттестации
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 

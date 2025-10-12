@@ -1,3 +1,5 @@
+// src/modules/knowledge-base/pages/KnowledgeBasePage.tsx
+// Описание: Страница базы знаний - документы, поиск и версионирование
 import { useState, useMemo } from 'react';
 import { useKnowledgeBaseStore } from '@/stores/knowledgeBaseStore';
 import { useAuthStore } from '@/stores/authStore';

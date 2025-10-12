@@ -1,3 +1,5 @@
+// src/components/ui/data-pagination.tsx
+// Описание: UI компонент пагинации для таблиц и списков с навигацией
 import { Button } from '@/components/ui/button';
 import {
   Select,

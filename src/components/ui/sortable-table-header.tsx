@@ -1,3 +1,5 @@
+// src/components/ui/sortable-table-header.tsx
+// Описание: UI компонент сортируемого заголовка таблицы с индикатором направления
 import Icon from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
 

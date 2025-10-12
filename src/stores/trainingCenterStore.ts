@@ -1,4 +1,5 @@
 // src/stores/trainingCenterStore.ts
+// Описание: Zustand store для управления учебным центром
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type {

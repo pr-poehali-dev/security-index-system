@@ -1,4 +1,5 @@
 // src/types/maintenance.ts
+// Описание: Типы данных для модуля технического обслуживания и ремонта
 export type MaintenanceType = 'scheduled_maintenance' | 'repair' | 'replacement' | 'emergency';
 export type MaintenanceStatus = 'planned' | 'in_progress' | 'completed' | 'cancelled';
 export type MaintenancePriority = 'critical' | 'high' | 'normal' | 'low';

@@ -1,3 +1,5 @@
+// src/modules/catalog/pages/ContractorsPage.tsx
+// Описание: Страница управления подрядчиками, их сотрудниками и доступами
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';

@@ -1,3 +1,5 @@
+// src/modules/common/pages/NotFoundPage.tsx
+// Описание: Страница 404 - отображение ошибки ненайденной страницы
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 

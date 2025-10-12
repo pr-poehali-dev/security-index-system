@@ -1,3 +1,5 @@
+// src/modules/examination/pages/ExaminationPage.tsx
+// Описание: Страница технической экспертизы - освидетельствования и заключения
 import { useState, useMemo } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';

@@ -1,4 +1,5 @@
 // src/stores/notificationsStore.ts
+// Описание: Zustand store для управления системными уведомлениями
 import { create } from 'zustand';
 import type { Notification, NotificationType, NotificationSource } from '@/types';
 

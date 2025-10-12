@@ -1,3 +1,5 @@
+// src/modules/catalog/pages/CatalogPage.tsx
+// Описание: Страница каталога организаций и промышленных объектов с деревом и карточками
 import { useState, useMemo, memo } from 'react';
 import { useCatalogStore } from '@/stores/catalogStore';
 import PageHeader from '@/components/layout/PageHeader';

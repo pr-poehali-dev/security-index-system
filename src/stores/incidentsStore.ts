@@ -1,4 +1,5 @@
 // src/stores/incidentsStore.ts
+// Описание: Zustand store для управления инцидентами и происшествиями
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { 

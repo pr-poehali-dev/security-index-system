@@ -1,3 +1,5 @@
+// src/modules/tasks/pages/TasksPage.tsx
+// Описание: Страница управления задачами с фильтрацией и приоритетами
 import { useState, useEffect } from 'react';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';

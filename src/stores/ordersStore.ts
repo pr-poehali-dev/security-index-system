@@ -1,4 +1,5 @@
 // src/stores/ordersStore.ts
+// Описание: Zustand store для управления приказами на аттестацию
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 

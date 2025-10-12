@@ -1,4 +1,5 @@
 // src/types/index.ts
+// Описание: Основные типы данных приложения - пользователи, тенанты, организации и персонал
 export type UserRole = 'SuperAdmin' | 'TenantAdmin' | 'Auditor' | 'Manager' | 'Director' | 'TrainingCenterManager';
 
 export type ModuleType = 

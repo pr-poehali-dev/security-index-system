@@ -1,3 +1,5 @@
+// src/components/ui/progress.tsx
+// Описание: UI компонент индикатора прогресса
 import * as React from "react"
 import * as ProgressPrimitive from "@radix-ui/react-progress"
 

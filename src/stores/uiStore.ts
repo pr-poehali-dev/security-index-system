@@ -1,4 +1,5 @@
 // src/stores/uiStore.ts
+// Описание: Zustand store для управления UI - тема и состояние сайдбара
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 

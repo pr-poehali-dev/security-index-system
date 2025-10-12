@@ -1,3 +1,5 @@
+// src/components/ui/input.tsx
+// Описание: UI компонент поля ввода для текстовых данных
 import * as React from "react"
 
 import { cn } from "@/lib/utils"

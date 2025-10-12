@@ -1,4 +1,5 @@
 // src/lib/competencyAnalysis.ts
+// Описание: Утилиты для анализа компетенций и потребностей в обучении
 import type { 
   Personnel, 
   CompetencyMatrix, 

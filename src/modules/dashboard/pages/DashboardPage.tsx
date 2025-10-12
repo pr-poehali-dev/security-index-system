@@ -1,3 +1,5 @@
+// src/modules/dashboard/pages/DashboardPage.tsx
+// Описание: Главная страница дашборда со статистикой и виджетами
 import { useMemo, memo, useCallback, useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';

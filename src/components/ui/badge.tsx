@@ -1,3 +1,5 @@
+// src/components/ui/badge.tsx
+// Описание: UI компонент бейджа для меток и статусов
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 

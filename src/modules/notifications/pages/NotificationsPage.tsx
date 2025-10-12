@@ -1,3 +1,5 @@
+// src/modules/notifications/pages/NotificationsPage.tsx
+// Описание: Страница управления уведомлениями и оповещениями
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotificationsStore } from '@/stores/notificationsStore';

@@ -1,4 +1,5 @@
 // src/stores/checklistsStore.ts
+// Описание: Zustand store для управления чек-листами и аудитами
 import { create } from 'zustand';
 import type { Checklist, Audit } from '@/types';
 

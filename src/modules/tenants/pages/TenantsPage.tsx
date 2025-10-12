@@ -1,3 +1,5 @@
+// src/modules/tenants/pages/TenantsPage.tsx
+// Описание: Страница управления тенантами - создание и настройка организаций
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import PageHeader from '@/components/layout/PageHeader';

@@ -1,4 +1,5 @@
 // src/stores/settingsStore.ts
+// Описание: Zustand store для управления настройками системы
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization, Person, Position, Certification, Competency, OrganizationContractor, InterOrgDocument } from '@/types';

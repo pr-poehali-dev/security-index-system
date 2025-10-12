@@ -1,3 +1,5 @@
+// src/modules/settings/pages/SettingsPage.tsx
+// Описание: Страница настроек - организации, персонал, справочники и пользователи
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';

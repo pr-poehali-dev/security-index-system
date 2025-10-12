@@ -1,4 +1,5 @@
 // src/App.tsx
+// Описание: Главный компонент приложения с роутингом, аутентификацией и управлением темой
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";

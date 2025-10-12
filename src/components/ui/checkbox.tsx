@@ -1,3 +1,5 @@
+// src/components/ui/checkbox.tsx
+// Описание: UI компонент флажка для выбора опций
 import * as React from "react"
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
 import { Check } from "lucide-react"

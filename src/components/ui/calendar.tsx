@@ -1,3 +1,5 @@
+// src/components/ui/calendar.tsx
+// Описание: UI компонент календаря для выбора дат
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";

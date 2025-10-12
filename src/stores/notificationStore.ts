@@ -1,4 +1,5 @@
 // src/stores/notificationStore.ts
+// Описание: Zustand store для управления уведомлениями платформы
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 

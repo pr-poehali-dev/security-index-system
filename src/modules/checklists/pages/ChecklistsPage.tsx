@@ -1,3 +1,5 @@
+// src/modules/checklists/pages/ChecklistsPage.tsx
+// Описание: Страница чек-листов и аудитов с шаблонами и историей проверок
 import { useState } from 'react';
 import { useChecklistsStore } from '@/stores/checklistsStore';
 import { useTemplatesStore } from '@/stores/templatesStore';

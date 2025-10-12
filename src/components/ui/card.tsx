@@ -1,3 +1,5 @@
+// src/components/ui/card.tsx
+// Описание: UI компонент карточки для группировки контента
 import * as React from "react"
 
 import { cn } from "@/lib/utils"

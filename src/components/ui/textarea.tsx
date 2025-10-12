@@ -1,3 +1,5 @@
+// src/components/ui/textarea.tsx
+// Описание: UI компонент многострочного текстового поля
 import * as React from "react"
 
 import { cn } from "@/lib/utils"

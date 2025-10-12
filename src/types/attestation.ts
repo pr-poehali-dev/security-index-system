@@ -1,4 +1,5 @@
 // src/types/attestation.ts
+// Описание: Типы данных для модуля аттестации - сотрудники, сертификаты, приказы и обучение
 export type CertificationStatus = 'valid' | 'expiring_soon' | 'expired' | 'pending';
 export type CertificationType = 'initial' | 'periodic' | 'extraordinary';
 export type CertificationResult = 'passed' | 'failed' | 'pending';

@@ -1,4 +1,5 @@
 // src/stores/catalogStore.ts
+// Описание: Zustand store для управления каталогом организаций и объектов
 import { create } from 'zustand';
 import type { Organization, IndustrialObject, ObjectDocument } from '@/types/catalog';
 

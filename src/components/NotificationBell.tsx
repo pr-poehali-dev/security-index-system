@@ -1,3 +1,5 @@
+// src/components/NotificationBell.tsx
+// Описание: Компонент колокольчика уведомлений с выпадающим списком
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotificationsStore } from '@/stores/notificationsStore';

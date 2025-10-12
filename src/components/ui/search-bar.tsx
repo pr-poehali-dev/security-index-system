@@ -1,3 +1,5 @@
+// src/components/ui/search-bar.tsx
+// Описание: UI компонент строки поиска с иконкой и очисткой
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
 

@@ -1,4 +1,5 @@
 // src/types/checklists.ts
+// Описание: Типы данных для чек-листов и аудитов - шаблоны, проверки и отчеты
 export type QuestionType = 'yes_no' | 'number' | 'text' | 'select';
 export type InspectionStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
 

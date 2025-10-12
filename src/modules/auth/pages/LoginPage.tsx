@@ -1,3 +1,5 @@
+// src/modules/auth/pages/LoginPage.tsx
+// Описание: Страница авторизации с формой входа и валидацией
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';

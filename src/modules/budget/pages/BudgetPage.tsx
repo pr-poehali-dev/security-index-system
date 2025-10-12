@@ -1,3 +1,5 @@
+// src/modules/budget/pages/BudgetPage.tsx
+// Описание: Страница бюджета - планирование расходов и аналитика
 import { useState } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';

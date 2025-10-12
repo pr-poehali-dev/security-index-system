@@ -1,4 +1,5 @@
 // src/lib/excelLazy.ts
+// Описание: Ленивая загрузка библиотеки XLSX для оптимизации производительности
 let xlsxModule: typeof import('xlsx') | null = null;
 
 export async function getXLSX() {

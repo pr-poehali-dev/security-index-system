@@ -1,3 +1,5 @@
+// src/components/ui/view-mode-toggle.tsx
+// Описание: UI компонент переключателя режимов отображения (сетка/список/таблица)
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 

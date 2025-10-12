@@ -1,4 +1,5 @@
 // src/stores/certificationStore.ts
+// Описание: Zustand store для управления сертификатами аттестации
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 

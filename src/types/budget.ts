@@ -1,4 +1,5 @@
 // src/types/budget.ts
+// Описание: Типы данных для модуля бюджета - планы, расходы и категории бюджета
 export type BudgetCategory = 'safety' | 'maintenance' | 'training' | 'examination' | 'equipment' | 'other';
 export type BudgetPeriod = 'monthly' | 'quarterly' | 'yearly';
 export type ExpenseStatus = 'planned' | 'approved' | 'spent' | 'cancelled';

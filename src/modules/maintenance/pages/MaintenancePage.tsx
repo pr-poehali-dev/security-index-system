@@ -1,3 +1,5 @@
+// src/modules/maintenance/pages/MaintenancePage.tsx
+// Описание: Страница технического обслуживания - планирование и учет ремонтных работ
 import { useState, useMemo } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';

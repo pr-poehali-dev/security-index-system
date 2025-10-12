@@ -1,4 +1,5 @@
 // src/stores/usersStore.ts
+// Описание: Zustand store для управления системными пользователями
 import { create } from 'zustand';
 import type { SystemUser } from '@/types';
 import { mockSystemUsers } from './mockData';

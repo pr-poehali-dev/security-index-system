@@ -1,3 +1,5 @@
+// src/modules/incidents/pages/IncidentsPage.tsx
+// Описание: Страница модуля инцидентов с Kanban, таблицей, аналитикой и отчетами
 import { memo, useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

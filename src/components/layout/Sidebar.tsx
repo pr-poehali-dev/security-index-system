@@ -1,3 +1,5 @@
+// src/components/layout/Sidebar.tsx
+// Описание: Компонент боковой панели навигации с меню и профилем
 import { memo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';

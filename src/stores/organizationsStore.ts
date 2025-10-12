@@ -1,4 +1,5 @@
 // src/stores/organizationsStore.ts
+// Описание: Zustand store для управления организациями и подразделениями
 import { create } from 'zustand';
 import type { Organization, Department } from '@/types';
 import { mockOrganizations, mockDepartments } from './mockData';

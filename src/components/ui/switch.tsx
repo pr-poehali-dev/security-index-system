@@ -1,3 +1,5 @@
+// src/components/ui/switch.tsx
+// Описание: UI компонент переключателя вкл/выкл
 import * as React from "react"
 import * as SwitchPrimitives from "@radix-ui/react-switch"
 

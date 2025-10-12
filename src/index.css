@@ -1,4 +1,5 @@
 /* src/index.css */
+/* Описание: Глобальные стили приложения, Tailwind CSS конфигурация и CSS переменные для тем */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 @tailwind base;

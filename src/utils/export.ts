@@ -1,4 +1,5 @@
 // src/utils/export.ts
+// Описание: Утилиты для экспорта данных в CSV и Excel форматы
 import * as XLSX from 'xlsx';
 
 export interface ExportColumn<T> {

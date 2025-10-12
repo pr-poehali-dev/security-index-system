@@ -1,3 +1,5 @@
+// src/components/ErrorBoundary.tsx
+// Описание: Компонент обработки ошибок React с интерфейсом восстановления
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';

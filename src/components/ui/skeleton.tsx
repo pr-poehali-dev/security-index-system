@@ -1,3 +1,5 @@
+// src/components/ui/skeleton.tsx
+// Описание: UI компонент заглушки для загрузки контента
 import { cn } from "@/lib/utils"
 
 function Skeleton({

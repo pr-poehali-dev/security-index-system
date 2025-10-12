@@ -1,3 +1,5 @@
+// src/components/ui/select.tsx
+// Описание: UI компонент выпадающего списка для выбора
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
 import { Check, ChevronDown, ChevronUp } from "lucide-react"

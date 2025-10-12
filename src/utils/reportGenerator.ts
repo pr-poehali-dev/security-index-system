@@ -1,4 +1,5 @@
 // src/utils/reportGenerator.ts
+// Описание: Генератор PDF отчетов по задачам и инцидентам
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import type { Task } from '@/types';

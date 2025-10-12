@@ -1,3 +1,5 @@
+// src/components/ui/icon.tsx
+// Описание: Обёртка для иконок Lucide с прямым импортом используемых иконок
 import type { FC } from 'react';
 import {
   AlertCircle, AlertTriangle, Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp,

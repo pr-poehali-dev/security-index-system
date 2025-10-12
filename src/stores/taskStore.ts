@@ -1,4 +1,5 @@
 // src/stores/taskStore.ts
+// Описание: Zustand store для управления задачами и поручениями
 import { create } from 'zustand';
 import type { Task } from '@/types/tasks';
 

@@ -1,3 +1,5 @@
+// src/components/ui/alert.tsx
+// Описание: UI компонент уведомлений и предупреждений
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 

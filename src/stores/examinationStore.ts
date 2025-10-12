@@ -1,4 +1,5 @@
 // src/stores/examinationStore.ts
+// Описание: Zustand store для управления техническими экспертизами
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 

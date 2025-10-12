@@ -1,4 +1,5 @@
 // src/stores/maintenanceStore.ts
+// Описание: Zustand store для управления техническим обслуживанием
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
