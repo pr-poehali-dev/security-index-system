@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from 'react';
-import { FixedSizeList as List } from 'react-window';
+import { FixedSizeList as List } from 'react-window/dist/index.cjs';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCertificationStore } from '@/stores/certificationStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
