@@ -106,46 +106,46 @@ const CatalogPage = memo(function CatalogPage() {
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-2">
-              <Icon name="Building" className="text-blue-600" size={24} />
-              <span className="text-2xl font-bold">{stats.total}</span>
+              <Icon name="Building" className="text-blue-600" size={20} />
+              <span className="text-xl md:text-2xl font-bold">{stats.total}</span>
             </div>
-            <p className="text-sm text-muted-foreground">Всего объектов</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Всего объектов</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-2">
-              <Icon name="CheckCircle2" className="text-emerald-600" size={24} />
-              <span className="text-2xl font-bold">{stats.active}</span>
+              <Icon name="CheckCircle2" className="text-emerald-600" size={20} />
+              <span className="text-xl md:text-2xl font-bold">{stats.active}</span>
             </div>
-            <p className="text-sm text-muted-foreground">Активных</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Активных</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-2">
-              <Icon name="AlertTriangle" className="text-red-600" size={24} />
-              <span className="text-2xl font-bold">{stats.needsExpertise}</span>
+              <Icon name="AlertTriangle" className="text-red-600" size={20} />
+              <span className="text-xl md:text-2xl font-bold">{stats.needsExpertise}</span>
             </div>
-            <p className="text-sm text-muted-foreground">Просрочена ЭПБ</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Просрочена ЭПБ</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-2">
-              <Icon name="Clock" className="text-amber-600" size={24} />
-              <span className="text-2xl font-bold">{stats.soonExpertise}</span>
+              <Icon name="Clock" className="text-amber-600" size={20} />
+              <span className="text-xl md:text-2xl font-bold">{stats.soonExpertise}</span>
             </div>
-            <p className="text-sm text-muted-foreground">ЭПБ через 90 дней</p>
+            <p className="text-xs md:text-sm text-muted-foreground">ЭПБ через 90 дней</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 min-h-0">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 md:gap-6 min-h-0">
         <Card className="overflow-hidden flex flex-col">
           <CardContent className="p-4 flex-1 overflow-auto">
             <div className="flex items-center justify-between mb-4">

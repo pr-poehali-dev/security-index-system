@@ -26,27 +26,27 @@ const IncidentsPage = memo(function IncidentsPage() {
         icon="AlertTriangle"
       />
 
-      <Tabs defaultValue="incidents" className="space-y-6">
-        <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
-          <TabsTrigger value="incidents" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="AlertTriangle" size={20} />
-            <span className="text-xs font-medium text-center leading-tight">Инциденты и<br/>мероприятия</span>
+      <Tabs defaultValue="incidents" className="space-y-4 md:space-y-6">
+        <TabsList className="h-auto flex-wrap justify-start gap-1 md:gap-2 bg-transparent p-0">
+          <TabsTrigger value="incidents" className="flex-col gap-1 md:gap-2 h-16 md:h-20 px-3 md:px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="AlertTriangle" size={18} />
+            <span className="text-[10px] md:text-xs font-medium text-center leading-tight">Инциденты и<br/>мероприятия</span>
           </TabsTrigger>
-          <TabsTrigger value="heatmap" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="Flame" size={20} />
-            <span className="text-xs font-medium">Тепловая карта</span>
+          <TabsTrigger value="heatmap" className="flex-col gap-1 md:gap-2 h-16 md:h-20 px-3 md:px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Flame" size={18} />
+            <span className="text-[10px] md:text-xs font-medium">Тепловая карта</span>
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="BarChart3" size={20} />
-            <span className="text-xs font-medium">Аналитика</span>
+          <TabsTrigger value="analytics" className="flex-col gap-1 md:gap-2 h-16 md:h-20 px-3 md:px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="BarChart3" size={18} />
+            <span className="text-[10px] md:text-xs font-medium">Аналитика</span>
           </TabsTrigger>
-          <TabsTrigger value="reports" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="FileText" size={20} />
-            <span className="text-xs font-medium">Отчеты</span>
+          <TabsTrigger value="reports" className="flex-col gap-1 md:gap-2 h-16 md:h-20 px-3 md:px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="FileText" size={18} />
+            <span className="text-[10px] md:text-xs font-medium">Отчеты</span>
           </TabsTrigger>
-          <TabsTrigger value="directories" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="FolderOpen" size={20} />
-            <span className="text-xs font-medium">Справочники</span>
+          <TabsTrigger value="directories" className="flex-col gap-1 md:gap-2 h-16 md:h-20 px-3 md:px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="FolderOpen" size={18} />
+            <span className="text-[10px] md:text-xs font-medium">Справочники</span>
           </TabsTrigger>
         </TabsList>
 

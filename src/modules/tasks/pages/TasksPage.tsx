@@ -94,54 +94,54 @@ export default function TasksPage() {
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4 mb-4 md:mb-6">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-2">
-              <Icon name="ListTodo" className="text-gray-600" size={24} />
-              <span className="text-3xl font-bold">{stats.total}</span>
+              <Icon name="ListTodo" className="text-gray-600" size={20} />
+              <span className="text-2xl md:text-3xl font-bold">{stats.total}</span>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Всего задач</p>
+            <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">Всего задач</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-2">
-              <Icon name="Circle" className="text-blue-600" size={24} />
-              <span className="text-3xl font-bold">{stats.open}</span>
+              <Icon name="Circle" className="text-blue-600" size={20} />
+              <span className="text-2xl md:text-3xl font-bold">{stats.open}</span>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Открыто</p>
+            <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">Открыто</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-2">
-              <Icon name="Clock" className="text-purple-600" size={24} />
-              <span className="text-3xl font-bold">{stats.inProgress}</span>
+              <Icon name="Clock" className="text-purple-600" size={20} />
+              <span className="text-2xl md:text-3xl font-bold">{stats.inProgress}</span>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">В работе</p>
+            <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">В работе</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-2">
-              <Icon name="CheckCircle2" className="text-green-600" size={24} />
-              <span className="text-3xl font-bold">{stats.completed}</span>
+              <Icon name="CheckCircle2" className="text-green-600" size={20} />
+              <span className="text-2xl md:text-3xl font-bold">{stats.completed}</span>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Завершено</p>
+            <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">Завершено</p>
           </CardContent>
         </Card>
 
         <Card className={stats.overdue > 0 ? 'border-red-300 bg-red-50' : ''}>
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-2">
-              <Icon name="AlertTriangle" className="text-red-600" size={24} />
-              <span className="text-3xl font-bold text-red-600">{stats.overdue}</span>
+              <Icon name="AlertTriangle" className="text-red-600" size={20} />
+              <span className="text-2xl md:text-3xl font-bold text-red-600">{stats.overdue}</span>
             </div>
-            <p className="text-sm text-red-600 font-medium">Просрочено</p>
+            <p className="text-xs md:text-sm text-red-600 font-medium">Просрочено</p>
           </CardContent>
         </Card>
       </div>
@@ -187,7 +187,7 @@ export default function TasksPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Статус</label>
               <Select value={filters.status} onValueChange={(value) => setFilters({ status: value as any })}>

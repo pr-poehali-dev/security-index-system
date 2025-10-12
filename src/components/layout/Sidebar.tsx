@@ -52,7 +52,7 @@ const Sidebar = memo(function Sidebar() {
   return (
     <aside className={cn(
       "fixed left-0 top-0 h-screen bg-gray-900 dark:bg-gray-950 text-white transition-all duration-300 z-30 flex flex-col",
-      sidebarCollapsed ? "w-16 -translate-x-full lg:translate-x-0" : "w-64"
+      sidebarCollapsed ? "w-16 -translate-x-full lg:translate-x-0 lg:w-16" : "w-64 translate-x-0"
     )}>
       <div className="p-4 border-b border-gray-800">
         <div className={cn(
