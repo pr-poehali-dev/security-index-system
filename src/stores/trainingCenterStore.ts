@@ -17,6 +17,9 @@ export interface IssuedCertificate {
   clientTenantId: string;
   personnelId: string;
   personnelName: string;
+  organizationId?: string;
+  organizationName?: string;
+  organizationInn?: string;
   groupId?: string;
   programId: string;
   programName: string;
@@ -103,6 +106,9 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
       clientTenantId: 'tenant-1',
       personnelId: 'personnel-1',
       personnelName: 'Иванов Иван Иванович',
+      organizationId: 'org-1',
+      organizationName: 'ООО "Промышленность"',
+      organizationInn: '7701234567',
       programId: 'program-1',
       programName: 'Промышленная безопасность А.1',
       certificateNumber: 'УД-2023-001234',
@@ -125,6 +131,9 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
       clientTenantId: 'tenant-1',
       personnelId: 'personnel-2',
       personnelName: 'Петров Петр Петрович',
+      organizationId: 'org-2',
+      organizationName: 'АО "Технострой"',
+      organizationInn: '7705987654',
       programId: 'program-2',
       programName: 'Электробезопасность IV группа',
       certificateNumber: 'ЭБ-2024-09234',
@@ -147,6 +156,9 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
       clientTenantId: 'tenant-1',
       personnelId: 'personnel-3',
       personnelName: 'Сидоров Сидор Сидорович',
+      organizationId: 'org-1',
+      organizationName: 'ООО "Промышленность"',
+      organizationInn: '7701234567',
       programId: 'program-3',
       programName: 'Работы на высоте (группа 2)',
       certificateNumber: 'УПК-2024-15487',

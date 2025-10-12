@@ -79,6 +79,8 @@ export default function IssuedCertificatesRegistry() {
       const program = trainingPrograms.find(p => p.id === cert.programId);
       return {
         'ФИО': cert.personnelName,
+        'Организация': cert.organizationName || 'Не указана',
+        'ИНН организации': cert.organizationInn || '',
         'Номер удостоверения': cert.certificateNumber,
         'Программа обучения': cert.programName,
         'Категория': categoryLabels[cert.category as keyof typeof categoryLabels] || cert.category,
@@ -86,8 +88,7 @@ export default function IssuedCertificatesRegistry() {
         'Дата протокола': format(new Date(cert.protocolDate), 'dd.MM.yyyy', { locale: ru }),
         'Дата выдачи': format(new Date(cert.issueDate), 'dd.MM.yyyy', { locale: ru }),
         'Срок действия': format(new Date(cert.expiryDate), 'dd.MM.yyyy', { locale: ru }),
-        'Область аттестации': cert.attestationArea || '',
-        'Организация': cert.clientOrganization || '',
+        'Область аттестации': cert.area || '',
         'Статус': statusLabels[cert.status as keyof typeof statusLabels] || cert.status
       };
     });
@@ -189,6 +190,7 @@ export default function IssuedCertificatesRegistry() {
               <TableRow>
                 <TableHead>Дата выдачи</TableHead>
                 <TableHead>ФИО обучающегося</TableHead>
+                <TableHead>Организация</TableHead>
                 <TableHead>Программа</TableHead>
                 <TableHead>Категория</TableHead>
                 <TableHead>Номер удостоверения</TableHead>
@@ -202,7 +204,7 @@ export default function IssuedCertificatesRegistry() {
             <TableBody>
               {filteredCertificates.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                     Удостоверения не найдены
                   </TableCell>
                 </TableRow>
@@ -213,6 +215,14 @@ export default function IssuedCertificatesRegistry() {
                       {format(new Date(cert.issueDate), 'dd.MM.yyyy', { locale: ru })}
                     </TableCell>
                     <TableCell className="font-medium">{cert.personnelName}</TableCell>
+                    <TableCell>
+                      <div className="max-w-[200px]">
+                        <div className="font-medium truncate">{cert.organizationName || 'Не указана'}</div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {cert.organizationInn ? `ИНН: ${cert.organizationInn}` : ''}
+                        </div>
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <div className="max-w-[200px]">
                         <div className="font-medium truncate">{cert.programName}</div>
