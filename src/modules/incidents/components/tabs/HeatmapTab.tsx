@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/stores/authStore';
 import { useIncidentsStore } from '@/stores/incidentsStore';
-import IncidentHeatmap from './IncidentHeatmap';
+import IncidentHeatmap from '../IncidentHeatmap';
 
 export default function HeatmapTab() {
   const user = useAuthStore((state) => state.user);

@@ -7,14 +7,14 @@ import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import type { Incident } from '@/types';
 import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
-import IncidentDialog from './IncidentDialog';
-import IncidentKanbanBoard from './IncidentKanbanBoard';
-import IncidentsTableFilters from './IncidentsTableFilters';
-import IncidentsKanbanFilters from './IncidentsKanbanFilters';
-import IncidentsTableView from './IncidentsTableView';
-import IncidentReminders from './IncidentReminders';
-import IncidentsPagination from './IncidentsPagination';
-import { useIncidentsExport } from './useIncidentsExport';
+import IncidentDialog from '../IncidentDialog';
+import IncidentKanbanBoard from '../IncidentKanbanBoard';
+import IncidentsTableFilters from '../IncidentsTableFilters';
+import IncidentsKanbanFilters from '../IncidentsKanbanFilters';
+import IncidentsTableView from '../IncidentsTableView';
+import IncidentReminders from '../IncidentReminders';
+import IncidentsPagination from '../IncidentsPagination';
+import { useIncidentsExport } from '../useIncidentsExport';
 
 export default function IncidentsTab() {
   const user = useAuthStore((state) => state.user);

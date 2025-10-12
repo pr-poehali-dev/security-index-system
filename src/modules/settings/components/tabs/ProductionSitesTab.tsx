@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 import { exportProductionSitesToExcel, importProductionSitesFromExcel } from '@/lib/exportUtils';
-import ProductionSitesImportDialog from './ProductionSitesImportDialog';
+import ProductionSitesImportDialog from '../ProductionSitesImportDialog';
 import type { ProductionSite } from '@/types';
 import {
   Table,

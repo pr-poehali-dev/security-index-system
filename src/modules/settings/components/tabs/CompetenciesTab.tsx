@@ -9,7 +9,7 @@ import Icon from '@/components/ui/icon';
 import { useState } from 'react';
 import type { CompetencyMatrix } from '@/types';
 import { CERTIFICATION_CATEGORIES } from '@/lib/constants';
-import ImportCompetenciesDialog from './ImportCompetenciesDialog';
+import ImportCompetenciesDialog from '../ImportCompetenciesDialog';
 import { exportToExcel } from '@/lib/exportUtils';
 import {
   Table,

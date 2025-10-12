@@ -4,10 +4,10 @@ import { useIncidentsStore } from '@/stores/incidentsStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import * as XLSX from 'xlsx';
 import type { IncidentStatus } from '@/types';
-import ReportFilters from './ReportFilters';
-import ReportStatsGrid from './ReportStatsGrid';
-import ReportChartsSection from './ReportChartsSection';
-import { STATUS_COLORS, STATUS_LABELS } from '../utils/analyticsUtils';
+import ReportFilters from '../ReportFilters';
+import ReportStatsGrid from '../ReportStatsGrid';
+import ReportChartsSection from '../ReportChartsSection';
+import { STATUS_COLORS, STATUS_LABELS } from '../../utils/analyticsUtils';
 
 export default function ReportsTab() {
   const user = useAuthStore((state) => state.user);

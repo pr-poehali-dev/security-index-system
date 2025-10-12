@@ -5,11 +5,11 @@ import Icon from '@/components/ui/icon';
 import { Navigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/constants';
 import PageHeader from '@/components/layout/PageHeader';
-import IncidentsTab from '../components/IncidentsTab';
-import AnalyticsTab from '../components/AnalyticsTab';
-import ReportsTab from '../components/ReportsTab';
-import DirectoriesTab from '../components/DirectoriesTab';
-import HeatmapTab from '../components/HeatmapTab';
+import IncidentsTab from '../components/tabs/IncidentsTab';
+import AnalyticsTab from '../components/tabs/AnalyticsTab';
+import ReportsTab from '../components/tabs/ReportsTab';
+import DirectoriesTab from '../components/tabs/DirectoriesTab';
+import HeatmapTab from '../components/tabs/HeatmapTab';
 
 const IncidentsPage = memo(function IncidentsPage() {
   const user = useAuthStore((state) => state.user);

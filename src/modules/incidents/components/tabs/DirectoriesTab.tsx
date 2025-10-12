@@ -1,9 +1,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
-import SourcesDirectory from './SourcesDirectory';
-import DirectionsDirectory from './DirectionsDirectory';
-import FundingTypesDirectory from './FundingTypesDirectory';
-import CategoriesDirectory from './CategoriesDirectory';
+import SourcesDirectory from '../SourcesDirectory';
+import DirectionsDirectory from '../DirectionsDirectory';
+import FundingTypesDirectory from '../FundingTypesDirectory';
+import CategoriesDirectory from '../CategoriesDirectory';
 
 export default function DirectoriesTab() {
   return (

@@ -5,13 +5,13 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { Card, CardContent } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 import type { IncidentStatus } from '@/types';
-import RiskMatrix from './RiskMatrix';
-import AnalyticsStatsGrid from './AnalyticsStatsGrid';
-import StatusDistributionCharts from './StatusDistributionCharts';
-import MonthlyDynamicsChart from './MonthlyDynamicsChart';
-import TopDirectionsChart from './TopDirectionsChart';
-import TopCategoriesOrganizationsCharts from './TopCategoriesOrganizationsCharts';
-import { STATUS_COLORS, STATUS_LABELS } from '../utils/analyticsUtils';
+import RiskMatrix from '../RiskMatrix';
+import AnalyticsStatsGrid from '../AnalyticsStatsGrid';
+import StatusDistributionCharts from '../StatusDistributionCharts';
+import MonthlyDynamicsChart from '../MonthlyDynamicsChart';
+import TopDirectionsChart from '../TopDirectionsChart';
+import TopCategoriesOrganizationsCharts from '../TopCategoriesOrganizationsCharts';
+import { STATUS_COLORS, STATUS_LABELS } from '../../utils/analyticsUtils';
 
 export default function AnalyticsTab() {
   const user = useAuthStore((state) => state.user);
