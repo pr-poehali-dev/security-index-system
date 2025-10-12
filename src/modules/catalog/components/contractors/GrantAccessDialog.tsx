@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,7 +20,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import type { ContractorEmployee, Contractor } from '../../types/contractors';
-import type { IndustrialObject } from '@/types/catalog';
+import type { IndustrialObject, Organization } from '@/types/catalog';
 
 interface GrantAccessDialogProps {
   open: boolean;
@@ -35,6 +36,7 @@ interface GrantAccessDialogProps {
   employees: ContractorEmployee[];
   contractors: Contractor[];
   catalogObjects: IndustrialObject[];
+  organizations: Organization[];
   onFormChange: (field: string, value: string) => void;
   onSubmit: () => void;
   onCancel: () => void;
@@ -47,10 +49,21 @@ export default function GrantAccessDialog({
   employees,
   contractors,
   catalogObjects,
+  organizations,
   onFormChange,
   onSubmit,
   onCancel,
 }: GrantAccessDialogProps) {
+  const [selectedOrganization, setSelectedOrganization] = useState<string>('');
+  
+  const filteredObjects = selectedOrganization
+    ? catalogObjects.filter(obj => obj.organizationId === selectedOrganization)
+    : [];
+  
+  const handleOrganizationChange = (value: string) => {
+    setSelectedOrganization(value);
+    onFormChange('objectId', '');
+  };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -90,16 +103,36 @@ export default function GrantAccessDialog({
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="organization">Организация *</Label>
+            <Select
+              value={selectedOrganization}
+              onValueChange={handleOrganizationChange}
+            >
+              <SelectTrigger id="organization">
+                <SelectValue placeholder="Выберите организацию" />
+              </SelectTrigger>
+              <SelectContent>
+                {organizations.map((org) => (
+                  <SelectItem key={org.id} value={org.id}>
+                    {org.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="object">Объект *</Label>
             <Select
               value={formData.objectId}
               onValueChange={(value) => onFormChange('objectId', value)}
+              disabled={!selectedOrganization}
             >
               <SelectTrigger id="object">
-                <SelectValue placeholder="Выберите объект" />
+                <SelectValue placeholder={selectedOrganization ? "Выберите объект" : "Сначала выберите организацию"} />
               </SelectTrigger>
               <SelectContent>
-                {catalogObjects.map((obj) => (
+                {filteredObjects.map((obj) => (
                   <SelectItem key={obj.id} value={obj.id}>
                     {obj.name}
                     {obj.type === 'opo' && obj.hazardClass

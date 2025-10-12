@@ -22,7 +22,7 @@ const ObjectAccessManagement = () => {
     loading,
   } = useContractorsStore();
 
-  const { objects: catalogObjects } = useCatalogStore();
+  const { objects: catalogObjects, organizations } = useCatalogStore();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterObject, setFilterObject] = useState<string>('all');
@@ -150,6 +150,7 @@ const ObjectAccessManagement = () => {
         employees={employees}
         contractors={contractors}
         catalogObjects={catalogObjects}
+        organizations={organizations}
         onFormChange={handleFormChange}
         onSubmit={handleGrantAccess}
         onCancel={handleCancelGrant}

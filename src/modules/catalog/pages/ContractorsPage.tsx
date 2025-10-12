@@ -63,30 +63,30 @@ const ContractorsPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="contractors">
-            <Icon name="Building2" size={16} className="mr-2" />
-            Организации
+        <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+          <TabsTrigger value="contractors" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Building2" size={20} />
+            <span className="text-xs font-medium">Организации</span>
           </TabsTrigger>
-          <TabsTrigger value="employees">
-            <Icon name="Users" size={16} className="mr-2" />
-            Персонал
+          <TabsTrigger value="employees" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Users" size={20} />
+            <span className="text-xs font-medium">Персонал</span>
           </TabsTrigger>
-          <TabsTrigger value="access">
-            <Icon name="ShieldCheck" size={16} className="mr-2" />
-            Доступ к объектам
+          <TabsTrigger value="access" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="ShieldCheck" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Доступ<br/>к объектам</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="contractors" className="space-y-4">
+        <TabsContent value="contractors" className="space-y-4 mt-4">
           <ContractorsList />
         </TabsContent>
 
-        <TabsContent value="employees" className="space-y-4">
+        <TabsContent value="employees" className="space-y-4 mt-4">
           <EmployeesListFull />
         </TabsContent>
 
-        <TabsContent value="access" className="space-y-4">
+        <TabsContent value="access" className="space-y-4 mt-4">
           <ObjectAccessManagement />
         </TabsContent>
       </Tabs>
