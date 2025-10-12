@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useContractorsStore } from '../../stores/contractorsStore';
+import { useCatalogStore } from '@/stores/catalogStore';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import type { ContractorEmployeeObject, AccessStatus } from '../../types/contractors';
+import type { IndustrialObject, HazardClass } from '@/types/catalog';
 
 const ObjectAccessManagement = () => {
   const {
@@ -53,6 +55,8 @@ const ObjectAccessManagement = () => {
     fetchContractors,
     loading,
   } = useContractorsStore();
+
+  const { objects: catalogObjects } = useCatalogStore();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterObject, setFilterObject] = useState<string>('all');
@@ -148,20 +152,25 @@ const ObjectAccessManagement = () => {
     return { status: 'ok', message: `${daysUntilExpiry} дн.`, color: 'text-green-600' };
   };
 
-  const mockObjects = [
-    { id: 'obj-1', name: 'КС-01 Центральная', hazardClass: 1 },
-    { id: 'obj-2', name: 'КС-02 Северная', hazardClass: 1 },
-    { id: 'obj-3', name: 'ГРС-15 Промышленная', hazardClass: 2 },
-    { id: 'obj-4', name: 'Склад НП-03', hazardClass: 3 },
-  ];
+  const getHazardClassLabel = (hazardClass?: HazardClass) => {
+    if (!hazardClass) return 'Не указан';
+    const labels: Record<HazardClass, string> = {
+      'I': 'I (чрезвычайно высокая)',
+      'II': 'II (высокая)',
+      'III': 'III (средняя)',
+      'IV': 'IV (умеренная)',
+    };
+    return labels[hazardClass];
+  };
 
   const filteredAccess = objectAccess.filter((access) => {
     const employee = employees.find((e) => e.id === access.employeeId);
-    const object = mockObjects.find((o) => o.id === access.objectId);
+    const object = catalogObjects.find((o) => o.id === access.objectId);
 
     const matchesSearch =
       employee?.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      object?.name.toLowerCase().includes(searchQuery.toLowerCase());
+      object?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      object?.registrationNumber.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesObject = filterObject === 'all' || access.objectId === filterObject;
     const matchesStatus = filterStatus === 'all' || access.accessStatus === filterStatus;
@@ -203,7 +212,7 @@ const ObjectAccessManagement = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Все объекты</SelectItem>
-              {mockObjects.map((obj) => (
+              {catalogObjects.map((obj) => (
                 <SelectItem key={obj.id} value={obj.id}>
                   {obj.name}
                 </SelectItem>
@@ -264,7 +273,7 @@ const ObjectAccessManagement = () => {
             <TableBody>
               {filteredAccess.map((access) => {
                 const employee = employees.find((e) => e.id === access.employeeId);
-                const object = mockObjects.find((o) => o.id === access.objectId);
+                const object = catalogObjects.find((o) => o.id === access.objectId);
                 const expiryCheck = checkExpiry(access.accessEnd);
 
                 return (
@@ -281,7 +290,14 @@ const ObjectAccessManagement = () => {
                       <div>
                         <div className="font-medium">{object?.name || 'Неизвестно'}</div>
                         <div className="text-xs text-muted-foreground">
-                          Класс опасности: {object?.hazardClass || '—'}
+                          {object?.type === 'opo' && object?.hazardClass
+                            ? `Класс опасности: ${getHazardClassLabel(object.hazardClass)}`
+                            : object?.type === 'gts'
+                            ? 'ГТС'
+                            : 'Здание'}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {object?.registrationNumber || '—'}
                         </div>
                       </div>
                     </TableCell>
@@ -377,9 +393,14 @@ const ObjectAccessManagement = () => {
                   <SelectValue placeholder="Выберите объект" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockObjects.map((obj) => (
+                  {catalogObjects.map((obj) => (
                     <SelectItem key={obj.id} value={obj.id}>
-                      {obj.name} (Класс {obj.hazardClass})
+                      {obj.name}
+                      {obj.type === 'opo' && obj.hazardClass
+                        ? ` (Класс ${obj.hazardClass})`
+                        : obj.type === 'gts'
+                        ? ' (ГТС)'
+                        : ' (Здание)'}
                     </SelectItem>
                   ))}
                 </SelectContent>
