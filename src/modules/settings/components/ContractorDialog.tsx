@@ -1,7 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useTenantsStore } from '@/stores/tenantsStore';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -44,7 +43,6 @@ interface FormData {
 export default function ContractorDialog({ open, onOpenChange, contractor }: ContractorDialogProps) {
   const user = useAuthStore((state) => state.user);
   const { addContractor, updateContractor } = useSettingsStore();
-  const { tenants } = useTenantsStore();
   const { toast } = useToast();
 
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<FormData>({
@@ -58,10 +56,6 @@ export default function ContractorDialog({ open, onOpenChange, contractor }: Con
   const type = watch('type');
   const services = watch('services') || [];
   const contractorTenantId = watch('contractorTenantId');
-
-  const trainingCenterTenants = tenants.filter(t => 
-    t.modules.includes('training-center') && t.id !== user?.tenantId
-  );
 
   const onSubmit = (data: FormData) => {
     if (!user?.tenantId) return;
@@ -86,15 +80,6 @@ export default function ContractorDialog({ open, onOpenChange, contractor }: Con
       ? services.filter(s => s !== service)
       : [...services, service];
     setValue('services', newServices);
-  };
-
-  const handleTenantSelect = (tenantId: string) => {
-    setValue('contractorTenantId', tenantId);
-    const tenant = tenants.find(t => t.id === tenantId);
-    if (tenant) {
-      setValue('contractorName', tenant.name);
-      setValue('contractorInn', tenant.inn);
-    }
   };
 
   return (
@@ -125,29 +110,7 @@ export default function ContractorDialog({ open, onOpenChange, contractor }: Con
               </Select>
             </div>
 
-            {type === 'training_center' && trainingCenterTenants.length > 0 && (
-              <div>
-                <Label>Выбрать учебный центр из системы (опционально)</Label>
-                <Select
-                  value={contractorTenantId}
-                  onValueChange={handleTenantSelect}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите из списка или укажите вручную" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {trainingCenterTenants.map((tenant) => (
-                      <SelectItem key={tenant.id} value={tenant.id}>
-                        {tenant.name} (ИНН: {tenant.inn})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground mt-1">
-                  При выборе учебного центра из системы заявки будут автоматически передаваться
-                </p>
-              </div>
-            )}
+
 
             <div>
               <Label htmlFor="contractorName">Название организации *</Label>
