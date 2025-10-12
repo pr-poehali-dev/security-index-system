@@ -27,6 +27,7 @@ import Icon from '@/components/ui/icon';
 import PageHeader from '@/components/layout/PageHeader';
 import DocumentFormDialog from '@/modules/knowledge-base/components/DocumentFormDialog';
 import DocumentViewDialog from '@/modules/knowledge-base/components/DocumentViewDialog';
+import DocumentVersionsDialog from '@/modules/knowledge-base/components/DocumentVersionsDialog';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -42,6 +43,7 @@ export default function KnowledgeBasePage() {
   const [formOpen, setFormOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [versionsDialogOpen, setVersionsDialogOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<KnowledgeDocument | null>(null);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -108,6 +110,11 @@ export default function KnowledgeBasePage() {
   const handleViewDocument = (doc: KnowledgeDocument) => {
     setSelectedDocument(doc);
     setViewOpen(true);
+  };
+
+  const handleViewVersions = (doc: KnowledgeDocument) => {
+    setSelectedDocument(doc);
+    setVersionsDialogOpen(true);
   };
 
   const handleDownloadDocument = (docId: string) => {
@@ -460,6 +467,10 @@ export default function KnowledgeBasePage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleViewVersions(doc)}>
+                                <Icon name="History" size={14} className="mr-2" />
+                                История версий
+                              </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleEditDocument(doc)}>
                                 <Icon name="Edit" size={14} className="mr-2" />
                                 Редактировать
@@ -494,6 +505,12 @@ export default function KnowledgeBasePage() {
       <DocumentViewDialog
         open={viewOpen}
         onOpenChange={setViewOpen}
+        document={selectedDocument}
+      />
+
+      <DocumentVersionsDialog
+        open={versionsDialogOpen}
+        onOpenChange={setVersionsDialogOpen}
         document={selectedDocument}
       />
 

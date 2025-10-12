@@ -675,6 +675,17 @@ export interface Notification {
 export type DocumentCategory = 'user_guide' | 'regulatory' | 'organization';
 export type DocumentStatus = 'draft' | 'published' | 'archived';
 
+export interface DocumentVersion {
+  versionNumber: string;
+  createdAt: string;
+  createdBy: string;
+  changeDescription?: string;
+  content?: string;
+  fileName?: string;
+  fileSize?: number;
+  fileUrl?: string;
+}
+
 export interface KnowledgeDocument {
   id: string;
   tenantId: string;
@@ -691,6 +702,7 @@ export interface KnowledgeDocument {
   status: DocumentStatus;
   viewsCount: number;
   downloadsCount: number;
+  versions?: DocumentVersion[];
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;

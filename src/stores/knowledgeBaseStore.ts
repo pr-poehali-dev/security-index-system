@@ -1,14 +1,16 @@
 import { create } from 'zustand';
-import type { KnowledgeDocument, DocumentCategory } from '@/types';
+import type { KnowledgeDocument, DocumentCategory, DocumentVersion } from '@/types';
 
 interface KnowledgeBaseState {
   documents: KnowledgeDocument[];
   getDocumentsByCategory: (category: DocumentCategory) => KnowledgeDocument[];
   addDocument: (document: Omit<KnowledgeDocument, 'id' | 'createdAt' | 'updatedAt' | 'viewsCount' | 'downloadsCount'>) => void;
-  updateDocument: (id: string, updates: Partial<KnowledgeDocument>) => void;
+  updateDocument: (id: string, updates: Partial<KnowledgeDocument>, changeDescription?: string, currentUser?: string) => void;
   deleteDocument: (id: string) => void;
   incrementViews: (id: string) => void;
   incrementDownloads: (id: string) => void;
+  getDocumentVersions: (id: string) => DocumentVersion[];
+  restoreVersion: (id: string, versionNumber: string) => void;
 }
 
 export const useKnowledgeBaseStore = create<KnowledgeBaseState>((set, get) => ({
@@ -139,11 +141,41 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>((set, get) => ({
     }));
   },
 
-  updateDocument: (id, updates) => {
+  updateDocument: (id, updates, changeDescription, currentUser) => {
     set((state) => ({
-      documents: state.documents.map((doc) =>
-        doc.id === id ? { ...doc, ...updates, updatedAt: new Date().toISOString() } : doc
-      ),
+      documents: state.documents.map((doc) => {
+        if (doc.id !== id) return doc;
+
+        const now = new Date().toISOString();
+        const currentVersion: DocumentVersion = {
+          versionNumber: doc.version || '1.0',
+          createdAt: doc.updatedAt,
+          createdBy: doc.author,
+          changeDescription: changeDescription || 'Обновление документа',
+          content: doc.content,
+          fileName: doc.fileName,
+          fileSize: doc.fileSize,
+          fileUrl: doc.fileUrl,
+        };
+
+        const newVersionNumber = updates.version || doc.version || '1.0';
+        const existingVersions = doc.versions || [];
+        
+        const shouldSaveVersion = 
+          updates.content !== undefined || 
+          updates.fileName !== undefined ||
+          updates.version !== undefined;
+
+        return {
+          ...doc,
+          ...updates,
+          updatedAt: now,
+          versions: shouldSaveVersion 
+            ? [currentVersion, ...existingVersions]
+            : existingVersions,
+          version: newVersionNumber,
+        };
+      }),
     }));
   },
 
@@ -166,6 +198,45 @@ export const useKnowledgeBaseStore = create<KnowledgeBaseState>((set, get) => ({
       documents: state.documents.map((doc) =>
         doc.id === id ? { ...doc, downloadsCount: doc.downloadsCount + 1 } : doc
       ),
+    }));
+  },
+
+  getDocumentVersions: (id) => {
+    const doc = get().documents.find(d => d.id === id);
+    return doc?.versions || [];
+  },
+
+  restoreVersion: (id, versionNumber) => {
+    set((state) => ({
+      documents: state.documents.map((doc) => {
+        if (doc.id !== id) return doc;
+
+        const versionToRestore = doc.versions?.find(v => v.versionNumber === versionNumber);
+        if (!versionToRestore) return doc;
+
+        const now = new Date().toISOString();
+        const currentVersion: DocumentVersion = {
+          versionNumber: doc.version || '1.0',
+          createdAt: doc.updatedAt,
+          createdBy: doc.author,
+          changeDescription: 'Текущая версия перед восстановлением',
+          content: doc.content,
+          fileName: doc.fileName,
+          fileSize: doc.fileSize,
+          fileUrl: doc.fileUrl,
+        };
+
+        return {
+          ...doc,
+          content: versionToRestore.content,
+          fileName: versionToRestore.fileName,
+          fileSize: versionToRestore.fileSize,
+          fileUrl: versionToRestore.fileUrl,
+          version: versionToRestore.versionNumber,
+          updatedAt: now,
+          versions: [currentVersion, ...(doc.versions || [])],
+        };
+      }),
     }));
   },
 }));

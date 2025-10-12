@@ -52,6 +52,7 @@ export default function DocumentFormDialog({
   const [contentType, setContentType] = useState<'text' | 'file'>('text');
   const [fileName, setFileName] = useState('');
   const [fileSize, setFileSize] = useState<number>();
+  const [changeDescription, setChangeDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -83,6 +84,7 @@ export default function DocumentFormDialog({
     setContentType('text');
     setFileName('');
     setFileSize(undefined);
+    setChangeDescription('');
   };
 
   const handleAddTag = () => {
@@ -149,12 +151,17 @@ export default function DocumentFormDialog({
       };
 
       if (mode === 'edit' && document) {
-        updateDocument(document.id, {
-          ...documentData,
-          publishedAt: status === 'published' && document.status !== 'published' 
-            ? new Date().toISOString() 
-            : document.publishedAt,
-        });
+        updateDocument(
+          document.id, 
+          {
+            ...documentData,
+            publishedAt: status === 'published' && document.status !== 'published' 
+              ? new Date().toISOString() 
+              : document.publishedAt,
+          },
+          changeDescription || 'Обновление документа',
+          user?.name || 'Администратор'
+        );
         toast.success('Документ обновлён');
       } else {
         addDocument({
@@ -355,6 +362,23 @@ export default function DocumentFormDialog({
               </Select>
             </div>
           </div>
+
+          {mode === 'edit' && (
+            <div className="space-y-2">
+              <Label htmlFor="changeDescription">Описание изменений</Label>
+              <Textarea
+                id="changeDescription"
+                value={changeDescription}
+                onChange={(e) => setChangeDescription(e.target.value)}
+                placeholder="Опишите, что было изменено в документе (опционально)"
+                rows={2}
+                maxLength={200}
+              />
+              <p className="text-xs text-muted-foreground">
+                Будет сохранено в истории версий для отслеживания изменений
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="tags">Теги</Label>
