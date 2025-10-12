@@ -26,7 +26,7 @@ export default function ManualCertificateDialog({
   onOpenChange,
   trainingCenterId
 }: ManualCertificateDialogProps) {
-  const { addIssuedCertificate, trainingPrograms } = useTrainingCenterStore();
+  const { addIssuedCertificate, programs } = useTrainingCenterStore();
   const { personnel, organizations } = useSettingsStore();
   
   const [formData, setFormData] = useState({
@@ -52,7 +52,7 @@ export default function ManualCertificateDialog({
     const organization = person?.organizationId 
       ? organizations.find(o => o.id === person.organizationId)
       : null;
-    const program = trainingPrograms.find(p => p.id === formData.programId);
+    const program = programs.find(p => p.id === formData.programId);
 
     if (!person || !program) {
       alert('Необходимо выбрать слушателя и программу');
@@ -145,7 +145,7 @@ export default function ManualCertificateDialog({
                   <SelectValue placeholder="Выберите программу" />
                 </SelectTrigger>
                 <SelectContent>
-                  {trainingPrograms.map(program => (
+                  {programs?.map(program => (
                     <SelectItem key={program.id} value={program.id}>
                       {program.name}
                     </SelectItem>
