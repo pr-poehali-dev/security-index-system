@@ -48,7 +48,7 @@ export default function ManualCertificateDialog({
   const [certificateFile, setCertificateFile] = useState<File | null>(null);
   const [protocolFile, setProtocolFile] = useState<File | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const person = personnel.find(p => p.id === formData.personnelId);
@@ -68,8 +68,24 @@ export default function ManualCertificateDialog({
       'Работы на высоте': 'labor_safety'
     };
 
-    const certificateFileUrl = certificateFile ? URL.createObjectURL(certificateFile) : undefined;
-    const protocolFileUrl = protocolFile ? URL.createObjectURL(protocolFile) : undefined;
+    const convertFileToBase64 = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    };
+
+    let certificateFileUrl: string | undefined;
+    let protocolFileUrl: string | undefined;
+
+    if (certificateFile) {
+      certificateFileUrl = await convertFileToBase64(certificateFile);
+    }
+    if (protocolFile) {
+      protocolFileUrl = await convertFileToBase64(protocolFile);
+    }
 
     addIssuedCertificate({
       trainingCenterId,

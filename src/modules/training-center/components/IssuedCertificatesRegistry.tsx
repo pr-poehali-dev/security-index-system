@@ -26,6 +26,7 @@ import BulkIssueCertificatesDialog from './BulkIssueCertificatesDialog';
 import ManualCertificateDialog from './ManualCertificateDialog';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const statusLabels = {
   issued: 'Выдано',
@@ -58,6 +59,7 @@ export default function IssuedCertificatesRegistry() {
   const [groupByOrganization, setGroupByOrganization] = useState(false);
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
   const [manualDialogOpen, setManualDialogOpen] = useState(false);
+  const [viewDocumentUrl, setViewDocumentUrl] = useState<string | null>(null);
 
   const filteredCertificates = issuedCertificates.filter((cert) => {
     const matchesSearch = 
@@ -317,7 +319,8 @@ export default function IssuedCertificatesRegistry() {
                                     size="sm" 
                                     variant="ghost" 
                                     className="h-8 w-8 p-0"
-                                    onClick={() => window.open(cert.certificateFileUrl, '_blank')}
+                                    onClick={() => setViewDocumentUrl(cert.certificateFileUrl!)}
+                                    title="Просмотр удостоверения"
                                   >
                                     <Icon name="FileText" size={16} />
                                   </Button>
@@ -327,7 +330,8 @@ export default function IssuedCertificatesRegistry() {
                                     size="sm" 
                                     variant="ghost" 
                                     className="h-8 w-8 p-0"
-                                    onClick={() => window.open(cert.protocolFileUrl, '_blank')}
+                                    onClick={() => setViewDocumentUrl(cert.protocolFileUrl!)}
+                                    title="Просмотр протокола"
                                   >
                                     <Icon name="ScrollText" size={16} />
                                   </Button>
@@ -439,7 +443,8 @@ export default function IssuedCertificatesRegistry() {
                               size="sm" 
                               variant="ghost" 
                               className="h-8 w-8 p-0"
-                              onClick={() => window.open(cert.certificateFileUrl, '_blank')}
+                              onClick={() => setViewDocumentUrl(cert.certificateFileUrl!)}
+                              title="Просмотр удостоверения"
                             >
                               <Icon name="FileText" size={16} />
                             </Button>
@@ -449,7 +454,8 @@ export default function IssuedCertificatesRegistry() {
                               size="sm" 
                               variant="ghost" 
                               className="h-8 w-8 p-0"
-                              onClick={() => window.open(cert.protocolFileUrl, '_blank')}
+                              onClick={() => setViewDocumentUrl(cert.protocolFileUrl!)}
+                              title="Просмотр протокола"
                             >
                               <Icon name="ScrollText" size={16} />
                             </Button>
@@ -493,6 +499,42 @@ export default function IssuedCertificatesRegistry() {
         onOpenChange={setManualDialogOpen}
         trainingCenterId="training-center-1"
       />
+
+      <Dialog open={!!viewDocumentUrl} onOpenChange={(open) => !open && setViewDocumentUrl(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>Просмотр документа</DialogTitle>
+          </DialogHeader>
+          <div className="w-full h-[70vh] flex items-center justify-center bg-muted rounded-lg overflow-hidden">
+            {viewDocumentUrl && (
+              viewDocumentUrl.startsWith('data:') ? (
+                <img 
+                  src={viewDocumentUrl} 
+                  alt="Документ" 
+                  className="max-w-full max-h-full object-contain"
+                />
+              ) : viewDocumentUrl.endsWith('.pdf') ? (
+                <iframe 
+                  src={viewDocumentUrl} 
+                  className="w-full h-full"
+                  title="PDF документ"
+                />
+              ) : (
+                <div className="text-center">
+                  <Icon name="FileText" size={48} className="mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground">Не удалось загрузить документ</p>
+                  <Button 
+                    className="mt-4" 
+                    onClick={() => window.open(viewDocumentUrl, '_blank')}
+                  >
+                    Открыть в новой вкладке
+                  </Button>
+                </div>
+              )
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
