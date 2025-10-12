@@ -45,7 +45,7 @@ const categoryLabels = {
 };
 
 export default function IssuedCertificatesRegistry() {
-  const { issuedCertificates, syncCertificateToAttestation } = useTrainingCenterStore();
+  const { issuedCertificates, syncCertificateToAttestation, trainingPrograms } = useTrainingCenterStore();
   const { addCertification } = useAttestationStore();
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,6 +73,54 @@ export default function IssuedCertificatesRegistry() {
     }
   };
 
+  const handleExport = () => {
+    // Подготовка данных для экспорта
+    const dataToExport = filteredCertificates.map(cert => {
+      const program = trainingPrograms.find(p => p.id === cert.programId);
+      return {
+        'ФИО': cert.personnelName,
+        'Номер удостоверения': cert.certificateNumber,
+        'Программа обучения': cert.programName,
+        'Категория': categoryLabels[cert.category as keyof typeof categoryLabels] || cert.category,
+        'Номер протокола': cert.protocolNumber,
+        'Дата протокола': format(new Date(cert.protocolDate), 'dd.MM.yyyy', { locale: ru }),
+        'Дата выдачи': format(new Date(cert.issueDate), 'dd.MM.yyyy', { locale: ru }),
+        'Срок действия': format(new Date(cert.expiryDate), 'dd.MM.yyyy', { locale: ru }),
+        'Область аттестации': cert.attestationArea || '',
+        'Организация': cert.clientOrganization || '',
+        'Статус': statusLabels[cert.status as keyof typeof statusLabels] || cert.status
+      };
+    });
+
+    // Формирование CSV
+    const headers = Object.keys(dataToExport[0] || {});
+    const csvContent = [
+      headers.join(';'),
+      ...dataToExport.map(row => 
+        headers.map(header => {
+          const value = row[header as keyof typeof row] || '';
+          // Экранируем точки с запятой и кавычки
+          return typeof value === 'string' && (value.includes(';') || value.includes('"'))
+            ? `"${value.replace(/"/g, '""')}"`
+            : value;
+        }).join(';')
+      )
+    ].join('\n');
+
+    // Скачивание файла
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm');
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `удостоверения_реестр_${timestamp}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -86,10 +134,16 @@ export default function IssuedCertificatesRegistry() {
               Список всех удостоверений, выданных учебным центром
             </CardDescription>
           </div>
-          <Button onClick={() => setBulkDialogOpen(true)} className="gap-2">
-            <Icon name="Upload" size={18} />
-            Массовая загрузка
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleExport} variant="outline" className="gap-2">
+              <Icon name="Download" size={18} />
+              Экспорт
+            </Button>
+            <Button onClick={() => setBulkDialogOpen(true)} className="gap-2">
+              <Icon name="Upload" size={18} />
+              Массовая загрузка
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
