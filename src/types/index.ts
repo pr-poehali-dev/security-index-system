@@ -174,7 +174,7 @@ export interface CompetencyMatrix {
   id: string;
   tenantId: string;
   organizationId: string;
-  position: string;
+  positionId: string;
   requiredAreas: CompetencyAreaRequirement[];
   createdAt: string;
   updatedAt: string;
