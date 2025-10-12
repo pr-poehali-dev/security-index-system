@@ -412,6 +412,46 @@ export interface Task {
   updatedAt: string;
 }
 
+export interface BudgetCategory {
+  id: string;
+  tenantId: string;
+  name: string;
+  description?: string;
+  plannedAmount: number;
+  year: number;
+  color?: string;
+  status: 'active' | 'archived';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BudgetExpense {
+  id: string;
+  tenantId: string;
+  categoryId: string;
+  amount: number;
+  description: string;
+  expenseDate: string;
+  documentNumber?: string;
+  sourceType?: 'manual' | 'incident';
+  sourceId?: string;
+  createdBy: string;
+  organizationId?: string;
+  productionSiteId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BudgetSummary {
+  categoryId: string;
+  categoryName: string;
+  plannedAmount: number;
+  spentAmount: number;
+  remainingAmount: number;
+  utilizationRate: number;
+  expensesCount: number;
+}
+
 export interface Equipment {
   id: string;
   tenantId: string;

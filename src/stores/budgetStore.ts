@@ -1,242 +1,272 @@
 import { create } from 'zustand';
-import type { Budget } from '@/types';
+import { persist } from 'zustand/middleware';
+import type { BudgetCategory, BudgetExpense, BudgetSummary } from '@/types';
 
-interface BudgetState {
-  budgets: Budget[];
-  selectedYear: number;
-  selectedQuarter: Budget['quarter'] | 'all';
-  setSelectedYear: (year: number) => void;
-  setSelectedQuarter: (quarter: Budget['quarter'] | 'all') => void;
-  addBudget: (budget: Omit<Budget, 'id'>) => void;
-  updateBudget: (id: string, updates: Partial<Budget>) => void;
-  deleteBudget: (id: string) => void;
-  getBudgetsByYear: (year: number) => Budget[];
-  getBudgetsByCategory: (category: Budget['category']) => Budget[];
-  getBudgetStats: (year: number) => {
-    totalPlanned: number;
-    totalActual: number;
-    utilization: number;
-    byCategory: Record<Budget['category'], { planned: number; actual: number; utilization: number }>;
-  };
-  error: string | null;
-  setError: (error: string | null) => void;
-  clearError: () => void;
-}
+const currentYear = new Date().getFullYear();
 
-const MOCK_BUDGETS: Budget[] = [
+const mockCategories: BudgetCategory[] = [
   {
-    id: 'budget-1',
+    id: 'cat-1',
     tenantId: 'tenant-1',
-    year: 2024,
-    category: 'attestation',
-    planned: 500000,
-    actual: 380000,
-    quarter: 1
+    name: 'Пожарная безопасность',
+    description: 'Расходы на обеспечение пожарной безопасности',
+    plannedAmount: 5000000,
+    year: currentYear,
+    color: '#ef4444',
+    status: 'active',
+    createdAt: '2025-01-01',
+    updatedAt: '2025-01-01'
   },
   {
-    id: 'budget-2',
+    id: 'cat-2',
     tenantId: 'tenant-1',
-    year: 2024,
-    category: 'attestation',
-    planned: 500000,
-    actual: 420000,
-    quarter: 2
+    name: 'Обслуживание оборудования',
+    description: 'ТО и ремонт оборудования',
+    plannedAmount: 3500000,
+    year: currentYear,
+    color: '#3b82f6',
+    status: 'active',
+    createdAt: '2025-01-01',
+    updatedAt: '2025-01-01'
   },
   {
-    id: 'budget-3',
+    id: 'cat-3',
     tenantId: 'tenant-1',
-    year: 2024,
-    category: 'attestation',
-    planned: 500000,
-    actual: 250000,
-    quarter: 3
+    name: 'Обучение персонала',
+    description: 'Обучение и аттестация',
+    plannedAmount: 1500000,
+    year: currentYear,
+    color: '#10b981',
+    status: 'active',
+    createdAt: '2025-01-01',
+    updatedAt: '2025-01-01'
   },
   {
-    id: 'budget-4',
+    id: 'cat-4',
     tenantId: 'tenant-1',
-    year: 2024,
-    category: 'attestation',
-    planned: 500000,
-    actual: 0,
-    quarter: 4
+    name: 'Экспертизы и проверки',
+    description: 'Независимые экспертизы',
+    plannedAmount: 2000000,
+    year: currentYear,
+    color: '#8b5cf6',
+    status: 'active',
+    createdAt: '2025-01-01',
+    updatedAt: '2025-01-01'
   },
   {
-    id: 'budget-5',
+    id: 'cat-5',
     tenantId: 'tenant-1',
-    year: 2024,
-    category: 'maintenance',
-    planned: 1200000,
-    actual: 980000,
-    quarter: 1
-  },
-  {
-    id: 'budget-6',
-    tenantId: 'tenant-1',
-    year: 2024,
-    category: 'maintenance',
-    planned: 1200000,
-    actual: 1150000,
-    quarter: 2
-  },
-  {
-    id: 'budget-7',
-    tenantId: 'tenant-1',
-    year: 2024,
-    category: 'maintenance',
-    planned: 1200000,
-    actual: 850000,
-    quarter: 3
-  },
-  {
-    id: 'budget-8',
-    tenantId: 'tenant-1',
-    year: 2024,
-    category: 'equipment',
-    planned: 3000000,
-    actual: 2800000,
-    quarter: 2
-  },
-  {
-    id: 'budget-9',
-    tenantId: 'tenant-1',
-    year: 2024,
-    category: 'training',
-    planned: 300000,
-    actual: 285000,
-    quarter: 1
-  },
-  {
-    id: 'budget-10',
-    tenantId: 'tenant-1',
-    year: 2024,
-    category: 'training',
-    planned: 300000,
-    actual: 310000,
-    quarter: 3
-  },
-  {
-    id: 'budget-11',
-    tenantId: 'tenant-1',
-    year: 2024,
-    category: 'other',
-    planned: 400000,
-    actual: 220000,
-    quarter: 2
+    name: 'СИЗ и спецодежда',
+    description: 'Средства индивидуальной защиты',
+    plannedAmount: 4000000,
+    year: currentYear,
+    color: '#f59e0b',
+    status: 'active',
+    createdAt: '2025-01-01',
+    updatedAt: '2025-01-01'
   }
 ];
 
-export const useBudgetStore = create<BudgetState>((set, get) => ({
-  budgets: MOCK_BUDGETS,
-  selectedYear: 2024,
-  selectedQuarter: 'all',
-  error: null,
-
-  setSelectedYear: (year) => set({ selectedYear: year }),
-
-  setSelectedQuarter: (quarter) => set({ selectedQuarter: quarter }),
-
-  addBudget: (budgetData) => {
-    try {
-      set((state) => ({
-        budgets: [
-          ...state.budgets,
-          {
-            ...budgetData,
-            id: `budget-${Date.now()}`
-          }
-        ],
-        error: null
-      }));
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Ошибка при добавлении бюджета';
-      set({ error: errorMessage });
-      throw error;
-    }
+const mockExpenses: BudgetExpense[] = [
+  {
+    id: 'exp-1',
+    tenantId: 'tenant-1',
+    categoryId: 'cat-1',
+    amount: 450000,
+    description: 'Закупка огнетушителей',
+    expenseDate: '2025-01-15',
+    documentNumber: 'ИСХ-001',
+    sourceType: 'manual',
+    createdBy: 'user-1',
+    organizationId: 'org-1',
+    createdAt: '2025-01-15',
+    updatedAt: '2025-01-15'
   },
-
-  updateBudget: (id, updates) => {
-    try {
-      set((state) => ({
-        budgets: state.budgets.map((budget) =>
-          budget.id === id ? { ...budget, ...updates } : budget
-        ),
-        error: null
-      }));
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Ошибка при обновлении бюджета';
-      set({ error: errorMessage });
-      throw error;
-    }
+  {
+    id: 'exp-2',
+    tenantId: 'tenant-1',
+    categoryId: 'cat-2',
+    amount: 280000,
+    description: 'ТО компрессорного оборудования',
+    expenseDate: '2025-01-20',
+    documentNumber: 'ИСХ-002',
+    sourceType: 'manual',
+    createdBy: 'user-1',
+    organizationId: 'org-1',
+    createdAt: '2025-01-20',
+    updatedAt: '2025-01-20'
   },
-
-  deleteBudget: (id) => {
-    try {
-      set((state) => ({
-        budgets: state.budgets.filter((budget) => budget.id !== id),
-        error: null
-      }));
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Ошибка при удалении бюджета';
-      set({ error: errorMessage });
-      throw error;
-    }
+  {
+    id: 'exp-3',
+    tenantId: 'tenant-1',
+    categoryId: 'cat-3',
+    amount: 95000,
+    description: 'Обучение по охране труда',
+    expenseDate: '2025-02-01',
+    documentNumber: 'ИСХ-003',
+    sourceType: 'manual',
+    createdBy: 'user-1',
+    organizationId: 'org-1',
+    createdAt: '2025-02-01',
+    updatedAt: '2025-02-01'
   },
-
-  getBudgetsByYear: (year) => {
-    const { budgets, selectedQuarter } = get();
-    return budgets.filter((budget) => {
-      if (budget.year !== year) return false;
-      if (selectedQuarter !== 'all' && budget.quarter !== selectedQuarter) return false;
-      return true;
-    });
+  {
+    id: 'exp-4',
+    tenantId: 'tenant-1',
+    categoryId: 'cat-1',
+    amount: 1200000,
+    description: 'Монтаж системы пожарной сигнализации',
+    expenseDate: '2025-02-10',
+    documentNumber: 'ИСХ-004',
+    sourceType: 'manual',
+    createdBy: 'user-1',
+    organizationId: 'org-1',
+    createdAt: '2025-02-10',
+    updatedAt: '2025-02-10'
   },
-
-  getBudgetsByCategory: (category) => {
-    const { selectedYear } = get();
-    return get().budgets.filter(
-      (budget) => budget.category === category && budget.year === selectedYear
-    );
-  },
-
-  getBudgetStats: (year) => {
-    const budgets = get().budgets.filter((b) => b.year === year);
-
-    const stats = {
-      totalPlanned: 0,
-      totalActual: 0,
-      utilization: 0,
-      byCategory: {} as Record<Budget['category'], { planned: number; actual: number; utilization: number }>
-    };
-
-    const categories: Budget['category'][] = ['attestation', 'maintenance', 'equipment', 'training', 'other'];
-
-    categories.forEach((category) => {
-      const categoryBudgets = budgets.filter((b) => b.category === category);
-      const planned = categoryBudgets.reduce((sum, b) => sum + b.planned, 0);
-      const actual = categoryBudgets.reduce((sum, b) => sum + b.actual, 0);
-
-      stats.byCategory[category] = {
-        planned,
-        actual,
-        utilization: planned > 0 ? Math.round((actual / planned) * 100) : 0
-      };
-
-      stats.totalPlanned += planned;
-      stats.totalActual += actual;
-    });
-
-    stats.utilization = stats.totalPlanned > 0 
-      ? Math.round((stats.totalActual / stats.totalPlanned) * 100) 
-      : 0;
-
-    return stats;
-  },
-  
-  setError: (error) => {
-    set({ error });
-  },
-  
-  clearError: () => {
-    set({ error: null });
+  {
+    id: 'exp-5',
+    tenantId: 'tenant-1',
+    categoryId: 'cat-5',
+    amount: 350000,
+    description: 'Закупка спецодежды',
+    expenseDate: '2025-02-15',
+    documentNumber: 'ИСХ-005',
+    sourceType: 'manual',
+    createdBy: 'user-1',
+    organizationId: 'org-1',
+    createdAt: '2025-02-15',
+    updatedAt: '2025-02-15'
   }
-}));
+];
+
+interface BudgetState {
+  categories: BudgetCategory[];
+  expenses: BudgetExpense[];
+  selectedYear: number;
+
+  addCategory: (category: Omit<BudgetCategory, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateCategory: (id: string, updates: Partial<BudgetCategory>) => void;
+  deleteCategory: (id: string) => void;
+  getCategoriesByYear: (year: number) => BudgetCategory[];
+
+  addExpense: (expense: Omit<BudgetExpense, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateExpense: (id: string, updates: Partial<BudgetExpense>) => void;
+  deleteExpense: (id: string) => void;
+  getExpensesByCategory: (categoryId: string) => BudgetExpense[];
+
+  getBudgetSummary: (year: number) => BudgetSummary[];
+  getTotalPlanned: (year: number) => number;
+  getTotalSpent: (year: number) => number;
+  getTotalUtilization: (year: number) => number;
+
+  setSelectedYear: (year: number) => void;
+}
+
+export const useBudgetStore = create<BudgetState>()(persist((set, get) => ({
+  categories: mockCategories,
+  expenses: mockExpenses,
+  selectedYear: currentYear,
+
+  addCategory: (category) => {
+    const newCategory: BudgetCategory = {
+      ...category,
+      id: `cat-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    set((state) => ({ categories: [...state.categories, newCategory] }));
+  },
+
+  updateCategory: (id, updates) => {
+    set((state) => ({
+      categories: state.categories.map((cat) =>
+        cat.id === id ? { ...cat, ...updates, updatedAt: new Date().toISOString() } : cat
+      )
+    }));
+  },
+
+  deleteCategory: (id) => {
+    set((state) => ({ categories: state.categories.filter((cat) => cat.id !== id) }));
+  },
+
+  getCategoriesByYear: (year) => {
+    return get().categories.filter((cat) => cat.year === year && cat.status === 'active');
+  },
+
+  addExpense: (expense) => {
+    const newExpense: BudgetExpense = {
+      ...expense,
+      id: `exp-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    set((state) => ({ expenses: [...state.expenses, newExpense] }));
+  },
+
+  updateExpense: (id, updates) => {
+    set((state) => ({
+      expenses: state.expenses.map((exp) =>
+        exp.id === id ? { ...exp, ...updates, updatedAt: new Date().toISOString() } : exp
+      )
+    }));
+  },
+
+  deleteExpense: (id) => {
+    set((state) => ({ expenses: state.expenses.filter((exp) => exp.id !== id) }));
+  },
+
+  getExpensesByCategory: (categoryId) => {
+    return get().expenses.filter((exp) => exp.categoryId === categoryId);
+  },
+
+  getBudgetSummary: (year) => {
+    const categories = get().getCategoriesByYear(year);
+    const expenses = get().expenses;
+
+    return categories.map((category) => {
+      const categoryExpenses = expenses.filter((exp) => exp.categoryId === category.id);
+      const spentAmount = categoryExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+      const remainingAmount = category.plannedAmount - spentAmount;
+      const utilizationRate = category.plannedAmount > 0 
+        ? Math.round((spentAmount / category.plannedAmount) * 100) 
+        : 0;
+
+      return {
+        categoryId: category.id,
+        categoryName: category.name,
+        plannedAmount: category.plannedAmount,
+        spentAmount,
+        remainingAmount,
+        utilizationRate,
+        expensesCount: categoryExpenses.length
+      };
+    });
+  },
+
+  getTotalPlanned: (year) => {
+    const categories = get().getCategoriesByYear(year);
+    return categories.reduce((sum, cat) => sum + cat.plannedAmount, 0);
+  },
+
+  getTotalSpent: (year) => {
+    const categories = get().getCategoriesByYear(year);
+    const expenses = get().expenses;
+    
+    return categories.reduce((sum, cat) => {
+      const categoryExpenses = expenses.filter((exp) => exp.categoryId === cat.id);
+      return sum + categoryExpenses.reduce((expSum, exp) => expSum + exp.amount, 0);
+    }, 0);
+  },
+
+  getTotalUtilization: (year) => {
+    const totalPlanned = get().getTotalPlanned(year);
+    const totalSpent = get().getTotalSpent(year);
+    return totalPlanned > 0 ? Math.round((totalSpent / totalPlanned) * 100) : 0;
+  },
+
+  setSelectedYear: (year) => {
+    set({ selectedYear: year });
+  }
+
+}), { name: 'budget-storage-v1' }));
