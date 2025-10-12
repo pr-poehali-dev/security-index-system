@@ -21,6 +21,7 @@ const AttestationPage = lazy(() => import("@/modules/attestation").then(m => ({ 
 const TasksPage = lazy(() => import("@/modules/tasks").then(m => ({ default: m.TasksPage })));
 const ExaminationPage = lazy(() => import("@/modules/examination").then(m => ({ default: m.ExaminationPage })));
 const NotificationsPage = lazy(() => import("@/modules/notifications").then(m => ({ default: m.NotificationsPage })));
+const CreateNotificationPage = lazy(() => import("@/modules/notifications/pages/CreateNotificationPage"));
 const MaintenancePage = lazy(() => import("@/modules/maintenance").then(m => ({ default: m.MaintenancePage })));
 const BudgetPage = lazy(() => import("@/modules/budget").then(m => ({ default: m.BudgetPage })));
 const TrainingCenterPage = lazy(() => import("@/modules/training-center/pages/TrainingCenterPage"));
@@ -219,6 +220,16 @@ const App = memo(function App() {
                 <ProtectedRoute>
                   <AuthenticatedLayout>
                     <NotificationsPage />
+                  </AuthenticatedLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.CREATE_NOTIFICATION}
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedLayout>
+                    <CreateNotificationPage />
                   </AuthenticatedLayout>
                 </ProtectedRoute>
               }

@@ -153,14 +153,23 @@ export default function NotificationsPage() {
         title="Уведомления"
         description="Новости платформы и системные уведомления"
         action={
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/dashboard')}
-            className="gap-2"
-          >
-            <Icon name="ArrowLeft" size={16} />
-            Назад
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => navigate('/notifications/create')}
+              className="gap-2"
+            >
+              <Icon name="Plus" size={16} />
+              Создать уведомление
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/dashboard')}
+              className="gap-2"
+            >
+              <Icon name="ArrowLeft" size={16} />
+              Назад
+            </Button>
+          </div>
         }
       />
 
