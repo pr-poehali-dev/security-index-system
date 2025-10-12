@@ -22,7 +22,7 @@ export function SortableTableHeader({
   const direction = isActive ? currentSort.direction : null;
 
   return (
-    <th
+    <div
       className={cn(
         'text-left p-3 font-semibold text-sm cursor-pointer hover:bg-muted/80 transition-colors select-none',
         className
@@ -50,6 +50,6 @@ export function SortableTableHeader({
           />
         </div>
       </div>
-    </th>
+    </div>
   );
 }

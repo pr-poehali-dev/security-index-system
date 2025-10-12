@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { FixedSizeList as List } from 'react-window';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
@@ -166,6 +167,97 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
     }
   };
 
+  const useVirtualization = sortedObjects.length > 100;
+
+  const TableRow = ({ index, style }: { index: number; style: React.CSSProperties }) => {
+    const obj = sortedObjects[index];
+    const organization = organizations.find(org => org.id === obj.organizationId);
+    
+    return (
+      <div 
+        style={style}
+        className="border-b last:border-b-0 hover:bg-muted/30 transition-colors flex items-stretch"
+      >
+        <div className="flex w-full items-center">
+          <div className="p-3 flex-[2] min-w-0">
+            <div className="flex items-start gap-2">
+              <Icon name="Building" size={18} className="text-blue-600 mt-0.5 flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="font-medium truncate">{obj.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{obj.location.address}</p>
+              </div>
+            </div>
+          </div>
+          <div className="p-3 flex-1">
+            <code className="text-xs bg-muted px-2 py-1 rounded">
+              {obj.registrationNumber}
+            </code>
+          </div>
+          <div className="p-3 flex-1">
+            <Badge variant="outline" className="whitespace-nowrap">
+              {getTypeLabel(obj.type)}
+              {obj.hazardClass && ` • ${obj.hazardClass}`}
+            </Badge>
+          </div>
+          <div className="p-3 flex-1 truncate">
+            <p className="text-sm truncate">{organization?.name || '-'}</p>
+          </div>
+          <div className="p-3 flex-1">
+            <Badge className={getStatusColor(obj.status)}>
+              {getStatusLabel(obj.status)}
+            </Badge>
+          </div>
+          <div className="p-3 flex-1">
+            {obj.nextExpertiseDate ? (
+              <div className="flex items-center gap-1">
+                {isDateExpired(obj.nextExpertiseDate) && (
+                  <Icon name="AlertCircle" size={14} className="text-red-500" />
+                )}
+                {isDateSoon(obj.nextExpertiseDate) && !isDateExpired(obj.nextExpertiseDate) && (
+                  <Icon name="Clock" size={14} className="text-amber-500" />
+                )}
+                <span className={`text-sm ${
+                  isDateExpired(obj.nextExpertiseDate)
+                    ? 'text-red-600 font-semibold'
+                    : isDateSoon(obj.nextExpertiseDate)
+                    ? 'text-amber-600 font-semibold'
+                    : ''
+                }`}>
+                  {formatDate(obj.nextExpertiseDate)}
+                </span>
+              </div>
+            ) : (
+              <span className="text-sm text-muted-foreground">-</span>
+            )}
+          </div>
+          <div className="p-3 flex-1 truncate">
+            <p className="text-sm truncate">{obj.responsiblePerson}</p>
+          </div>
+          <div className="p-3 flex-shrink-0">
+            <div className="flex items-center justify-end gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onView(obj)}
+                title="Просмотр"
+              >
+                <Icon name="Eye" size={16} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(obj)}
+                title="Редактировать"
+              >
+                <Icon name="Edit" size={16} />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex justify-end">
@@ -190,152 +282,88 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
       </div>
       
       <div className="border rounded-lg overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-muted/50 border-b">
-            <tr>
+        <div className="overflow-x-auto">
+          <div className="min-w-[1400px]">
+            <div className="bg-muted/50 border-b flex">
               <SortableTableHeader
                 label="Название"
                 field="name"
                 currentSort={sortConfig}
                 onSort={handleSort}
+                className="flex-[2]"
               />
               <SortableTableHeader
                 label="Рег. номер"
                 field="registrationNumber"
                 currentSort={sortConfig}
                 onSort={handleSort}
+                className="flex-1"
               />
               <SortableTableHeader
                 label="Тип"
                 field="type"
                 currentSort={sortConfig}
                 onSort={handleSort}
+                className="flex-1"
               />
               <SortableTableHeader
                 label="Организация"
                 field="organization"
                 currentSort={sortConfig}
                 onSort={handleSort}
+                className="flex-1"
               />
               <SortableTableHeader
                 label="Статус"
                 field="status"
                 currentSort={sortConfig}
                 onSort={handleSort}
+                className="flex-1"
               />
               <SortableTableHeader
                 label="Следующая ЭПБ"
                 field="nextExpertiseDate"
                 currentSort={sortConfig}
                 onSort={handleSort}
+                className="flex-1"
               />
               <SortableTableHeader
                 label="Ответственный"
                 field="responsiblePerson"
                 currentSort={sortConfig}
                 onSort={handleSort}
+                className="flex-1"
               />
-              <th className="text-right p-3 font-semibold text-sm">Действия</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedObjects.map((obj) => {
-              const organization = organizations.find(org => org.id === obj.organizationId);
-              
-              return (
-                <tr 
-                  key={obj.id}
-                  className="border-b last:border-b-0 hover:bg-muted/30 transition-colors"
-                >
-                  <td className="p-3">
-                    <div className="flex items-start gap-2">
-                      <Icon name="Building" size={18} className="text-blue-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium">{obj.name}</p>
-                        <p className="text-xs text-muted-foreground">{obj.location.address}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <code className="text-xs bg-muted px-2 py-1 rounded">
-                      {obj.registrationNumber}
-                    </code>
-                  </td>
-                  <td className="p-3">
-                    <Badge variant="outline" className="whitespace-nowrap">
-                      {getTypeLabel(obj.type)}
-                      {obj.hazardClass && ` • ${obj.hazardClass}`}
-                    </Badge>
-                  </td>
-                  <td className="p-3">
-                    <p className="text-sm">{organization?.name || '-'}</p>
-                  </td>
-                  <td className="p-3">
-                    <Badge className={getStatusColor(obj.status)}>
-                      {getStatusLabel(obj.status)}
-                    </Badge>
-                  </td>
-                  <td className="p-3">
-                    {obj.nextExpertiseDate ? (
-                      <div className="flex items-center gap-1">
-                        {isDateExpired(obj.nextExpertiseDate) && (
-                          <Icon name="AlertCircle" size={14} className="text-red-500" />
-                        )}
-                        {isDateSoon(obj.nextExpertiseDate) && !isDateExpired(obj.nextExpertiseDate) && (
-                          <Icon name="Clock" size={14} className="text-amber-500" />
-                        )}
-                        <span className={`text-sm ${
-                          isDateExpired(obj.nextExpertiseDate)
-                            ? 'text-red-600 font-semibold'
-                            : isDateSoon(obj.nextExpertiseDate)
-                            ? 'text-amber-600 font-semibold'
-                            : ''
-                        }`}>
-                          {formatDate(obj.nextExpertiseDate)}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-sm text-muted-foreground">-</span>
-                    )}
-                  </td>
-                  <td className="p-3">
-                    <p className="text-sm">{obj.responsiblePerson}</p>
-                  </td>
-                  <td className="p-3">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onView(obj)}
-                        title="Просмотр"
-                      >
-                        <Icon name="Eye" size={16} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onEdit(obj)}
-                        title="Редактировать"
-                      >
-                        <Icon name="Edit" size={16} />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-      
-      {sortedObjects.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          <Icon name="Search" className="mx-auto mb-3" size={48} />
-          <p>Объекты не найдены</p>
+              <div className="text-right p-3 font-semibold text-sm flex-shrink-0 w-32">Действия</div>
+            </div>
+
+            {useVirtualization ? (
+              <List
+                height={600}
+                itemCount={sortedObjects.length}
+                itemSize={80}
+                width="100%"
+                className="scrollbar-thin"
+              >
+                {TableRow}
+              </List>
+            ) : (
+              <div>
+                {sortedObjects.map((obj, index) => (
+                  <TableRow key={obj.id} index={index} style={{}} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      )}
-    </div>
+      
+        {sortedObjects.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            <Icon name="Search" className="mx-auto mb-3" size={48} />
+            <p>Объекты не найдены</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { FixedSizeList as List } from 'react-window';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
@@ -163,6 +164,78 @@ export default function TaskTableView({ tasks, onTaskClick }: TaskTableViewProps
     }
   };
 
+  const useVirtualization = sortedTasks.length > 100;
+
+  const TaskRow = ({ index, style }: { index: number; style: React.CSSProperties }) => {
+    const task = sortedTasks[index];
+    const overdueTask = isOverdue(task.dueDate, task.status);
+    
+    return (
+      <div 
+        style={style}
+        className="border-b last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer flex items-stretch"
+        onClick={() => onTaskClick(task)}
+      >
+        <div className="flex w-full items-center">
+          <div className="p-3 flex-[2] min-w-0">
+            <div className="flex items-start gap-2">
+              <Icon name="ListTodo" size={18} className="text-blue-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{task.title}</p>
+                {task.description && (
+                  <p className="text-xs text-muted-foreground line-clamp-1">
+                    {task.description}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="p-3 flex-1">
+            <Badge className={getPriorityColor(task.priority)}>
+              {getPriorityLabel(task.priority)}
+            </Badge>
+          </div>
+          <div className="p-3 flex-1">
+            <Badge className={getStatusColor(task.status)}>
+              {getStatusLabel(task.status)}
+            </Badge>
+          </div>
+          <div className="p-3 flex-1 truncate">
+            <p className="text-sm truncate">{task.assignee}</p>
+          </div>
+          <div className="p-3 flex-1">
+            <div className="flex items-center gap-1">
+              {overdueTask && (
+                <Icon name="AlertCircle" size={14} className="text-red-500" />
+              )}
+              <span className={`text-sm ${overdueTask ? 'text-red-600 font-semibold' : ''}`}>
+                {formatDate(task.dueDate)}
+              </span>
+            </div>
+          </div>
+          <div className="p-3 flex-1 truncate">
+            <p className="text-sm text-muted-foreground truncate">{task.object || '-'}</p>
+          </div>
+          <div className="p-3 flex-shrink-0 w-24">
+            <div className="flex items-center justify-end">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTaskClick(task);
+                }}
+                title="Просмотр"
+              >
+                <Icon name="Eye" size={16} />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex justify-end">
@@ -187,127 +260,80 @@ export default function TaskTableView({ tasks, onTaskClick }: TaskTableViewProps
       </div>
       
       <div className="border rounded-lg overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-muted/50 border-b">
-            <tr>
+        <div className="overflow-x-auto">
+          <div className="min-w-[1200px]">
+            <div className="bg-muted/50 border-b flex">
               <SortableTableHeader
                 label="Название"
                 field="title"
                 currentSort={sortConfig}
                 onSort={handleSort}
+                className="flex-[2]"
               />
               <SortableTableHeader
                 label="Приоритет"
                 field="priority"
                 currentSort={sortConfig}
                 onSort={handleSort}
+                className="flex-1"
               />
               <SortableTableHeader
                 label="Статус"
                 field="status"
                 currentSort={sortConfig}
                 onSort={handleSort}
+                className="flex-1"
               />
               <SortableTableHeader
                 label="Ответственный"
                 field="assignee"
                 currentSort={sortConfig}
                 onSort={handleSort}
+                className="flex-1"
               />
               <SortableTableHeader
                 label="Срок"
                 field="dueDate"
                 currentSort={sortConfig}
                 onSort={handleSort}
+                className="flex-1"
               />
               <SortableTableHeader
                 label="Объект"
                 field="object"
                 currentSort={sortConfig}
                 onSort={handleSort}
+                className="flex-1"
               />
-              <th className="text-right p-3 font-semibold text-sm">Действия</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedTasks.map((task) => {
-              const overdueTask = isOverdue(task.dueDate, task.status);
-              
-              return (
-                <tr 
-                  key={task.id}
-                  className="border-b last:border-b-0 hover:bg-muted/30 transition-colors cursor-pointer"
-                  onClick={() => onTaskClick(task)}
-                >
-                  <td className="p-3">
-                    <div className="flex items-start gap-2">
-                      <Icon name="ListTodo" size={18} className="text-blue-600 mt-0.5 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium">{task.title}</p>
-                        {task.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-1">
-                            {task.description}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <Badge className={getPriorityColor(task.priority)}>
-                      {getPriorityLabel(task.priority)}
-                    </Badge>
-                  </td>
-                  <td className="p-3">
-                    <Badge className={getStatusColor(task.status)}>
-                      {getStatusLabel(task.status)}
-                    </Badge>
-                  </td>
-                  <td className="p-3">
-                    <p className="text-sm">{task.assignee}</p>
-                  </td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-1">
-                      {overdueTask && (
-                        <Icon name="AlertCircle" size={14} className="text-red-500" />
-                      )}
-                      <span className={`text-sm ${overdueTask ? 'text-red-600 font-semibold' : ''}`}>
-                        {formatDate(task.dueDate)}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <p className="text-sm text-muted-foreground">{task.object || '-'}</p>
-                  </td>
-                  <td className="p-3">
-                    <div className="flex items-center justify-end">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onTaskClick(task);
-                        }}
-                        title="Просмотр"
-                      >
-                        <Icon name="Eye" size={16} />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-      
-      
-      {sortedTasks.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          <Icon name="Search" className="mx-auto mb-3" size={48} />
-          <p>Задачи не найдены</p>
+              <div className="text-right p-3 font-semibold text-sm flex-shrink-0 w-24">Действия</div>
+            </div>
+
+            {useVirtualization ? (
+              <List
+                height={600}
+                itemCount={sortedTasks.length}
+                itemSize={80}
+                width="100%"
+                className="scrollbar-thin"
+              >
+                {TaskRow}
+              </List>
+            ) : (
+              <div>
+                {sortedTasks.map((task, index) => (
+                  <TaskRow key={task.id} index={index} style={{}} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      
+        {sortedTasks.length === 0 && (
+          <div className="text-center py-12 text-muted-foreground">
+            <Icon name="Search" className="mx-auto mb-3" size={48} />
+            <p>Задачи не найдены</p>
+          </div>
+        )}
       </div>
     </div>
   );
