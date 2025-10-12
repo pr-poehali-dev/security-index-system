@@ -21,6 +21,7 @@ import {
 import Icon from '@/components/ui/icon';
 import { useTrainingCenterStore } from '@/stores/trainingCenterStore';
 import { useCertificationStore } from '@/stores/certificationStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import BulkIssueCertificatesDialog from './BulkIssueCertificatesDialog';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -47,6 +48,7 @@ const categoryLabels = {
 export default function IssuedCertificatesRegistry() {
   const { issuedCertificates, syncCertificateToAttestation, trainingPrograms } = useTrainingCenterStore();
   const { addCertification } = useCertificationStore();
+  const { organizations, personnel, people } = useSettingsStore();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -77,10 +79,15 @@ export default function IssuedCertificatesRegistry() {
     // Подготовка данных для экспорта
     const dataToExport = filteredCertificates.map(cert => {
       const program = trainingPrograms.find(p => p.id === cert.programId);
+      const person = personnel.find(p => p.id === cert.personnelId);
+      const organization = person?.organizationId 
+        ? organizations.find(o => o.id === person.organizationId)
+        : organizations.find(o => o.id === cert.organizationId);
+      
       return {
         'ФИО': cert.personnelName,
-        'Организация': cert.organizationName || 'Не указана',
-        'ИНН организации': cert.organizationInn || '',
+        'Организация': organization?.name || cert.organizationName || 'Не указана',
+        'ИНН организации': organization?.inn || cert.organizationInn || '',
         'Номер удостоверения': cert.certificateNumber,
         'Программа обучения': cert.programName,
         'Категория': categoryLabels[cert.category as keyof typeof categoryLabels] || cert.category,
@@ -209,7 +216,13 @@ export default function IssuedCertificatesRegistry() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredCertificates.map((cert) => (
+                filteredCertificates.map((cert) => {
+                  const person = personnel.find(p => p.id === cert.personnelId);
+                  const organization = person?.organizationId 
+                    ? organizations.find(o => o.id === person.organizationId)
+                    : organizations.find(o => o.id === cert.organizationId);
+                  
+                  return (
                   <TableRow key={cert.id}>
                     <TableCell className="whitespace-nowrap">
                       {format(new Date(cert.issueDate), 'dd.MM.yyyy', { locale: ru })}
@@ -217,9 +230,11 @@ export default function IssuedCertificatesRegistry() {
                     <TableCell className="font-medium">{cert.personnelName}</TableCell>
                     <TableCell>
                       <div className="max-w-[200px]">
-                        <div className="font-medium truncate">{cert.organizationName || 'Не указана'}</div>
+                        <div className="font-medium truncate">
+                          {organization?.name || cert.organizationName || 'Не указана'}
+                        </div>
                         <div className="text-xs text-muted-foreground truncate">
-                          {cert.organizationInn ? `ИНН: ${cert.organizationInn}` : ''}
+                          {organization?.inn || cert.organizationInn ? `ИНН: ${organization?.inn || cert.organizationInn}` : ''}
                         </div>
                       </div>
                     </TableCell>
@@ -279,7 +294,8 @@ export default function IssuedCertificatesRegistry() {
                       )}
                     </TableCell>
                   </TableRow>
-                ))
+                );
+                })
               )}
             </TableBody>
           </Table>
