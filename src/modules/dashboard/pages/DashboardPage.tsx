@@ -1,4 +1,4 @@
-import { useMemo, memo, useCallback } from 'react';
+import { useMemo, memo, useCallback, useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useCatalogStore } from '@/stores/catalogStore';
@@ -9,6 +9,7 @@ import { analyzePersonnelCompetencies } from '@/lib/competencyAnalysis';
 import PageHeader from '@/components/layout/PageHeader';
 import { ROUTES } from '@/lib/constants';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   generateDashboardReport,
   generateTasksReport,
@@ -32,6 +33,12 @@ import DeadlineCalendar from '@/components/widgets/DeadlineCalendar';
 const DashboardPage = memo(function DashboardPage() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
   
   if (user?.role === 'SuperAdmin') {
     return <Navigate to={ROUTES.TENANTS} replace />;
@@ -322,6 +329,28 @@ const DashboardPage = memo(function DashboardPage() {
       toast.error('Ошибка при формировании отчета');
     }
   }, [organizations, objects]);
+
+  if (isLoading) {
+    return (
+      <div>
+        <PageHeader
+          title="Загрузка..."
+          description="Обзор ключевых показателей системы"
+          icon="LayoutDashboard"
+        />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-32 rounded-lg" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <Skeleton key={i} className="h-64 rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

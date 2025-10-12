@@ -4,6 +4,8 @@ import { useIncidentsStore } from '@/stores/incidentsStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import * as XLSX from 'xlsx';
 import type { IncidentStatus } from '@/types';
+import Icon from '@/components/ui/icon';
+import { Card, CardContent } from '@/components/ui/card';
 import ReportFilters from '../ReportFilters';
 import ReportStatsGrid from '../ReportStatsGrid';
 import ReportChartsSection from '../ReportChartsSection';
@@ -308,6 +310,39 @@ export default function ReportsTab() {
       avgDaysToComplete
     };
   }, [filteredIncidents]);
+
+  if (filteredIncidents.length === 0) {
+    return (
+      <div className="space-y-6">
+        <ReportFilters
+          periodType={periodType}
+          setPeriodType={setPeriodType}
+          organizationFilter={organizationFilter}
+          setOrganizationFilter={setOrganizationFilter}
+          directionFilter={directionFilter}
+          setDirectionFilter={setDirectionFilter}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
+          organizations={organizations}
+          directions={directions}
+          onExport={handleExportReport}
+        />
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <Icon name="FileBarChart" size={64} className="text-gray-300 dark:text-gray-600 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              Нет данных для отчёта
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-md">
+              В выбранном периоде отсутствуют инциденты. Измените фильтры или период для отображения данных.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

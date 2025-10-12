@@ -1,6 +1,7 @@
-import { memo } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import Icon from '@/components/ui/icon';
 import { Navigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/constants';
@@ -13,9 +14,29 @@ import HeatmapTab from '../components/tabs/HeatmapTab';
 
 const IncidentsPage = memo(function IncidentsPage() {
   const user = useAuthStore((state) => state.user);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 400);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (!user || !user.availableModules.includes('incidents')) {
     return <Navigate to={ROUTES.DASHBOARD} replace />;
+  }
+
+  if (isLoading) {
+    return (
+      <div>
+        <PageHeader
+          title="Учет инцидентов"
+          description="Фиксация и учет нарушений/отклонений от требований в области ОТ, ПБ и ЭБ"
+          icon="AlertTriangle"
+        />
+        <Skeleton className="h-12 rounded-lg mb-6 max-w-2xl" />
+        <Skeleton className="h-96 rounded-lg" />
+      </div>
+    );
   }
 
   return (

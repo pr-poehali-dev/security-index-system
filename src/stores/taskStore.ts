@@ -9,6 +9,7 @@ interface TaskState {
     priority: Task['priority'] | 'all';
     type: Task['type'] | 'all';
     assignedTo: string | 'all';
+    search: string;
   };
   error: string | null;
   
@@ -101,6 +102,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   filters: {
     status: 'all',
     priority: 'all',
+    search: '',
     type: 'all',
     assignedTo: 'all'
   },
@@ -208,6 +210,15 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       if (filters.priority !== 'all' && task.priority !== filters.priority) return false;
       if (filters.type !== 'all' && task.type !== filters.type) return false;
       if (filters.assignedTo !== 'all' && task.assignedTo !== filters.assignedTo) return false;
+      
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        const matchesTitle = task.title.toLowerCase().includes(searchLower);
+        const matchesDescription = task.description?.toLowerCase().includes(searchLower);
+        const matchesObject = task.objectName?.toLowerCase().includes(searchLower);
+        if (!matchesTitle && !matchesDescription && !matchesObject) return false;
+      }
+      
       return true;
     });
   },

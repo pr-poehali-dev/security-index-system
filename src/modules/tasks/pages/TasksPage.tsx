@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
 import PageHeader from '@/components/layout/PageHeader';
@@ -7,11 +7,19 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import Icon from '@/components/ui/icon';
 import TaskTableView from '../components/TaskTableView';
 import type { Task } from '@/types/tasks';
 
 export default function TasksPage() {
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 400);
+    return () => clearTimeout(timer);
+  }, []);
   const {
     tasks,
     filters,
@@ -80,6 +88,25 @@ export default function TasksPage() {
                         currentTab === 'overdue' ? overdueTasks :
                         filteredTasks.filter(t => t.status === currentTab);
 
+  if (isLoading) {
+    return (
+      <div>
+        <PageHeader
+          title="Управление задачами"
+          description="Постановка и контроль выполнения задач по промышленной безопасности"
+          icon="ListTodo"
+        />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4 mb-6">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-28 rounded-lg" />
+          ))}
+        </div>
+        <Skeleton className="h-64 rounded-lg mb-6" />
+        <Skeleton className="h-96 rounded-lg" />
+      </div>
+    );
+  }
+
   return (
     <div>
       <PageHeader
@@ -87,7 +114,7 @@ export default function TasksPage() {
         description="Постановка и контроль выполнения задач по промышленной безопасности"
         icon="ListTodo"
         action={
-          <Button className="gap-2">
+          <Button className="gap-2" aria-label="Создать задачу">
             <Icon name="Plus" size={18} />
             Создать задачу
           </Button>
@@ -166,11 +193,12 @@ export default function TasksPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">Фильтры</CardTitle>
-            <div className="flex gap-1 border rounded-lg p-1">
+            <div className="flex gap-1 border rounded-lg p-1" role="group" aria-label="Режим отображения">
               <Button
                 variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('cards')}
+                aria-label="Режим карточек"
                 title="Карточки"
               >
                 <Icon name="LayoutGrid" size={16} />
@@ -178,6 +206,7 @@ export default function TasksPage() {
               <Button
                 variant={viewMode === 'table' ? 'secondary' : 'ghost'}
                 size="sm"
+                aria-label="Режим таблицы"
                 onClick={() => setViewMode('table')}
                 title="Таблица"
               >
@@ -187,11 +216,23 @@ export default function TasksPage() {
           </div>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <div className="relative">
+              <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Input
+                placeholder="Поиск по названию, описанию или объекту..."
+                value={filters.search}
+                onChange={(e) => setFilters({ search: e.target.value })}
+                className="pl-10"
+                aria-label="Поиск задач"
+              />
+            </div>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Статус</label>
+              <label htmlFor="status-filter" className="text-sm font-medium mb-2 block">Статус</label>
               <Select value={filters.status} onValueChange={(value) => setFilters({ status: value as any })}>
-                <SelectTrigger>
+                <SelectTrigger id="status-filter" aria-label="Фильтр по статусу">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -205,9 +246,9 @@ export default function TasksPage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Приоритет</label>
+              <label htmlFor="priority-filter" className="text-sm font-medium mb-2 block">Приоритет</label>
               <Select value={filters.priority} onValueChange={(value) => setFilters({ priority: value as any })}>
-                <SelectTrigger>
+                <SelectTrigger id="priority-filter" aria-label="Фильтр по приоритету">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -221,9 +262,9 @@ export default function TasksPage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Тип задачи</label>
+              <label htmlFor="type-filter" className="text-sm font-medium mb-2 block">Тип задачи</label>
               <Select value={filters.type} onValueChange={(value) => setFilters({ type: value as any })}>
-                <SelectTrigger>
+                <SelectTrigger id="type-filter" aria-label="Фильтр по типу задачи">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -237,9 +278,9 @@ export default function TasksPage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Исполнитель</label>
+              <label htmlFor="assignee-filter" className="text-sm font-medium mb-2 block">Исполнитель</label>
               <Select value={filters.assignedTo} onValueChange={(value) => setFilters({ assignedTo: value })}>
-                <SelectTrigger>
+                <SelectTrigger id="assignee-filter" aria-label="Фильтр по исполнителю">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

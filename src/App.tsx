@@ -9,6 +9,7 @@ import { useEffect, lazy, Suspense, memo } from "react";
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/lib/constants";
 import Sidebar from "@/components/layout/Sidebar";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const LoginPage = lazy(() => import("@/modules/auth").then(m => ({ default: m.LoginPage })));
 const DashboardPage = lazy(() => import("@/modules/dashboard").then(m => ({ default: m.DashboardPage })));
@@ -95,13 +96,14 @@ const App = memo(function App() {
   }, [theme]);
   
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
               <Route path={ROUTES.LOGIN} element={<LoginPage />} />
             <Route
               path={ROUTES.DASHBOARD}
@@ -274,6 +276,7 @@ const App = memo(function App() {
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
+    </ErrorBoundary>
   );
 });
 
