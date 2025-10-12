@@ -4,11 +4,21 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { useContractorsStore } from '../../stores/contractorsStore';
 import { Contractor, ContractorStatus, ContractorType } from '../../types/contractors';
 import ContractorFormDialog from './ContractorFormDialog';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+
+type ViewMode = 'grid' | 'table';
 
 const ContractorsList = () => {
   const { contractors, loading, fetchContractors, deleteContractor } = useContractorsStore();
@@ -17,6 +27,7 @@ const ContractorsList = () => {
   const [typeFilter, setTypeFilter] = useState<ContractorType | 'all'>('all');
   const [selectedContractor, setSelectedContractor] = useState<Contractor | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   useEffect(() => {
     fetchContractors();
@@ -121,6 +132,25 @@ const ContractorsList = () => {
               className="pl-10"
             />
           </div>
+          
+          <div className="flex gap-1 border rounded-md">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+              className="rounded-r-none"
+            >
+              <Icon name="LayoutGrid" size={16} />
+            </Button>
+            <Button
+              variant={viewMode === 'table' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('table')}
+              className="rounded-l-none"
+            >
+              <Icon name="Table" size={16} />
+            </Button>
+          </div>
         </div>
         
         <div className="flex items-center gap-4">
@@ -187,6 +217,103 @@ const ContractorsList = () => {
                 ? 'Подрядчики не найдены'
                 : 'Нет добавленных подрядчиков'}
             </p>
+          </CardContent>
+        </Card>
+      ) : viewMode === 'table' ? (
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Организация</TableHead>
+                  <TableHead>Тип</TableHead>
+                  <TableHead>ИНН / КПП</TableHead>
+                  <TableHead>Контакты</TableHead>
+                  <TableHead>Договор</TableHead>
+                  <TableHead>Рейтинг</TableHead>
+                  <TableHead>Статус</TableHead>
+                  <TableHead className="text-right">Действия</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredContractors.map((contractor) => (
+                  <TableRow key={contractor.id}>
+                    <TableCell>
+                      <div className="font-medium">{contractor.name}</div>
+                      {contractor.directorName && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {contractor.directorName}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>{getTypeBadge(contractor.type)}</TableCell>
+                    <TableCell>
+                      <div className="text-sm">{contractor.inn}</div>
+                      {contractor.kpp && (
+                        <div className="text-xs text-muted-foreground">{contractor.kpp}</div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {contractor.contactPhone && (
+                        <div className="text-sm">
+                          <a href={`tel:${contractor.contactPhone}`} className="hover:underline">
+                            {contractor.contactPhone}
+                          </a>
+                        </div>
+                      )}
+                      {contractor.contactEmail && (
+                        <div className="text-xs text-muted-foreground">
+                          {contractor.contactEmail}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {contractor.contractNumber ? (
+                        <>
+                          <div className="text-sm font-medium">{contractor.contractNumber}</div>
+                          {contractor.contractExpiry && (
+                            <div
+                              className={`text-xs ${
+                                isContractExpired(contractor.contractExpiry)
+                                  ? 'text-red-600'
+                                  : isContractExpiringSoon(contractor.contractExpiry)
+                                  ? 'text-orange-600'
+                                  : 'text-muted-foreground'
+                              }`}
+                            >
+                              до {format(new Date(contractor.contractExpiry), 'dd.MM.yyyy', { locale: ru })}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>{getRatingStars(contractor.rating)}</TableCell>
+                    <TableCell>{getStatusBadge(contractor.status)}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(contractor)}
+                        >
+                          <Icon name="Edit" size={14} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => handleDelete(contractor.id)}
+                        >
+                          <Icon name="Trash2" size={14} />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       ) : (
