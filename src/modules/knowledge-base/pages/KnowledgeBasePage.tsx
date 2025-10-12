@@ -1,23 +1,51 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useKnowledgeBaseStore } from '@/stores/knowledgeBaseStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import Icon from '@/components/ui/icon';
 import PageHeader from '@/components/layout/PageHeader';
+import DocumentFormDialog from '@/modules/knowledge-base/components/DocumentFormDialog';
+import DocumentViewDialog from '@/modules/knowledge-base/components/DocumentViewDialog';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import type { DocumentCategory } from '@/types';
+import { toast } from 'sonner';
+import type { DocumentCategory, KnowledgeDocument } from '@/types';
 
 export default function KnowledgeBasePage() {
   const navigate = useNavigate();
-  const { documents, getDocumentsByCategory, incrementViews, incrementDownloads } = useKnowledgeBaseStore();
+  const user = useAuthStore((state) => state.user);
+  const { documents, getDocumentsByCategory, incrementViews, incrementDownloads, deleteDocument } = useKnowledgeBaseStore();
   
   const [activeTab, setActiveTab] = useState<DocumentCategory>('user_guide');
   const [searchQuery, setSearchQuery] = useState('');
+  const [formOpen, setFormOpen] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<KnowledgeDocument | null>(null);
+  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+
+  const canManage = user?.role === 'SuperAdmin' || user?.role === 'TenantAdmin';
 
   const filteredDocuments = useMemo(() => {
     const categoryDocs = getDocumentsByCategory(activeTab);
@@ -64,12 +92,40 @@ export default function KnowledgeBasePage() {
     return mb >= 1 ? `${mb.toFixed(1)} МБ` : `${(bytes / 1024).toFixed(0)} КБ`;
   };
 
-  const handleViewDocument = (docId: string) => {
-    incrementViews(docId);
+  const handleCreateDocument = () => {
+    setSelectedDocument(null);
+    setFormMode('create');
+    setFormOpen(true);
+  };
+
+  const handleEditDocument = (doc: KnowledgeDocument) => {
+    setSelectedDocument(doc);
+    setFormMode('edit');
+    setFormOpen(true);
+  };
+
+  const handleViewDocument = (doc: KnowledgeDocument) => {
+    setSelectedDocument(doc);
+    setViewOpen(true);
   };
 
   const handleDownloadDocument = (docId: string) => {
     incrementDownloads(docId);
+    toast.success('Документ загружен');
+  };
+
+  const handleDeleteClick = (doc: KnowledgeDocument) => {
+    setSelectedDocument(doc);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedDocument) {
+      deleteDocument(selectedDocument.id);
+      toast.success('Документ удалён');
+      setDeleteDialogOpen(false);
+      setSelectedDocument(null);
+    }
   };
 
   const stats = useMemo(() => {
@@ -89,14 +145,22 @@ export default function KnowledgeBasePage() {
         title="База знаний"
         description="Документация, инструкции и нормативные материалы"
         action={
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/dashboard')}
-            className="gap-2"
-          >
-            <Icon name="ArrowLeft" size={16} />
-            Назад
-          </Button>
+          <div className="flex gap-2">
+            {canManage && (
+              <Button onClick={handleCreateDocument} className="gap-2">
+                <Icon name="Plus" size={16} />
+                Добавить документ
+              </Button>
+            )}
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/dashboard')}
+              className="gap-2"
+            >
+              <Icon name="ArrowLeft" size={16} />
+              Назад
+            </Button>
+          </div>
         }
       />
 
@@ -283,7 +347,7 @@ export default function KnowledgeBasePage() {
                           <Button 
                             size="sm" 
                             variant="outline"
-                            onClick={() => handleViewDocument(doc.id)}
+                            onClick={() => handleViewDocument(doc)}
                             className="gap-2"
                           >
                             <Icon name="Eye" size={14} />
@@ -293,12 +357,35 @@ export default function KnowledgeBasePage() {
                         {doc.fileName && (
                           <Button 
                             size="sm"
+                            variant="outline"
                             onClick={() => handleDownloadDocument(doc.id)}
                             className="gap-2"
                           >
                             <Icon name="Download" size={14} />
                             Скачать
                           </Button>
+                        )}
+                        {canManage && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                                <Icon name="MoreVertical" size={16} />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleEditDocument(doc)}>
+                                <Icon name="Edit" size={14} className="mr-2" />
+                                Редактировать
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleDeleteClick(doc)}
+                                className="text-destructive"
+                              >
+                                <Icon name="Trash2" size={14} className="mr-2" />
+                                Удалить
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         )}
                       </div>
                     </div>
@@ -309,6 +396,37 @@ export default function KnowledgeBasePage() {
           )}
         </TabsContent>
       </Tabs>
+
+      <DocumentFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        document={selectedDocument || undefined}
+        mode={formMode}
+      />
+
+      <DocumentViewDialog
+        open={viewOpen}
+        onOpenChange={setViewOpen}
+        document={selectedDocument}
+      />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Удалить документ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Вы уверены, что хотите удалить документ "{selectedDocument?.title}"?
+              Это действие нельзя отменить.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Удалить
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
