@@ -1,3 +1,4 @@
+// src/types/index.ts
 export type UserRole = 'SuperAdmin' | 'TenantAdmin' | 'Auditor' | 'Manager' | 'Director' | 'TrainingCenterManager';
 
 export type ModuleType = 

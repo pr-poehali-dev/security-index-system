@@ -1,3 +1,4 @@
+// src/lib/constants.ts
 import type { ModuleType, UserRole } from '@/types';
 
 export const MODULES: Record<ModuleType, { name: string; description: string; icon: string }> = {

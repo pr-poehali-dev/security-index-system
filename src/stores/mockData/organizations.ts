@@ -1,3 +1,4 @@
+// src/stores/mockData/organizations.ts
 import type { Organization, Department } from '@/types';
 
 export const mockOrganizations: Organization[] = [

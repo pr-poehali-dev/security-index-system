@@ -1,3 +1,4 @@
+// src/lib/competencyAnalysis.ts
 import type { 
   Personnel, 
   CompetencyMatrix, 

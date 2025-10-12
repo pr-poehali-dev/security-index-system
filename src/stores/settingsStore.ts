@@ -1,3 +1,4 @@
+// src/stores/settingsStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization, Person, Position, Certification, Competency } from '@/types';

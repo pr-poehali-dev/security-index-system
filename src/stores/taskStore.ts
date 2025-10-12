@@ -1,3 +1,4 @@
+// src/stores/taskStore.ts
 import { create } from 'zustand';
 import type { Task } from '@/types/tasks';
 

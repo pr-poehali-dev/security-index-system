@@ -1,3 +1,4 @@
+// src/stores/budgetStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { BudgetCategory, BudgetExpense, BudgetSummary, OrganizationBudgetPlan } from '@/types';

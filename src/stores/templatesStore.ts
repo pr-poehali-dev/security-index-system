@@ -1,3 +1,4 @@
+// src/stores/templatesStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { ChecklistTemplate } from '@/modules/checklists/data/templates';

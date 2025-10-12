@@ -1,3 +1,4 @@
+// src/lib/passwordUtils.ts
 export function generateLogin(fullName: string): string {
   const parts = fullName.trim().split(' ').filter(Boolean);
   

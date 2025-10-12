@@ -1,3 +1,4 @@
+// src/stores/mockData/productionSites.ts
 import type { ProductionSite } from '@/types';
 
 export const mockProductionSites: ProductionSite[] = [

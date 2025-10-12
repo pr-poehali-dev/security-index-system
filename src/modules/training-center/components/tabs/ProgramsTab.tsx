@@ -1,3 +1,4 @@
+// src/modules/training-center/components/tabs/ProgramsTab.tsx
 import { useState, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useTrainingCenterStore } from '@/stores/trainingCenterStore';

@@ -1,3 +1,4 @@
+// src/types/checklists.ts
 export type QuestionType = 'yes_no' | 'number' | 'text' | 'select';
 export type InspectionStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
 

@@ -1,3 +1,4 @@
+// src/stores/mockData/competencyMatrix.ts
 import type { CompetencyMatrix } from '@/types';
 
 export const mockCompetencyMatrix: CompetencyMatrix[] = [

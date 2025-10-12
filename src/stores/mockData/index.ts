@@ -1,3 +1,4 @@
+// src/stores/mockData/index.ts
 export { mockOrganizations, mockDepartments } from './organizations';
 export { mockPeople, mockPositions, mockPersonnel } from './personnel';
 export { mockCompetencies, mockCertifications } from './competencies';

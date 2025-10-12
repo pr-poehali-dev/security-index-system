@@ -1,3 +1,4 @@
+// src/modules/training-center/components/tabs/ScheduleTab.tsx
 import { Card, CardContent } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 

@@ -1,3 +1,4 @@
+// src/modules/training-center/pages/TrainingCenterPage.tsx
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';

@@ -1,3 +1,4 @@
+// src/utils/reportGenerator.ts
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import type { Task } from '@/types';

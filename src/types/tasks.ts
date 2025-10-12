@@ -1,3 +1,4 @@
+// src/types/tasks.ts
 export type TaskStatus = 'new' | 'assigned' | 'in_progress' | 'under_review' | 'completed' | 'cancelled';
 export type TaskPriority = 'critical' | 'high' | 'medium' | 'low';
 export type TaskSource = 'manual' | 'incident' | 'checklist' | 'certification' | 'examination' | 'automated';

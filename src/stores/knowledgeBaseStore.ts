@@ -1,3 +1,4 @@
+// src/stores/knowledgeBaseStore.ts
 import { create } from 'zustand';
 import type { KnowledgeDocument, DocumentCategory, DocumentVersion } from '@/types';
 

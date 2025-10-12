@@ -1,3 +1,4 @@
+// src/lib/excelLazy.ts
 let xlsxModule: typeof import('xlsx') | null = null;
 
 export async function getXLSX() {

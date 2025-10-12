@@ -1,3 +1,4 @@
+// src/types/budget.ts
 export type BudgetCategory = 'safety' | 'maintenance' | 'training' | 'examination' | 'equipment' | 'other';
 export type BudgetPeriod = 'monthly' | 'quarterly' | 'yearly';
 export type ExpenseStatus = 'planned' | 'approved' | 'spent' | 'cancelled';

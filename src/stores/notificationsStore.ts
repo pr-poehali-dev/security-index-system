@@ -1,3 +1,4 @@
+// src/stores/notificationsStore.ts
 import { create } from 'zustand';
 import type { Notification, NotificationType, NotificationSource } from '@/types';
 

@@ -1,3 +1,4 @@
+// src/lib/exportUtils.ts
 import type { Organization, Department, Personnel, ProductionSite } from '@/types';
 
 export function exportOrganizationsToExcel(

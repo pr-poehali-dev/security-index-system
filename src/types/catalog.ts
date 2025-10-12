@@ -1,3 +1,4 @@
+// src/types/catalog.ts
 export type HazardClass = 'I' | 'II' | 'III' | 'IV';
 export type ObjectType = 'opo' | 'gts' | 'building';
 export type ObjectStatus = 'active' | 'conservation' | 'liquidated';

@@ -1,3 +1,4 @@
+// src/stores/checklistsStore.ts
 import { create } from 'zustand';
 import type { Checklist, Audit } from '@/types';
 

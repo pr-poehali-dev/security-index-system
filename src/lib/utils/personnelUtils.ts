@@ -1,3 +1,4 @@
+// src/lib/utils/personnelUtils.ts
 import type { Personnel, Person, Position } from '@/types';
 
 export interface PersonnelFullInfo {

@@ -1,3 +1,4 @@
+// src/utils/export.ts
 import * as XLSX from 'xlsx';
 
 export interface ExportColumn<T> {

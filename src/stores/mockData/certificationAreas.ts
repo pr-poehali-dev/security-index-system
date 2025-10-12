@@ -1,3 +1,4 @@
+// src/stores/mockData/certificationAreas.ts
 export const certificationCategories = [
   'Промышленная безопасность',
   'Энергобезопасность',

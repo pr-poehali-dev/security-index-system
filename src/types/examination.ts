@@ -1,3 +1,4 @@
+// src/types/examination.ts
 export type ExaminationType = 'technical_diagnostics' | 'safety_expertise' | 'testing';
 export type ExaminationStatus = 'scheduled' | 'in_progress' | 'completed' | 'overdue';
 export type ExaminationResult = 'compliant' | 'non_compliant' | 'conditional';

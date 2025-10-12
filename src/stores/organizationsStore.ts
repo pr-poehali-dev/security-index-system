@@ -1,3 +1,4 @@
+// src/stores/organizationsStore.ts
 import { create } from 'zustand';
 import type { Organization, Department } from '@/types';
 import { mockOrganizations, mockDepartments } from './mockData';

@@ -1,3 +1,4 @@
+// src/stores/mockData/personnel.ts
 import type { Person, Position, Personnel } from '@/types';
 
 export const mockPeople: Person[] = [

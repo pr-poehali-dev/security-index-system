@@ -1,3 +1,4 @@
+// src/types/attestation.ts
 export type CertificationStatus = 'valid' | 'expiring_soon' | 'expired' | 'pending';
 export type CertificationType = 'initial' | 'periodic' | 'extraordinary';
 export type CertificationResult = 'passed' | 'failed' | 'pending';

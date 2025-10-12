@@ -1,3 +1,4 @@
+// src/stores/catalogStore.ts
 import { create } from 'zustand';
 import type { Organization, IndustrialObject, ObjectDocument } from '@/types/catalog';
 
