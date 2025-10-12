@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/components/ui/icon';
 import {
   Select,
@@ -9,11 +10,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCertificationStore } from '@/stores/certificationStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
+import MassActionDialog from '../orders/MassActionDialog';
 
 interface ComplianceData {
   personnelId: string;
@@ -35,6 +43,9 @@ export default function ComplianceAnalysisTab() {
   
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
   const [complianceFilter, setComplianceFilter] = useState<string>('all');
+  const [selectedPersonnelIds, setSelectedPersonnelIds] = useState<Set<string>>(new Set());
+  const [showMassActionDialog, setShowMassActionDialog] = useState(false);
+  const [massActionType, setMassActionType] = useState<string>('');
 
   const tenantPersonnel = useMemo(() => {
     return user?.tenantId 
@@ -113,6 +124,54 @@ export default function ComplianceAnalysisTab() {
     return Array.from(new Set(complianceData.map(d => d.department))).filter(d => d !== '—');
   }, [complianceData]);
 
+  const handleSelectPersonnel = (personnelId: string, checked: boolean) => {
+    const newSelected = new Set(selectedPersonnelIds);
+    if (checked) {
+      newSelected.add(personnelId);
+    } else {
+      newSelected.delete(personnelId);
+    }
+    setSelectedPersonnelIds(newSelected);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedPersonnelIds(new Set(filteredData.map(item => item.personnelId)));
+    } else {
+      setSelectedPersonnelIds(new Set());
+    }
+  };
+
+  const handleCreateOrder = (type: string) => {
+    setMassActionType(type);
+    setShowMassActionDialog(true);
+  };
+
+  const selectedEmployees = useMemo(() => {
+    return filteredData
+      .filter(item => selectedPersonnelIds.has(item.personnelId))
+      .map(item => ({
+        id: item.personnelId,
+        name: item.personnelName,
+        position: item.position,
+        department: item.department,
+        organization: '—',
+        certifications: item.missingCertifications.map(area => ({
+          id: `missing-${area}`,
+          category: '',
+          area: area,
+          issueDate: '',
+          expiryDate: '',
+          protocolNumber: '',
+          protocolDate: '',
+          verified: false,
+          verifiedDate: undefined,
+          status: 'expired' as const,
+          daysLeft: 0
+        }))
+      }));
+  }, [filteredData, selectedPersonnelIds]);
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -158,10 +217,41 @@ export default function ComplianceAnalysisTab() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Анализ соответствия требованиям</CardTitle>
-            <Button className="gap-2">
-              <Icon name="Download" size={16} />
-              Экспорт отчета
-            </Button>
+            <div className="flex items-center gap-2">
+              {selectedPersonnelIds.size > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="default" className="gap-2">
+                      <Icon name="FileText" size={18} />
+                      Сформировать приказ ({selectedPersonnelIds.size})
+                      <Icon name="ChevronDown" size={14} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[320px]">
+                    <DropdownMenuItem onClick={() => handleCreateOrder('sdo')}>
+                      <Icon name="Monitor" size={16} className="mr-2" />
+                      О подготовке в СДО Интеллектуальная система
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleCreateOrder('training_center')}>
+                      <Icon name="School" size={16} className="mr-2" />
+                      О подготовке в учебный центр
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleCreateOrder('internal_attestation')}>
+                      <Icon name="ClipboardCheck" size={16} className="mr-2" />
+                      О аттестации в ЕПТ организации
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleCreateOrder('rostechnadzor')}>
+                      <Icon name="Building2" size={16} className="mr-2" />
+                      О направлении на аттестацию в Ростехнадзор
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+              <Button className="gap-2">
+                <Icon name="Download" size={16} />
+                Экспорт отчета
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -190,11 +280,44 @@ export default function ComplianceAnalysisTab() {
             </Select>
           </div>
 
+          {selectedPersonnelIds.size > 0 && (
+            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={selectedPersonnelIds.size === filteredData.length}
+                    onCheckedChange={handleSelectAll}
+                  />
+                  <span className="text-sm font-medium">
+                    Выбрано сотрудников: {selectedPersonnelIds.size}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    (будут добавлены только недостающие области аттестации)
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedPersonnelIds(new Set())}
+                  className="gap-2"
+                >
+                  <Icon name="X" size={14} />
+                  Отменить выбор
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-4">
             {filteredData.map((item, idx) => (
               <Card key={idx}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-3">
+                    <Checkbox
+                      checked={selectedPersonnelIds.has(item.personnelId)}
+                      onCheckedChange={(checked) => handleSelectPersonnel(item.personnelId, checked as boolean)}
+                      className="mt-1 mr-3"
+                    />
                     <div>
                       <h3 className="font-semibold">{item.personnelName}</h3>
                       <p className="text-sm text-muted-foreground">{item.position} • {item.department}</p>
@@ -383,6 +506,13 @@ export default function ComplianceAnalysisTab() {
           )}
         </CardContent>
       </Card>
+
+      <MassActionDialog
+        open={showMassActionDialog}
+        onOpenChange={setShowMassActionDialog}
+        actionType={massActionType}
+        employees={selectedEmployees}
+      />
     </div>
   );
 }
