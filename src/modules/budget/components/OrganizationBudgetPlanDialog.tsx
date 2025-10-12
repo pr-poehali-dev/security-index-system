@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { useBudgetStore } from '@/stores/budgetStore';
-import { useOrganizationStore } from '@/stores/organizationStore';
+import { useOrganizationsStore } from '@/stores/organizationsStore';
 import type { OrganizationBudgetPlan, OrganizationBudgetCategory } from '@/types';
 
 interface OrganizationBudgetPlanDialogProps {
@@ -33,7 +33,7 @@ export default function OrganizationBudgetPlanDialog({
     updateOrganizationPlan,
     organizationPlans 
   } = useBudgetStore();
-  const { organizations } = useOrganizationStore();
+  const { organizations } = useOrganizationsStore();
 
   const [organizationId, setOrganizationId] = useState(initialOrgId || '');
   const [status, setStatus] = useState<'draft' | 'approved' | 'archived'>('draft');
