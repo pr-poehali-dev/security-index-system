@@ -11,6 +11,7 @@ export type ModuleType =
   | 'maintenance'
   | 'budget'
   | 'training-center'
+  | 'knowledge-base'
   | 'settings';
 
 export interface User {
@@ -669,4 +670,28 @@ export interface Notification {
   link?: string;
   isRead: boolean;
   createdAt: string;
+}
+
+export type DocumentCategory = 'user_guide' | 'regulatory' | 'organization';
+export type DocumentStatus = 'draft' | 'published' | 'archived';
+
+export interface KnowledgeDocument {
+  id: string;
+  tenantId: string;
+  category: DocumentCategory;
+  title: string;
+  description?: string;
+  content?: string;
+  fileUrl?: string;
+  fileName?: string;
+  fileSize?: number;
+  tags?: string[];
+  version?: string;
+  author: string;
+  status: DocumentStatus;
+  viewsCount: number;
+  downloadsCount: number;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
 }

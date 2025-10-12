@@ -24,6 +24,7 @@ const MODULE_ROUTES: Record<ModuleType, string> = {
   maintenance: ROUTES.MAINTENANCE,
   budget: ROUTES.BUDGET,
   'training-center': ROUTES.TRAINING_CENTER,
+  'knowledge-base': ROUTES.KNOWLEDGE_BASE,
   settings: ROUTES.SETTINGS
 };
 

@@ -51,6 +51,11 @@ export const MODULES: Record<ModuleType, { name: string; description: string; ic
     description: 'Управление учебными программами и обучением',
     icon: 'BookOpen'
   },
+  'knowledge-base': {
+    name: 'База знаний',
+    description: 'Документация, инструкции и нормативные материалы',
+    icon: 'Library'
+  },
   settings: {
     name: 'Настройки',
     description: 'Управление организациями, персоналом и компетенциями',
@@ -70,6 +75,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, ModuleType[]> = {
     'maintenance',
     'budget',
     'training-center',
+    'knowledge-base',
     'settings'
   ],
   TenantAdmin: [
@@ -82,12 +88,13 @@ export const ROLE_PERMISSIONS: Record<UserRole, ModuleType[]> = {
     'maintenance',
     'budget',
     'training-center',
+    'knowledge-base',
     'settings'
   ],
-  Auditor: ['attestation', 'catalog', 'incidents', 'checklists', 'examination'],
-  Manager: ['attestation', 'catalog', 'tasks', 'maintenance'],
-  Director: ['attestation', 'incidents', 'budget'],
-  TrainingCenterManager: ['training-center']
+  Auditor: ['attestation', 'catalog', 'incidents', 'checklists', 'examination', 'knowledge-base'],
+  Manager: ['attestation', 'catalog', 'tasks', 'maintenance', 'knowledge-base'],
+  Director: ['attestation', 'incidents', 'budget', 'knowledge-base'],
+  TrainingCenterManager: ['training-center', 'knowledge-base']
 };
 
 export const CERTIFICATION_CATEGORIES = [
@@ -114,6 +121,7 @@ export const ROUTES = {
   MAINTENANCE: '/maintenance',
   BUDGET: '/budget',
   TRAINING_CENTER: '/training-center',
+  KNOWLEDGE_BASE: '/knowledge-base',
   NOTIFICATIONS: '/notifications',
   CREATE_NOTIFICATION: '/notifications/create',
   NOTIFICATIONS_HISTORY: '/notifications/history'

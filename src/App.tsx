@@ -26,6 +26,7 @@ const NotificationsHistoryPage = lazy(() => import("@/modules/notifications/page
 const MaintenancePage = lazy(() => import("@/modules/maintenance").then(m => ({ default: m.MaintenancePage })));
 const BudgetPage = lazy(() => import("@/modules/budget").then(m => ({ default: m.BudgetPage })));
 const TrainingCenterPage = lazy(() => import("@/modules/training-center/pages/TrainingCenterPage"));
+const KnowledgeBasePage = lazy(() => import("@/modules/knowledge-base").then(m => ({ default: m.KnowledgeBasePage })));
 const NotFoundPage = lazy(() => import("@/modules/common").then(m => ({ default: m.NotFoundPage })));
 import { useIncidentNotifications } from "@/hooks/useIncidentNotifications";
 import { useAttestationNotifications } from "@/hooks/useAttestationNotifications";
@@ -211,6 +212,16 @@ const App = memo(function App() {
                 <ProtectedRoute>
                   <AuthenticatedLayout>
                     <TrainingCenterPage />
+                  </AuthenticatedLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.KNOWLEDGE_BASE}
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedLayout>
+                    <KnowledgeBasePage />
                   </AuthenticatedLayout>
                 </ProtectedRoute>
               }
