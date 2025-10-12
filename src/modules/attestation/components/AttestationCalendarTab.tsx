@@ -8,8 +8,9 @@ import MonthView from './MonthView';
 import YearView from './YearView';
 import UpcomingCertificationsList from './UpcomingCertificationsList';
 import DayCertificationsDialog from './DayCertificationsDialog';
+import { useAttestationStore } from '@/stores/attestationStore';
 
-interface Certification {
+interface CalendarCertification {
   id: string;
   employeeName: string;
   employeePosition: string;
@@ -21,93 +22,16 @@ interface Certification {
   daysLeft: number;
 }
 
-const mockCertifications: Certification[] = [
-  {
-    id: '1',
-    employeeName: 'Иванов Иван Иванович',
-    employeePosition: 'Инженер',
-    department: 'Производство',
-    category: 'Промышленная безопасность',
-    area: 'А.1 Основы промышленной безопасности',
-    expiryDate: '2028-01-01',
-    status: 'valid',
-    daysLeft: 1182
-  },
-  {
-    id: '2',
-    employeeName: 'Петрова Анна Сергеевна',
-    employeePosition: 'Начальник участка',
-    department: 'Производство',
-    category: 'Электробезопасность',
-    area: 'IV группа до 1000В',
-    expiryDate: '2025-12-20',
-    status: 'expiring_soon',
-    daysLeft: 74
-  },
-  {
-    id: '3',
-    employeeName: 'Сидоров Петр Николаевич',
-    employeePosition: 'Техник',
-    department: 'Ремонт',
-    category: 'Работа на высоте',
-    area: '3 группа',
-    expiryDate: '2025-11-15',
-    status: 'expiring_soon',
-    daysLeft: 39
-  },
-  {
-    id: '4',
-    employeeName: 'Козлов Михаил Андреевич',
-    employeePosition: 'Электромонтёр',
-    department: 'Энергоцех',
-    category: 'Электробезопасность',
-    area: 'V группа до и выше 1000В',
-    expiryDate: '2025-10-25',
-    status: 'expiring_soon',
-    daysLeft: 18
-  },
-  {
-    id: '5',
-    employeeName: 'Морозова Елена Викторовна',
-    employeePosition: 'Лаборант',
-    department: 'Лаборатория',
-    category: 'Промышленная безопасность',
-    area: 'Б.7 Эксплуатация газового оборудования',
-    expiryDate: '2025-08-14',
-    status: 'expired',
-    daysLeft: -67
-  },
-  {
-    id: '6',
-    employeeName: 'Новиков Алексей Сергеевич',
-    employeePosition: 'Оператор',
-    department: 'Производство',
-    category: 'Промышленная безопасность',
-    area: 'А.1 Основы промышленной безопасности',
-    expiryDate: '2026-03-10',
-    status: 'valid',
-    daysLeft: 154
-  },
-  {
-    id: '7',
-    employeeName: 'Соколова Мария Петровна',
-    employeePosition: 'Мастер',
-    department: 'Производство',
-    category: 'Работа на высоте',
-    area: '2 группа',
-    expiryDate: '2026-01-22',
-    status: 'valid',
-    daysLeft: 107
-  },
-];
-
 export default function AttestationCalendarTab() {
+  const { certifications } = useAttestationStore();
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [viewType, setViewType] = useState<'month' | 'year'>('year');
   const [filterDepartment, setFilterDepartment] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+
+  const mockCertifications: CalendarCertification[] = [];
 
   const departments = Array.from(new Set(mockCertifications.map(c => c.department)));
   const categories = Array.from(new Set(mockCertifications.map(c => c.category)));
@@ -118,7 +42,7 @@ export default function AttestationCalendarTab() {
       const matchesCategory = filterCategory === 'all' || cert.category === filterCategory;
       return matchesDepartment && matchesCategory;
     });
-  }, [filterDepartment, filterCategory]);
+  }, [mockCertifications, filterDepartment, filterCategory]);
 
   const getMonthData = (year: number, month: number) => {
     const firstDay = new Date(year, month, 1);

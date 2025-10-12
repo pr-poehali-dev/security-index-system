@@ -6,12 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { SearchBar } from '@/components/ui/search-bar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
-const works = [
-  { id: '1', object: 'Котельная №1', type: 'ТО', title: 'Плановое ТО №3', scheduled: '2025-10-10', status: 'planned', executor: 'Внутренняя служба' },
-  { id: '2', object: 'ГТС-01', type: 'Ремонт', title: 'Ремонт затвора №2', scheduled: '2025-10-08', status: 'in_progress', executor: 'ООО "РемСервис"' },
-  { id: '3', object: 'Подстанция А', type: 'ТО', title: 'ТО трансформатора', scheduled: '2025-09-25', status: 'completed', executor: 'Внутренняя служба' }
-];
+import { useMaintenanceStore } from '@/stores/maintenanceStore';
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -32,25 +27,28 @@ const getTypeColor = (type: string) => {
 };
 
 export default function MaintenancePage() {
+  const { works, getStatistics } = useMaintenanceStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
 
+  const stats = getStatistics();
+
   const filteredWorks = useMemo(() => {
     return works.filter((work) => {
       const matchesSearch = work.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           work.object.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           work.objectName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            work.executor.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = statusFilter === 'all' || work.status === statusFilter;
       const matchesType = typeFilter === 'all' || work.type === typeFilter;
       return matchesSearch && matchesStatus && matchesType;
     });
-  }, [searchQuery, statusFilter, typeFilter]);
+  }, [works, searchQuery, statusFilter, typeFilter]);
 
   const workTypes = useMemo(() => {
     const types = new Set(works.map(w => w.type));
     return Array.from(types);
-  }, []);
+  }, [works]);
 
   return (
     <div>
@@ -71,7 +69,7 @@ export default function MaintenancePage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
               <Icon name="Calendar" className="text-blue-600" size={24} />
-              <span className="text-2xl font-bold">12</span>
+              <span className="text-2xl font-bold">{stats.planned}</span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">Запланировано</p>
           </CardContent>
@@ -80,7 +78,7 @@ export default function MaintenancePage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
               <Icon name="Wrench" className="text-amber-600" size={24} />
-              <span className="text-2xl font-bold">5</span>
+              <span className="text-2xl font-bold">{stats.inProgress}</span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">В работе</p>
           </CardContent>
@@ -89,7 +87,7 @@ export default function MaintenancePage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
               <Icon name="CheckCircle2" className="text-emerald-600" size={24} />
-              <span className="text-2xl font-bold">28</span>
+              <span className="text-2xl font-bold">{stats.completed}</span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">Завершено</p>
           </CardContent>
@@ -98,7 +96,7 @@ export default function MaintenancePage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
               <Icon name="Clock" className="text-purple-600" size={24} />
-              <span className="text-2xl font-bold">3</span>
+              <span className="text-2xl font-bold">{stats.overdue}</span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">Просрочено</p>
           </CardContent>
@@ -107,7 +105,7 @@ export default function MaintenancePage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
               <Icon name="TrendingUp" className="text-blue-600" size={24} />
-              <span className="text-2xl font-bold">92%</span>
+              <span className="text-2xl font-bold">{stats.completionRate}%</span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">Выполнение</p>
           </CardContent>
@@ -169,11 +167,11 @@ export default function MaintenancePage() {
                   <div className="flex items-center gap-4 text-sm text-gray-600">
                     <div className="flex items-center gap-1">
                       <Icon name="Building" size={14} />
-                      <span>{work.object}</span>
+                      <span>{work.objectName}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Icon name="Calendar" size={14} />
-                      <span>{new Date(work.scheduled).toLocaleDateString('ru-RU')}</span>
+                      <span>{new Date(work.scheduledDate).toLocaleDateString('ru-RU')}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Icon name="User" size={14} />

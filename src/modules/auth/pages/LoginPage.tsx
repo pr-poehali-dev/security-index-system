@@ -9,15 +9,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import Icon from '@/components/ui/icon';
 import { ROUTES } from '@/lib/constants';
 
-const testUsers = [
-  { email: 'superadmin@system.ru', role: 'SuperAdmin', description: 'Управление тенантами' },
-  { email: 'admin@company.ru', role: 'TenantAdmin', description: 'Настройки, организации, персонал' },
-  { email: 'auditor@company.ru', role: 'Auditor', description: 'Проверки и инциденты' },
-  { email: 'manager@company.ru', role: 'Manager', description: 'Задачи и обслуживание' },
-  { email: 'director@company.ru', role: 'Director', description: 'Аналитика и бюджет' },
-  { email: 'training@company.ru', role: 'TrainingCenterManager', description: 'Управление учебным центром' }
-];
-
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -140,22 +131,7 @@ export default function LoginPage() {
                 )}
               </Button>
 
-              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Тестовые пользователи (пароль: password123):</p>
-                <div className="space-y-1">
-                  {testUsers.map((user) => (
-                    <button
-                      key={user.email}
-                      type="button"
-                      onClick={() => setEmail(user.email)}
-                      className="w-full text-left px-2 py-1.5 text-xs rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      <div className="font-medium text-emerald-600">{user.email}</div>
-                      <div className="text-gray-500 text-[10px]">{user.description}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
+
             </form>
           </CardContent>
         </Card>

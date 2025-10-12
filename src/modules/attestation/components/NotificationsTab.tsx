@@ -17,74 +17,16 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useAttestationStore } from '@/stores/attestationStore';
 
-const OLD_mockRules = [
-  {
-    id: '1',
-    name: 'За 90 дней до истечения',
-    enabled: true,
-    daysBeforeExpiry: 90,
-    notifyEmployee: true,
-    notifyManager: true,
-    notifyHR: false,
-    emailTemplate: 'template_90days',
-    frequency: 'once'
-  },
-  {
-    id: '2',
-    name: 'За 30 дней до истечения',
-    enabled: true,
-    daysBeforeExpiry: 30,
-    notifyEmployee: true,
-    notifyManager: true,
-    notifyHR: true,
-    emailTemplate: 'template_30days',
-    frequency: 'once'
-  },
-  {
-    id: '3',
-    name: 'За 7 дней до истечения',
-    enabled: true,
-    daysBeforeExpiry: 7,
-    notifyEmployee: true,
-    notifyManager: true,
-    notifyHR: true,
-    emailTemplate: 'template_7days',
-    frequency: 'daily'
-  },
-];
-
-const mockLogs: NotificationLog[] = [
-  {
-    id: '1',
-    date: '2025-10-07 10:30',
-    type: 'За 30 дней до истечения',
-    recipient: 'ivanov@company.ru',
-    employee: 'Иванов Иван Иванович',
-    certification: 'Электробезопасность IV',
-    expiryDate: '2025-11-07',
-    status: 'sent'
-  },
-  {
-    id: '2',
-    date: '2025-10-07 10:31',
-    type: 'За 30 дней до истечения',
-    recipient: 'manager@company.ru',
-    employee: 'Иванов Иван Иванович',
-    certification: 'Электробезопасность IV',
-    expiryDate: '2025-11-07',
-    status: 'sent'
-  },
-  {
-    id: '3',
-    date: '2025-10-06 09:15',
-    type: 'За 7 дней до истечения',
-    recipient: 'petrova@company.ru',
-    employee: 'Петрова Анна Сергеевна',
-    certification: 'Работы на высоте',
-    expiryDate: '2025-10-13',
-    status: 'sent'
-  },
-];
+interface NotificationLog {
+  id: string;
+  date: string;
+  type: string;
+  recipient: string;
+  employee: string;
+  certification: string;
+  expiryDate: string;
+  status: 'sent' | 'failed' | 'pending';
+}
 
 export default function NotificationsTab() {
   const user = useAuthStore((state) => state.user);

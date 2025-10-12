@@ -9,12 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import CreateExaminationDialog from '../components/CreateExaminationDialog';
 import ExaminationDetailsDialog from '../components/ExaminationDetailsDialog';
 import UploadConclusionDialog from '../components/UploadConclusionDialog';
-
-const examinations = [
-  { id: '1', object: 'Котельная №1', type: 'Экспертиза ПБ', scheduled: '2025-11-15', status: 'scheduled', executor: 'ООО "Эксперт"' },
-  { id: '2', object: 'ГТС-01', type: 'Тех. диагностирование', scheduled: '2025-10-20', status: 'in_progress', executor: 'ООО "Диагностика"' },
-  { id: '3', object: 'Подстанция А', type: 'Испытания', scheduled: '2025-09-30', status: 'completed', executor: 'ООО "Энергосервис"' }
-];
+import { useExaminationStore } from '@/stores/examinationStore';
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -37,6 +32,7 @@ const getStatusLabel = (status: string) => {
 };
 
 export default function ExaminationPage() {
+  const { examinations, getStatistics } = useExaminationStore();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -45,21 +41,23 @@ export default function ExaminationPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
 
+  const stats = getStatistics();
+
   const filteredExaminations = useMemo(() => {
     return examinations.filter((exam) => {
-      const matchesSearch = exam.object.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      const matchesSearch = exam.objectName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            exam.executor.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            exam.type.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = statusFilter === 'all' || exam.status === statusFilter;
       const matchesType = typeFilter === 'all' || exam.type === typeFilter;
       return matchesSearch && matchesStatus && matchesType;
     });
-  }, [searchQuery, statusFilter, typeFilter]);
+  }, [examinations, searchQuery, statusFilter, typeFilter]);
 
   const examinationTypes = useMemo(() => {
     const types = new Set(examinations.map(e => e.type));
     return Array.from(types);
-  }, []);
+  }, [examinations]);
 
   const handleViewDetails = (exam: typeof examinations[0]) => {
     setSelectedExamination(exam);
@@ -90,7 +88,7 @@ export default function ExaminationPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
               <Icon name="Calendar" className="text-blue-600" size={24} />
-              <span className="text-2xl font-bold">8</span>
+              <span className="text-2xl font-bold">{stats.scheduled}</span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">Запланировано</p>
           </CardContent>
@@ -99,7 +97,7 @@ export default function ExaminationPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
               <Icon name="Activity" className="text-amber-600" size={24} />
-              <span className="text-2xl font-bold">3</span>
+              <span className="text-2xl font-bold">{stats.inProgress}</span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">В процессе</p>
           </CardContent>
@@ -108,7 +106,7 @@ export default function ExaminationPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
               <Icon name="CheckCircle2" className="text-emerald-600" size={24} />
-              <span className="text-2xl font-bold">42</span>
+              <span className="text-2xl font-bold">{stats.completed}</span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">Завершено</p>
           </CardContent>
@@ -117,7 +115,7 @@ export default function ExaminationPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
               <Icon name="AlertTriangle" className="text-red-600" size={24} />
-              <span className="text-2xl font-bold">1</span>
+              <span className="text-2xl font-bold">{stats.overdue}</span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">Просрочено</p>
           </CardContent>
@@ -179,11 +177,11 @@ export default function ExaminationPage() {
                   <div className="flex items-center gap-4 text-sm text-gray-600">
                     <div className="flex items-center gap-1">
                       <Icon name="Building" size={14} />
-                      <span>{exam.object}</span>
+                      <span>{exam.objectName}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Icon name="Calendar" size={14} />
-                      <span>{new Date(exam.scheduled).toLocaleDateString('ru-RU')}</span>
+                      <span>{new Date(exam.scheduledDate).toLocaleDateString('ru-RU')}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Icon name="User" size={14} />

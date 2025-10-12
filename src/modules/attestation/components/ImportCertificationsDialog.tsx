@@ -58,55 +58,7 @@ export default function ImportCertificationsDialog({ open, onOpenChange }: Impor
     setIsProcessing(true);
 
     setTimeout(() => {
-      const mockData: ImportedCertification[] = [
-        {
-          employeeName: 'Иванов Иван Иванович',
-          category: 'Промышленная безопасность',
-          area: 'А.1 Основы промышленной безопасности',
-          issueDate: '2023-01-01',
-          expiryDate: '2028-01-01',
-          protocolNumber: 'ПБ-123/2023',
-          protocolDate: '2023-01-01',
-          status: 'valid'
-        },
-        {
-          employeeName: 'Иванов Иван Иванович',
-          category: 'Промышленная безопасность',
-          area: 'Б.3 Эксплуатация объектов электроэнергетики',
-          issueDate: '2021-09-15',
-          expiryDate: '2026-09-14',
-          protocolNumber: 'ПБ-456/2021',
-          protocolDate: '2021-09-15',
-          status: 'valid'
-        },
-        {
-          employeeName: 'Петрова Анна Сергеевна',
-          category: 'Электробезопасность',
-          area: 'V группа до 1000В',
-          issueDate: '2024-06-15',
-          expiryDate: '2025-06-15',
-          status: 'valid'
-        },
-        {
-          employeeName: 'Неизвестный сотрудник',
-          category: 'Промышленная безопасность',
-          area: 'А.1',
-          issueDate: '2023-01-01',
-          expiryDate: '2028-01-01',
-          protocolNumber: 'ПБ-999/2023',
-          status: 'error',
-          errors: ['Сотрудник не найден в системе']
-        },
-        {
-          employeeName: 'Сидоров Петр Николаевич',
-          category: 'Работы на высоте',
-          area: '2 группа',
-          issueDate: '2025-01-01',
-          expiryDate: '2024-12-31',
-          status: 'warning',
-          errors: ['Дата истечения раньше даты выдачи']
-        }
-      ];
+      const mockData: ImportedCertification[] = [];
 
       setImportData(mockData);
       setStep('preview');
