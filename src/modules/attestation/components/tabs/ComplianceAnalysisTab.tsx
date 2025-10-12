@@ -209,55 +209,79 @@ export default function ComplianceAnalysisTab() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div className="space-y-3">
                     <div>
-                      <p className="font-medium mb-2 flex items-center gap-1">
-                        <Icon name="CheckCircle" size={14} className="text-emerald-600" />
-                        Действующие ({item.actualCertifications.length})
+                      <p className="font-medium mb-3 flex items-center gap-2">
+                        <Icon name="ClipboardCheck" size={16} className="text-muted-foreground" />
+                        Требуемые области аттестации ({item.requiredCertifications.length})
                       </p>
-                      <ul className="space-y-1 text-muted-foreground">
-                        {item.actualCertifications.map((cert, i) => (
-                          <li key={i} className="flex items-start gap-1">
-                            <span className="text-emerald-600 mt-0.5">•</span>
-                            {cert}
-                          </li>
-                        ))}
-                      </ul>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {item.requiredCertifications.map((cert, i) => {
+                          const hasValidCert = item.actualCertifications.includes(cert);
+                          const isExpiring = item.expiringCertifications.includes(cert);
+                          
+                          return (
+                            <div
+                              key={i}
+                              className={`flex items-center gap-2 px-3 py-2 rounded-md border ${
+                                hasValidCert && !isExpiring
+                                  ? 'bg-emerald-50 dark:bg-emerald-950 border-emerald-200 dark:border-emerald-800'
+                                  : isExpiring
+                                  ? 'bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800'
+                                  : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
+                              }`}
+                            >
+                              {hasValidCert && !isExpiring ? (
+                                <Icon name="CheckCircle2" size={16} className="text-emerald-600 flex-shrink-0" />
+                              ) : isExpiring ? (
+                                <Icon name="AlertTriangle" size={16} className="text-amber-600 flex-shrink-0" />
+                              ) : (
+                                <Icon name="XCircle" size={16} className="text-red-600 flex-shrink-0" />
+                              )}
+                              <span className={`text-sm ${
+                                hasValidCert && !isExpiring
+                                  ? 'text-emerald-900 dark:text-emerald-100 font-medium'
+                                  : isExpiring
+                                  ? 'text-amber-900 dark:text-amber-100 font-medium'
+                                  : 'text-red-900 dark:text-red-100 font-medium'
+                              }`}>
+                                {cert}
+                              </span>
+                              {isExpiring && (
+                                <span className="ml-auto text-xs text-amber-600 font-medium">
+                                  Истекает
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
 
-                    {item.expiringCertifications.length > 0 && (
-                      <div>
-                        <p className="font-medium mb-2 flex items-center gap-1">
+                    <div className="flex items-center gap-4 text-sm pt-2">
+                      <div className="flex items-center gap-2">
+                        <Icon name="CheckCircle2" size={14} className="text-emerald-600" />
+                        <span className="text-muted-foreground">
+                          Имеется: <span className="font-medium text-emerald-600">{item.actualCertifications.length}</span>
+                        </span>
+                      </div>
+                      {item.expiringCertifications.length > 0 && (
+                        <div className="flex items-center gap-2">
                           <Icon name="AlertTriangle" size={14} className="text-amber-600" />
-                          Истекают ({item.expiringCertifications.length})
-                        </p>
-                        <ul className="space-y-1 text-muted-foreground">
-                          {item.expiringCertifications.map((cert, i) => (
-                            <li key={i} className="flex items-start gap-1">
-                              <span className="text-amber-600 mt-0.5">•</span>
-                              {cert}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {item.missingCertifications.length > 0 && (
-                      <div>
-                        <p className="font-medium mb-2 flex items-center gap-1">
+                          <span className="text-muted-foreground">
+                            Истекает: <span className="font-medium text-amber-600">{item.expiringCertifications.length}</span>
+                          </span>
+                        </div>
+                      )}
+                      {item.missingCertifications.length > 0 && (
+                        <div className="flex items-center gap-2">
                           <Icon name="XCircle" size={14} className="text-red-600" />
-                          Отсутствуют ({item.missingCertifications.length})
-                        </p>
-                        <ul className="space-y-1 text-muted-foreground">
-                          {item.missingCertifications.map((cert, i) => (
-                            <li key={i} className="flex items-start gap-1">
-                              <span className="text-red-600 mt-0.5">•</span>
-                              {cert}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                          <span className="text-muted-foreground">
+                            Отсутствует: <span className="font-medium text-red-600">{item.missingCertifications.length}</span>
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {(item.expiringCertifications.length > 0 || item.missingCertifications.length > 0) && (
