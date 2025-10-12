@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import CreateOrderDialog from '../CreateOrderDialog';
 import CreateTrainingDialog from '../CreateTrainingDialog';
+import SendToTrainingCenterDialog from '../SendToTrainingCenterDialog';
 import { useAuthStore } from '@/stores/authStore';
 import { useOrdersStore } from '@/stores/ordersStore';
 import { useTrainingsAttestationStore } from '@/stores/trainingsAttestationStore';
@@ -29,6 +30,8 @@ export default function OrdersTrainingTab() {
   const [orderViewMode, setOrderViewMode] = useState<'cards' | 'table'>('cards');
   const [showCreateOrderDialog, setShowCreateOrderDialog] = useState(false);
   const [showCreateTrainingDialog, setShowCreateTrainingDialog] = useState(false);
+  const [showSendToTCDialog, setShowSendToTCDialog] = useState(false);
+  const [selectedOrderForTC, setSelectedOrderForTC] = useState<Order | null>(null);
   const [trainingViewMode, setTrainingViewMode] = useState<'cards' | 'table'>('cards');
   const [expandedTrainings, setExpandedTrainings] = useState<Set<string>>(new Set());
 
@@ -175,7 +178,10 @@ export default function OrdersTrainingTab() {
           <Icon name="Monitor" size={14} />
           СДО ИСП
         </Button>,
-        <Button key="send-tc" variant="outline" size="sm" className="gap-1" onClick={() => orderHandlers.handleSendToTrainingCenter(order.id)}>
+        <Button key="send-tc" variant="outline" size="sm" className="gap-1" onClick={() => {
+          setSelectedOrderForTC(order);
+          setShowSendToTCDialog(true);
+        }}>
           <Icon name="Building2" size={14} />
           Учебный центр
         </Button>,
@@ -281,6 +287,12 @@ export default function OrdersTrainingTab() {
       <CreateTrainingDialog
         open={showCreateTrainingDialog}
         onOpenChange={setShowCreateTrainingDialog}
+      />
+
+      <SendToTrainingCenterDialog
+        open={showSendToTCDialog}
+        onOpenChange={setShowSendToTCDialog}
+        order={selectedOrderForTC}
       />
     </div>
   );

@@ -83,6 +83,9 @@ interface TrainingCenterState {
   updateRequest: (id: string, updates: Partial<OrganizationTrainingRequest>) => void;
   deleteRequest: (id: string) => void;
   getRequestsByTenant: (tenantId: string) => OrganizationTrainingRequest[];
+  approveRequest: (requestId: string, groupId?: string) => void;
+  rejectRequest: (requestId: string, reason: string) => void;
+  completeRequest: (requestId: string) => void;
   
   addIssuedCertificate: (cert: Omit<IssuedCertificate, 'id' | 'createdAt' | 'updatedAt'>) => IssuedCertificate;
   updateIssuedCertificate: (id: string, updates: Partial<IssuedCertificate>) => void;
@@ -326,6 +329,30 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
 
   getRequestsByTenant: (tenantId) => {
     return get().requests.filter((r) => r.tenantId === tenantId);
+  },
+
+  approveRequest: (requestId: string, groupId?: string) => {
+    set((state) => ({
+      requests: state.requests.map((r) =>
+        r.id === requestId ? { ...r, status: 'approved' as const, updatedAt: new Date().toISOString() } : r
+      )
+    }));
+  },
+
+  rejectRequest: (requestId: string, reason: string) => {
+    set((state) => ({
+      requests: state.requests.map((r) =>
+        r.id === requestId ? { ...r, status: 'rejected' as const, reviewNotes: reason, updatedAt: new Date().toISOString() } : r
+      )
+    }));
+  },
+
+  completeRequest: (requestId: string) => {
+    set((state) => ({
+      requests: state.requests.map((r) =>
+        r.id === requestId ? { ...r, status: 'completed' as const, updatedAt: new Date().toISOString() } : r
+      )
+    }));
   },
 
   addIssuedCertificate: (cert) => {

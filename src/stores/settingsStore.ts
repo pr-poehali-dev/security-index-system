@@ -1,7 +1,7 @@
 // src/stores/settingsStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization, Person, Position, Certification, Competency } from '@/types';
+import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization, Person, Position, Certification, Competency, OrganizationContractor, InterOrgDocument } from '@/types';
 import {
   mockOrganizations,
   mockDepartments,
@@ -113,6 +113,19 @@ interface SettingsState {
   deleteCertification: (id: string) => void;
   getCertificationsByPerson: (personId: string) => Certification[];
   getCertificationsByTenant: (tenantId: string) => Certification[];
+
+  contractors: OrganizationContractor[];
+  addContractor: (contractor: Omit<OrganizationContractor, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateContractor: (id: string, updates: Partial<OrganizationContractor>) => void;
+  deleteContractor: (id: string) => void;
+  getContractorsByTenant: (tenantId: string) => OrganizationContractor[];
+  getContractorsByType: (tenantId: string, type: OrganizationContractor['type']) => OrganizationContractor[];
+
+  interOrgDocuments: InterOrgDocument[];
+  addInterOrgDocument: (doc: Omit<InterOrgDocument, 'id' | 'sentAt'>) => void;
+  updateInterOrgDocument: (id: string, updates: Partial<InterOrgDocument>) => void;
+  deleteInterOrgDocument: (id: string) => void;
+  getInterOrgDocumentsByTenant: (tenantId: string, direction: 'sent' | 'received' | 'all') => InterOrgDocument[];
 }
 
 export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
@@ -619,5 +632,75 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
 
   getCertificationsByTenant: (tenantId) => {
     return get().certifications.filter((cert) => cert.tenantId === tenantId);
+  },
+
+  contractors: [],
+
+  addContractor: (contractor) => {
+    const newContractor: OrganizationContractor = {
+      ...contractor,
+      id: `contractor-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    set((state) => ({ contractors: [...state.contractors, newContractor] }));
+  },
+
+  updateContractor: (id, updates) => {
+    set((state) => ({
+      contractors: state.contractors.map((c) =>
+        c.id === id ? { ...c, ...updates, updatedAt: new Date().toISOString() } : c
+      )
+    }));
+  },
+
+  deleteContractor: (id) => {
+    set((state) => ({
+      contractors: state.contractors.filter((c) => c.id !== id)
+    }));
+  },
+
+  getContractorsByTenant: (tenantId) => {
+    return get().contractors.filter((c) => c.tenantId === tenantId);
+  },
+
+  getContractorsByType: (tenantId, type) => {
+    return get().contractors.filter((c) => c.tenantId === tenantId && c.type === type);
+  },
+
+  interOrgDocuments: [],
+
+  addInterOrgDocument: (doc) => {
+    const newDoc: InterOrgDocument = {
+      ...doc,
+      id: `inter-doc-${Date.now()}`,
+      sentAt: new Date().toISOString()
+    };
+    set((state) => ({ interOrgDocuments: [...state.interOrgDocuments, newDoc] }));
+  },
+
+  updateInterOrgDocument: (id, updates) => {
+    set((state) => ({
+      interOrgDocuments: state.interOrgDocuments.map((doc) =>
+        doc.id === id ? { ...doc, ...updates } : doc
+      )
+    }));
+  },
+
+  deleteInterOrgDocument: (id) => {
+    set((state) => ({
+      interOrgDocuments: state.interOrgDocuments.filter((doc) => doc.id !== id)
+    }));
+  },
+
+  getInterOrgDocumentsByTenant: (tenantId, direction) => {
+    const docs = get().interOrgDocuments;
+    if (direction === 'sent') {
+      return docs.filter((doc) => doc.fromTenantId === tenantId);
+    } else if (direction === 'received') {
+      return docs.filter((doc) => doc.toTenantId === tenantId);
+    } else {
+      return docs.filter((doc) => doc.fromTenantId === tenantId || doc.toTenantId === tenantId);
+    }
   }
 }), { name: 'settings-storage-v3' }));

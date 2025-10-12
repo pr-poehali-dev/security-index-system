@@ -2,10 +2,12 @@
 import { useState, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useTrainingCenterStore } from '@/stores/trainingCenterStore';
+import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
 import {
   Table,
@@ -41,11 +43,13 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default function RequestsTab() {
   const user = useAuthStore((state) => state.user);
-  const { getRequestsByTenant } = useTrainingCenterStore();
+  const { getRequestsByTenant, approveRequest, rejectRequest, completeRequest } = useTrainingCenterStore();
+  const { toast } = useToast();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedRequest, setSelectedRequest] = useState<OrganizationTrainingRequest | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   const requests = user?.tenantId ? getRequestsByTenant(user.tenantId) : [];
 
@@ -71,6 +75,29 @@ export default function RequestsTab() {
     };
 
     return <Badge variant={variants[status]}>{STATUS_LABELS[status]}</Badge>;
+  };
+
+  const handleApprove = (requestId: string) => {
+    approveRequest(requestId);
+    toast({ title: 'Заявка одобрена', description: 'Можно приступить к формированию группы и обучению' });
+    setSelectedRequest(null);
+  };
+
+  const handleReject = (requestId: string) => {
+    if (!rejectReason.trim()) {
+      toast({ title: 'Укажите причину отклонения', variant: 'destructive' });
+      return;
+    }
+    rejectRequest(requestId, rejectReason);
+    toast({ title: 'Заявка отклонена' });
+    setSelectedRequest(null);
+    setRejectReason('');
+  };
+
+  const handleComplete = (requestId: string) => {
+    completeRequest(requestId);
+    toast({ title: 'Заявка завершена', description: 'Документы отправлены в организацию' });
+    setSelectedRequest(null);
   };
 
   return (
@@ -153,13 +180,29 @@ export default function RequestsTab() {
                       </TableCell>
                       <TableCell>{getStatusBadge(request.status)}</TableCell>
                       <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedRequest(request)}
-                        >
-                          <Icon name="Eye" size={14} />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedRequest(request)}
+                          >
+                            <Icon name="Eye" size={14} />
+                          </Button>
+                          {request.status === 'new' && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedRequest(request);
+                                  handleApprove(request.id);
+                                }}
+                              >
+                                <Icon name="Check" size={14} />
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -236,6 +279,51 @@ export default function RequestsTab() {
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Примечания</label>
                   <p className="text-sm mt-1">{selectedRequest.notes}</p>
+                </div>
+              )}
+
+              {selectedRequest.status === 'new' && (
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button
+                    className="flex-1"
+                    onClick={() => handleApprove(selectedRequest.id)}
+                  >
+                    <Icon name="Check" size={16} className="mr-2" />
+                    Одобрить заявку
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    variant="destructive"
+                    onClick={() => handleReject(selectedRequest.id)}
+                  >
+                    <Icon name="X" size={16} className="mr-2" />
+                    Отклонить
+                  </Button>
+                </div>
+              )}
+
+              {selectedRequest.status === 'new' && (
+                <div>
+                  <Label htmlFor="rejectReason">Причина отклонения</Label>
+                  <Textarea
+                    id="rejectReason"
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    placeholder="Укажите причину отклонения заявки"
+                    rows={2}
+                  />
+                </div>
+              )}
+
+              {selectedRequest.status === 'approved' && (
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button
+                    className="flex-1"
+                    onClick={() => handleComplete(selectedRequest.id)}
+                  >
+                    <Icon name="Send" size={16} className="mr-2" />
+                    Завершить и отправить документы
+                  </Button>
                 </div>
               )}
             </div>

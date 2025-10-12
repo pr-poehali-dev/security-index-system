@@ -633,11 +633,14 @@ export type OrganizationRequestStatus = 'new' | 'in_review' | 'approved' | 'reje
 export interface OrganizationTrainingRequest {
   id: string;
   tenantId: string;
+  fromTenantId?: string;
+  fromTenantName?: string;
   organizationId: string;
   organizationName: string;
   programId: string;
   programName: string;
   requestDate: string;
+  requestType: 'full_training' | 'sdo_access_only';
   studentsCount: number;
   students: {
     personnelId: string;
@@ -652,6 +655,8 @@ export interface OrganizationTrainingRequest {
   status: OrganizationRequestStatus;
   notes?: string;
   reviewNotes?: string;
+  orderId?: string;
+  responseDocuments?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -707,4 +712,52 @@ export interface KnowledgeDocument {
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;
+}
+
+export type ContractorServiceType = 'full_training' | 'sdo_access_only' | 'certification' | 'consulting';
+
+export interface OrganizationContractor {
+  id: string;
+  tenantId: string;
+  contractorTenantId?: string;
+  contractorExternalOrgId?: string;
+  contractorName: string;
+  contractorInn?: string;
+  type: 'training_center' | 'contractor' | 'supplier';
+  services: ContractorServiceType[];
+  contractNumber?: string;
+  contractDate?: string;
+  contractExpiryDate?: string;
+  contactPerson?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  status: 'active' | 'suspended' | 'terminated';
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type InterOrgDocumentType = 'training_request' | 'certificate' | 'sdo_access' | 'invoice' | 'contract' | 'report';
+export type InterOrgDocumentStatus = 'sent' | 'received' | 'processed' | 'rejected';
+
+export interface InterOrgDocument {
+  id: string;
+  fromTenantId: string;
+  fromTenantName: string;
+  toTenantId: string;
+  toTenantName: string;
+  documentType: InterOrgDocumentType;
+  sourceId?: string;
+  title: string;
+  description?: string;
+  fileName?: string;
+  fileUrl?: string;
+  fileSize?: number;
+  status: InterOrgDocumentStatus;
+  metadata?: Record<string, any>;
+  sentAt: string;
+  receivedAt?: string;
+  processedAt?: string;
+  processedBy?: string;
+  notes?: string;
 }

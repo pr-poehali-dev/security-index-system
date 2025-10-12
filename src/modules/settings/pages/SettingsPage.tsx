@@ -29,7 +29,9 @@ import EditSystemUserDialog from '../components/EditSystemUserDialog';
 import ExternalOrganizationDialog from '../components/ExternalOrganizationDialog';
 
 import PositionDialog from '../components/PositionDialog';
-import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization, Position } from '@/types';
+import ContractorsTab from '../components/tabs/ContractorsTab';
+import ContractorDialog from '../components/ContractorDialog';
+import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization, Position, OrganizationContractor } from '@/types';
 
 export default function SettingsPage() {
   const user = useAuthStore((state) => state.user);
@@ -42,7 +44,8 @@ export default function SettingsPage() {
     deleteCompetency,
     deleteProductionSite,
     deleteSystemUser,
-    deleteExternalOrganization
+    deleteExternalOrganization,
+    deleteContractor
   } = useSettingsStore();
   
   const { toast } = useToast();
@@ -65,6 +68,8 @@ export default function SettingsPage() {
   const [editingSite, setEditingSite] = useState<ProductionSite | null>(null);
   const [editingUser, setEditingUser] = useState<SystemUser | null>(null);
   const [editingExternalOrg, setEditingExternalOrg] = useState<ExternalOrganization | null>(null);
+  const [showAddContractor, setShowAddContractor] = useState(false);
+  const [editingContractor, setEditingContractor] = useState<OrganizationContractor | null>(null);
 
   const isReadOnly = user?.role !== 'TenantAdmin';
   
@@ -121,6 +126,13 @@ export default function SettingsPage() {
     }
   };
 
+  const handleDeleteContractor = (id: string) => {
+    if (confirm('Удалить контрагента?')) {
+      deleteContractor(id);
+      toast({ title: 'Контрагент удален' });
+    }
+  };
+
 
 
   const handleDeletePositionObj = (id: string) => {
@@ -172,6 +184,10 @@ export default function SettingsPage() {
           <TabsTrigger value="competencies" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="GraduationCap" size={20} />
             <span className="text-xs font-medium text-center leading-tight">Справочник<br/>компетенций</span>
+          </TabsTrigger>
+          <TabsTrigger value="contractors" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Handshake" size={20} />
+            <span className="text-xs font-medium">Контрагенты</span>
           </TabsTrigger>
           <TabsTrigger value="external-orgs" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="Building2" size={20} />
@@ -228,6 +244,14 @@ export default function SettingsPage() {
             onAdd={() => setShowAddCompetency(true)}
             onEdit={setEditingCompetency}
             onDelete={handleDeleteCompetency}
+          />
+        </TabsContent>
+
+        <TabsContent value="contractors">
+          <ContractorsTab
+            onAdd={() => setShowAddContractor(true)}
+            onEdit={setEditingContractor}
+            onDelete={handleDeleteContractor}
           />
         </TabsContent>
 
@@ -348,6 +372,17 @@ export default function SettingsPage() {
           }
         }}
         organization={editingExternalOrg || undefined}
+      />
+
+      <ContractorDialog 
+        open={showAddContractor || !!editingContractor} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowAddContractor(false);
+            setEditingContractor(null);
+          }
+        }}
+        contractor={editingContractor || undefined}
       />
     </div>
   );
