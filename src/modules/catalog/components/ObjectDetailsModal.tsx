@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Icon from '@/components/ui/icon';
 import { useCatalogStore } from '@/stores/catalogStore';
 import DocumentUploadModal from './DocumentUploadModal';
+import ObjectPersonnelWidget from './contractors/ObjectPersonnelWidget';
 import type { IndustrialObject, DocumentType, DocumentStatus } from '@/types/catalog';
 
 interface ObjectDetailsModalProps {
@@ -147,6 +148,10 @@ export default function ObjectDetailsModal({ open, onOpenChange, object, onEdit 
             <TabsTrigger value="dates" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Icon name="Calendar" size={20} />
               <span className="text-xs font-medium text-center leading-tight">Контроль<br/>сроков</span>
+            </TabsTrigger>
+            <TabsTrigger value="personnel" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Icon name="Users" size={20} />
+              <span className="text-xs font-medium">Персонал</span>
             </TabsTrigger>
             <TabsTrigger value="documents" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Icon name="FileText" size={20} />
@@ -356,6 +361,13 @@ export default function ObjectDetailsModal({ open, onOpenChange, object, onEdit 
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="personnel" className="space-y-4 mt-4">
+            <ObjectPersonnelWidget 
+              objectId={object.id} 
+              objectName={object.name}
+            />
           </TabsContent>
 
           <TabsContent value="documents" className="space-y-4 mt-4">
