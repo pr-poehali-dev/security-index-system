@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { useContractorsStore } from '../../stores/contractorsStore';
-import { Contractor, ContractorStatus } from '../../types/contractors';
+import { Contractor, ContractorStatus, ContractorType } from '../../types/contractors';
 import ContractorFormDialog from './ContractorFormDialog';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -14,6 +14,7 @@ const ContractorsList = () => {
   const { contractors, loading, fetchContractors, deleteContractor } = useContractorsStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ContractorStatus | 'all'>('all');
+  const [typeFilter, setTypeFilter] = useState<ContractorType | 'all'>('all');
   const [selectedContractor, setSelectedContractor] = useState<Contractor | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
@@ -26,7 +27,8 @@ const ContractorsList = () => {
       contractor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       contractor.inn.includes(searchQuery);
     const matchesStatus = statusFilter === 'all' || contractor.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesType = typeFilter === 'all' || (contractor.type || 'contractor') === typeFilter;
+    return matchesSearch && matchesStatus && matchesType;
   });
 
   const getStatusBadge = (status: ContractorStatus) => {
@@ -38,6 +40,21 @@ const ContractorsList = () => {
     };
     const config = variants[status];
     return <Badge variant={config.variant}>{config.label}</Badge>;
+  };
+
+  const getTypeBadge = (type?: ContractorType) => {
+    const actualType = type || 'contractor';
+    const config = {
+      contractor: { label: 'Подрядчик', icon: 'Briefcase' as const, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100' },
+      training_center: { label: 'Учебный центр', icon: 'GraduationCap' as const, className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' },
+    };
+    const typeConfig = config[actualType];
+    return (
+      <Badge variant="outline" className={typeConfig.className}>
+        <Icon name={typeConfig.icon} size={12} className="mr-1" />
+        {typeConfig.label}
+      </Badge>
+    );
   };
 
   const getRatingStars = (rating: number) => {
@@ -93,38 +110,71 @@ const ContractorsList = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1">
-          <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Поиск по названию или ИНН..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+      <div className="space-y-3">
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1">
+            <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Поиск по названию или ИНН..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant={statusFilter === 'all' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setStatusFilter('all')}
-          >
-            Все
-          </Button>
-          <Button
-            variant={statusFilter === 'active' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setStatusFilter('active')}
-          >
-            Активные
-          </Button>
-          <Button
-            variant={statusFilter === 'suspended' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setStatusFilter('suspended')}
-          >
-            Приостановлены
-          </Button>
+        
+        <div className="flex items-center gap-4">
+          <div className="flex gap-2">
+            <span className="text-sm text-muted-foreground self-center">Тип:</span>
+            <Button
+              variant={typeFilter === 'all' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setTypeFilter('all')}
+            >
+              Все
+            </Button>
+            <Button
+              variant={typeFilter === 'contractor' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setTypeFilter('contractor')}
+            >
+              <Icon name="Briefcase" size={14} className="mr-1" />
+              Подрядчики
+            </Button>
+            <Button
+              variant={typeFilter === 'training_center' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setTypeFilter('training_center')}
+            >
+              <Icon name="GraduationCap" size={14} className="mr-1" />
+              Учебные центры
+            </Button>
+          </div>
+          
+          <div className="flex gap-2">
+            <span className="text-sm text-muted-foreground self-center">Статус:</span>
+            <Button
+              variant={statusFilter === 'all' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('all')}
+            >
+              Все
+            </Button>
+            <Button
+              variant={statusFilter === 'active' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('active')}
+            >
+              Активные
+            </Button>
+            <Button
+              variant={statusFilter === 'suspended' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setStatusFilter('suspended')}
+            >
+              Приостановлены
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -144,15 +194,20 @@ const ContractorsList = () => {
           {filteredContractors.map((contractor) => (
             <Card key={contractor.id} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-2">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg">{contractor.name}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-lg">{contractor.name}</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
                       ИНН: {contractor.inn}
                       {contractor.kpp && ` / КПП: ${contractor.kpp}`}
                     </p>
                   </div>
-                  {getStatusBadge(contractor.status)}
+                  <div className="flex flex-col gap-2">
+                    {getStatusBadge(contractor.status)}
+                    {getTypeBadge(contractor.type)}
+                  </div>
                 </div>
                 <div className="mt-2">{getRatingStars(contractor.rating)}</div>
               </CardHeader>

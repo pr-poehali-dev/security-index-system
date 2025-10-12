@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import { useContractorsStore } from '../../stores/contractorsStore';
-import { Contractor, ContractorFormData, ContractorStatus } from '../../types/contractors';
+import { Contractor, ContractorFormData, ContractorStatus, ContractorType } from '../../types/contractors';
 
 interface ContractorFormDialogProps {
   open: boolean;
@@ -37,9 +37,11 @@ const ContractorFormDialog = ({
 }: ContractorFormDialogProps) => {
   const { createContractor, updateContractor, loading } = useContractorsStore();
   const [workTypesInput, setWorkTypesInput] = useState('');
+  const [accreditationsInput, setAccreditationsInput] = useState('');
 
   const [formData, setFormData] = useState<ContractorFormData>({
     name: '',
+    type: 'contractor',
     inn: '',
     kpp: '',
     legalAddress: '',
@@ -58,12 +60,16 @@ const ContractorFormDialog = ({
     insuranceExpiry: '',
     status: 'active',
     notes: '',
+    accreditations: [],
+    website: '',
+    rating: 0,
   });
 
   useEffect(() => {
     if (contractor) {
       setFormData({
         name: contractor.name,
+        type: contractor.type || 'contractor',
         inn: contractor.inn,
         kpp: contractor.kpp,
         legalAddress: contractor.legalAddress,
@@ -82,11 +88,16 @@ const ContractorFormDialog = ({
         insuranceExpiry: contractor.insuranceExpiry,
         status: contractor.status,
         notes: contractor.notes,
+        accreditations: contractor.accreditations || [],
+        website: contractor.website || '',
+        rating: contractor.rating || 0,
       });
       setWorkTypesInput(contractor.allowedWorkTypes?.join(', ') || '');
+      setAccreditationsInput(contractor.accreditations?.join(', ') || '');
     } else {
       setFormData({
         name: '',
+        type: 'contractor',
         inn: '',
         kpp: '',
         legalAddress: '',
@@ -105,8 +116,12 @@ const ContractorFormDialog = ({
         insuranceExpiry: '',
         status: 'active',
         notes: '',
+        accreditations: [],
+        website: '',
+        rating: 0,
       });
       setWorkTypesInput('');
+      setAccreditationsInput('');
     }
   }, [contractor, open]);
 
@@ -118,9 +133,15 @@ const ContractorFormDialog = ({
       .map((type) => type.trim())
       .filter((type) => type.length > 0);
 
+    const accreditations = accreditationsInput
+      .split(',')
+      .map((acc) => acc.trim())
+      .filter((acc) => acc.length > 0);
+
     const dataToSubmit = {
       ...formData,
       allowedWorkTypes: workTypes,
+      accreditations,
     };
 
     if (contractor) {
@@ -167,6 +188,26 @@ const ContractorFormDialog = ({
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="ООО 'ГазСервис'"
                 />
+              </div>
+
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="type">
+                  Тип организации <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value: ContractorType) =>
+                    setFormData({ ...formData, type: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="contractor">Подрядчик</SelectItem>
+                    <SelectItem value="training_center">Учебный центр</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -364,6 +405,57 @@ const ContractorFormDialog = ({
               </div>
             </div>
           </div>
+
+          {formData.type === 'training_center' && (
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold">Данные учебного центра</h3>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 col-span-2">
+                  <Label htmlFor="website">Веб-сайт</Label>
+                  <Input
+                    id="website"
+                    type="url"
+                    value={formData.website}
+                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                    placeholder="https://training-center.ru"
+                  />
+                </div>
+
+                <div className="space-y-2 col-span-2">
+                  <Label htmlFor="accreditations">Аккредитации</Label>
+                  <Input
+                    id="accreditations"
+                    value={accreditationsInput}
+                    onChange={(e) => setAccreditationsInput(e.target.value)}
+                    placeholder="ISO 9001, РосТехНадзор (через запятую)"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Укажите аккредитации через запятую
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="rating">Рейтинг (0-5)</Label>
+                  <Input
+                    id="rating"
+                    type="number"
+                    min="0"
+                    max="5"
+                    step="0.1"
+                    value={formData.rating || 0}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        rating: e.target.value ? parseFloat(e.target.value) : 0,
+                      })
+                    }
+                    placeholder="4.5"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="space-y-4">
             <h3 className="text-sm font-semibold">Дополнительно</h3>

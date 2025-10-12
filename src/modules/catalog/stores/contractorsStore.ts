@@ -95,7 +95,10 @@ export const useContractorsStore = create<ContractorsState>((set, get) => ({
         ...data,
         id: Math.random().toString(36).substr(2, 9),
         tenantId: 'current-tenant-id', // TODO: Get from auth
-        rating: 0,
+        type: data.type || 'contractor',
+        rating: data.rating || 0,
+        accreditations: data.accreditations || [],
+        website: data.website || '',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
