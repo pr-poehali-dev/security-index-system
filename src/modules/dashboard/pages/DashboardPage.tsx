@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, memo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useCatalogStore } from '@/stores/catalogStore';
@@ -28,7 +28,7 @@ import OrganizationsCard from '../components/OrganizationsCard';
 import TasksChartCard from '../components/TasksChartCard';
 import IncidentsChartCard from '../components/IncidentsChartCard';
 
-export default function DashboardPage() {
+const DashboardPage = memo(function DashboardPage() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const { objects, organizations } = useCatalogStore();
@@ -252,7 +252,7 @@ export default function DashboardPage() {
     });
   }, [incidents]);
 
-  const handleGenerateDashboardReport = async (period: ReportPeriod) => {
+  const handleGenerateDashboardReport = useCallback(async (period: ReportPeriod) => {
     try {
       toast.info('Формируем отчет...');
       await generateDashboardReport({
@@ -277,7 +277,7 @@ export default function DashboardPage() {
     }
   };
 
-  const handleGenerateTasksReport = async (period: ReportPeriod) => {
+  const handleGenerateTasksReport = useCallback(async (period: ReportPeriod) => {
     try {
       toast.info('Формируем отчет по задачам...');
       await generateTasksReport(tasks, period);
@@ -285,9 +285,9 @@ export default function DashboardPage() {
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
     }
-  };
+  }, [tasks]);
 
-  const handleGenerateIncidentsReport = async (period: ReportPeriod) => {
+  const handleGenerateIncidentsReport = useCallback(async (period: ReportPeriod) => {
     try {
       toast.info('Формируем отчет по инцидентам...');
       await generateIncidentsReport(incidents, period);
@@ -295,9 +295,9 @@ export default function DashboardPage() {
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
     }
-  };
+  }, [incidents]);
 
-  const handleGenerateExpertiseReport = async (period: ReportPeriod) => {
+  const handleGenerateExpertiseReport = useCallback(async (period: ReportPeriod) => {
     try {
       toast.info('Формируем отчет по экспертизам...');
       await generateExpertiseReport(objects, organizations, period);
@@ -305,9 +305,9 @@ export default function DashboardPage() {
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
     }
-  };
+  }, [objects, organizations]);
 
-  const handleGenerateOrganizationsReport = async (period: ReportPeriod) => {
+  const handleGenerateOrganizationsReport = useCallback(async (period: ReportPeriod) => {
     try {
       toast.info('Формируем отчет по организациям...');
       await generateOrganizationsReport(organizations, objects, period);
@@ -315,7 +315,7 @@ export default function DashboardPage() {
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
     }
-  };
+  }, [organizations, objects]);
 
   return (
     <div>
@@ -388,4 +388,6 @@ export default function DashboardPage() {
       </div>
     </div>
   );
-}
+});
+
+export default DashboardPage;

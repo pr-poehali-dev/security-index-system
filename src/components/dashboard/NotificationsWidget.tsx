@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotificationsStore } from '@/stores/notificationsStore';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,7 +9,7 @@ import { ROUTES } from '@/lib/constants';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
-export default function NotificationsWidget() {
+const NotificationsWidget = memo(function NotificationsWidget() {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
   const { notifications, markAsRead } = useNotificationsStore();
@@ -179,4 +179,6 @@ export default function NotificationsWidget() {
       </CardContent>
     </Card>
   );
-}
+});
+
+export default NotificationsWidget;

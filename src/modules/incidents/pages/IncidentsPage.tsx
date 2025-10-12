@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
@@ -10,7 +11,7 @@ import ReportsTab from '../components/ReportsTab';
 import DirectoriesTab from '../components/DirectoriesTab';
 import HeatmapTab from '../components/HeatmapTab';
 
-export default function IncidentsPage() {
+const IncidentsPage = memo(function IncidentsPage() {
   const user = useAuthStore((state) => state.user);
 
   if (!user || !user.availableModules.includes('incidents')) {
@@ -71,4 +72,6 @@ export default function IncidentsPage() {
       </Tabs>
     </div>
   );
-}
+});
+
+export default IncidentsPage;

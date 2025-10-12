@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -26,7 +27,7 @@ const MODULE_ROUTES: Record<ModuleType, string> = {
   settings: ROUTES.SETTINGS
 };
 
-export default function Sidebar() {
+const Sidebar = memo(function Sidebar() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const { theme, toggleTheme, sidebarCollapsed, toggleSidebar } = useUIStore();
@@ -197,4 +198,6 @@ export default function Sidebar() {
       </div>
     </aside>
   );
-}
+});
+
+export default Sidebar;

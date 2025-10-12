@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
@@ -10,7 +11,7 @@ import NotificationsTab from '../components/NotificationsTab';
 import AttestationCalendarTab from '../components/AttestationCalendarTab';
 import TasksTab from '../components/TasksTab';
 
-export default function AttestationPage() {
+const AttestationPage = memo(function AttestationPage() {
   return (
     <div>
       <PageHeader
@@ -89,4 +90,6 @@ export default function AttestationPage() {
       </Tabs>
     </div>
   );
-}
+});
+
+export default AttestationPage;

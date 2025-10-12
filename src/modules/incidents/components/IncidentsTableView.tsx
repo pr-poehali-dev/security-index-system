@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -29,7 +30,7 @@ interface IncidentsTableViewProps {
   handleDelete: (id: string) => void;
 }
 
-export default function IncidentsTableView({
+const IncidentsTableView = memo(function IncidentsTableView({
   filteredIncidents,
   selectedIds,
   startIndex = 0,
@@ -154,4 +155,6 @@ export default function IncidentsTableView({
       </Table>
     </div>
   );
-}
+});
+
+export default IncidentsTableView;

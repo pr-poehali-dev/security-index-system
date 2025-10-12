@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo } from 'react';
 import { useCatalogStore } from '@/stores/catalogStore';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,7 +16,7 @@ import ObjectDetailsModal from '../components/ObjectDetailsModal';
 import OrganizationFormModal from '../components/OrganizationFormModal';
 import type { IndustrialObject, Organization } from '@/types/catalog';
 
-export default function CatalogPage() {
+const CatalogPage = memo(function CatalogPage() {
   const { objects, selectedOrganization } = useCatalogStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
@@ -263,4 +263,6 @@ export default function CatalogPage() {
       />
     </div>
   );
-}
+});
+
+export default CatalogPage;

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -61,7 +62,7 @@ const isExpired = (date: string | undefined) => {
   return new Date(date) < new Date();
 };
 
-export default function ObjectCard({ object: obj, onView, onEdit }: ObjectCardProps) {
+const ObjectCard = memo(function ObjectCard({ object: obj, onView, onEdit }: ObjectCardProps) {
   const needsAttention = isExpired(obj.nextExpertiseDate) || 
                         isExpired(obj.nextDiagnosticDate) || 
                         isExpired(obj.nextTestDate);
@@ -155,4 +156,8 @@ export default function ObjectCard({ object: obj, onView, onEdit }: ObjectCardPr
       </CardContent>
     </Card>
   );
-}
+});
+
+export default ObjectCard;);
+
+export default ObjectCard;

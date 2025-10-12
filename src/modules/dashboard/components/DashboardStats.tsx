@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
@@ -21,7 +22,7 @@ interface DashboardStatsProps {
   stats: StatItem[];
 }
 
-export default function DashboardStats({ stats }: DashboardStatsProps) {
+const DashboardStats = memo(function DashboardStats({ stats }: DashboardStatsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       {stats.map((stat, index) => (
@@ -49,4 +50,6 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
       ))}
     </div>
   );
-}
+});
+
+export default DashboardStats;

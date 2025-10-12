@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, lazy, Suspense, memo } from "react";
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/lib/constants";
 import Sidebar from "@/components/layout/Sidebar";
@@ -31,7 +31,7 @@ import { useCatalogNotifications } from "@/hooks/useCatalogNotifications";
 
 const queryClient = new QueryClient();
 
-function PageLoader() {
+const PageLoader = memo(function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="flex flex-col items-center gap-4">
@@ -40,9 +40,9 @@ function PageLoader() {
       </div>
     </div>
   );
-}
+});
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+const ProtectedRoute = memo(function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   
   if (!isAuthenticated) {
@@ -50,9 +50,9 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
   
   return <>{children}</>;
-}
+});
 
-function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
+const AuthenticatedLayout = memo(function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
   useIncidentNotifications();
   useAttestationNotifications();
@@ -71,9 +71,9 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
       </main>
     </div>
   );
-}
+});
 
-const App = () => {
+const App = memo(function App() {
   const theme = useUIStore((state) => state.theme);
   
   useEffect(() => {
@@ -231,6 +231,6 @@ const App = () => {
       </TooltipProvider>
     </QueryClientProvider>
   );
-};
+});
 
 export default App;

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useCatalogStore } from '@/stores/catalogStore';
 import Icon from '@/components/ui/icon';
 import { Badge } from '@/components/ui/badge';
@@ -209,7 +210,7 @@ interface OrganizationTreeProps {
   onDelete?: (org: Organization) => void;
 }
 
-export default function OrganizationTree({ onEdit, onDelete }: OrganizationTreeProps = {}) {
+const OrganizationTree = memo(function OrganizationTree({ onEdit, onDelete }: OrganizationTreeProps = {}) {
   const { getOrganizationTree } = useCatalogStore();
   const tree = getOrganizationTree();
   
@@ -234,4 +235,6 @@ export default function OrganizationTree({ onEdit, onDelete }: OrganizationTreeP
       ))}
     </div>
   );
-}
+});
+
+export default OrganizationTree;
