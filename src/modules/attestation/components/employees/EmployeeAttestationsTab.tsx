@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCertificationStore } from '@/stores/certificationStore';
-import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/personnelUtils';
+import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';

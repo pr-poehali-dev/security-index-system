@@ -5,21 +5,51 @@ export interface PersonnelFullInfo {
   position: string;
   personId: string;
   positionId: string;
+  person?: Person;
+  positionObj?: Position;
+}
+
+export function getFullName(person: Person | undefined): string {
+  if (!person) return '—';
+  return `${person.lastName} ${person.firstName} ${person.middleName || ''}`.trim();
+}
+
+export function getShortName(person: Person | undefined): string {
+  if (!person) return '—';
+  const firstInitial = person.firstName.charAt(0).toUpperCase();
+  const middleInitial = person.middleName ? person.middleName.charAt(0).toUpperCase() : '';
+  return `${person.lastName} ${firstInitial}.${middleInitial ? ` ${middleInitial}.` : ''}`.trim();
+}
+
+export function getPositionName(position: Position | undefined): string {
+  if (!position) return '—';
+  return position.name;
 }
 
 export function getPersonnelFullInfo(
-  personnel: Personnel,
+  personnel: Personnel | undefined,
   people: Person[],
   positions: Position[]
 ): PersonnelFullInfo {
+  if (!personnel) {
+    return { 
+      fullName: '—', 
+      position: '—',
+      personId: '',
+      positionId: ''
+    };
+  }
+
   const person = people.find(p => p.id === personnel.personId);
   const position = positions.find(p => p.id === personnel.positionId);
 
   return {
-    fullName: person ? `${person.lastName} ${person.firstName} ${person.middleName || ''}`.trim() : '—',
-    position: position?.name || '—',
+    fullName: getFullName(person),
+    position: getPositionName(position),
     personId: personnel.personId,
-    positionId: personnel.positionId
+    positionId: personnel.positionId,
+    person,
+    positionObj: position
   };
 }
 
