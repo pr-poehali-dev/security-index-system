@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCertificationStore } from '@/stores/certificationStore';
+import { useContractorsStore } from '@/modules/catalog/stores/contractorsStore';
 import { 
   CERTIFICATION_CATEGORIES, 
   CERTIFICATION_AREAS_BY_CATEGORY,
@@ -24,15 +25,20 @@ import {
 
 export default function DirectoriesTab() {
   const user = useAuthStore((state) => state.user);
-  const { competencies, getOrganizationsByTenant, getExternalOrganizationsByType } = useSettingsStore();
+  const { competencies, getOrganizationsByTenant } = useSettingsStore();
   const { getCertificationTypesByTenant } = useCertificationStore();
+  const { getTrainingCenters, fetchContractors } = useContractorsStore();
   const [searchQuery, setSearchQuery] = useState('');
   
   const certTypes = user?.tenantId ? getCertificationTypesByTenant(user.tenantId) : [];
   
   const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
   const tenantCompetencies = competencies.filter((c) => c.tenantId === user?.tenantId);
-  const trainingOrganizations = user?.tenantId ? getExternalOrganizationsByType(user.tenantId, 'training_center') : [];
+  const trainingOrganizations = getTrainingCenters();
+  
+  useEffect(() => {
+    fetchContractors();
+  }, [fetchContractors]);
   
   const filteredTemplates = tenantCompetencies.filter(comp => {
     const orgName = organizations.find(o => o.id === comp.organizationId)?.name || '';
@@ -199,11 +205,11 @@ export default function DirectoriesTab() {
                   <Icon name="Building2" size={48} className="mx-auto text-muted-foreground mb-4" />
                   <p className="text-lg font-medium mb-2">Учебные центры не найдены</p>
                   <p className="text-sm text-muted-foreground mb-4">
-                    {searchQuery ? 'Измените параметры поиска' : 'Учебные центры настраиваются в модуле "Настройки"'}
+                    {searchQuery ? 'Измените параметры поиска' : 'Учебные центры добавляются в модуле "Подрядчики"'}
                   </p>
-                  <Button variant="outline" onClick={() => window.location.href = '/settings'} className="gap-2">
-                    <Icon name="Settings" size={16} />
-                    Перейти в настройки
+                  <Button variant="outline" onClick={() => window.location.href = '/contractors'} className="gap-2">
+                    <Icon name="Building2" size={16} />
+                    Перейти к подрядчикам
                   </Button>
                 </div>
               ) : (
@@ -271,6 +277,14 @@ export default function DirectoriesTab() {
                                 </div>
                               </div>
                             )}
+                            {org.rating > 0 && (
+                              <div className="flex items-center gap-2 mt-2">
+                                <Icon name="Star" size={14} className="text-amber-500" />
+                                <span className="text-sm text-muted-foreground">
+                                  Рейтинг: {org.rating}/5
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </CardContent>
@@ -288,8 +302,8 @@ export default function DirectoriesTab() {
                         Об учебных центрах
                       </h4>
                       <p className="text-sm text-blue-700 dark:text-blue-300">
-                        Справочник учебных центров отображает данные из модуля "Настройки" → "Сторонние организации" (тип: Учебный центр).
-                        Для редактирования перейдите в раздел настроек.
+                        Справочник учебных центров отображает данные из модуля "Подрядчики" → "Организации" (тип: Учебный центр).
+                        Здесь показываются только те учебные центры, которые зарегистрированы в системе. Для добавления или редактирования перейдите в модуль "Подрядчики".
                       </p>
                     </div>
                   </div>

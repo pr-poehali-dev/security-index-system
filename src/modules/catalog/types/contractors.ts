@@ -2,11 +2,13 @@ export type ContractorStatus = 'active' | 'suspended' | 'blocked' | 'archived';
 export type EmployeeStatus = 'active' | 'suspended' | 'blocked' | 'dismissed';
 export type AccessStatus = 'active' | 'suspended' | 'revoked' | 'expired';
 export type AttestationStatus = 'valid' | 'expiring' | 'expired';
+export type ContractorType = 'contractor' | 'training_center';
 
 export interface Contractor {
   id: string;
   tenantId: string;
   name: string;
+  type: ContractorType;
   inn: string;
   kpp?: string;
   legalAddress?: string;
@@ -26,6 +28,8 @@ export interface Contractor {
   rating: number;
   status: ContractorStatus;
   notes?: string;
+  accreditations?: string[];
+  website?: string;
   createdAt: string;
   updatedAt: string;
   createdBy?: string;

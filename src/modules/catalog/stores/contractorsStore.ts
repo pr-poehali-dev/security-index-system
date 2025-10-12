@@ -49,6 +49,10 @@ interface ContractorsState {
   checkEmployeeCompliance: (employeeId: string, objectId: string) => Promise<ContractorComplianceCheck>;
   getObjectPersonnel: (objectId: string) => Promise<ObjectPersonnel>;
 
+  // Helpers
+  getContractorsByType: (type: 'contractor' | 'training_center') => Contractor[];
+  getTrainingCenters: () => Contractor[];
+
   // Utils
   clearError: () => void;
 }
@@ -384,6 +388,16 @@ export const useContractorsStore = create<ContractorsState>((set, get) => ({
       set({ error: (error as Error).message, loading: false });
       throw error;
     }
+  },
+
+  getContractorsByType: (type: 'contractor' | 'training_center') => {
+    const { contractors } = get();
+    return contractors.filter((c) => c.type === type);
+  },
+
+  getTrainingCenters: () => {
+    const { contractors } = get();
+    return contractors.filter((c) => c.type === 'training_center');
   },
 
   clearError: () => set({ error: null }),
