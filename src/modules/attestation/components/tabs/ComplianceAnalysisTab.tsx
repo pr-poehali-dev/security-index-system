@@ -68,10 +68,12 @@ export default function ComplianceAnalysisTab() {
       
       const missingAreas = requiredAreas.filter(ra => !actualAreas.includes(ra));
       
-      const validAreasCount = actualAreas.filter(area => !expiringAreas.includes(area)).length;
+      const validRequiredAreas = requiredAreas.filter(ra => 
+        actualAreas.includes(ra) && !expiringAreas.includes(ra)
+      );
       
       const compliancePercent = requiredAreas.length > 0 
-        ? Math.round((validAreasCount / requiredAreas.length) * 100)
+        ? Math.round((validRequiredAreas.length / requiredAreas.length) * 100)
         : 0;
 
       return {
