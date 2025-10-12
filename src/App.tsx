@@ -73,7 +73,7 @@ const AuthenticatedLayout = memo(function AuthenticatedLayout({ children }: { ch
       )}
       <main className={cn(
         "flex-1 transition-all duration-300 overflow-x-hidden",
-        sidebarCollapsed ? "lg:ml-0" : "lg:ml-64"
+        sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
       )}>
         <div className="p-4 sm:p-6 lg:p-8 max-w-full">
           {children}

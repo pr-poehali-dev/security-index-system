@@ -52,38 +52,54 @@ const Sidebar = memo(function Sidebar() {
   return (
     <aside className={cn(
       "fixed left-0 top-0 h-screen bg-gray-900 dark:bg-gray-950 text-white transition-all duration-300 z-30 flex flex-col",
-      sidebarCollapsed ? "w-16 -translate-x-full lg:translate-x-0 lg:w-16" : "w-64 translate-x-0"
+      sidebarCollapsed ? "-translate-x-full lg:translate-x-0 lg:w-16" : "translate-x-0",
+      "lg:w-auto",
+      sidebarCollapsed ? "w-16" : "w-64"
     )}>
-      <div className="p-4 border-b border-gray-800">
+      <div className={cn("border-b border-gray-800", sidebarCollapsed ? "p-2" : "p-4")}>
         <div className={cn(
           "flex items-center",
           sidebarCollapsed ? "flex-col gap-2" : "justify-between"
         )}>
-          {!sidebarCollapsed && (
-            <div className="flex items-center gap-2 animate-fade-in">
+          {sidebarCollapsed ? (
+            <div className="flex flex-col items-center gap-2 w-full">
               <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
                 <Icon name="Shield" size={18} />
               </div>
-              <div>
-                <h2 className="font-bold text-sm">Индекс Безопасности</h2>
-                <p className="text-xs text-gray-400">{user.role}</p>
-              </div>
+              <NotificationBell />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleSidebar}
+                className="text-gray-400 hover:text-white hover:bg-gray-800 w-full"
+              >
+                <Icon name="ChevronRight" size={20} />
+              </Button>
             </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 animate-fade-in">
+                <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+                  <Icon name="Shield" size={18} />
+                </div>
+                <div>
+                  <h2 className="font-bold text-sm">Индекс Безопасности</h2>
+                  <p className="text-xs text-gray-400">{user.role}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <NotificationBell />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleSidebar}
+                  className="text-gray-400 hover:text-white hover:bg-gray-800"
+                >
+                  <Icon name="ChevronLeft" size={20} />
+                </Button>
+              </div>
+            </>
           )}
-          <div className={cn(
-            "flex items-center gap-1",
-            sidebarCollapsed && "flex-col"
-          )}>
-            <NotificationBell />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSidebar}
-              className="text-gray-400 hover:text-white hover:bg-gray-800"
-            >
-              <Icon name={sidebarCollapsed ? "ChevronRight" : "ChevronLeft"} size={20} />
-            </Button>
-          </div>
         </div>
       </div>
 
@@ -91,8 +107,10 @@ const Sidebar = memo(function Sidebar() {
         {user.role !== 'SuperAdmin' && (
           <NavLink
             to={ROUTES.DASHBOARD}
+            title={sidebarCollapsed ? "Дашборд" : ""}
             className={({ isActive }) => cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors",
+              "flex items-center gap-3 rounded-lg mb-1 transition-colors",
+              sidebarCollapsed ? "justify-center px-2 py-2.5" : "px-3 py-2.5",
               isActive 
                 ? "bg-emerald-600 text-white" 
                 : "text-gray-300 hover:bg-gray-800 hover:text-white"
@@ -111,8 +129,10 @@ const Sidebar = memo(function Sidebar() {
               <NavLink
                 key={moduleKey}
                 to={ROUTES.TENANTS}
+                title={sidebarCollapsed ? "Управление тенантами" : ""}
                 className={({ isActive }) => cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors",
+                  "flex items-center gap-3 rounded-lg mb-1 transition-colors",
+                  sidebarCollapsed ? "justify-center px-2 py-2.5" : "px-3 py-2.5",
                   isActive 
                     ? "bg-emerald-600 text-white" 
                     : "text-gray-300 hover:bg-gray-800 hover:text-white"
@@ -138,8 +158,10 @@ const Sidebar = memo(function Sidebar() {
             <NavLink
               key={moduleKey}
               to={route}
+              title={sidebarCollapsed ? module.name : ""}
               className={({ isActive }) => cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors relative",
+                "flex items-center gap-3 rounded-lg mb-1 transition-colors relative",
+                sidebarCollapsed ? "justify-center px-2 py-2.5" : "px-3 py-2.5",
                 isActive 
                   ? "bg-emerald-600 text-white" 
                   : "text-gray-300 hover:bg-gray-800 hover:text-white"
@@ -166,12 +188,14 @@ const Sidebar = memo(function Sidebar() {
         })}
       </nav>
 
-      <div className="border-t border-gray-800 p-4 space-y-3">
+      <div className={cn("border-t border-gray-800 space-y-3", sidebarCollapsed ? "p-2" : "p-4")}>
         {user.availableModules.includes('settings') && (
           <NavLink
             to={ROUTES.SETTINGS}
+            title={sidebarCollapsed ? "Настройки" : ""}
             className={({ isActive }) => cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg mb-3 transition-colors",
+              "flex items-center gap-3 rounded-lg mb-3 transition-colors",
+              sidebarCollapsed ? "justify-center px-2 py-2.5" : "px-3 py-2.5",
               isActive 
                 ? "bg-emerald-600 text-white" 
                 : "text-gray-300 hover:bg-gray-800 hover:text-white"
@@ -182,16 +206,30 @@ const Sidebar = memo(function Sidebar() {
           </NavLink>
         )}
         
-        <div className={cn("flex items-center gap-3", sidebarCollapsed && "justify-center")}>
-          {!sidebarCollapsed && <span className="text-xs text-gray-400">Тема</span>}
-          <div className="flex items-center gap-2">
-            <Icon name="Sun" size={16} className="text-gray-400" />
-            <Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} />
-            <Icon name="Moon" size={16} className="text-gray-400" />
+        {sidebarCollapsed ? (
+          <div className="flex flex-col items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="text-gray-400 hover:text-white hover:bg-gray-800"
+              title={theme === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
+            >
+              <Icon name={theme === 'dark' ? 'Sun' : 'Moon'} size={18} />
+            </Button>
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-gray-400">Тема</span>
+            <div className="flex items-center gap-2">
+              <Icon name="Sun" size={16} className="text-gray-400" />
+              <Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} />
+              <Icon name="Moon" size={16} className="text-gray-400" />
+            </div>
+          </div>
+        )}
 
-        <div className={cn("flex items-center gap-3", sidebarCollapsed ? "flex-col" : "")}>
+        <div className={cn("flex items-center", sidebarCollapsed ? "flex-col gap-2" : "gap-3")}>
           <Avatar className="w-8 h-8">
             <AvatarFallback className="bg-emerald-600 text-white text-xs">
               {getInitials(user.name)}
@@ -208,10 +246,12 @@ const Sidebar = memo(function Sidebar() {
         <Button
           variant="ghost"
           onClick={logout}
+          size={sidebarCollapsed ? "icon" : "default"}
           className={cn(
             "w-full text-gray-300 hover:text-white hover:bg-gray-800",
-            sidebarCollapsed && "px-0"
+            sidebarCollapsed ? "px-0" : ""
           )}
+          title={sidebarCollapsed ? "Выход" : ""}
         >
           <Icon name="LogOut" size={18} className={sidebarCollapsed ? "" : "mr-2"} />
           {!sidebarCollapsed && <span className="text-sm">Выход</span>}
