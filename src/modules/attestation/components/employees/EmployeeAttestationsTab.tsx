@@ -1,5 +1,4 @@
-import { useState, useMemo, useRef } from 'react';
-import { FixedSizeList as List } from 'react-window/dist/index.cjs';
+import { useState, useMemo } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCertificationStore } from '@/stores/certificationStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
@@ -381,49 +380,18 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                     <th className="pb-3 font-medium">Действия</th>
                   </tr>
                 </thead>
+                <tbody>
+                  {filteredEmployees.map((emp) => (
+                    <EmployeeTableRow
+                      key={emp.id}
+                      employee={emp}
+                      isSelected={selectedEmployeeIds.has(emp.id)}
+                      onSelect={(checked) => handleSelectEmployee(emp.id, checked)}
+                      onViewDetails={() => setSelectedEmployee(emp)}
+                    />
+                  ))}
+                </tbody>
               </table>
-              {filteredEmployees.length > 30 ? (
-                <List
-                  height={600}
-                  itemCount={filteredEmployees.length}
-                  itemSize={65}
-                  width="100%"
-                  className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
-                  overscanCount={10}
-                >
-                  {({ index, style }) => {
-                    const emp = filteredEmployees[index];
-                    return (
-                      <div style={style}>
-                        <table className="w-full">
-                          <tbody>
-                            <EmployeeTableRow
-                              employee={emp}
-                              isSelected={selectedEmployeeIds.has(emp.id)}
-                              onSelect={(checked) => handleSelectEmployee(emp.id, checked)}
-                              onViewDetails={() => setSelectedEmployee(emp)}
-                            />
-                          </tbody>
-                        </table>
-                      </div>
-                    );
-                  }}
-                </List>
-              ) : (
-                <table className="w-full">
-                  <tbody>
-                    {filteredEmployees.map((emp) => (
-                      <EmployeeTableRow
-                        key={emp.id}
-                        employee={emp}
-                        isSelected={selectedEmployeeIds.has(emp.id)}
-                        onSelect={(checked) => handleSelectEmployee(emp.id, checked)}
-                        onViewDetails={() => setSelectedEmployee(emp)}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              )}
             </div>
           )}
 
