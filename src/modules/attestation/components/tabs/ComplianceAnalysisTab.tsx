@@ -217,112 +217,156 @@ export default function ComplianceAnalysisTab() {
                     />
                   </div>
 
-                  <div className="space-y-3">
-                    <div>
-                      <p className="font-medium mb-3 flex items-center gap-2">
-                        <Icon name="ClipboardCheck" size={16} className="text-muted-foreground" />
-                        Требуемые области аттестации ({item.requiredCertifications.length})
-                      </p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {item.requiredCertifications.map((cert, i) => {
-                          const hasValidCert = item.actualCertifications.includes(cert);
-                          const isExpiring = item.expiringCertifications.includes(cert);
-                          
-                          return (
-                            <div
-                              key={i}
-                              className={`flex items-center gap-2 px-3 py-2 rounded-md border ${
-                                hasValidCert && !isExpiring
-                                  ? 'bg-emerald-50 dark:bg-emerald-950 border-emerald-200 dark:border-emerald-800'
-                                  : isExpiring
-                                  ? 'bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800'
-                                  : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
-                              }`}
-                            >
-                              {hasValidCert && !isExpiring ? (
-                                <Icon name="CheckCircle2" size={16} className="text-emerald-600 flex-shrink-0" />
-                              ) : isExpiring ? (
-                                <Icon name="AlertTriangle" size={16} className="text-amber-600 flex-shrink-0" />
-                              ) : (
-                                <Icon name="XCircle" size={16} className="text-red-600 flex-shrink-0" />
-                              )}
-                              <span className={`text-sm ${
-                                hasValidCert && !isExpiring
-                                  ? 'text-emerald-900 dark:text-emerald-100 font-medium'
-                                  : isExpiring
-                                  ? 'text-amber-900 dark:text-amber-100 font-medium'
-                                  : 'text-red-900 dark:text-red-100 font-medium'
-                              }`}>
-                                {cert}
-                              </span>
-                              {isExpiring && (
-                                <span className="ml-auto text-xs text-amber-600 font-medium">
-                                  Истекает
-                                </span>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                  <div className="space-y-4">
+                    {item.requiredCertifications.length > 0 ? (
+                      <>
+                        <div>
+                          <p className="font-medium mb-3 flex items-center gap-2">
+                            <Icon name="ClipboardCheck" size={16} className="text-muted-foreground" />
+                            Требуемые области аттестации ({item.requiredCertifications.length})
+                          </p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            {item.requiredCertifications.map((cert, i) => {
+                              const hasValidCert = item.actualCertifications.includes(cert);
+                              const isExpiring = item.expiringCertifications.includes(cert);
+                              
+                              return (
+                                <div
+                                  key={i}
+                                  className={`flex items-center gap-2 px-3 py-2 rounded-md border ${
+                                    hasValidCert && !isExpiring
+                                      ? 'bg-emerald-50 dark:bg-emerald-950 border-emerald-200 dark:border-emerald-800'
+                                      : isExpiring
+                                      ? 'bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800'
+                                      : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
+                                  }`}
+                                >
+                                  {hasValidCert && !isExpiring ? (
+                                    <Icon name="CheckCircle2" size={16} className="text-emerald-600 flex-shrink-0" />
+                                  ) : isExpiring ? (
+                                    <Icon name="AlertTriangle" size={16} className="text-amber-600 flex-shrink-0" />
+                                  ) : (
+                                    <Icon name="XCircle" size={16} className="text-red-600 flex-shrink-0" />
+                                  )}
+                                  <span className={`text-sm flex-1 ${
+                                    hasValidCert && !isExpiring
+                                      ? 'text-emerald-900 dark:text-emerald-100 font-medium'
+                                      : isExpiring
+                                      ? 'text-amber-900 dark:text-amber-100 font-medium'
+                                      : 'text-red-900 dark:text-red-100 font-medium'
+                                  }`}>
+                                    {cert}
+                                  </span>
+                                  {isExpiring && (
+                                    <span className="text-xs text-amber-600 font-medium whitespace-nowrap">
+                                      Истекает
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
 
-                    <div className="flex items-center gap-4 text-sm pt-2">
-                      <div className="flex items-center gap-2">
-                        <Icon name="CheckCircle2" size={14} className="text-emerald-600" />
-                        <span className="text-muted-foreground">
-                          Действительные: <span className="font-medium text-emerald-600">
-                            {item.actualCertifications.filter(a => !item.expiringCertifications.includes(a)).length}
-                          </span>
-                        </span>
+                        <div className="flex items-center gap-4 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Icon name="CheckCircle2" size={14} className="text-emerald-600" />
+                            <span className="text-muted-foreground">
+                              Действительные: <span className="font-medium text-emerald-600">
+                                {item.actualCertifications.filter(a => !item.expiringCertifications.includes(a)).length}
+                              </span>
+                            </span>
+                          </div>
+                          {item.expiringCertifications.length > 0 && (
+                            <div className="flex items-center gap-2">
+                              <Icon name="AlertTriangle" size={14} className="text-amber-600" />
+                              <span className="text-muted-foreground">
+                                Истекает: <span className="font-medium text-amber-600">{item.expiringCertifications.length}</span>
+                              </span>
+                            </div>
+                          )}
+                          {item.missingCertifications.length > 0 && (
+                            <div className="flex items-center gap-2">
+                              <Icon name="XCircle" size={14} className="text-red-600" />
+                              <span className="text-muted-foreground">
+                                Отсутствует: <span className="font-medium text-red-600">{item.missingCertifications.length}</span>
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center py-4 text-muted-foreground text-sm bg-muted/50 rounded-md">
+                        Для должности "{item.position}" не определены требуемые области аттестации
                       </div>
-                      {item.expiringCertifications.length > 0 && (
-                        <div className="flex items-center gap-2">
-                          <Icon name="AlertTriangle" size={14} className="text-amber-600" />
-                          <span className="text-muted-foreground">
-                            Истекает: <span className="font-medium text-amber-600">{item.expiringCertifications.length}</span>
-                          </span>
-                        </div>
-                      )}
-                      {item.missingCertifications.length > 0 && (
-                        <div className="flex items-center gap-2">
-                          <Icon name="XCircle" size={14} className="text-red-600" />
-                          <span className="text-muted-foreground">
-                            Отсутствует: <span className="font-medium text-red-600">{item.missingCertifications.length}</span>
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </div>
 
                   {(item.expiringCertifications.length > 0 || item.missingCertifications.length > 0) && (
-                    <div className="mt-4 pt-4 border-t flex items-center justify-end gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="gap-2"
-                        onClick={() => {
-                          toast({
-                            title: "Формирование приказа",
-                            description: `Приказ для ${item.personnelName} будет сформирован`,
-                          });
-                        }}
-                      >
-                        <Icon name="FileText" size={14} />
-                        Сформировать приказ
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        className="gap-2"
-                        onClick={() => {
-                          toast({
-                            title: "Направление на обучение",
-                            description: `${item.personnelName} направлен на обучение`,
-                          });
-                        }}
-                      >
-                        <Icon name="GraduationCap" size={14} />
-                        Направить на обучение
-                      </Button>
+                    <div className="mt-4 pt-4 border-t">
+                      <p className="text-sm font-medium mb-3">Массовые действия:</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="gap-2"
+                          onClick={() => {
+                            const areas = [...new Set([...item.missingCertifications, ...item.expiringCertifications])];
+                            toast({
+                              title: "Добавление в приказ",
+                              description: `${areas.length} областей аттестации добавлено в приказ на подготовку для ${item.personnelName}`,
+                            });
+                          }}
+                        >
+                          <Icon name="FilePlus" size={14} />
+                          Добавить все в приказ ({item.missingCertifications.length + item.expiringCertifications.length})
+                        </Button>
+                        {item.missingCertifications.length > 0 && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="gap-2 text-red-600 border-red-200 hover:bg-red-50"
+                            onClick={() => {
+                              toast({
+                                title: "Добавление недостающих",
+                                description: `${item.missingCertifications.length} недостающих областей добавлено в приказ для ${item.personnelName}`,
+                              });
+                            }}
+                          >
+                            <Icon name="XCircle" size={14} />
+                            Только недостающие ({item.missingCertifications.length})
+                          </Button>
+                        )}
+                        {item.expiringCertifications.length > 0 && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="gap-2 text-amber-600 border-amber-200 hover:bg-amber-50"
+                            onClick={() => {
+                              toast({
+                                title: "Добавление истекающих",
+                                description: `${item.expiringCertifications.length} истекающих областей добавлено в приказ для ${item.personnelName}`,
+                              });
+                            }}
+                          >
+                            <Icon name="AlertTriangle" size={14} />
+                            Только истекающие ({item.expiringCertifications.length})
+                          </Button>
+                        )}
+                        <Button 
+                          size="sm" 
+                          className="gap-2 ml-auto"
+                          onClick={() => {
+                            toast({
+                              title: "Направление на обучение",
+                              description: `${item.personnelName} направлен на обучение`,
+                            });
+                          }}
+                        >
+                          <Icon name="GraduationCap" size={14} />
+                          Направить на обучение
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </CardContent>
