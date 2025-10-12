@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
-import { useAttestationStore } from '@/stores/attestationStore';
+import { useCertificationStore } from '@/stores/certificationStore';
 import { useNotificationsStore } from '@/stores/notificationsStore';
 import { useAuthStore } from '@/stores/authStore';
 import { differenceInDays, parseISO } from 'date-fns';
 
 export function useAttestationNotifications() {
   const user = useAuthStore((state) => state.user);
-  const { getCertificationsByTenant } = useAttestationStore();
+  const { getCertificationsByTenant } = useCertificationStore();
   const { addNotification, notifications } = useNotificationsStore();
 
   useEffect(() => {

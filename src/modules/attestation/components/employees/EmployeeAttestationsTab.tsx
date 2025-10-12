@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useAttestationStore } from '@/stores/attestationStore';
+import { useCertificationStore } from '@/stores/certificationStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/personnelUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,7 +30,7 @@ interface EmployeeAttestationsTabProps {
 
 export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttestationsTabProps) {
   const { personnel, people, positions, organizations } = useSettingsStore();
-  const { certifications, updateCertification } = useAttestationStore();
+  const { certifications, updateCertification } = useCertificationStore();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');

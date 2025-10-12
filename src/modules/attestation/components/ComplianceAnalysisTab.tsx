@@ -12,7 +12,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useAttestationStore } from '@/stores/attestationStore';
+import { useCertificationStore } from '@/stores/certificationStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
 
 interface ComplianceData {
@@ -31,7 +31,7 @@ export default function ComplianceAnalysisTab() {
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
   const { personnel, people, positions, departments, competencies } = useSettingsStore();
-  const { certifications } = useAttestationStore();
+  const { certifications } = useCertificationStore();
   
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
   const [complianceFilter, setComplianceFilter] = useState<string>('all');

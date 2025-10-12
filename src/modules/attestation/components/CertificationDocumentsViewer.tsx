@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Icon from '@/components/ui/icon';
-import { useAttestationStore, type Certification, type CertificationDocument } from '@/stores/attestationStore';
+import { useCertificationStore, type Certification, type CertificationDocument } from '@/stores/certificationStore';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -32,7 +32,7 @@ const roleLabels = {
 };
 
 export default function CertificationDocumentsViewer({ certification }: CertificationDocumentsViewerProps) {
-  const { deleteDocument } = useAttestationStore();
+  const { deleteDocument } = useCertificationStore();
 
   const documents = certification.documents || [];
 

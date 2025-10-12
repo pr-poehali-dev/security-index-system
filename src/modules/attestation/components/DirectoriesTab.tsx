@@ -6,7 +6,7 @@ import Icon from '@/components/ui/icon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useAttestationStore } from '@/stores/attestationStore';
+import { useCertificationStore } from '@/stores/certificationStore';
 import { 
   CERTIFICATION_CATEGORIES, 
   CERTIFICATION_AREAS_BY_CATEGORY,
@@ -25,7 +25,7 @@ import {
 export default function DirectoriesTab() {
   const user = useAuthStore((state) => state.user);
   const { competencies, getOrganizationsByTenant, getExternalOrganizationsByType } = useSettingsStore();
-  const { getCertificationTypesByTenant } = useAttestationStore();
+  const { getCertificationTypesByTenant } = useCertificationStore();
   const [searchQuery, setSearchQuery] = useState('');
   
   const certTypes = user?.tenantId ? getCertificationTypesByTenant(user.tenantId) : [];

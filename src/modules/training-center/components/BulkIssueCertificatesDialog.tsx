@@ -22,7 +22,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/components/ui/icon';
 import { useTrainingCenterStore, type IssuedCertificate } from '@/stores/trainingCenterStore';
-import { useAttestationStore } from '@/stores/attestationStore';
+import { useCertificationStore } from '@/stores/certificationStore';
 
 interface BulkIssueCertificatesDialogProps {
   open: boolean;
@@ -43,7 +43,7 @@ interface ParsedRow {
 
 export default function BulkIssueCertificatesDialog({ open, onClose }: BulkIssueCertificatesDialogProps) {
   const { addIssuedCertificate, syncCertificateToAttestation } = useTrainingCenterStore();
-  const { addCertification } = useAttestationStore();
+  const { addCertification } = useCertificationStore();
   
   const [step, setStep] = useState<'upload' | 'preview' | 'result'>('upload');
   const [file, setFile] = useState<File | null>(null);

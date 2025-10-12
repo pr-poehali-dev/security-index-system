@@ -15,18 +15,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
-import { useAttestationStore } from '@/stores/attestationStore';
-
-interface NotificationLog {
-  id: string;
-  date: string;
-  type: string;
-  recipient: string;
-  employee: string;
-  certification: string;
-  expiryDate: string;
-  status: 'sent' | 'failed' | 'pending';
-}
+import { useNotificationStore } from '@/stores/notificationStore';
 
 export default function NotificationsTab() {
   const user = useAuthStore((state) => state.user);
@@ -34,7 +23,7 @@ export default function NotificationsTab() {
     getNotificationRulesByTenant, 
     getNotificationLogsByTenant,
     updateNotificationRule 
-  } = useAttestationStore();
+  } = useNotificationStore();
   
   const rules = user?.tenantId ? getNotificationRulesByTenant(user.tenantId) : [];
   const logs = user?.tenantId ? getNotificationLogsByTenant(user.tenantId) : [];

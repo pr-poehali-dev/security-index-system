@@ -6,18 +6,20 @@ import { Button } from '@/components/ui/button';
 import CreateOrderDialog from './CreateOrderDialog';
 import CreateTrainingDialog from './CreateTrainingDialog';
 import { useAuthStore } from '@/stores/authStore';
-import { useAttestationStore } from '@/stores/attestationStore';
+import { useOrdersStore } from '@/stores/ordersStore';
+import { useTrainingsAttestationStore } from '@/stores/trainingsAttestationStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { createOrderHandlers } from './orders/orderHandlers';
 import { createTrainingHandlers } from './orders/trainingHandlers';
 import OrdersTab from './orders/OrdersTab';
 import TrainingsTab from './orders/TrainingsTab';
-import type { Order } from '@/stores/attestationStore';
+import type { Order } from '@/stores/ordersStore';
 
 export default function OrdersTrainingTab() {
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
-  const { orders, trainings, getOrdersByTenant, getTrainingsByTenant } = useAttestationStore();
+  const { orders, getOrdersByTenant } = useOrdersStore();
+  const { trainings, getTrainingsByTenant } = useTrainingsAttestationStore();
   const { personnel, people, positions, getExternalOrganizationsByType } = useSettingsStore();
   
   const [searchQuery, setSearchQuery] = useState('');

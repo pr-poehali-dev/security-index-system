@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/table';
 import Icon from '@/components/ui/icon';
 import { useTrainingCenterStore } from '@/stores/trainingCenterStore';
-import { useAttestationStore } from '@/stores/attestationStore';
+import { useCertificationStore } from '@/stores/certificationStore';
 import BulkIssueCertificatesDialog from './BulkIssueCertificatesDialog';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -46,7 +46,7 @@ const categoryLabels = {
 
 export default function IssuedCertificatesRegistry() {
   const { issuedCertificates, syncCertificateToAttestation, trainingPrograms } = useTrainingCenterStore();
-  const { addCertification } = useAttestationStore();
+  const { addCertification } = useCertificationStore();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');

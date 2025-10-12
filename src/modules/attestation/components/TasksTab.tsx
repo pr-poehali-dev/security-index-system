@@ -6,7 +6,7 @@ import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useAttestationStore } from '@/stores/attestationStore';
+import { useCertificationStore } from '@/stores/certificationStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
 import TaskStatisticsCards from './TaskStatisticsCards';
 import TaskFilters from './TaskFilters';
@@ -20,7 +20,7 @@ export default function TasksTab() {
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
   const { personnel, people, positions, departments: deptList } = useSettingsStore();
-  const { certifications } = useAttestationStore();
+  const { certifications } = useCertificationStore();
   
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterPriority, setFilterPriority] = useState<string>('all');
