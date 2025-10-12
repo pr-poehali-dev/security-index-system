@@ -76,9 +76,19 @@ export default function TenantsTable({ tenants, onEdit, onShowCredentials, onTog
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={tenant.status === 'active' ? 'default' : 'secondary'}>
-                    {tenant.status === 'active' ? 'Активен' : 'Неактивен'}
-                  </Badge>
+                  <button
+                    onClick={() => onToggleStatus(tenant.id)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      tenant.status === 'active' ? 'bg-emerald-500' : 'bg-red-500'
+                    }`}
+                    title={tenant.status === 'active' ? 'Деактивировать' : 'Активировать'}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        tenant.status === 'active' ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
                 </TableCell>
                 <TableCell>
                   <div>
@@ -107,15 +117,6 @@ export default function TenantsTable({ tenants, onEdit, onShowCredentials, onTog
                       title="Учетные данные"
                     >
                       <Icon name="Key" size={16} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onToggleStatus(tenant.id)}
-                      title={tenant.status === 'active' ? 'Деактивировать' : 'Активировать'}
-                      className={tenant.status === 'active' ? 'text-red-600 hover:text-red-700' : 'text-emerald-600 hover:text-emerald-700'}
-                    >
-                      <Icon name={tenant.status === 'active' ? 'Ban' : 'CheckCircle'} size={16} />
                     </Button>
                   </div>
                 </TableCell>

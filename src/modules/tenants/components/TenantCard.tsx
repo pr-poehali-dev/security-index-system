@@ -29,9 +29,19 @@ export default function TenantCard({ tenant, onEdit, onShowCredentials, onToggle
               <p className="text-sm text-gray-600 dark:text-gray-400">ИНН: {tenant.inn}</p>
             </div>
           </div>
-          <Badge variant={tenant.status === 'active' ? 'default' : 'secondary'}>
-            {tenant.status === 'active' ? 'Активен' : 'Неактивен'}
-          </Badge>
+          <button
+            onClick={() => onToggleStatus(tenant.id)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              tenant.status === 'active' ? 'bg-emerald-500' : 'bg-red-500'
+            }`}
+            title={tenant.status === 'active' ? 'Деактивировать' : 'Активировать'}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                tenant.status === 'active' ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -81,14 +91,6 @@ export default function TenantCard({ tenant, onEdit, onShowCredentials, onToggle
           >
             <Icon name="Key" className="mr-2" size={14} />
             Учетные данные
-          </Button>
-          <Button 
-            variant={tenant.status === 'active' ? 'outline' : 'default'}
-            size="sm" 
-            onClick={() => onToggleStatus(tenant.id)}
-            title={tenant.status === 'active' ? 'Деактивировать' : 'Активировать'}
-          >
-            <Icon name={tenant.status === 'active' ? 'Ban' : 'CheckCircle'} size={14} />
           </Button>
         </div>
       </CardContent>
