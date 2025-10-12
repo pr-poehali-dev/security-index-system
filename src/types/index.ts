@@ -452,6 +452,27 @@ export interface BudgetSummary {
   expensesCount: number;
 }
 
+export interface OrganizationBudgetPlan {
+  id: string;
+  tenantId: string;
+  organizationId: string;
+  year: number;
+  totalPlannedAmount: number;
+  status: 'draft' | 'approved' | 'archived';
+  approvedBy?: string;
+  approvedAt?: string;
+  categories: OrganizationBudgetCategory[];
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrganizationBudgetCategory {
+  categoryId: string;
+  plannedAmount: number;
+  description?: string;
+}
+
 export interface Equipment {
   id: string;
   tenantId: string;

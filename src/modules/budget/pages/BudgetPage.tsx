@@ -15,6 +15,7 @@ import BudgetAnalytics from '../components/BudgetAnalytics';
 import ExpenseHistoryTable from '../components/ExpenseHistoryTable';
 import AddExpenseDialog from '../components/AddExpenseDialog';
 import BudgetCategoriesDialog from '../components/BudgetCategoriesDialog';
+import OrganizationBudgetPlansTable from '../components/OrganizationBudgetPlansTable';
 
 const currentYear = new Date().getFullYear();
 const years = [currentYear - 1, currentYear, currentYear + 1];
@@ -75,6 +76,10 @@ export default function BudgetPage() {
             <Icon name="PieChart" size={16} />
             Обзор
           </TabsTrigger>
+          <TabsTrigger value="plans" className="gap-2">
+            <Icon name="Building2" size={16} />
+            Планы организаций
+          </TabsTrigger>
           <TabsTrigger value="history" className="gap-2">
             <Icon name="List" size={16} />
             История расходов
@@ -83,6 +88,10 @@ export default function BudgetPage() {
 
         <TabsContent value="overview">
           <BudgetAnalytics year={selectedYear} />
+        </TabsContent>
+
+        <TabsContent value="plans">
+          <OrganizationBudgetPlansTable year={selectedYear} />
         </TabsContent>
 
         <TabsContent value="history">

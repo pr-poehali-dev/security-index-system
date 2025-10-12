@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { BudgetCategory, BudgetExpense, BudgetSummary } from '@/types';
+import type { BudgetCategory, BudgetExpense, BudgetSummary, OrganizationBudgetPlan } from '@/types';
 
 const currentYear = new Date().getFullYear();
 
@@ -143,6 +143,7 @@ const mockExpenses: BudgetExpense[] = [
 interface BudgetState {
   categories: BudgetCategory[];
   expenses: BudgetExpense[];
+  organizationPlans: OrganizationBudgetPlan[];
   selectedYear: number;
 
   addCategory: (category: Omit<BudgetCategory, 'id' | 'createdAt' | 'updatedAt'>) => void;
@@ -155,6 +156,12 @@ interface BudgetState {
   deleteExpense: (id: string) => void;
   getExpensesByCategory: (categoryId: string) => BudgetExpense[];
 
+  addOrganizationPlan: (plan: Omit<OrganizationBudgetPlan, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateOrganizationPlan: (id: string, updates: Partial<OrganizationBudgetPlan>) => void;
+  deleteOrganizationPlan: (id: string) => void;
+  getOrganizationPlan: (organizationId: string, year: number) => OrganizationBudgetPlan | undefined;
+  getOrganizationPlansByYear: (year: number) => OrganizationBudgetPlan[];
+
   getBudgetSummary: (year: number) => BudgetSummary[];
   getTotalPlanned: (year: number) => number;
   getTotalSpent: (year: number) => number;
@@ -166,6 +173,7 @@ interface BudgetState {
 export const useBudgetStore = create<BudgetState>()(persist((set, get) => ({
   categories: mockCategories,
   expenses: mockExpenses,
+  organizationPlans: [],
   selectedYear: currentYear,
 
   addCategory: (category) => {
@@ -218,6 +226,40 @@ export const useBudgetStore = create<BudgetState>()(persist((set, get) => ({
 
   getExpensesByCategory: (categoryId) => {
     return get().expenses.filter((exp) => exp.categoryId === categoryId);
+  },
+
+  addOrganizationPlan: (plan) => {
+    const newPlan: OrganizationBudgetPlan = {
+      ...plan,
+      id: `plan-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    set((state) => ({ organizationPlans: [...state.organizationPlans, newPlan] }));
+  },
+
+  updateOrganizationPlan: (id, updates) => {
+    set((state) => ({
+      organizationPlans: state.organizationPlans.map((plan) =>
+        plan.id === id ? { ...plan, ...updates, updatedAt: new Date().toISOString() } : plan
+      )
+    }));
+  },
+
+  deleteOrganizationPlan: (id) => {
+    set((state) => ({ 
+      organizationPlans: state.organizationPlans.filter((plan) => plan.id !== id) 
+    }));
+  },
+
+  getOrganizationPlan: (organizationId, year) => {
+    return get().organizationPlans.find(
+      (plan) => plan.organizationId === organizationId && plan.year === year
+    );
+  },
+
+  getOrganizationPlansByYear: (year) => {
+    return get().organizationPlans.filter((plan) => plan.year === year);
   },
 
   getBudgetSummary: (year) => {
