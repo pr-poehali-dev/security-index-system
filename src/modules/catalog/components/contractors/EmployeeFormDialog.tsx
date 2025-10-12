@@ -162,11 +162,13 @@ const EmployeeFormDialog = ({
                     <SelectValue placeholder="Выберите подрядчика" />
                   </SelectTrigger>
                   <SelectContent>
-                    {contractors.map((contractor) => (
-                      <SelectItem key={contractor.id} value={contractor.id}>
-                        {contractor.name}
-                      </SelectItem>
-                    ))}
+                    {contractors
+                      .filter((contractor) => contractor.type === 'contractor')
+                      .map((contractor) => (
+                        <SelectItem key={contractor.id} value={contractor.id}>
+                          {contractor.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>

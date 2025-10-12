@@ -133,22 +133,22 @@ const ContractorsList = () => {
             />
           </div>
           
-          <div className="flex gap-1 border rounded-md">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className="rounded-r-none"
-            >
-              <Icon name="LayoutGrid" size={16} />
-            </Button>
+          <div className="flex border rounded-md">
             <Button
               variant={viewMode === 'table' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('table')}
-              className="rounded-l-none"
+              className="rounded-r-none"
             >
               <Icon name="Table" size={16} />
+            </Button>
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+              className="rounded-l-none"
+            >
+              <Icon name="LayoutGrid" size={16} />
             </Button>
           </div>
         </div>
