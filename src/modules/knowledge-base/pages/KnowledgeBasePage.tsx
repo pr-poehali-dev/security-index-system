@@ -320,35 +320,32 @@ export default function KnowledgeBasePage() {
         </div>
       </Card>
 
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as DocumentCategory)}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="user_guide" className="gap-2">
-            <Icon name="BookOpen" size={16} />
-            Инструкции
-            <Badge variant="secondary" className="ml-1">{stats.userGuides}</Badge>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as DocumentCategory)} className="space-y-6">
+        <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+          <TabsTrigger value="user_guide" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="BookOpen" size={20} />
+            <div className="flex items-center gap-1">
+              <span className="text-xs font-medium">Инструкции</span>
+              <Badge variant="secondary" className="text-xs">{stats.userGuides}</Badge>
+            </div>
           </TabsTrigger>
-          <TabsTrigger value="regulatory" className="gap-2">
-            <Icon name="Scale" size={16} />
-            Нормативные
-            <Badge variant="secondary" className="ml-1">{stats.regulatory}</Badge>
+          <TabsTrigger value="regulatory" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Scale" size={20} />
+            <div className="flex items-center gap-1">
+              <span className="text-xs font-medium">Нормативные</span>
+              <Badge variant="secondary" className="text-xs">{stats.regulatory}</Badge>
+            </div>
           </TabsTrigger>
-          <TabsTrigger value="organization" className="gap-2">
-            <Icon name="Building2" size={16} />
-            Документы
-            <Badge variant="secondary" className="ml-1">{stats.organization}</Badge>
+          <TabsTrigger value="organization" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Building2" size={20} />
+            <div className="flex items-center gap-1">
+              <span className="text-xs font-medium">Документы</span>
+              <Badge variant="secondary" className="text-xs">{stats.organization}</Badge>
+            </div>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value={activeTab} className="space-y-4 mt-6">
-          <Card className="p-4 bg-muted/50">
-            <div className="flex items-start gap-3">
-              <Icon name={categoryInfo.icon} size={24} className={categoryInfo.color} />
-              <div>
-                <h3 className="font-semibold">{categoryInfo.label}</h3>
-                <p className="text-sm text-muted-foreground">{categoryInfo.description}</p>
-              </div>
-            </div>
-          </Card>
+        <TabsContent value={activeTab} className="space-y-4">
 
           {filteredDocuments.length === 0 ? (
             <Card className="p-12">
