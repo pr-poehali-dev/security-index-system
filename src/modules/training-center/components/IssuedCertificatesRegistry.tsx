@@ -21,6 +21,7 @@ import {
 import Icon from '@/components/ui/icon';
 import { useTrainingCenterStore } from '@/stores/trainingCenterStore';
 import { useAttestationStore } from '@/stores/attestationStore';
+import BulkIssueCertificatesDialog from './BulkIssueCertificatesDialog';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -50,6 +51,7 @@ export default function IssuedCertificatesRegistry() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
 
   const filteredCertificates = issuedCertificates.filter((cert) => {
     const matchesSearch = 
@@ -74,13 +76,21 @@ export default function IssuedCertificatesRegistry() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Icon name="Award" size={24} />
-          Реестр выданных удостоверений
-        </CardTitle>
-        <CardDescription>
-          Список всех удостоверений, выданных учебным центром
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Icon name="Award" size={24} />
+              Реестр выданных удостоверений
+            </CardTitle>
+            <CardDescription>
+              Список всех удостоверений, выданных учебным центром
+            </CardDescription>
+          </div>
+          <Button onClick={() => setBulkDialogOpen(true)} className="gap-2">
+            <Icon name="Upload" size={18} />
+            Массовая загрузка
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="flex gap-3 mb-6">
@@ -215,6 +225,11 @@ export default function IssuedCertificatesRegistry() {
           Всего удостоверений: <span className="font-medium">{filteredCertificates.length}</span>
         </div>
       </CardContent>
+
+      <BulkIssueCertificatesDialog
+        open={bulkDialogOpen}
+        onClose={() => setBulkDialogOpen(false)}
+      />
     </Card>
   );
 }
