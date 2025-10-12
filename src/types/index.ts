@@ -655,7 +655,7 @@ export interface OrganizationTrainingRequest {
 }
 
 export type NotificationType = 'critical' | 'warning' | 'info' | 'success';
-export type NotificationSource = 'incident' | 'certification' | 'task' | 'audit' | 'system';
+export type NotificationSource = 'incident' | 'certification' | 'task' | 'audit' | 'system' | 'platform_news' | 'attestation' | 'catalog';
 
 export interface Notification {
   id: string;

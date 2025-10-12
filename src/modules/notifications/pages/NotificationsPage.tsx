@@ -12,27 +12,20 @@ import { ru } from 'date-fns/locale';
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
-  const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
-  const [sourceFilter, setSourceFilter] = useState<'all' | 'incident' | 'attestation' | 'catalog'>('all');
+  const [activeTab, setActiveTab] = useState<'news' | 'system'>('news');
   const { notifications, markAsRead, markAllAsRead, deleteNotification, clearAll } = useNotificationsStore();
 
-  const filteredNotifications = useMemo(() => {
-    let filtered = [...notifications];
+  const platformNews = useMemo(() => {
+    return notifications
+      .filter(n => n.source === 'platform_news')
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [notifications]);
 
-    if (filter === 'unread') {
-      filtered = filtered.filter(n => !n.isRead);
-    } else if (filter === 'read') {
-      filtered = filtered.filter(n => n.isRead);
-    }
-
-    if (sourceFilter !== 'all') {
-      filtered = filtered.filter(n => n.source === sourceFilter);
-    }
-
-    return filtered.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-  }, [notifications, filter, sourceFilter]);
+  const systemNotifications = useMemo(() => {
+    return notifications
+      .filter(n => n.source !== 'platform_news')
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [notifications]);
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
@@ -49,14 +42,18 @@ export default function NotificationsPage() {
 
   const getSourceLabel = (source: string) => {
     switch (source) {
+      case 'platform_news':
+        return 'Новости платформы';
       case 'incident':
         return 'Инциденты';
       case 'attestation':
         return 'Аттестация';
       case 'catalog':
         return 'Каталог объектов';
-      default:
+      case 'system':
         return 'Система';
+      default:
+        return source;
     }
   };
 
@@ -78,13 +75,83 @@ export default function NotificationsPage() {
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadNewsCount = platformNews.filter(n => !n.isRead).length;
+  const unreadSystemCount = systemNotifications.filter(n => !n.isRead).length;
+
+  const renderNotifications = (items: typeof notifications) => {
+    if (items.length === 0) {
+      return (
+        <Card className="p-12">
+          <div className="text-center text-muted-foreground">
+            <Icon name="Bell" size={64} className="mx-auto mb-4 opacity-20" />
+            <p className="text-lg font-medium">Нет уведомлений</p>
+            <p className="text-sm mt-2">
+              {activeTab === 'news' 
+                ? 'Новостей пока нет' 
+                : 'Системных уведомлений пока нет'}
+            </p>
+          </div>
+        </Card>
+      );
+    }
+
+    return items.map((notification) => (
+      <Card
+        key={notification.id}
+        className={`p-4 hover:bg-muted/50 transition-colors ${
+          !notification.isRead ? 'border-l-4 border-l-primary bg-blue-50/30 dark:bg-blue-950/20' : ''
+        } ${notification.link ? 'cursor-pointer' : ''}`}
+        onClick={() => handleNotificationClick(notification)}
+      >
+        <div className="flex gap-4">
+          <div className="flex-shrink-0 mt-1">
+            {getNotificationIcon(notification.type)}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <h3 className={`text-base font-medium ${!notification.isRead ? 'font-semibold' : ''}`}>
+                  {notification.title}
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {notification.message}
+                </p>
+                <div className="flex items-center gap-3 mt-3">
+                  <Badge variant="outline" className="text-xs">
+                    {getSourceLabel(notification.source)}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">
+                    {formatTime(notification.createdAt)}
+                  </span>
+                  {!notification.isRead && (
+                    <Badge variant="default" className="text-xs">
+                      Новое
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteNotification(notification.id);
+                }}
+              >
+                <Icon name="X" size={16} />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Card>
+    ));
+  };
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Уведомления"
-        description="Все системные уведомления и оповещения"
+        description="Новости платформы и системные уведомления"
         action={
           <Button 
             variant="outline" 
@@ -97,143 +164,68 @@ export default function NotificationsPage() {
         }
       />
 
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <Tabs value={filter} onValueChange={(v) => setFilter(v as any)} className="w-auto">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'news' | 'system')}>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
           <TabsList>
-            <TabsTrigger value="all">
-              Все ({notifications.length})
+            <TabsTrigger value="news" className="gap-2">
+              <Icon name="Newspaper" size={16} />
+              Новости платформы
+              {unreadNewsCount > 0 && (
+                <Badge variant="default" className="ml-1 h-5 min-w-5 px-1.5">
+                  {unreadNewsCount}
+                </Badge>
+              )}
             </TabsTrigger>
-            <TabsTrigger value="unread">
-              Непрочитанные ({unreadCount})
-            </TabsTrigger>
-            <TabsTrigger value="read">
-              Прочитанные ({notifications.length - unreadCount})
+            <TabsTrigger value="system" className="gap-2">
+              <Icon name="Bell" size={16} />
+              Системные уведомления
+              {unreadSystemCount > 0 && (
+                <Badge variant="default" className="ml-1 h-5 min-w-5 px-1.5">
+                  {unreadSystemCount}
+                </Badge>
+              )}
             </TabsTrigger>
           </TabsList>
-        </Tabs>
 
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSourceFilter('all')}
-            className={sourceFilter === 'all' ? 'bg-primary text-primary-foreground' : ''}
-          >
-            Все
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSourceFilter('incident')}
-            className={sourceFilter === 'incident' ? 'bg-primary text-primary-foreground' : ''}
-          >
-            <Icon name="AlertTriangle" size={16} className="mr-1" />
-            Инциденты
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSourceFilter('attestation')}
-            className={sourceFilter === 'attestation' ? 'bg-primary text-primary-foreground' : ''}
-          >
-            <Icon name="Award" size={16} className="mr-1" />
-            Аттестация
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSourceFilter('catalog')}
-            className={sourceFilter === 'catalog' ? 'bg-primary text-primary-foreground' : ''}
-          >
-            <Icon name="Building" size={16} className="mr-1" />
-            Каталог
-          </Button>
+          <div className="flex gap-2 ml-auto">
+            {activeTab === 'news' ? (
+              <>
+                {unreadNewsCount > 0 && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => platformNews.filter(n => !n.isRead).forEach(n => markAsRead(n.id))}
+                  >
+                    <Icon name="CheckCheck" size={16} className="mr-1" />
+                    Прочитать все
+                  </Button>
+                )}
+              </>
+            ) : (
+              <>
+                {unreadSystemCount > 0 && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => systemNotifications.filter(n => !n.isRead).forEach(n => markAsRead(n.id))}
+                  >
+                    <Icon name="CheckCheck" size={16} className="mr-1" />
+                    Прочитать все
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
         </div>
 
-        <div className="flex gap-2 ml-auto">
-          {unreadCount > 0 && (
-            <Button variant="outline" size="sm" onClick={markAllAsRead}>
-              <Icon name="CheckCheck" size={16} className="mr-1" />
-              Прочитать все
-            </Button>
-          )}
-          {notifications.length > 0 && (
-            <Button variant="outline" size="sm" onClick={clearAll}>
-              <Icon name="Trash2" size={16} className="mr-1" />
-              Очистить все
-            </Button>
-          )}
-        </div>
-      </div>
+        <TabsContent value="news" className="space-y-3 mt-6">
+          {renderNotifications(platformNews)}
+        </TabsContent>
 
-      <div className="space-y-3">
-        {filteredNotifications.length === 0 ? (
-          <Card className="p-12">
-            <div className="text-center text-muted-foreground">
-              <Icon name="Bell" size={64} className="mx-auto mb-4 opacity-20" />
-              <p className="text-lg font-medium">Нет уведомлений</p>
-              <p className="text-sm mt-2">
-                {filter === 'unread' 
-                  ? 'Все уведомления прочитаны'
-                  : sourceFilter !== 'all'
-                  ? 'Нет уведомлений для выбранного модуля'
-                  : 'У вас пока нет уведомлений'}
-              </p>
-            </div>
-          </Card>
-        ) : (
-          filteredNotifications.map((notification) => (
-            <Card
-              key={notification.id}
-              className={`p-4 hover:bg-muted/50 transition-colors ${
-                !notification.isRead ? 'border-l-4 border-l-primary bg-blue-50/30' : ''
-              } ${notification.link ? 'cursor-pointer' : ''}`}
-              onClick={() => handleNotificationClick(notification)}
-            >
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 mt-1">
-                  {getNotificationIcon(notification.type)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <h3 className={`text-base font-medium ${!notification.isRead ? 'font-semibold' : ''}`}>
-                        {notification.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {notification.message}
-                      </p>
-                      <div className="flex items-center gap-3 mt-3">
-                        <Badge variant="outline" className="text-xs">
-                          {getSourceLabel(notification.source)}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {formatTime(notification.createdAt)}
-                        </span>
-                        {!notification.isRead && (
-                          <Badge variant="default" className="text-xs">
-                            Новое
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteNotification(notification.id);
-                      }}
-                    >
-                      <Icon name="X" size={16} />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))
-        )}
-      </div>
+        <TabsContent value="system" className="space-y-3 mt-6">
+          {renderNotifications(systemNotifications)}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
