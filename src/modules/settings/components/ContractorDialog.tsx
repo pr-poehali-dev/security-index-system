@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -45,6 +46,10 @@ export default function ContractorDialog({ open, onOpenChange, contractor }: Con
   const { addContractor, updateContractor } = useSettingsStore();
   const { toast } = useToast();
 
+  const [isValidatingTenant, setIsValidatingTenant] = useState(false);
+  const [tenantValidationError, setTenantValidationError] = useState<string>('');
+  const [validatedTenantInfo, setValidatedTenantInfo] = useState<{ name: string; inn?: string } | null>(null);
+
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<FormData>({
     defaultValues: contractor || {
       type: 'training_center',
@@ -57,8 +62,65 @@ export default function ContractorDialog({ open, onOpenChange, contractor }: Con
   const services = watch('services') || [];
   const contractorTenantId = watch('contractorTenantId');
 
+  useEffect(() => {
+    if (contractorTenantId && contractorTenantId.trim()) {
+      validateTenantId(contractorTenantId.trim());
+    } else {
+      setTenantValidationError('');
+      setValidatedTenantInfo(null);
+    }
+  }, [contractorTenantId]);
+
+  const validateTenantId = async (tenantId: string) => {
+    if (tenantId === user?.tenantId) {
+      setTenantValidationError('Нельзя указать ID своей организации');
+      setValidatedTenantInfo(null);
+      return;
+    }
+
+    setIsValidatingTenant(true);
+    setTenantValidationError('');
+    setValidatedTenantInfo(null);
+
+    try {
+      const mockTenants: Record<string, { name: string; inn?: string; modules: string[] }> = {
+        'tenant-training-center-001': { name: 'АНО ДПО "Профессионал"', inn: '7701234567', modules: ['training-center'] },
+        'tenant-training-center-002': { name: 'ООО "Учебный Центр Безопасности"', inn: '7702345678', modules: ['training-center'] },
+        'tenant-production-001': { name: 'ООО "Производственная компания"', inn: '7703456789', modules: ['attestation'] },
+      };
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const tenant = mockTenants[tenantId];
+      if (!tenant) {
+        setTenantValidationError('Организация с таким ID не найдена в системе');
+      } else if (type === 'training_center' && !tenant.modules.includes('training-center')) {
+        setTenantValidationError('Указанная организация не является учебным центром');
+      } else {
+        setValidatedTenantInfo({ name: tenant.name, inn: tenant.inn });
+        setValue('contractorName', tenant.name);
+        if (tenant.inn) {
+          setValue('contractorInn', tenant.inn);
+        }
+      }
+    } catch (error) {
+      setTenantValidationError('Ошибка проверки ID организации');
+    } finally {
+      setIsValidatingTenant(false);
+    }
+  };
+
   const onSubmit = (data: FormData) => {
     if (!user?.tenantId) return;
+
+    if (data.contractorTenantId && tenantValidationError) {
+      toast({ 
+        title: 'Ошибка валидации', 
+        description: tenantValidationError,
+        variant: 'destructive' 
+      });
+      return;
+    }
 
     if (contractor) {
       updateContractor(contractor.id, data);
@@ -72,6 +134,8 @@ export default function ContractorDialog({ open, onOpenChange, contractor }: Con
     }
 
     reset();
+    setTenantValidationError('');
+    setValidatedTenantInfo(null);
     onOpenChange(false);
   };
 
@@ -112,14 +176,35 @@ export default function ContractorDialog({ open, onOpenChange, contractor }: Con
 
             <div>
               <Label htmlFor="contractorTenantId">ID организации в системе (опционально)</Label>
-              <Input
-                id="contractorTenantId"
-                {...register('contractorTenantId')}
-                placeholder="Введите ID тенанта для автоматической интеграции"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Если контрагент зарегистрирован в системе, укажите его ID для автоматической передачи заявок
-              </p>
+              <div className="relative">
+                <Input
+                  id="contractorTenantId"
+                  {...register('contractorTenantId')}
+                  placeholder="Введите ID тенанта для автоматической интеграции"
+                  className={tenantValidationError ? 'border-destructive' : validatedTenantInfo ? 'border-green-500' : ''}
+                />
+                {isValidatingTenant && (
+                  <div className="absolute right-3 top-2.5">
+                    <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+                  </div>
+                )}
+              </div>
+              {tenantValidationError && (
+                <p className="text-xs text-destructive mt-1 flex items-center gap-1">
+                  <span>✕</span> {tenantValidationError}
+                </p>
+              )}
+              {validatedTenantInfo && !tenantValidationError && (
+                <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                  <span>✓</span> Найдена организация: {validatedTenantInfo.name}
+                  {validatedTenantInfo.inn && ` (ИНН: ${validatedTenantInfo.inn})`}
+                </p>
+              )}
+              {!contractorTenantId && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Если контрагент зарегистрирован в системе, укажите его ID для автоматической передачи заявок
+                </p>
+              )}
             </div>
 
             <div>
