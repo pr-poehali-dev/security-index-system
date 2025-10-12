@@ -1,32 +1,17 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from '@/components/ui/table';
 import Icon from '@/components/ui/icon';
 import { useTrainingCenterStore } from '@/stores/trainingCenterStore';
 import { useCertificationStore } from '@/stores/certificationStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import BulkIssueCertificatesDialog from './BulkIssueCertificatesDialog';
 import ManualCertificateDialog from './ManualCertificateDialog';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import CertificatesFilters from './registry/CertificatesFilters';
+import CertificatesTable from './registry/CertificatesTable';
+import GroupedCertificatesView from './registry/GroupedCertificatesView';
+import DocumentViewerDialog from './registry/DocumentViewerDialog';
+import { useCertificatesExport } from './registry/useCertificatesExport';
 
 const statusLabels = {
   issued: 'Выдано',
@@ -103,58 +88,7 @@ export default function IssuedCertificatesRegistry() {
     }
   };
 
-  const handleExport = () => {
-    // Подготовка данных для экспорта
-    const dataToExport = filteredCertificates.map(cert => {
-      const person = personnel.find(p => p.id === cert.personnelId);
-      const organization = person?.organizationId 
-        ? organizations.find(o => o.id === person.organizationId)
-        : organizations.find(o => o.id === cert.organizationId);
-      
-      return {
-        'ФИО': cert.personnelName,
-        'Организация': organization?.name || cert.organizationName || 'Не указана',
-        'ИНН организации': organization?.inn || cert.organizationInn || '',
-        'Номер удостоверения': cert.certificateNumber,
-        'Программа обучения': cert.programName,
-        'Категория': categoryLabels[cert.category as keyof typeof categoryLabels] || cert.category,
-        'Номер протокола': cert.protocolNumber,
-        'Дата протокола': format(new Date(cert.protocolDate), 'dd.MM.yyyy', { locale: ru }),
-        'Дата выдачи': format(new Date(cert.issueDate), 'dd.MM.yyyy', { locale: ru }),
-        'Срок действия': format(new Date(cert.expiryDate), 'dd.MM.yyyy', { locale: ru }),
-        'Область аттестации': cert.area || '',
-        'Статус': statusLabels[cert.status as keyof typeof statusLabels] || cert.status
-      };
-    });
-
-    // Формирование CSV
-    const headers = Object.keys(dataToExport[0] || {});
-    const csvContent = [
-      headers.join(';'),
-      ...dataToExport.map(row => 
-        headers.map(header => {
-          const value = row[header as keyof typeof row] || '';
-          // Экранируем точки с запятой и кавычки
-          return typeof value === 'string' && (value.includes(';') || value.includes('"'))
-            ? `"${value.replace(/"/g, '""')}"`
-            : value;
-        }).join(';')
-      )
-    ].join('\n');
-
-    // Скачивание файла
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm');
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', `удостоверения_реестр_${timestamp}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  const { handleExport } = useCertificatesExport(filteredCertificates, organizations, personnel);
 
   return (
     <Card>
@@ -186,302 +120,42 @@ export default function IssuedCertificatesRegistry() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex gap-3 mb-6">
-          <div className="flex-1">
-            <Input
-              placeholder="Поиск по ФИО, номеру удостоверения или программе..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full"
-            />
-          </div>
-          
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Статус" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Все статусы</SelectItem>
-              <SelectItem value="issued">Выдано</SelectItem>
-              <SelectItem value="delivered">Передано</SelectItem>
-              <SelectItem value="synced">Синхронизировано</SelectItem>
-            </SelectContent>
-          </Select>
+        <CertificatesFilters
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          categoryFilter={categoryFilter}
+          setCategoryFilter={setCategoryFilter}
+          organizationFilter={organizationFilter}
+          setOrganizationFilter={setOrganizationFilter}
+          groupByOrganization={groupByOrganization}
+          setGroupByOrganization={setGroupByOrganization}
+          uniqueOrganizations={uniqueOrganizations}
+        />
 
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Категория" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Все категории</SelectItem>
-              <SelectItem value="industrial_safety">Промбезопасность</SelectItem>
-              <SelectItem value="energy_safety">Энергобезопасность</SelectItem>
-              <SelectItem value="labor_safety">Охрана труда</SelectItem>
-              <SelectItem value="ecology">Экология</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={organizationFilter} onValueChange={setOrganizationFilter}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Организация" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Все организации</SelectItem>
-              {uniqueOrganizations.map(org => org && (
-                <SelectItem key={org.id} value={org.id}>
-                  {org.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Button
-            variant={groupByOrganization ? 'default' : 'outline'}
-            onClick={() => setGroupByOrganization(!groupByOrganization)}
-            className="gap-2"
-          >
-            <Icon name="Layers" size={16} />
-            {groupByOrganization ? 'Без группировки' : 'Группировать'}
-          </Button>
-        </div>
-
-{groupByOrganization && groupedByOrganization ? (
-          <div className="space-y-6">
-            {Object.entries(groupedByOrganization).map(([orgId, certs]) => {
-              const org = organizations.find(o => o.id === orgId);
-              const orgName = org?.name || (orgId === 'no-org' ? 'Без организации' : 'Не указана');
-              
-              return (
-                <div key={orgId} className="space-y-3">
-                  <div className="flex items-center gap-2 px-4 py-2 bg-muted rounded-lg">
-                    <Icon name="Building2" size={18} />
-                    <h3 className="font-semibold">{orgName}</h3>
-                    <Badge variant="secondary" className="ml-2">
-                      {certs.length} {certs.length === 1 ? 'удостоверение' : 'удостоверений'}
-                    </Badge>
-                  </div>
-                  
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Дата выдачи</TableHead>
-                          <TableHead>ФИО обучающегося</TableHead>
-                          <TableHead>Программа</TableHead>
-                          <TableHead>Категория</TableHead>
-                          <TableHead>Номер удостоверения</TableHead>
-                          <TableHead>Протокол</TableHead>
-                          <TableHead>Срок действия</TableHead>
-                          <TableHead>Статус</TableHead>
-                          <TableHead>Документы</TableHead>
-                          <TableHead className="text-right">Действия</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {certs.map((cert) => (
-                          <TableRow key={cert.id}>
-                            <TableCell className="whitespace-nowrap">
-                              {format(new Date(cert.issueDate), 'dd.MM.yyyy', { locale: ru })}
-                            </TableCell>
-                            <TableCell className="font-medium">{cert.personnelName}</TableCell>
-                            <TableCell>
-                              <div className="max-w-[200px]">
-                                <div className="font-medium truncate">{cert.programName}</div>
-                                <div className="text-xs text-muted-foreground truncate">{cert.area}</div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline">
-                                {categoryLabels[cert.category]}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="font-mono text-sm">{cert.certificateNumber}</TableCell>
-                            <TableCell>
-                              <div className="text-sm">
-                                <div className="font-medium">{cert.protocolNumber}</div>
-                                <div className="text-xs text-muted-foreground">
-                                  {format(new Date(cert.protocolDate), 'dd.MM.yyyy', { locale: ru })}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell className="whitespace-nowrap">
-                              {format(new Date(cert.expiryDate), 'dd.MM.yyyy', { locale: ru })}
-                            </TableCell>
-                            <TableCell>
-                              <Badge className={statusColors[cert.status]}>
-                                {statusLabels[cert.status]}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex gap-1">
-                                {cert.certificateFileUrl && (
-                                  <Button 
-                                    size="sm" 
-                                    variant="ghost" 
-                                    className="h-8 w-8 p-0"
-                                    onClick={() => setViewDocumentUrl(cert.certificateFileUrl!)}
-                                    title="Просмотр удостоверения"
-                                  >
-                                    <Icon name="FileText" size={16} />
-                                  </Button>
-                                )}
-                                {cert.protocolFileUrl && (
-                                  <Button 
-                                    size="sm" 
-                                    variant="ghost" 
-                                    className="h-8 w-8 p-0"
-                                    onClick={() => setViewDocumentUrl(cert.protocolFileUrl!)}
-                                    title="Просмотр протокола"
-                                  >
-                                    <Icon name="ScrollText" size={16} />
-                                  </Button>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {cert.status !== 'synced' && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="gap-2"
-                                  onClick={() => handleSync(cert.id)}
-                                >
-                                  <Icon name="RefreshCw" size={14} />
-                                  Синхронизировать
-                                </Button>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        {groupByOrganization && groupedByOrganization ? (
+          <GroupedCertificatesView
+            groupedByOrganization={groupedByOrganization}
+            organizations={organizations}
+            personnel={personnel}
+            statusLabels={statusLabels}
+            statusColors={statusColors}
+            categoryLabels={categoryLabels}
+            onViewDocument={setViewDocumentUrl}
+            onSync={handleSync}
+          />
         ) : (
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Дата выдачи</TableHead>
-                  <TableHead>ФИО обучающегося</TableHead>
-                  <TableHead>Организация</TableHead>
-                  <TableHead>Программа</TableHead>
-                  <TableHead>Категория</TableHead>
-                  <TableHead>Номер удостоверения</TableHead>
-                  <TableHead>Протокол</TableHead>
-                  <TableHead>Срок действия</TableHead>
-                  <TableHead>Статус</TableHead>
-                  <TableHead>Документы</TableHead>
-                  <TableHead className="text-right">Действия</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCertificates.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
-                      Удостоверения не найдены
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredCertificates.map((cert) => {
-                    const person = personnel.find(p => p.id === cert.personnelId);
-                    const organization = person?.organizationId 
-                      ? organizations.find(o => o.id === person.organizationId)
-                      : organizations.find(o => o.id === cert.organizationId);
-                    
-                    return (
-                    <TableRow key={cert.id}>
-                      <TableCell className="whitespace-nowrap">
-                        {format(new Date(cert.issueDate), 'dd.MM.yyyy', { locale: ru })}
-                      </TableCell>
-                      <TableCell className="font-medium">{cert.personnelName}</TableCell>
-                      <TableCell>
-                        <div className="max-w-[200px]">
-                          <div className="font-medium truncate">
-                            {organization?.name || cert.organizationName || 'Не указана'}
-                          </div>
-                          <div className="text-xs text-muted-foreground truncate">
-                            {organization?.inn || cert.organizationInn ? `ИНН: ${organization?.inn || cert.organizationInn}` : ''}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="max-w-[200px]">
-                          <div className="font-medium truncate">{cert.programName}</div>
-                          <div className="text-xs text-muted-foreground truncate">{cert.area}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
-                          {categoryLabels[cert.category]}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-mono text-sm">{cert.certificateNumber}</TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <div className="font-medium">{cert.protocolNumber}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {format(new Date(cert.protocolDate), 'dd.MM.yyyy', { locale: ru })}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        {format(new Date(cert.expiryDate), 'dd.MM.yyyy', { locale: ru })}
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={statusColors[cert.status]}>
-                          {statusLabels[cert.status]}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          {cert.certificateFileUrl && (
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="h-8 w-8 p-0"
-                              onClick={() => setViewDocumentUrl(cert.certificateFileUrl!)}
-                              title="Просмотр удостоверения"
-                            >
-                              <Icon name="FileText" size={16} />
-                            </Button>
-                          )}
-                          {cert.protocolFileUrl && (
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              className="h-8 w-8 p-0"
-                              onClick={() => setViewDocumentUrl(cert.protocolFileUrl!)}
-                              title="Просмотр протокола"
-                            >
-                              <Icon name="ScrollText" size={16} />
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {cert.status !== 'synced' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="gap-2"
-                            onClick={() => handleSync(cert.id)}
-                          >
-                            <Icon name="RefreshCw" size={14} />
-                            Синхронизировать
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
+          <CertificatesTable
+            certificates={filteredCertificates}
+            organizations={organizations}
+            personnel={personnel}
+            statusLabels={statusLabels}
+            statusColors={statusColors}
+            categoryLabels={categoryLabels}
+            onViewDocument={setViewDocumentUrl}
+            onSync={handleSync}
+          />
         )}
 
         <div className="mt-4 text-sm text-muted-foreground">
@@ -500,41 +174,10 @@ export default function IssuedCertificatesRegistry() {
         trainingCenterId="training-center-1"
       />
 
-      <Dialog open={!!viewDocumentUrl} onOpenChange={(open) => !open && setViewDocumentUrl(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh]">
-          <DialogHeader>
-            <DialogTitle>Просмотр документа</DialogTitle>
-          </DialogHeader>
-          <div className="w-full h-[70vh] flex items-center justify-center bg-muted rounded-lg overflow-hidden">
-            {viewDocumentUrl && (
-              viewDocumentUrl.startsWith('data:') ? (
-                <img 
-                  src={viewDocumentUrl} 
-                  alt="Документ" 
-                  className="max-w-full max-h-full object-contain"
-                />
-              ) : viewDocumentUrl.endsWith('.pdf') ? (
-                <iframe 
-                  src={viewDocumentUrl} 
-                  className="w-full h-full"
-                  title="PDF документ"
-                />
-              ) : (
-                <div className="text-center">
-                  <Icon name="FileText" size={48} className="mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">Не удалось загрузить документ</p>
-                  <Button 
-                    className="mt-4" 
-                    onClick={() => window.open(viewDocumentUrl, '_blank')}
-                  >
-                    Открыть в новой вкладке
-                  </Button>
-                </div>
-              )
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <DocumentViewerDialog
+        documentUrl={viewDocumentUrl}
+        onClose={() => setViewDocumentUrl(null)}
+      />
     </Card>
   );
 }
