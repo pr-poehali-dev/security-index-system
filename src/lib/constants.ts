@@ -75,7 +75,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, ModuleType[]> = {
     'examination',
     'maintenance',
     'budget',
-    'training-center',
     'knowledge-base',
     'settings'
   ],
@@ -88,7 +87,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, ModuleType[]> = {
     'examination',
     'maintenance',
     'budget',
-    'training-center',
     'knowledge-base',
     'settings'
   ],
