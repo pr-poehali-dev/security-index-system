@@ -8,10 +8,13 @@ import Icon from '@/components/ui/icon';
 import { ROUTES } from '@/lib/constants';
 import { Navigate } from 'react-router-dom';
 import TenantCard from '../components/TenantCard';
+import TenantsTable from '../components/TenantsTable';
 import CreateTenantDialog from '../components/CreateTenantDialog';
 import EditTenantDialog from '../components/EditTenantDialog';
 import CredentialsDialog from '../components/CredentialsDialog';
 import type { ModuleType } from '@/types';
+
+type ViewMode = 'cards' | 'table';
 
 export default function TenantsPage() {
   const user = useAuthStore((state) => state.user);
@@ -21,6 +24,7 @@ export default function TenantsPage() {
   }
 
   const { tenants, addTenant, updateTenant, saveCredentials, getCredentials, resetPassword } = useTenantStore();
+  const [viewMode, setViewMode] = useState<ViewMode>('cards');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCredentialsDialogOpen, setIsCredentialsDialogOpen] = useState(false);
@@ -145,37 +149,65 @@ export default function TenantsPage() {
         description="Создание и администрирование организаций в системе"
         icon="Building2"
         action={
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Icon name="Plus" size={18} />
-                Создать тенант
+          <div className="flex items-center gap-2">
+            <div className="flex items-center border rounded-lg overflow-hidden">
+              <Button
+                variant={viewMode === 'cards' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('cards')}
+                className="rounded-none"
+              >
+                <Icon name="LayoutGrid" size={18} />
               </Button>
-            </DialogTrigger>
-            <CreateTenantDialog
-              open={isCreateDialogOpen}
-              onOpenChange={setIsCreateDialogOpen}
-              formData={formData}
-              generatedCredentials={generatedCredentials}
-              onFormDataChange={setFormData}
-              onModuleToggle={handleModuleToggle}
-              onSubmit={handleSubmit}
-              onCloseCredentials={handleCloseCredentials}
-            />
-          </Dialog>
+              <Button
+                variant={viewMode === 'table' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('table')}
+                className="rounded-none"
+              >
+                <Icon name="Table" size={18} />
+              </Button>
+            </div>
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Icon name="Plus" size={18} />
+                  Создать тенант
+                </Button>
+              </DialogTrigger>
+              <CreateTenantDialog
+                open={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+                formData={formData}
+                generatedCredentials={generatedCredentials}
+                onFormDataChange={setFormData}
+                onModuleToggle={handleModuleToggle}
+                onSubmit={handleSubmit}
+                onCloseCredentials={handleCloseCredentials}
+              />
+            </Dialog>
+          </div>
         }
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {tenants.map((tenant) => (
-          <TenantCard
-            key={tenant.id}
-            tenant={tenant}
-            onEdit={handleEditTenant}
-            onShowCredentials={handleShowCredentials}
-          />
-        ))}
-      </div>
+      {viewMode === 'cards' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {tenants.map((tenant) => (
+            <TenantCard
+              key={tenant.id}
+              tenant={tenant}
+              onEdit={handleEditTenant}
+              onShowCredentials={handleShowCredentials}
+            />
+          ))}
+        </div>
+      ) : (
+        <TenantsTable
+          tenants={tenants}
+          onEdit={handleEditTenant}
+          onShowCredentials={handleShowCredentials}
+        />
+      )}
 
       <EditTenantDialog
         open={isEditDialogOpen}
