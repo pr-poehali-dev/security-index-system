@@ -234,6 +234,16 @@ const App = memo(function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path={ROUTES.NOTIFICATIONS_HISTORY}
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedLayout>
+                    <NotificationsHistoryPage />
+                  </AuthenticatedLayout>
+                </ProtectedRoute>
+              }
+            />
               <Route path="/" element={
                 <ProtectedRoute>
                   <Navigate to={ROUTES.DASHBOARD} replace />

@@ -155,6 +155,14 @@ export default function NotificationsPage() {
         action={
           <div className="flex gap-2">
             <Button 
+              onClick={() => navigate('/notifications/history')}
+              variant="outline"
+              className="gap-2"
+            >
+              <Icon name="History" size={16} />
+              История
+            </Button>
+            <Button 
               onClick={() => navigate('/notifications/create')}
               className="gap-2"
             >
