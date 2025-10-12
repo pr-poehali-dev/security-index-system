@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type {
   TrainingProgram,
   TrainingGroup,
@@ -8,6 +9,31 @@ import type {
   TrainingScheduleEntry,
   OrganizationTrainingRequest,
 } from '@/types';
+import type { Certification, CertificationDocument } from './attestationStore';
+
+export interface IssuedCertificate {
+  id: string;
+  trainingCenterId: string;
+  clientTenantId: string;
+  personnelId: string;
+  personnelName: string;
+  groupId?: string;
+  programId: string;
+  programName: string;
+  certificateNumber: string;
+  protocolNumber: string;
+  protocolDate: string;
+  issueDate: string;
+  expiryDate: string;
+  category: 'industrial_safety' | 'energy_safety' | 'labor_safety' | 'ecology';
+  area: string;
+  certificateFileUrl?: string;
+  protocolFileUrl?: string;
+  status: 'issued' | 'delivered' | 'synced';
+  issuedBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface TrainingCenterState {
   programs: TrainingProgram[];
@@ -17,6 +43,7 @@ interface TrainingCenterState {
   instructors: TrainingInstructor[];
   scheduleEntries: TrainingScheduleEntry[];
   requests: OrganizationTrainingRequest[];
+  issuedCertificates: IssuedCertificate[];
   
   addProgram: (program: TrainingProgram) => void;
   updateProgram: (id: string, updates: Partial<TrainingProgram>) => void;
@@ -52,9 +79,16 @@ interface TrainingCenterState {
   updateRequest: (id: string, updates: Partial<OrganizationTrainingRequest>) => void;
   deleteRequest: (id: string) => void;
   getRequestsByTenant: (tenantId: string) => OrganizationTrainingRequest[];
+  
+  addIssuedCertificate: (cert: Omit<IssuedCertificate, 'id' | 'createdAt' | 'updatedAt'>) => IssuedCertificate;
+  updateIssuedCertificate: (id: string, updates: Partial<IssuedCertificate>) => void;
+  deleteIssuedCertificate: (id: string) => void;
+  getIssuedCertificatesByTrainingCenter: (trainingCenterId: string) => IssuedCertificate[];
+  getIssuedCertificatesByClient: (clientTenantId: string) => IssuedCertificate[];
+  syncCertificateToAttestation: (certificateId: string) => Certification | null;
 }
 
-export const useTrainingCenterStore = create<TrainingCenterState>((set, get) => ({
+export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set, get) => ({
   programs: [],
   groups: [],
   enrollments: [],
@@ -62,6 +96,74 @@ export const useTrainingCenterStore = create<TrainingCenterState>((set, get) => 
   instructors: [],
   scheduleEntries: [],
   requests: [],
+  issuedCertificates: [
+    {
+      id: 'issued-1',
+      trainingCenterId: 'external-org-1',
+      clientTenantId: 'tenant-1',
+      personnelId: 'personnel-1',
+      personnelName: 'Иванов Иван Иванович',
+      programId: 'program-1',
+      programName: 'Промышленная безопасность А.1',
+      certificateNumber: 'УД-2023-001234',
+      protocolNumber: 'ПБ-123/2023',
+      protocolDate: '2023-01-01',
+      issueDate: '2023-01-01',
+      expiryDate: '2028-01-01',
+      category: 'industrial_safety',
+      area: 'А.1 Основы промышленной безопасности',
+      certificateFileUrl: '/files/certificates/cert-1-certificate.pdf',
+      protocolFileUrl: '/files/protocols/cert-1-protocol.pdf',
+      status: 'synced',
+      issuedBy: 'Комиссия АНО ДПО "Учебный центр"',
+      createdAt: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'issued-2',
+      trainingCenterId: 'external-org-1',
+      clientTenantId: 'tenant-1',
+      personnelId: 'personnel-2',
+      personnelName: 'Петров Петр Петрович',
+      programId: 'program-2',
+      programName: 'Электробезопасность IV группа',
+      certificateNumber: 'ЭБ-2024-09234',
+      protocolNumber: 'ЭБ-234/2024',
+      protocolDate: '2024-08-25',
+      issueDate: '2024-08-25',
+      expiryDate: '2027-08-25',
+      category: 'energy_safety',
+      area: 'IV группа до 1000В',
+      certificateFileUrl: '/files/certificates/cert-eb-09234.pdf',
+      protocolFileUrl: '/files/protocols/protocol-eb-234.pdf',
+      status: 'issued',
+      issuedBy: 'Комиссия АНО ДПО "Учебный центр"',
+      createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'issued-3',
+      trainingCenterId: 'external-org-1',
+      clientTenantId: 'tenant-1',
+      personnelId: 'personnel-3',
+      personnelName: 'Сидоров Сидор Сидорович',
+      programId: 'program-3',
+      programName: 'Работы на высоте (группа 2)',
+      certificateNumber: 'УПК-2024-15487',
+      protocolNumber: 'ОТ-487/2024',
+      protocolDate: '2024-09-10',
+      issueDate: '2024-09-10',
+      expiryDate: '2027-09-10',
+      category: 'labor_safety',
+      area: 'Работы на высоте группа 2',
+      certificateFileUrl: '/files/certificates/cert-upk-15487.pdf',
+      protocolFileUrl: '/files/protocols/protocol-ot-487.pdf',
+      status: 'delivered',
+      issuedBy: 'Комиссия АНО ДПО "Учебный центр"',
+      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ],
 
   addProgram: (program) => set((state) => ({
     programs: [...state.programs, program],
@@ -212,4 +314,83 @@ export const useTrainingCenterStore = create<TrainingCenterState>((set, get) => 
   getRequestsByTenant: (tenantId) => {
     return get().requests.filter((r) => r.tenantId === tenantId);
   },
-}));
+
+  addIssuedCertificate: (cert) => {
+    const newCert: IssuedCertificate = {
+      ...cert,
+      id: `issued-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    set((state) => ({ issuedCertificates: [...state.issuedCertificates, newCert] }));
+    return newCert;
+  },
+
+  updateIssuedCertificate: (id, updates) => set((state) => ({
+    issuedCertificates: state.issuedCertificates.map((cert) =>
+      cert.id === id ? { ...cert, ...updates, updatedAt: new Date().toISOString() } : cert
+    )
+  })),
+
+  deleteIssuedCertificate: (id) => set((state) => ({
+    issuedCertificates: state.issuedCertificates.filter((cert) => cert.id !== id)
+  })),
+
+  getIssuedCertificatesByTrainingCenter: (trainingCenterId) => {
+    return get().issuedCertificates.filter((cert) => cert.trainingCenterId === trainingCenterId);
+  },
+
+  getIssuedCertificatesByClient: (clientTenantId) => {
+    return get().issuedCertificates.filter((cert) => cert.clientTenantId === clientTenantId);
+  },
+
+  syncCertificateToAttestation: (certificateId) => {
+    const issuedCert = get().issuedCertificates.find((c) => c.id === certificateId);
+    if (!issuedCert) return null;
+
+    const attestationCert: Certification = {
+      id: `cert-synced-${Date.now()}`,
+      personnelId: issuedCert.personnelId,
+      tenantId: issuedCert.clientTenantId,
+      category: issuedCert.category,
+      area: issuedCert.area,
+      issueDate: issuedCert.issueDate,
+      expiryDate: issuedCert.expiryDate,
+      certificateNumber: issuedCert.certificateNumber,
+      protocolNumber: issuedCert.protocolNumber,
+      protocolDate: issuedCert.protocolDate,
+      verified: false,
+      trainingOrganizationId: issuedCert.trainingCenterId,
+      documents: [
+        issuedCert.certificateFileUrl ? {
+          id: `doc-${Date.now()}-1`,
+          certificationId: `cert-synced-${Date.now()}`,
+          type: 'certificate' as const,
+          fileName: `Удостоверение_${issuedCert.certificateNumber}.pdf`,
+          fileUrl: issuedCert.certificateFileUrl,
+          fileSize: 0,
+          uploadedBy: issuedCert.issuedBy,
+          uploadedByRole: 'training_center' as const,
+          uploadedAt: issuedCert.createdAt
+        } : undefined,
+        issuedCert.protocolFileUrl ? {
+          id: `doc-${Date.now()}-2`,
+          certificationId: `cert-synced-${Date.now()}`,
+          type: 'protocol' as const,
+          fileName: `Протокол_${issuedCert.protocolNumber}.pdf`,
+          fileUrl: issuedCert.protocolFileUrl,
+          fileSize: 0,
+          uploadedBy: issuedCert.issuedBy,
+          uploadedByRole: 'training_center' as const,
+          uploadedAt: issuedCert.createdAt
+        } : undefined
+      ].filter(Boolean) as CertificationDocument[],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    get().updateIssuedCertificate(certificateId, { status: 'synced' });
+
+    return attestationCert;
+  }
+}), { name: 'training-center-storage-v1' }));

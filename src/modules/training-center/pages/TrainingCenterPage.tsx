@@ -7,6 +7,7 @@ import EnrollmentsTab from '../components/EnrollmentsTab';
 import ScheduleTab from '../components/ScheduleTab';
 import DirectoriesTab from '../components/DirectoriesTab';
 import ReportsTab from '../components/ReportsTab';
+import IssuedCertificatesRegistry from '../components/IssuedCertificatesRegistry';
 
 export default function TrainingCenterPage() {
   const [activeTab, setActiveTab] = useState('programs');
@@ -38,6 +39,10 @@ export default function TrainingCenterPage() {
             <Icon name="Calendar" size={20} />
             <span className="text-xs font-medium">Расписание</span>
           </TabsTrigger>
+          <TabsTrigger value="certificates" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Award" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Реестр<br/>удостоверений</span>
+          </TabsTrigger>
           <TabsTrigger value="reports" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="BarChart3" size={20} />
             <span className="text-xs font-medium">Отчёты</span>
@@ -62,6 +67,10 @@ export default function TrainingCenterPage() {
 
         <TabsContent value="schedule">
           <ScheduleTab />
+        </TabsContent>
+
+        <TabsContent value="certificates">
+          <IssuedCertificatesRegistry />
         </TabsContent>
 
         <TabsContent value="reports">

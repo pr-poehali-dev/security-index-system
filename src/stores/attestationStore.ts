@@ -1,6 +1,19 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export interface CertificationDocument {
+  id: string;
+  certificationId: string;
+  type: 'certificate' | 'protocol' | 'scan' | 'other';
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  uploadedBy: string;
+  uploadedByRole: 'training_center' | 'employee' | 'admin';
+  uploadedAt: string;
+  description?: string;
+}
+
 export interface Certification {
   id: string;
   personnelId: string;
@@ -11,11 +24,14 @@ export interface Certification {
   expiryDate: string;
   protocolNumber?: string;
   protocolDate?: string;
+  certificateNumber?: string;
   verified: boolean;
   verifiedDate?: string;
   verifiedBy?: string;
   trainingOrganizationId?: string;
+  trainingId?: string;
   documentUrl?: string;
+  documents?: CertificationDocument[];
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -121,7 +137,12 @@ interface AttestationState {
   deleteCertification: (id: string) => void;
   getCertificationsByPersonnel: (personnelId: string) => Certification[];
   getCertificationsByTenant: (tenantId: string) => Certification[];
+  getCertificationsByTrainingCenter: (trainingOrgId: string) => Certification[];
   importCertifications: (certs: Omit<Certification, 'id' | 'createdAt' | 'updatedAt'>[]) => void;
+  
+  addDocument: (certificationId: string, doc: Omit<CertificationDocument, 'id' | 'uploadedAt'>) => void;
+  deleteDocument: (certificationId: string, documentId: string) => void;
+  getDocumentsByCertification: (certificationId: string) => CertificationDocument[];
   
   addCertificationType: (type: Omit<CertificationType, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateCertificationType: (id: string, updates: Partial<CertificationType>) => void;
@@ -157,10 +178,39 @@ export const useAttestationStore = create<AttestationState>()(persist((set, get)
       area: 'А.1 Основы промышленной безопасности',
       issueDate: '2023-01-01',
       expiryDate: '2028-01-01',
+      certificateNumber: 'УД-2023-001234',
       protocolNumber: 'ПБ-123/2023',
       protocolDate: '2023-01-01',
       verified: true,
       verifiedDate: '2024-03-15',
+      trainingOrganizationId: 'external-org-1',
+      trainingId: 'training-1',
+      documents: [
+        {
+          id: 'doc-1',
+          certificationId: 'cert-1',
+          type: 'certificate',
+          fileName: 'Удостоверение_ПБ_А1_2023.pdf',
+          fileUrl: '/files/certificates/cert-1-certificate.pdf',
+          fileSize: 245678,
+          uploadedBy: 'АНО ДПО "Учебный центр"',
+          uploadedByRole: 'training_center',
+          uploadedAt: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString(),
+          description: 'Удостоверение о проверке знаний'
+        },
+        {
+          id: 'doc-2',
+          certificationId: 'cert-1',
+          type: 'protocol',
+          fileName: 'Протокол_ПБ-123-2023.pdf',
+          fileUrl: '/files/protocols/cert-1-protocol.pdf',
+          fileSize: 189023,
+          uploadedBy: 'АНО ДПО "Учебный центр"',
+          uploadedByRole: 'training_center',
+          uploadedAt: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString(),
+          description: 'Протокол заседания комиссии'
+        }
+      ],
       createdAt: new Date(Date.now() - 500 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString()
     },
@@ -265,6 +315,10 @@ export const useAttestationStore = create<AttestationState>()(persist((set, get)
     return get().certifications.filter((cert) => cert.tenantId === tenantId);
   },
 
+  getCertificationsByTrainingCenter: (trainingOrgId) => {
+    return get().certifications.filter((cert) => cert.trainingOrganizationId === trainingOrgId);
+  },
+
   importCertifications: (certs) => {
     const newCerts = certs.map((cert, index) => ({
       ...cert,
@@ -273,6 +327,36 @@ export const useAttestationStore = create<AttestationState>()(persist((set, get)
       updatedAt: new Date().toISOString()
     }));
     set((state) => ({ certifications: [...state.certifications, ...newCerts] }));
+  },
+
+  addDocument: (certificationId, doc) => {
+    const newDoc: CertificationDocument = {
+      ...doc,
+      id: `doc-${Date.now()}`,
+      uploadedAt: new Date().toISOString()
+    };
+    set((state) => ({
+      certifications: state.certifications.map((cert) =>
+        cert.id === certificationId
+          ? { ...cert, documents: [...(cert.documents || []), newDoc], updatedAt: new Date().toISOString() }
+          : cert
+      )
+    }));
+  },
+
+  deleteDocument: (certificationId, documentId) => {
+    set((state) => ({
+      certifications: state.certifications.map((cert) =>
+        cert.id === certificationId
+          ? { ...cert, documents: (cert.documents || []).filter((d) => d.id !== documentId), updatedAt: new Date().toISOString() }
+          : cert
+      )
+    }));
+  },
+
+  getDocumentsByCertification: (certificationId) => {
+    const cert = get().certifications.find((c) => c.id === certificationId);
+    return cert?.documents || [];
   },
 
   certificationTypes: [
