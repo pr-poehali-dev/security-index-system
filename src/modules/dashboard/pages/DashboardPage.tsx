@@ -1,5 +1,5 @@
 import { useMemo, memo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useCatalogStore } from '@/stores/catalogStore';
 import { useTaskStore } from '@/stores/taskStore';
@@ -32,6 +32,11 @@ import DeadlineCalendar from '@/components/widgets/DeadlineCalendar';
 const DashboardPage = memo(function DashboardPage() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
+  
+  if (user?.role === 'SuperAdmin') {
+    return <Navigate to={ROUTES.TENANTS} replace />;
+  }
+  
   const { objects, organizations } = useCatalogStore();
   const { tasks, getTaskStats, getOverdueTasks } = useTaskStore();
   const { incidents } = useIncidentsStore();

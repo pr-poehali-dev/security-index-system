@@ -223,7 +223,11 @@ const App = memo(function App() {
                 </ProtectedRoute>
               }
             />
-              <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <Navigate to={ROUTES.DASHBOARD} replace />
+                </ProtectedRoute>
+              } />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Suspense>

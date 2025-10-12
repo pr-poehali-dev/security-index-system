@@ -25,7 +25,12 @@ export default function LoginPage() {
     try {
       const success = await login(email, password);
       if (success) {
-        navigate(ROUTES.DASHBOARD);
+        const loggedUser = useAuthStore.getState().user;
+        if (loggedUser?.role === 'SuperAdmin') {
+          navigate(ROUTES.TENANTS);
+        } else {
+          navigate(ROUTES.DASHBOARD);
+        }
       } else {
         setError('Неверный email или пароль');
       }

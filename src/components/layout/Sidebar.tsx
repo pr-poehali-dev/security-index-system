@@ -87,21 +87,41 @@ const Sidebar = memo(function Sidebar() {
       </div>
 
       <nav className="flex-1 overflow-y-auto py-4 px-2">
-        <NavLink
-          to={ROUTES.DASHBOARD}
-          className={({ isActive }) => cn(
-            "flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors",
-            isActive 
-              ? "bg-emerald-600 text-white" 
-              : "text-gray-300 hover:bg-gray-800 hover:text-white"
-          )}
-        >
-          <Icon name="LayoutDashboard" size={20} />
-          {!sidebarCollapsed && <span className="text-sm font-medium">Дашборд</span>}
-        </NavLink>
+        {user.role !== 'SuperAdmin' && (
+          <NavLink
+            to={ROUTES.DASHBOARD}
+            className={({ isActive }) => cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors",
+              isActive 
+                ? "bg-emerald-600 text-white" 
+                : "text-gray-300 hover:bg-gray-800 hover:text-white"
+            )}
+          >
+            <Icon name="LayoutDashboard" size={20} />
+            {!sidebarCollapsed && <span className="text-sm font-medium">Дашборд</span>}
+          </NavLink>
+        )}
 
         {user.availableModules.map((moduleKey) => {
-          if (moduleKey === 'tenants' || moduleKey === 'settings') return null;
+          if (moduleKey === 'settings') return null;
+          
+          if (moduleKey === 'tenants') {
+            return (
+              <NavLink
+                key={moduleKey}
+                to={ROUTES.TENANTS}
+                className={({ isActive }) => cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors",
+                  isActive 
+                    ? "bg-emerald-600 text-white" 
+                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                )}
+              >
+                <Icon name="Building2" size={20} />
+                {!sidebarCollapsed && <span className="text-sm font-medium">Управление тенантами</span>}
+              </NavLink>
+            );
+          }
           
           const module = MODULES[moduleKey];
           const route = MODULE_ROUTES[moduleKey];
