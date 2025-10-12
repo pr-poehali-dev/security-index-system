@@ -34,7 +34,7 @@ const MOCK_USERS = [
 
 export default function CreateNotificationPage() {
   const navigate = useNavigate();
-  const { addNotification } = useNotificationsStore();
+  const { addBulkNotification } = useNotificationsStore();
   const { tenants } = useTenantStore();
   
   const [title, setTitle] = useState('');
@@ -100,40 +100,26 @@ export default function CreateNotificationPage() {
     setIsSubmitting(true);
 
     try {
+      const notificationData = {
+        type,
+        source,
+        title: title.trim(),
+        message: message.trim(),
+        link: link.trim() || undefined,
+        isRead: false,
+      };
+
       if (recipientType === 'all') {
-        addNotification({
-          tenantId: 'global',
-          type,
-          source,
-          title: title.trim(),
-          message: message.trim(),
-          link: link.trim() || undefined,
-          isRead: false,
-        });
+        addBulkNotification(notificationData, { type: 'all' });
       } else if (recipientType === 'tenants') {
-        selectedTenants.forEach(tenantId => {
-          addNotification({
-            tenantId,
-            type,
-            source,
-            title: title.trim(),
-            message: message.trim(),
-            link: link.trim() || undefined,
-            isRead: false,
-          });
+        addBulkNotification(notificationData, { 
+          type: 'tenants', 
+          tenantIds: selectedTenants 
         });
       } else if (recipientType === 'users') {
-        selectedUsers.forEach(userId => {
-          addNotification({
-            tenantId: 'global',
-            userId,
-            type,
-            source,
-            title: title.trim(),
-            message: message.trim(),
-            link: link.trim() || undefined,
-            isRead: false,
-          });
+        addBulkNotification(notificationData, { 
+          type: 'users', 
+          userIds: selectedUsers 
         });
       }
 

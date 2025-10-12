@@ -22,6 +22,7 @@ const TasksPage = lazy(() => import("@/modules/tasks").then(m => ({ default: m.T
 const ExaminationPage = lazy(() => import("@/modules/examination").then(m => ({ default: m.ExaminationPage })));
 const NotificationsPage = lazy(() => import("@/modules/notifications").then(m => ({ default: m.NotificationsPage })));
 const CreateNotificationPage = lazy(() => import("@/modules/notifications/pages/CreateNotificationPage"));
+const NotificationsHistoryPage = lazy(() => import("@/modules/notifications/pages/NotificationsHistoryPage"));
 const MaintenancePage = lazy(() => import("@/modules/maintenance").then(m => ({ default: m.MaintenancePage })));
 const BudgetPage = lazy(() => import("@/modules/budget").then(m => ({ default: m.BudgetPage })));
 const TrainingCenterPage = lazy(() => import("@/modules/training-center/pages/TrainingCenterPage"));
