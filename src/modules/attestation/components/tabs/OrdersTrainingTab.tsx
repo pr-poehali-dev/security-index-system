@@ -252,6 +252,7 @@ export default function OrdersTrainingTab() {
                 setShowSendToTCDialog(true);
               }
             }}
+            onSendToSDO={orderHandlers.handleSendToSDO}
             onExportToExcel={handleExportOrdersToExcel}
             onCreateOrder={() => setShowCreateOrderDialog(true)}
             getOrderActions={getOrderActions}

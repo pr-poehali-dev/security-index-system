@@ -20,6 +20,7 @@ interface OrdersTableViewProps {
   onPrint: (orderId: string) => void;
   onDelete: (orderId: string) => void;
   onSendToTraining?: (orderId: string) => void;
+  onSendToSDO?: (orderId: string) => void;
 }
 
 const getOrderTypeLabel = (type: Order['type']) => {
@@ -83,7 +84,8 @@ export default function OrdersTableView({
   onDownloadPDF,
   onPrint,
   onDelete,
-  onSendToTraining
+  onSendToTraining,
+  onSendToSDO
 }: OrdersTableViewProps) {
   const [sortConfig, setSortConfig] = useState<{ field: string; direction: SortDirection }>({ 
     field: 'date', 
@@ -252,6 +254,16 @@ export default function OrdersTableView({
                         title="Отправить в учебный центр"
                       >
                         <Icon name="Send" size={16} />
+                      </Button>
+                    )}
+                    {order.type === 'lms' && order.status === 'approved' && onSendToSDO && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => onSendToSDO(order.id)}
+                        title="Отправить в СДО"
+                      >
+                        <Icon name="Monitor" size={16} />
                       </Button>
                     )}
                     <Button

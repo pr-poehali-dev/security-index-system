@@ -19,6 +19,7 @@ interface OrdersCardViewProps {
   onPrint: (orderId: string) => void;
   onDelete: (orderId: string) => void;
   onSendToTraining?: (orderId: string) => void;
+  onSendToSDO?: (orderId: string) => void;
   getOrderActions: (order: Order) => JSX.Element[];
 }
 
@@ -83,7 +84,8 @@ export default function OrdersCardView({
   onDownloadPDF,
   onPrint,
   onDelete,
-  onSendToTraining
+  onSendToTraining,
+  onSendToSDO
 }: OrdersCardViewProps) {
   if (orders.length === 0) {
     return (
@@ -186,6 +188,17 @@ export default function OrdersCardView({
                 >
                   <Icon name="Send" size={14} className="mr-1" />
                   В учебный центр
+                </Button>
+              )}
+              {order.type === 'lms' && order.status === 'approved' && onSendToSDO && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => onSendToSDO(order.id)}
+                  className="w-full mb-2"
+                >
+                  <Icon name="Monitor" size={14} className="mr-1" />
+                  Отправить в СДО
                 </Button>
               )}
               <Button
