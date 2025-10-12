@@ -27,7 +27,10 @@ const ContractorsList = () => {
   const [typeFilter, setTypeFilter] = useState<ContractorType | 'all'>('all');
   const [selectedContractor, setSelectedContractor] = useState<Contractor | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem('contractors-view-mode');
+    return (saved as ViewMode) || 'grid';
+  });
 
   useEffect(() => {
     fetchContractors();
@@ -137,7 +140,10 @@ const ContractorsList = () => {
             <Button
               variant={viewMode === 'table' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setViewMode('table')}
+              onClick={() => {
+                setViewMode('table');
+                localStorage.setItem('contractors-view-mode', 'table');
+              }}
               className="rounded-r-none"
             >
               <Icon name="Table" size={16} />
@@ -145,7 +151,10 @@ const ContractorsList = () => {
             <Button
               variant={viewMode === 'grid' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setViewMode('grid')}
+              onClick={() => {
+                setViewMode('grid');
+                localStorage.setItem('contractors-view-mode', 'grid');
+              }}
               className="rounded-l-none"
             >
               <Icon name="LayoutGrid" size={16} />
