@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useKnowledgeBaseStore } from '@/stores/knowledgeBaseStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -44,6 +44,7 @@ export default function KnowledgeBasePage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<KnowledgeDocument | null>(null);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const canManage = user?.role === 'SuperAdmin' || user?.role === 'TenantAdmin';
 
@@ -128,6 +129,65 @@ export default function KnowledgeBasePage() {
     }
   };
 
+  const handleExportDocuments = () => {
+    const exportData = {
+      version: '1.0',
+      exportDate: new Date().toISOString(),
+      documents: filteredDocuments.length > 0 ? filteredDocuments : getDocumentsByCategory(activeTab),
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `knowledge-base-${activeTab}-${format(new Date(), 'yyyy-MM-dd')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success('Документы экспортированы');
+  };
+
+  const handleImportDocuments = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      if (!data.documents || !Array.isArray(data.documents)) {
+        toast.error('Неверный формат файла');
+        return;
+      }
+
+      let imported = 0;
+      data.documents.forEach((doc: any) => {
+        if (doc.title && doc.category) {
+          const { id, createdAt, updatedAt, viewsCount, downloadsCount, ...docData } = doc;
+          useKnowledgeBaseStore.getState().addDocument({
+            ...docData,
+            tenantId: user?.tenantId || 'tenant-1',
+          });
+          imported++;
+        }
+      });
+
+      toast.success(`Импортировано документов: ${imported}`);
+    } catch (error) {
+      toast.error('Ошибка при импорте файла');
+      console.error(error);
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const stats = useMemo(() => {
     return {
       userGuides: getDocumentsByCategory('user_guide').length,
@@ -147,10 +207,37 @@ export default function KnowledgeBasePage() {
         action={
           <div className="flex gap-2">
             {canManage && (
-              <Button onClick={handleCreateDocument} className="gap-2">
-                <Icon name="Plus" size={16} />
-                Добавить документ
-              </Button>
+              <>
+                <Button onClick={handleCreateDocument} className="gap-2">
+                  <Icon name="Plus" size={16} />
+                  Добавить документ
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="gap-2">
+                      <Icon name="Download" size={16} />
+                      Экспорт/Импорт
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleExportDocuments}>
+                      <Icon name="Download" size={14} className="mr-2" />
+                      Экспортировать документы
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleImportDocuments}>
+                      <Icon name="Upload" size={14} className="mr-2" />
+                      Импортировать документы
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </>
             )}
             <Button 
               variant="outline" 
