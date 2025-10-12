@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { List } from 'react-window';
+import TablePagination from '@/components/ui/table-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
@@ -50,6 +51,8 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
     field: 'name', 
     direction: 'asc' 
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
 
   const handleSort = (field: string) => {
     setSortConfig(prev => {
@@ -167,10 +170,15 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
     }
   };
 
-  const useVirtualization = sortedObjects.length > 100;
+  const totalPages = Math.ceil(sortedObjects.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedObjects = sortedObjects.slice(startIndex, endIndex);
+  
+  const useVirtualization = paginatedObjects.length > 100;
 
   const TableRow = ({ index, style }: { index: number; style: React.CSSProperties }) => {
-    const obj = sortedObjects[index];
+    const obj = paginatedObjects[index];
     const organization = organizations.find(org => org.id === obj.organizationId);
     
     return (
@@ -340,7 +348,7 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
             {useVirtualization ? (
               <List
                 height={600}
-                itemCount={sortedObjects.length}
+                itemCount={paginatedObjects.length}
                 itemSize={80}
                 width="100%"
                 className="scrollbar-thin"
@@ -349,7 +357,7 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
               </List>
             ) : (
               <div>
-                {sortedObjects.map((obj, index) => (
+                {paginatedObjects.map((obj, index) => (
                   <TableRow key={obj.id} index={index} style={{}} />
                 ))}
               </div>
@@ -363,6 +371,18 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
             <p>Объекты не найдены</p>
           </div>
         )}
+        
+        <TablePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          itemsPerPage={itemsPerPage}
+          totalItems={sortedObjects.length}
+          onItemsPerPageChange={(value) => {
+            setItemsPerPage(value);
+            setCurrentPage(1);
+          }}
+        />
       </div>
     </div>
   );

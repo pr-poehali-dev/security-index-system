@@ -27,6 +27,7 @@ import UpcomingExpertiseCard from '../components/UpcomingExpertiseCard';
 import OrganizationsCard from '../components/OrganizationsCard';
 import TasksChartCard from '../components/TasksChartCard';
 import IncidentsChartCard from '../components/IncidentsChartCard';
+import DeadlineCalendar from '@/components/widgets/DeadlineCalendar';
 
 const DashboardPage = memo(function DashboardPage() {
   const navigate = useNavigate();
@@ -375,7 +376,7 @@ const DashboardPage = memo(function DashboardPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <TasksChartCard 
           data={tasksChartData}
           onGenerateReport={handleGenerateTasksReport}
@@ -384,6 +385,24 @@ const DashboardPage = memo(function DashboardPage() {
         <IncidentsChartCard 
           data={incidentsChartData}
           onGenerateReport={handleGenerateIncidentsReport}
+        />
+      </div>
+
+      <div className="mb-6">
+        <DeadlineCalendar 
+          tasks={tasks}
+          expertises={objects.map(obj => ({
+            id: obj.id,
+            objectName: obj.name,
+            nextExpertiseDate: obj.nextExpertiseDate || ''
+          }))}
+          onEventClick={(event) => {
+            if (event.type === 'task') {
+              navigate(ROUTES.TASKS);
+            } else {
+              navigate(ROUTES.CATALOG);
+            }
+          }}
         />
       </div>
     </div>

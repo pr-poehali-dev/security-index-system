@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { List } from 'react-window';
+import TablePagination from '@/components/ui/table-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
@@ -59,6 +60,8 @@ export default function TaskTableView({ tasks, onTaskClick }: TaskTableViewProps
     field: 'dueDate', 
     direction: 'asc' 
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
 
   const handleSort = (field: string) => {
     setSortConfig(prev => {
@@ -164,10 +167,15 @@ export default function TaskTableView({ tasks, onTaskClick }: TaskTableViewProps
     }
   };
 
-  const useVirtualization = sortedTasks.length > 100;
+  const totalPages = Math.ceil(sortedTasks.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedTasks = sortedTasks.slice(startIndex, endIndex);
+  
+  const useVirtualization = paginatedTasks.length > 100;
 
   const TaskRow = ({ index, style }: { index: number; style: React.CSSProperties }) => {
-    const task = sortedTasks[index];
+    const task = paginatedTasks[index];
     const overdueTask = isOverdue(task.dueDate, task.status);
     
     return (
@@ -311,7 +319,7 @@ export default function TaskTableView({ tasks, onTaskClick }: TaskTableViewProps
             {useVirtualization ? (
               <List
                 height={600}
-                itemCount={sortedTasks.length}
+                itemCount={paginatedTasks.length}
                 itemSize={80}
                 width="100%"
                 className="scrollbar-thin"
@@ -320,7 +328,7 @@ export default function TaskTableView({ tasks, onTaskClick }: TaskTableViewProps
               </List>
             ) : (
               <div>
-                {sortedTasks.map((task, index) => (
+                {paginatedTasks.map((task, index) => (
                   <TaskRow key={task.id} index={index} style={{}} />
                 ))}
               </div>
@@ -334,6 +342,18 @@ export default function TaskTableView({ tasks, onTaskClick }: TaskTableViewProps
             <p>Задачи не найдены</p>
           </div>
         )}
+        
+        <TablePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          itemsPerPage={itemsPerPage}
+          totalItems={sortedTasks.length}
+          onItemsPerPageChange={(value) => {
+            setItemsPerPage(value);
+            setCurrentPage(1);
+          }}
+        />
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import TablePagination from '@/components/ui/table-pagination';
 import type { Incident, IncidentStatus } from '@/types';
 
 interface IncidentsTableViewProps {
@@ -46,6 +47,14 @@ const IncidentsTableView = memo(function IncidentsTableView({
   setEditingIncident,
   handleDelete
 }: IncidentsTableViewProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
+  
+  const totalPages = Math.ceil(filteredIncidents.length / itemsPerPage);
+  const startIdx = (currentPage - 1) * itemsPerPage;
+  const endIdx = startIdx + itemsPerPage;
+  const paginatedIncidents = filteredIncidents.slice(startIdx, endIdx);
+  
   const getStatusBadge = (status: IncidentStatus) => {
     const variants: Record<IncidentStatus, any> = {
       created: 'secondary',
@@ -95,14 +104,14 @@ const IncidentsTableView = memo(function IncidentsTableView({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredIncidents.length === 0 ? (
+          {paginatedIncidents.length === 0 ? (
             <TableRow>
               <TableCell colSpan={14} className="text-center text-muted-foreground py-8">
                 Нет данных
               </TableCell>
             </TableRow>
           ) : (
-            filteredIncidents.map((incident, index) => (
+            paginatedIncidents.map((incident, index) => (
               <TableRow key={incident.id}>
                 <TableCell>
                   <Checkbox
@@ -110,7 +119,7 @@ const IncidentsTableView = memo(function IncidentsTableView({
                     onCheckedChange={(checked) => handleSelectOne(incident.id, checked as boolean)}
                   />
                 </TableCell>
-                <TableCell>{startIndex + index + 1}</TableCell>
+                <TableCell>{startIdx + index + 1}</TableCell>
                 <TableCell className="text-sm">{getOrganizationName(incident.organizationId)}</TableCell>
                 <TableCell className="text-sm">{getProductionSiteName(incident.productionSiteId)}</TableCell>
                 <TableCell className="text-sm whitespace-nowrap">
@@ -153,6 +162,18 @@ const IncidentsTableView = memo(function IncidentsTableView({
           )}
         </TableBody>
       </Table>
+      
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        itemsPerPage={itemsPerPage}
+        totalItems={filteredIncidents.length}
+        onItemsPerPageChange={(value) => {
+          setItemsPerPage(value);
+          setCurrentPage(1);
+        }}
+      />
     </div>
   );
 });
