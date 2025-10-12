@@ -52,7 +52,7 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
     direction: 'asc' 
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [itemsPerPage, setItemsPerPage] = useState(50);
 
   const handleSort = (field: string) => {
     setSortConfig(prev => {
@@ -175,7 +175,7 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
   const endIndex = startIndex + itemsPerPage;
   const paginatedObjects = sortedObjects.slice(startIndex, endIndex);
   
-  const useVirtualization = paginatedObjects.length > 100;
+  const useVirtualization = paginatedObjects.length > 20;
 
   const TableRow = ({ index, style }: { index: number; style: React.CSSProperties }) => {
     const obj = paginatedObjects[index];
@@ -345,22 +345,25 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
               <div className="text-right p-3 font-semibold text-sm flex-shrink-0 w-32">Действия</div>
             </div>
 
-            {useVirtualization ? (
-              <List
-                height={600}
-                itemCount={paginatedObjects.length}
-                itemSize={80}
-                width="100%"
-                className="scrollbar-thin"
-              >
-                {TableRow}
-              </List>
-            ) : (
-              <div>
-                {paginatedObjects.map((obj, index) => (
-                  <TableRow key={obj.id} index={index} style={{}} />
-                ))}
-              </div>
+            {paginatedObjects.length > 0 && (
+              useVirtualization ? (
+                <List
+                  height={Math.min(paginatedObjects.length * 80, 600)}
+                  itemCount={paginatedObjects.length}
+                  itemSize={80}
+                  width="100%"
+                  className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
+                  overscanCount={5}
+                >
+                  {TableRow}
+                </List>
+              ) : (
+                <div>
+                  {paginatedObjects.map((obj, index) => (
+                    <TableRow key={obj.id} index={index} style={{}} />
+                  ))}
+                </div>
+              )
             )}
           </div>
         </div>
