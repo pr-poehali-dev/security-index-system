@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCertificationStore } from '@/stores/certificationStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import DataPagination from '@/components/ui/data-pagination';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,6 +46,8 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
   const [massActionType, setMassActionType] = useState<string>('');
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [showAddEmployeeDialog, setShowAddEmployeeDialog] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
 
   const mockEmployees = useMemo(() => {
     return personnel
@@ -173,7 +176,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
     return Array.from(new Set(mockEmployees.map(emp => emp.organization)));
   }, [mockEmployees]);
 
-  const filteredEmployees = mockEmployees.filter(emp => {
+  const allFilteredEmployees = mockEmployees.filter(emp => {
     const matchesSearch = emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           emp.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           emp.organization.toLowerCase().includes(searchQuery.toLowerCase());
@@ -199,6 +202,16 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
     
     return matchesSearch && matchesOrganization && matchesStatus && matchesVerification;
   });
+
+  const totalEmployees = allFilteredEmployees.length;
+  const totalPages = Math.ceil(totalEmployees / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const filteredEmployees = allFilteredEmployees.slice(startIndex, endIndex);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, organizationFilter, statusFilter, verificationFilter]);
 
   const totalCertifications = mockEmployees.reduce((sum, emp) => sum + emp.certifications.length, 0);
   const validCertifications = mockEmployees.reduce((sum, emp) => 
@@ -317,7 +330,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Checkbox
-                    checked={selectedEmployeeIds.size === filteredEmployees.length}
+                    checked={selectedEmployeeIds.size === allFilteredEmployees.length}
                     onCheckedChange={handleSelectAll}
                   />
                   <span className="text-sm font-medium">
@@ -367,7 +380,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                   <tr className="text-left">
                     <th className="pb-3 font-medium w-12">
                       <Checkbox
-                        checked={selectedEmployeeIds.size === filteredEmployees.length && filteredEmployees.length > 0}
+                        checked={selectedEmployeeIds.size === allFilteredEmployees.length && allFilteredEmployees.length > 0}
                         onCheckedChange={handleSelectAll}
                       />
                     </th>
@@ -398,6 +411,23 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
           {filteredEmployees.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
               Сотрудники не найдены
+            </div>
+          )}
+
+          {totalEmployees > 0 && (
+            <div className="mt-6">
+              <DataPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalItems={totalEmployees}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(newSize) => {
+                  setPageSize(newSize);
+                  setCurrentPage(1);
+                }}
+                pageSizeOptions={[12, 24, 48, 96]}
+              />
             </div>
           )}
         </CardContent>

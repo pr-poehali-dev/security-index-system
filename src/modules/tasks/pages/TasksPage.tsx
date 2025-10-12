@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import Icon from '@/components/ui/icon';
 import TaskTableView from '../components/TaskTableView';
+import DataPagination from '@/components/ui/data-pagination';
 import type { Task } from '@/types/tasks';
 
 export default function TasksPage() {
@@ -34,6 +35,8 @@ export default function TasksPage() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [currentTab, setCurrentTab] = useState('all');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const filteredTasks = getFilteredTasks();
   const stats = getTaskStats();
@@ -84,9 +87,19 @@ export default function TasksPage() {
     }
   };
 
-  const tasksToDisplay = currentTab === 'all' ? filteredTasks : 
+  const tasksBeforePagination = currentTab === 'all' ? filteredTasks : 
                         currentTab === 'overdue' ? overdueTasks :
                         filteredTasks.filter(t => t.status === currentTab);
+  
+  const totalTasks = tasksBeforePagination.length;
+  const totalPages = Math.ceil(totalTasks / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const tasksToDisplay = tasksBeforePagination.slice(startIndex, endIndex);
+  
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [currentTab, filters]);
 
   if (isLoading) {
     return (
@@ -402,6 +415,19 @@ export default function TasksPage() {
                   <p className="text-gray-500">Задачи не найдены</p>
                 </CardContent>
               </Card>
+            )}
+            {totalTasks > 0 && (
+              <DataPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalItems={totalTasks}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(newSize) => {
+                  setPageSize(newSize);
+                  setCurrentPage(1);
+                }}
+              />
             )}
             </div>
           )}
