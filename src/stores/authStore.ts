@@ -23,7 +23,7 @@ const MOCK_USERS: User[] = [
     name: 'Администратор Тенанта',
     role: 'TenantAdmin',
     tenantId: 'tenant-1',
-    availableModules: ['attestation', 'catalog', 'incidents', 'checklists', 'tasks', 'examination', 'maintenance', 'budget', 'training-center', 'settings']
+    availableModules: ['attestation', 'catalog', 'incidents', 'checklists', 'tasks', 'examination', 'maintenance', 'budget', 'training-center', 'knowledge-base', 'settings']
   },
   {
     id: '3',
@@ -31,7 +31,7 @@ const MOCK_USERS: User[] = [
     name: 'Аудитор',
     role: 'Auditor',
     tenantId: 'tenant-1',
-    availableModules: ['attestation', 'catalog', 'incidents', 'checklists', 'examination']
+    availableModules: ['attestation', 'catalog', 'incidents', 'checklists', 'examination', 'knowledge-base']
   },
   {
     id: '4',
@@ -39,7 +39,7 @@ const MOCK_USERS: User[] = [
     name: 'Менеджер',
     role: 'Manager',
     tenantId: 'tenant-1',
-    availableModules: ['attestation', 'catalog', 'tasks', 'maintenance']
+    availableModules: ['attestation', 'catalog', 'tasks', 'maintenance', 'knowledge-base']
   },
   {
     id: '5',
@@ -47,7 +47,7 @@ const MOCK_USERS: User[] = [
     name: 'Директор',
     role: 'Director',
     tenantId: 'tenant-1',
-    availableModules: ['attestation', 'incidents', 'budget']
+    availableModules: ['attestation', 'incidents', 'budget', 'knowledge-base']
   },
   {
     id: '6',
@@ -55,7 +55,7 @@ const MOCK_USERS: User[] = [
     name: 'Менеджер Учебного Центра',
     role: 'TrainingCenterManager',
     tenantId: 'tenant-1',
-    availableModules: ['training-center']
+    availableModules: ['training-center', 'knowledge-base']
   }
 ];
 
