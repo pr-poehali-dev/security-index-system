@@ -15,7 +15,7 @@ const MOCK_USERS: User[] = [
     email: 'superadmin@system.ru',
     name: 'Суперадминистратор',
     role: 'SuperAdmin',
-    availableModules: ['tenants', 'attestation', 'catalog', 'incidents', 'checklists', 'tasks', 'examination', 'maintenance', 'budget', 'training-center', 'settings']
+    availableModules: ['tenants']
   },
   {
     id: '2',
