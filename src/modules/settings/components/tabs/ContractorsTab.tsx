@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useTenantsStore } from '@/stores/tenantsStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,7 +51,6 @@ const SERVICE_LABELS: Record<string, string> = {
 export default function ContractorsTab({ onAdd, onEdit, onDelete }: ContractorsTabProps) {
   const user = useAuthStore((state) => state.user);
   const { getContractorsByTenant } = useSettingsStore();
-  const { tenants } = useTenantsStore();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -79,12 +77,6 @@ export default function ContractorsTab({ onAdd, onEdit, onDelete }: ContractorsT
     };
 
     return <Badge variant={variants[status]}>{STATUS_LABELS[status]}</Badge>;
-  };
-
-  const getTenantName = (tenantId?: string) => {
-    if (!tenantId) return '—';
-    const tenant = tenants.find(t => t.id === tenantId);
-    return tenant?.name || 'Неизвестный тенант';
   };
 
   return (
@@ -161,10 +153,10 @@ export default function ContractorsTab({ onAdd, onEdit, onDelete }: ContractorsT
                     <TableCell>
                       <div className="font-medium">{contractor.contractorName}</div>
                       {contractor.contractorTenantId && (
-                        <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                          <Icon name="Link" size={12} />
-                          {getTenantName(contractor.contractorTenantId)}
-                        </div>
+                        <Badge variant="outline" className="text-xs mt-1">
+                          <Icon name="Link" size={10} className="mr-1" />
+                          В системе
+                        </Badge>
                       )}
                     </TableCell>
                     <TableCell>
