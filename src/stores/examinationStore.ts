@@ -37,7 +37,70 @@ interface ExaminationState {
 }
 
 export const useExaminationStore = create<ExaminationState>()(persist((set, get) => ({
-  examinations: [],
+  examinations: [
+    {
+      id: 'exam-1',
+      tenantId: 'tenant-1',
+      objectId: 'eq-1',
+      objectName: 'Компрессор К-301',
+      type: 'Техническая диагностика',
+      scheduledDate: '2025-11-15',
+      status: 'scheduled',
+      executor: 'ООО "Экспертиза Промбезопасность"',
+      executorContact: '+7 495 123-45-67',
+      notes: 'Периодическая диагностика согласно графику',
+      createdBy: 'user-1',
+      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'exam-2',
+      tenantId: 'tenant-1',
+      objectId: 'eq-3',
+      objectName: 'Котел паровой КП-500',
+      type: 'Экспертиза промышленной безопасности',
+      scheduledDate: '2025-10-20',
+      completedDate: '2025-10-18',
+      status: 'completed',
+      executor: 'АНО "Центр экспертиз"',
+      executorContact: '+7 495 987-65-43',
+      conclusionFileUrl: '/files/conclusion-kp500.pdf',
+      notes: 'Выявлены замечания, требуется устранение в течение 30 дней',
+      createdBy: 'user-1',
+      createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'exam-3',
+      tenantId: 'tenant-1',
+      objectId: 'eq-2',
+      objectName: 'Насос центробежный Н-12',
+      type: 'Неразрушающий контроль',
+      scheduledDate: '2025-10-05',
+      status: 'overdue',
+      executor: 'ООО "ПромКонтроль"',
+      executorContact: '+7 495 555-12-34',
+      notes: 'Просрочено! Требуется немедленное проведение',
+      createdBy: 'user-1',
+      createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'exam-4',
+      tenantId: 'tenant-1',
+      objectId: 'eq-4',
+      objectName: 'Кран мостовой КМ-10',
+      type: 'Техническое освидетельствование',
+      scheduledDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      status: 'in_progress',
+      executor: 'Ростехнадзор',
+      executorContact: '+7 495 777-88-99',
+      notes: 'В процессе проведения',
+      createdBy: 'user-1',
+      createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ],
   
   addExamination: (examination) => {
     const newExamination: Examination = {
