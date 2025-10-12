@@ -26,21 +26,24 @@ export default function ManualCertificateDialog({
   onOpenChange,
   trainingCenterId
 }: ManualCertificateDialogProps) {
-  const { addIssuedCertificate, programs } = useTrainingCenterStore();
-  const { personnel = [], organizations = [] } = useSettingsStore();
+  const { addIssuedCertificate } = useTrainingCenterStore();
+  const { personnel = [], organizations = [], certificationAreas } = useSettingsStore();
   
   const [formData, setFormData] = useState({
     personnelId: '',
-    programId: '',
     certificateNumber: '',
     protocolNumber: '',
     protocolDate: '',
     issueDate: '',
     expiryDate: '',
-    category: 'industrial_safety' as const,
+    category: 'Промышленная безопасность',
     area: '',
     issuedBy: ''
   });
+
+  const availableAreas = formData.category 
+    ? certificationAreas.getAreasForCategory(formData.category)
+    : [];
   
   const [certificateFile, setCertificateFile] = useState<File | null>(null);
   const [protocolFile, setProtocolFile] = useState<File | null>(null);
@@ -52,12 +55,18 @@ export default function ManualCertificateDialog({
     const organization = person?.organizationId 
       ? organizations.find(o => o.id === person.organizationId)
       : null;
-    const program = programs.find(p => p.id === formData.programId);
 
-    if (!person || !program) {
-      alert('Необходимо выбрать слушателя и программу');
+    if (!person || !formData.area) {
+      alert('Необходимо выбрать слушателя и область аттестации');
       return;
     }
+
+    const categoryMap: Record<string, 'industrial_safety' | 'energy_safety' | 'labor_safety' | 'ecology'> = {
+      'Промышленная безопасность': 'industrial_safety',
+      'Энергобезопасность': 'energy_safety',
+      'Электробезопасность': 'energy_safety',
+      'Работы на высоте': 'labor_safety'
+    };
 
     const certificateFileUrl = certificateFile ? URL.createObjectURL(certificateFile) : undefined;
     const protocolFileUrl = protocolFile ? URL.createObjectURL(protocolFile) : undefined;
@@ -70,14 +79,14 @@ export default function ManualCertificateDialog({
       organizationId: organization?.id,
       organizationName: organization?.name,
       organizationInn: organization?.inn,
-      programId: formData.programId,
-      programName: program.name,
+      programId: formData.area,
+      programName: formData.area,
       certificateNumber: formData.certificateNumber,
       protocolNumber: formData.protocolNumber,
       protocolDate: formData.protocolDate,
       issueDate: formData.issueDate,
       expiryDate: formData.expiryDate,
-      category: formData.category,
+      category: categoryMap[formData.category] || 'industrial_safety',
       area: formData.area,
       certificateFileUrl,
       protocolFileUrl,
@@ -87,13 +96,12 @@ export default function ManualCertificateDialog({
 
     setFormData({
       personnelId: '',
-      programId: '',
       certificateNumber: '',
       protocolNumber: '',
       protocolDate: '',
       issueDate: '',
       expiryDate: '',
-      category: 'industrial_safety',
+      category: 'Промышленная безопасность',
       area: '',
       issuedBy: ''
     });
@@ -136,49 +144,18 @@ export default function ManualCertificateDialog({
             </div>
 
             <div className="space-y-2">
-              <Label>Программа обучения *</Label>
-              <Select 
-                value={formData.programId} 
-                onValueChange={(value) => setFormData({ ...formData, programId: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите программу" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(programs || []).map(program => (
-                    <SelectItem key={program.id} value={program.id}>
-                      {program.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Номер удостоверения *</Label>
-              <Input
-                value={formData.certificateNumber}
-                onChange={(e) => setFormData({ ...formData, certificateNumber: e.target.value })}
-                placeholder="Например: У-12345"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label>Категория *</Label>
               <Select 
                 value={formData.category} 
-                onValueChange={(value: any) => setFormData({ ...formData, category: value })}
+                onValueChange={(value: any) => setFormData({ ...formData, category: value, area: '' })}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {categoryOptions.map(cat => (
-                    <SelectItem key={cat.value} value={cat.value}>
-                      {cat.label}
+                  {certificationAreas.categories.map(cat => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -187,11 +164,31 @@ export default function ManualCertificateDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Область аттестации</Label>
+            <Label>Область аттестации (программа обучения) *</Label>
+            <Select 
+              value={formData.area} 
+              onValueChange={(value) => setFormData({ ...formData, area: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Выберите область аттестации" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableAreas.map(area => (
+                  <SelectItem key={area} value={area}>
+                    {area}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Номер удостоверения *</Label>
             <Input
-              value={formData.area}
-              onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-              placeholder="Например: Б.7.1"
+              value={formData.certificateNumber}
+              onChange={(e) => setFormData({ ...formData, certificateNumber: e.target.value })}
+              placeholder="Например: У-12345"
+              required
             />
           </div>
 

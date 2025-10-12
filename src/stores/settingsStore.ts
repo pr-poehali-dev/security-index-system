@@ -12,7 +12,13 @@ import {
   mockProductionSites,
   mockExternalOrganizations,
   mockSystemUsers,
-  mockCompetencyMatrix
+  mockCompetencyMatrix,
+  certificationCategories,
+  industrialSafetyAreas,
+  energySafetyAreas,
+  electricalSafetyAreas,
+  heightWorkAreas,
+  getAreasForCategory
 } from './mockData';
 
 interface SettingsState {
@@ -27,6 +33,14 @@ interface SettingsState {
   productionSites: ProductionSite[];
   systemUsers: SystemUser[];
   externalOrganizations: ExternalOrganization[];
+  certificationAreas: {
+    categories: readonly string[];
+    industrialSafety: readonly string[];
+    energySafety: readonly string[];
+    electricalSafety: readonly string[];
+    heightWork: readonly string[];
+    getAreasForCategory: (category: string) => readonly string[];
+  };
   
   addOrganization: (org: Omit<Organization, 'id' | 'createdAt'>) => void;
   updateOrganization: (id: string, updates: Partial<Organization>) => void;
@@ -110,6 +124,15 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
   positions: mockPositions,
 
   personnel: mockPersonnel,
+
+  certificationAreas: {
+    categories: certificationCategories,
+    industrialSafety: industrialSafetyAreas,
+    energySafety: energySafetyAreas,
+    electricalSafety: electricalSafetyAreas,
+    heightWork: heightWorkAreas,
+    getAreasForCategory
+  },
 
   addOrganization: (org) => {
     const newOrg: Organization = {
