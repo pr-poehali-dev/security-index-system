@@ -245,6 +245,13 @@ export default function OrdersTrainingTab() {
             onDownloadPDF={orderHandlers.handleDownloadOrderPDF}
             onPrint={orderHandlers.handlePrintOrder}
             onDelete={orderHandlers.handleDeleteOrder}
+            onSendToTraining={(orderId) => {
+              const order = orders.find(o => o.id === orderId);
+              if (order) {
+                setSelectedOrderForTC(order);
+                setShowSendToTCDialog(true);
+              }
+            }}
             onExportToExcel={handleExportOrdersToExcel}
             onCreateOrder={() => setShowCreateOrderDialog(true)}
             getOrderActions={getOrderActions}

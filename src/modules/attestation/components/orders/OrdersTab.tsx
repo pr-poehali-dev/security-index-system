@@ -29,6 +29,7 @@ interface OrdersTabProps {
   onDownloadPDF: (orderId: string) => void;
   onPrint: (orderId: string) => void;
   onDelete: (orderId: string) => void;
+  onSendToTraining?: (orderId: string) => void;
   onExportToExcel: () => void;
   onCreateOrder: () => void;
   getOrderActions: (order: Order) => JSX.Element[];
@@ -51,6 +52,7 @@ export default function OrdersTab({
   onDownloadPDF,
   onPrint,
   onDelete,
+  onSendToTraining,
   onExportToExcel,
   onCreateOrder,
   getOrderActions
@@ -137,6 +139,7 @@ export default function OrdersTab({
               onDownloadPDF={onDownloadPDF}
               onPrint={onPrint}
               onDelete={onDelete}
+              onSendToTraining={onSendToTraining}
               getOrderActions={getOrderActions}
             />
           ) : (
@@ -148,6 +151,7 @@ export default function OrdersTab({
               onDownloadPDF={onDownloadPDF}
               onPrint={onPrint}
               onDelete={onDelete}
+              onSendToTraining={onSendToTraining}
             />
           )}
         </CardContent>

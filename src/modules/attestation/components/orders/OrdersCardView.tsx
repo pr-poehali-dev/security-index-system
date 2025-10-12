@@ -18,6 +18,7 @@ interface OrdersCardViewProps {
   onDownloadPDF: (orderId: string) => void;
   onPrint: (orderId: string) => void;
   onDelete: (orderId: string) => void;
+  onSendToTraining?: (orderId: string) => void;
   getOrderActions: (order: Order) => JSX.Element[];
 }
 
@@ -46,6 +47,8 @@ const getOrderTypeColor = (type: Order['type']) => {
 const getStatusLabel = (status: Order['status']) => {
   switch (status) {
     case 'draft': return 'Черновик';
+    case 'prepared': return 'Подготовлен';
+    case 'approved': return 'Согласовано';
     case 'active': return 'Активен';
     case 'completed': return 'Выполнен';
     case 'cancelled': return 'Отменен';
@@ -56,8 +59,10 @@ const getStatusLabel = (status: Order['status']) => {
 const getStatusColor = (status: Order['status']) => {
   switch (status) {
     case 'draft': return 'bg-gray-100 text-gray-700 dark:bg-gray-950/30 dark:text-gray-400';
-    case 'active': return 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400';
-    case 'completed': return 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400';
+    case 'prepared': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400';
+    case 'approved': return 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400';
+    case 'active': return 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400';
+    case 'completed': return 'bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400';
     case 'cancelled': return 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400';
     default: return 'bg-gray-100 text-gray-700 dark:bg-gray-950/30 dark:text-gray-400';
   }
@@ -77,7 +82,8 @@ export default function OrdersCardView({
   onEdit,
   onDownloadPDF,
   onPrint,
-  onDelete
+  onDelete,
+  onSendToTraining
 }: OrdersCardViewProps) {
   if (orders.length === 0) {
     return (
@@ -171,6 +177,17 @@ export default function OrdersCardView({
             </div>
 
             <div className="flex gap-2 mt-4 pt-3 border-t">
+              {order.type === 'training' && order.status === 'approved' && onSendToTraining && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => onSendToTraining(order.id)}
+                  className="w-full mb-2"
+                >
+                  <Icon name="Send" size={14} className="mr-1" />
+                  В учебный центр
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"

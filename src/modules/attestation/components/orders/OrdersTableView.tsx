@@ -19,6 +19,7 @@ interface OrdersTableViewProps {
   onDownloadPDF: (orderId: string) => void;
   onPrint: (orderId: string) => void;
   onDelete: (orderId: string) => void;
+  onSendToTraining?: (orderId: string) => void;
 }
 
 const getOrderTypeLabel = (type: Order['type']) => {
@@ -46,6 +47,8 @@ const getOrderTypeColor = (type: Order['type']) => {
 const getStatusLabel = (status: Order['status']) => {
   switch (status) {
     case 'draft': return 'Черновик';
+    case 'prepared': return 'Подготовлен';
+    case 'approved': return 'Согласовано';
     case 'active': return 'Активен';
     case 'completed': return 'Выполнен';
     case 'cancelled': return 'Отменен';
@@ -56,8 +59,10 @@ const getStatusLabel = (status: Order['status']) => {
 const getStatusColor = (status: Order['status']) => {
   switch (status) {
     case 'draft': return 'bg-gray-100 text-gray-700 dark:bg-gray-950/30 dark:text-gray-400';
-    case 'active': return 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400';
-    case 'completed': return 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400';
+    case 'prepared': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400';
+    case 'approved': return 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400';
+    case 'active': return 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400';
+    case 'completed': return 'bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400';
     case 'cancelled': return 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400';
     default: return 'bg-gray-100 text-gray-700 dark:bg-gray-950/30 dark:text-gray-400';
   }
@@ -77,7 +82,8 @@ export default function OrdersTableView({
   onEdit,
   onDownloadPDF,
   onPrint,
-  onDelete
+  onDelete,
+  onSendToTraining
 }: OrdersTableViewProps) {
   const [sortConfig, setSortConfig] = useState<{ field: string; direction: SortDirection }>({ 
     field: 'date', 
@@ -120,9 +126,9 @@ export default function OrdersTableView({
           bValue = b.type;
           break;
         case 'status':
-          const statusOrder = { draft: 1, active: 2, completed: 3, cancelled: 4 };
-          aValue = statusOrder[a.status];
-          bValue = statusOrder[b.status];
+          const statusOrder = { draft: 1, prepared: 2, approved: 3, active: 4, completed: 5, cancelled: 6 };
+          aValue = statusOrder[a.status as keyof typeof statusOrder];
+          bValue = statusOrder[b.status as keyof typeof statusOrder];
           break;
         case 'date':
           aValue = new Date(a.date).getTime();
@@ -238,6 +244,16 @@ export default function OrdersTableView({
                 </td>
                 <td className="p-3">
                   <div className="flex items-center justify-end gap-1">
+                    {order.type === 'training' && order.status === 'approved' && onSendToTraining && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => onSendToTraining(order.id)}
+                        title="Отправить в учебный центр"
+                      >
+                        <Icon name="Send" size={16} />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
