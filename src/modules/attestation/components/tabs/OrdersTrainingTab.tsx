@@ -3,16 +3,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import CreateOrderDialog from './CreateOrderDialog';
-import CreateTrainingDialog from './CreateTrainingDialog';
+import CreateOrderDialog from '../orders/CreateOrderDialog';
+import CreateTrainingDialog from '../orders/CreateTrainingDialog';
 import { useAuthStore } from '@/stores/authStore';
 import { useOrdersStore } from '@/stores/ordersStore';
 import { useTrainingsAttestationStore } from '@/stores/trainingsAttestationStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { createOrderHandlers } from './orders/orderHandlers';
-import { createTrainingHandlers } from './orders/trainingHandlers';
-import OrdersTab from './orders/OrdersTab';
-import TrainingsTab from './orders/TrainingsTab';
+import { createOrderHandlers } from '../orders/orderHandlers';
+import { createTrainingHandlers } from '../orders/trainingHandlers';
+import OrdersTab from '../orders/OrdersTab';
+import TrainingsTab from '../orders/TrainingsTab';
 import type { Order } from '@/stores/ordersStore';
 
 export default function OrdersTrainingTab() {

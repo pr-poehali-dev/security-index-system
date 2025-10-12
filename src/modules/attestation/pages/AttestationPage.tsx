@@ -3,13 +3,13 @@ import PageHeader from '@/components/layout/PageHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import EmployeeAttestationsTab from '../components/employees/EmployeeAttestationsTab';
-import ComplianceAnalysisTab from '../components/ComplianceAnalysisTab';
-import OrdersTrainingTab from '../components/OrdersTrainingTab';
-import ReportsTab from '../components/ReportsTab';
-import DirectoriesTab from '../components/DirectoriesTab';
-import NotificationsTab from '../components/NotificationsTab';
-import AttestationCalendarTab from '../components/AttestationCalendarTab';
-import TasksTab from '../components/TasksTab';
+import ComplianceAnalysisTab from '../components/tabs/ComplianceAnalysisTab';
+import OrdersTrainingTab from '../components/tabs/OrdersTrainingTab';
+import ReportsTab from '../components/tabs/ReportsTab';
+import DirectoriesTab from '../components/tabs/DirectoriesTab';
+import NotificationsTab from '../components/tabs/NotificationsTab';
+import AttestationCalendarTab from '../components/tabs/AttestationCalendarTab';
+import TasksTab from '../components/tabs/TasksTab';
 
 const AttestationPage = memo(function AttestationPage() {
   return (
