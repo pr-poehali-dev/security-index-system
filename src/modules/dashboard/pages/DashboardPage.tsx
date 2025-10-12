@@ -275,7 +275,7 @@ const DashboardPage = memo(function DashboardPage() {
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
     }
-  };
+  }, [objectsStats, taskStats, overdueTasks, openIncidents, incidents, criticalTasks, objects, organizations]);
 
   const handleGenerateTasksReport = useCallback(async (period: ReportPeriod) => {
     try {

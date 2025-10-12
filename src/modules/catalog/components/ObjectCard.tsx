@@ -158,6 +158,4 @@ const ObjectCard = memo(function ObjectCard({ object: obj, onView, onEdit }: Obj
   );
 });
 
-export default ObjectCard;);
-
 export default ObjectCard;
