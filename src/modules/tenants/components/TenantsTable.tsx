@@ -16,9 +16,10 @@ interface TenantsTableProps {
   tenants: Tenant[];
   onEdit: (tenantId: string) => void;
   onShowCredentials: (tenantId: string) => void;
+  onToggleStatus: (tenantId: string) => void;
 }
 
-export default function TenantsTable({ tenants, onEdit, onShowCredentials }: TenantsTableProps) {
+export default function TenantsTable({ tenants, onEdit, onShowCredentials, onToggleStatus }: TenantsTableProps) {
   const getDaysUntilExpiry = (expiresAt: string) => {
     return Math.floor((new Date(expiresAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
   };
@@ -95,6 +96,7 @@ export default function TenantsTable({ tenants, onEdit, onShowCredentials }: Ten
                       variant="ghost"
                       size="sm"
                       onClick={() => onEdit(tenant.id)}
+                      title="Настроить"
                     >
                       <Icon name="Settings" size={16} />
                     </Button>
@@ -102,8 +104,18 @@ export default function TenantsTable({ tenants, onEdit, onShowCredentials }: Ten
                       variant="ghost"
                       size="sm"
                       onClick={() => onShowCredentials(tenant.id)}
+                      title="Учетные данные"
                     >
                       <Icon name="Key" size={16} />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onToggleStatus(tenant.id)}
+                      title={tenant.status === 'active' ? 'Деактивировать' : 'Активировать'}
+                      className={tenant.status === 'active' ? 'text-red-600 hover:text-red-700' : 'text-emerald-600 hover:text-emerald-700'}
+                    >
+                      <Icon name={tenant.status === 'active' ? 'Ban' : 'CheckCircle'} size={16} />
                     </Button>
                   </div>
                 </TableCell>

@@ -9,9 +9,10 @@ interface TenantCardProps {
   tenant: Tenant;
   onEdit: (tenantId: string) => void;
   onShowCredentials: (tenantId: string) => void;
+  onToggleStatus: (tenantId: string) => void;
 }
 
-export default function TenantCard({ tenant, onEdit, onShowCredentials }: TenantCardProps) {
+export default function TenantCard({ tenant, onEdit, onShowCredentials, onToggleStatus }: TenantCardProps) {
   const daysUntilExpiry = Math.floor((new Date(tenant.expiresAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
   const isExpiring = daysUntilExpiry <= 30;
 
@@ -80,6 +81,14 @@ export default function TenantCard({ tenant, onEdit, onShowCredentials }: Tenant
           >
             <Icon name="Key" className="mr-2" size={14} />
             Учетные данные
+          </Button>
+          <Button 
+            variant={tenant.status === 'active' ? 'outline' : 'default'}
+            size="sm" 
+            onClick={() => onToggleStatus(tenant.id)}
+            title={tenant.status === 'active' ? 'Деактивировать' : 'Активировать'}
+          >
+            <Icon name={tenant.status === 'active' ? 'Ban' : 'CheckCircle'} size={14} />
           </Button>
         </div>
       </CardContent>

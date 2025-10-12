@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTenantStore } from '@/stores/tenantStore';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import TenantCard from '../TenantCard';
 import TenantsTable from '../TenantsTable';
@@ -11,10 +13,13 @@ import CredentialsDialog from '../CredentialsDialog';
 import type { ModuleType } from '@/types';
 
 type ViewMode = 'cards' | 'table';
+type StatusFilter = 'all' | 'active' | 'inactive';
 
 export default function GeneralTab() {
   const { tenants, addTenant, updateTenant, saveCredentials, getCredentials, resetPassword } = useTenantStore();
   const [viewMode, setViewMode] = useState<ViewMode>('cards');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCredentialsDialogOpen, setIsCredentialsDialogOpen] = useState(false);
@@ -129,13 +134,54 @@ export default function GeneralTab() {
     setIsCredentialsDialogOpen(false);
   };
 
+  const handleToggleStatus = (tenantId: string) => {
+    const tenant = tenants.find(t => t.id === tenantId);
+    if (tenant) {
+      updateTenant(tenantId, {
+        ...tenant,
+        status: tenant.status === 'active' ? 'inactive' : 'active'
+      });
+    }
+  };
+
+  const filteredTenants = useMemo(() => {
+    return tenants.filter(tenant => {
+      const matchesSearch = searchQuery === '' || 
+        tenant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tenant.inn.includes(searchQuery);
+      
+      const matchesStatus = statusFilter === 'all' || tenant.status === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    });
+  }, [tenants, searchQuery, statusFilter]);
+
   const selectedTenantData = selectedTenant ? tenants.find(t => t.id === selectedTenant) : null;
   const credentials = selectedTenant ? getCredentials(selectedTenant) : null;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2 flex-1">
+          <div className="relative flex-1 max-w-md">
+            <Icon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <Input
+              placeholder="Поиск по названию или ИНН..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilter)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Все статусы</SelectItem>
+              <SelectItem value="active">Активные</SelectItem>
+              <SelectItem value="inactive">Неактивные</SelectItem>
+            </SelectContent>
+          </Select>
           <div className="flex items-center border rounded-lg overflow-hidden bg-white dark:bg-gray-800">
             <Button
               variant={viewMode === 'cards' ? 'default' : 'ghost'}
@@ -177,22 +223,29 @@ export default function GeneralTab() {
         </Dialog>
       </div>
 
-      {viewMode === 'cards' ? (
+      {filteredTenants.length === 0 ? (
+        <div className="text-center py-12 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
+          <Icon name="Search" className="mx-auto text-gray-400 mb-4" size={48} />
+          <p className="text-gray-600 dark:text-gray-400">Тенанты не найдены</p>
+        </div>
+      ) : viewMode === 'cards' ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {tenants.map((tenant) => (
+          {filteredTenants.map((tenant) => (
             <TenantCard
               key={tenant.id}
               tenant={tenant}
               onEdit={handleEditTenant}
               onShowCredentials={handleShowCredentials}
+              onToggleStatus={handleToggleStatus}
             />
           ))}
         </div>
       ) : (
         <TenantsTable
-          tenants={tenants}
+          tenants={filteredTenants}
           onEdit={handleEditTenant}
           onShowCredentials={handleShowCredentials}
+          onToggleStatus={handleToggleStatus}
         />
       )}
 
