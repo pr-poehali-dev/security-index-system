@@ -8,11 +8,11 @@ import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCertificationStore } from '@/stores/certificationStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
-import TaskStatisticsCards from '../tasks/TaskStatisticsCards';
-import TaskFilters from '../tasks/TaskFilters';
-import TaskCard from '../tasks/TaskCard';
-import TaskDetailsDialog from '../tasks/TaskDetailsDialog';
-import PriorityStatistics from '../reports/PriorityStatistics';
+import TaskStatisticsCards from '../TaskStatisticsCards';
+import TaskFilters from '../TaskFilters';
+import TaskCard from '../TaskCard';
+import TaskDetailsDialog from '../TaskDetailsDialog';
+import PriorityStatistics from '../PriorityStatistics';
 import { getStatusLabel } from '../../utils/taskUtils';
 import type { Task } from '../../types/task';
 

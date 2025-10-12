@@ -2,12 +2,12 @@ import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
-import CalendarStatisticsCards from '../calendar/CalendarStatisticsCards';
-import CalendarFilters from '../calendar/CalendarFilters';
-import MonthView from '../calendar/MonthView';
-import YearView from '../calendar/YearView';
-import UpcomingCertificationsList from '../calendar/UpcomingCertificationsList';
-import DayCertificationsDialog from '../calendar/DayCertificationsDialog';
+import CalendarStatisticsCards from '../CalendarStatisticsCards';
+import CalendarFilters from '../CalendarFilters';
+import MonthView from '../MonthView';
+import YearView from '../YearView';
+import UpcomingCertificationsList from '../UpcomingCertificationsList';
+import DayCertificationsDialog from '../DayCertificationsDialog';
 import { useCertificationStore } from '@/stores/certificationStore';
 
 interface CalendarCertification {
