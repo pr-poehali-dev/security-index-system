@@ -40,7 +40,6 @@ export interface IssuedCertificate {
 
 interface TrainingCenterState {
   programs: TrainingProgram[];
-  trainingPrograms: TrainingProgram[];
   groups: TrainingGroup[];
   enrollments: TrainingEnrollment[];
   locations: TrainingLocation[];
@@ -94,9 +93,6 @@ interface TrainingCenterState {
 
 export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set, get) => ({
   programs: [],
-  get trainingPrograms() {
-    return this.programs;
-  },
   groups: [],
   enrollments: [],
   locations: [],

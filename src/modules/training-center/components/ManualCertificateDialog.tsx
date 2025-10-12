@@ -27,7 +27,7 @@ export default function ManualCertificateDialog({
   trainingCenterId
 }: ManualCertificateDialogProps) {
   const { addIssuedCertificate, programs } = useTrainingCenterStore();
-  const { personnel, organizations } = useSettingsStore();
+  const { personnel = [], organizations = [] } = useSettingsStore();
   
   const [formData, setFormData] = useState({
     personnelId: '',
@@ -121,7 +121,7 @@ export default function ManualCertificateDialog({
                   <SelectValue placeholder="Выберите слушателя" />
                 </SelectTrigger>
                 <SelectContent>
-                  {personnel.map(person => {
+                  {(personnel || []).map(person => {
                     const org = person.organizationId 
                       ? organizations.find(o => o.id === person.organizationId)
                       : null;
@@ -145,7 +145,7 @@ export default function ManualCertificateDialog({
                   <SelectValue placeholder="Выберите программу" />
                 </SelectTrigger>
                 <SelectContent>
-                  {programs?.map(program => (
+                  {(programs || []).map(program => (
                     <SelectItem key={program.id} value={program.id}>
                       {program.name}
                     </SelectItem>

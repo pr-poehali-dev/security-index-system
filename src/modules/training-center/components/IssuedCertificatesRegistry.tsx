@@ -47,9 +47,9 @@ const categoryLabels = {
 };
 
 export default function IssuedCertificatesRegistry() {
-  const { issuedCertificates, syncCertificateToAttestation, trainingPrograms } = useTrainingCenterStore();
+  const { issuedCertificates, syncCertificateToAttestation, programs } = useTrainingCenterStore();
   const { addCertification } = useCertificationStore();
-  const { organizations, personnel, people } = useSettingsStore();
+  const { organizations = [], personnel = [] } = useSettingsStore();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -104,7 +104,7 @@ export default function IssuedCertificatesRegistry() {
   const handleExport = () => {
     // Подготовка данных для экспорта
     const dataToExport = filteredCertificates.map(cert => {
-      const program = trainingPrograms.find(p => p.id === cert.programId);
+      const program = programs.find(p => p.id === cert.programId);
       const person = personnel.find(p => p.id === cert.personnelId);
       const organization = person?.organizationId 
         ? organizations.find(o => o.id === person.organizationId)
