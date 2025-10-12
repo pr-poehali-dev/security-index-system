@@ -17,6 +17,7 @@ const DashboardPage = lazy(() => import("@/modules/dashboard").then(m => ({ defa
 const TenantsPage = lazy(() => import("@/modules/tenants").then(m => ({ default: m.TenantsPage })));
 const SettingsPage = lazy(() => import("@/modules/settings").then(m => ({ default: m.SettingsPage })));
 const CatalogPage = lazy(() => import("@/modules/catalog").then(m => ({ default: m.CatalogPage })));
+const ContractorsPage = lazy(() => import("@/modules/catalog/pages/ContractorsPage"));
 const IncidentsPage = lazy(() => import("@/modules/incidents").then(m => ({ default: m.IncidentsPage })));
 const ChecklistsPage = lazy(() => import("@/modules/checklists").then(m => ({ default: m.ChecklistsPage })));
 const AttestationPage = lazy(() => import("@/modules/attestation").then(m => ({ default: m.AttestationPage })));
@@ -142,6 +143,16 @@ const App = memo(function App() {
                 <ProtectedRoute>
                   <AuthenticatedLayout>
                     <CatalogPage />
+                  </AuthenticatedLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.CONTRACTORS}
+              element={
+                <ProtectedRoute>
+                  <AuthenticatedLayout>
+                    <ContractorsPage />
                   </AuthenticatedLayout>
                 </ProtectedRoute>
               }

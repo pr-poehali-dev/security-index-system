@@ -154,7 +154,7 @@ const Sidebar = memo(function Sidebar() {
           
           const hasNotifications = notifications.length > 0;
           
-          return (
+          const linkElement = (
             <NavLink
               key={moduleKey}
               to={route}
@@ -185,6 +185,30 @@ const Sidebar = memo(function Sidebar() {
               )}
             </NavLink>
           );
+          
+          if (moduleKey === 'catalog') {
+            return (
+              <div key={moduleKey}>
+                {linkElement}
+                <NavLink
+                  to={ROUTES.CONTRACTORS}
+                  title={sidebarCollapsed ? "Подрядчики" : ""}
+                  className={({ isActive }) => cn(
+                    "flex items-center gap-3 rounded-lg mb-1 transition-colors",
+                    sidebarCollapsed ? "justify-center px-2 py-2.5 ml-0" : "px-3 py-2.5 ml-4",
+                    isActive 
+                      ? "bg-emerald-600 text-white" 
+                      : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                  )}
+                >
+                  <Icon name="Users" size={20} />
+                  {!sidebarCollapsed && <span className="text-sm font-medium">Подрядчики</span>}
+                </NavLink>
+              </div>
+            );
+          }
+          
+          return linkElement;
         })}
       </nav>
 
