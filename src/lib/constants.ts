@@ -54,7 +54,7 @@ export const MODULES: Record<ModuleType, { name: string; description: string; ic
   'knowledge-base': {
     name: 'База знаний',
     description: 'Документация, инструкции и нормативные материалы',
-    icon: 'Library'
+    icon: 'BookMarked'
   },
   settings: {
     name: 'Настройки',
