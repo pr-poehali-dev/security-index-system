@@ -51,7 +51,13 @@ export default function ComplianceAnalysisTab() {
       const requiredAreas = competency?.requiredAreas.flatMap(ra => ra.areas) || [];
       
       const personnelCerts = certifications.filter(c => c.personnelId === p.id);
-      const actualAreas = personnelCerts.map(c => c.area);
+      
+      const validCerts = personnelCerts.filter(c => {
+        const { status } = getCertificationStatus(c.expiryDate);
+        return status === 'valid' || status === 'expiring_soon';
+      });
+      
+      const actualAreas = validCerts.map(c => c.area);
       
       const expiringAreas = personnelCerts
         .filter(c => {
@@ -62,8 +68,10 @@ export default function ComplianceAnalysisTab() {
       
       const missingAreas = requiredAreas.filter(ra => !actualAreas.includes(ra));
       
+      const validAreasCount = actualAreas.filter(area => !expiringAreas.includes(area)).length;
+      
       const compliancePercent = requiredAreas.length > 0 
-        ? Math.round((actualAreas.length / requiredAreas.length) * 100)
+        ? Math.round((validAreasCount / requiredAreas.length) * 100)
         : 0;
 
       return {
@@ -262,7 +270,9 @@ export default function ComplianceAnalysisTab() {
                       <div className="flex items-center gap-2">
                         <Icon name="CheckCircle2" size={14} className="text-emerald-600" />
                         <span className="text-muted-foreground">
-                          Имеется: <span className="font-medium text-emerald-600">{item.actualCertifications.length}</span>
+                          Действительные: <span className="font-medium text-emerald-600">
+                            {item.actualCertifications.filter(a => !item.expiringCertifications.includes(a)).length}
+                          </span>
                         </span>
                       </div>
                       {item.expiringCertifications.length > 0 && (
