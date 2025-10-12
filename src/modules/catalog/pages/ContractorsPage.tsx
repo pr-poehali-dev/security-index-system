@@ -3,13 +3,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import ContractorsList from '../components/contractors/ContractorsList';
-import EmployeesList from '../components/contractors/EmployeesList';
+import EmployeesListFull from '../components/contractors/EmployeesListFull';
 import ObjectAccessManagement from '../components/contractors/ObjectAccessManagement';
 import ContractorFormDialog from '../components/contractors/ContractorFormDialog';
+import EmployeeFormDialog from '../components/contractors/EmployeeFormDialog';
 
 const ContractorsPage = () => {
   const [activeTab, setActiveTab] = useState('contractors');
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isContractorDialogOpen, setIsContractorDialogOpen] = useState(false);
+  const [isEmployeeDialogOpen, setIsEmployeeDialogOpen] = useState(false);
+
+  const handleCreateClick = () => {
+    if (activeTab === 'contractors') {
+      setIsContractorDialogOpen(true);
+    } else if (activeTab === 'employees') {
+      setIsEmployeeDialogOpen(true);
+    }
+  };
 
   const getCreateButtonText = () => {
     switch (activeTab) {
@@ -46,7 +56,7 @@ const ContractorsPage = () => {
             Реестр подрядных организаций, персонала и контроль доступа к объектам
           </p>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
+        <Button onClick={handleCreateClick}>
           <Icon name={getCreateButtonIcon()} className="mr-2" size={18} />
           {getCreateButtonText()}
         </Button>
@@ -73,7 +83,7 @@ const ContractorsPage = () => {
         </TabsContent>
 
         <TabsContent value="employees" className="space-y-4">
-          <EmployeesList />
+          <EmployeesListFull />
         </TabsContent>
 
         <TabsContent value="access" className="space-y-4">
@@ -82,8 +92,13 @@ const ContractorsPage = () => {
       </Tabs>
 
       <ContractorFormDialog
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
+        open={isContractorDialogOpen}
+        onOpenChange={setIsContractorDialogOpen}
+      />
+      
+      <EmployeeFormDialog
+        open={isEmployeeDialogOpen}
+        onOpenChange={setIsEmployeeDialogOpen}
       />
     </div>
   );
