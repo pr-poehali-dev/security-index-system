@@ -1,3 +1,4 @@
+// src/modules/attestation/pages/AttestationPage.tsx
 import { memo } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
