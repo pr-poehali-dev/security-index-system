@@ -28,6 +28,7 @@ export default function KnowledgeBasePage() {
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
 
   const canManage = user?.role === 'SuperAdmin' || user?.role === 'TenantAdmin';
+  const canView = true;
 
   const filteredDocuments = useMemo(() => {
     const categoryDocs = getDocumentsByCategory(activeTab);
