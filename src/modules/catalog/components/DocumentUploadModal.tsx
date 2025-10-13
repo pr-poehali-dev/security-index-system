@@ -105,6 +105,20 @@ export default function DocumentUploadModal({ open, onOpenChange, objectId }: Do
 
       const fileUrl = `/docs/${file!.name}`;
       
+      // Определяем статус документа на основе срока действия
+      let status: 'valid' | 'expiring_soon' | 'expired' = 'valid';
+      if (formData.expiryDate) {
+        const today = new Date();
+        const expiryDate = new Date(formData.expiryDate);
+        const daysUntilExpiry = Math.floor((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (daysUntilExpiry < 0) {
+          status = 'expired';
+        } else if (daysUntilExpiry <= 30) {
+          status = 'expiring_soon';
+        }
+      }
+      
       addDocument({
         objectId,
         title: formData.title.trim(),
@@ -115,6 +129,7 @@ export default function DocumentUploadModal({ open, onOpenChange, objectId }: Do
         fileUrl,
         fileName: file!.name,
         fileSize: file!.size,
+        status,
         uploadedBy: 'Текущий пользователь'
       });
 
