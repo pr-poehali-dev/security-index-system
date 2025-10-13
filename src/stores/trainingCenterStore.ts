@@ -94,6 +94,8 @@ interface TrainingCenterState {
   getIssuedCertificatesByTrainingCenter: (trainingCenterId: string) => IssuedCertificate[];
   getIssuedCertificatesByClient: (clientTenantId: string) => IssuedCertificate[];
   syncCertificateToAttestation: (certificateId: string) => Certification | null;
+  syncCertificatesToOrganization: (certificateIds: string[], targetTenantId: string) => void;
+  bulkSyncGroupCertificates: (groupId: string) => void;
 }
 
 export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set, get) => ({
@@ -510,5 +512,28 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
     get().updateIssuedCertificate(certificateId, { status: 'synced' });
 
     return attestationCert;
+  },
+
+  syncCertificatesToOrganization: (certificateIds: string[], targetTenantId: string) => {
+    const { issuedCertificates, updateIssuedCertificate } = get();
+    
+    certificateIds.forEach(certId => {
+      const cert = issuedCertificates.find(c => c.id === certId);
+      if (cert && cert.clientTenantId === targetTenantId) {
+        updateIssuedCertificate(certId, { status: 'synced' });
+      }
+    });
+  },
+
+  bulkSyncGroupCertificates: (groupId: string) => {
+    const { issuedCertificates, updateIssuedCertificate } = get();
+    
+    const groupCerts = issuedCertificates.filter(cert => cert.groupId === groupId);
+    
+    groupCerts.forEach(cert => {
+      if (cert.status === 'issued') {
+        updateIssuedCertificate(cert.id, { status: 'synced' });
+      }
+    });
   }
 }), { name: 'training-center-storage-v1' }));

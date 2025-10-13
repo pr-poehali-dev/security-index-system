@@ -573,8 +573,19 @@ export interface TrainingGroup {
   enrolledCount: number;
   status: TrainingGroupStatus;
   notes?: string;
+  externalEnrollments?: ExternalEnrollment[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ExternalEnrollment {
+  tenantId: string;
+  tenantName: string;
+  personnelId: string;
+  fullName: string;
+  position: string;
+  department?: string;
+  requestId?: string;
 }
 
 export type EnrollmentStatus = 'enrolled' | 'in_progress' | 'completed' | 'failed' | 'cancelled';
@@ -664,7 +675,7 @@ export interface OrganizationTrainingRequest {
 }
 
 export type NotificationType = 'critical' | 'warning' | 'info' | 'success';
-export type NotificationSource = 'incident' | 'certification' | 'task' | 'audit' | 'system' | 'platform_news' | 'attestation' | 'catalog';
+export type NotificationSource = 'incident' | 'certification' | 'task' | 'audit' | 'system' | 'platform_news' | 'attestation' | 'catalog' | 'training_center';
 
 export interface Notification {
   id: string;
@@ -721,8 +732,7 @@ export type ContractorServiceType = 'full_training' | 'sdo_access_only' | 'certi
 export interface OrganizationContractor {
   id: string;
   tenantId: string;
-  contractorTenantId?: string;
-  contractorExternalOrgId?: string;
+  contractorTenantId: string;
   contractorName: string;
   contractorInn?: string;
   type: 'training_center' | 'contractor' | 'supplier';
@@ -739,8 +749,8 @@ export interface OrganizationContractor {
   updatedAt: string;
 }
 
-export type InterOrgDocumentType = 'training_request' | 'certificate' | 'sdo_access' | 'invoice' | 'contract' | 'report';
-export type InterOrgDocumentStatus = 'sent' | 'received' | 'processed' | 'rejected';
+export type InterOrgDocumentType = 'training_request' | 'training_completion' | 'certificate' | 'sdo_access' | 'invoice' | 'contract' | 'report';
+export type InterOrgDocumentStatus = 'draft' | 'sent' | 'received' | 'processed' | 'completed' | 'rejected';
 
 export interface InterOrgDocument {
   id: string;
@@ -757,9 +767,72 @@ export interface InterOrgDocument {
   fileSize?: number;
   status: InterOrgDocumentStatus;
   metadata?: Record<string, any>;
+  data?: any;
   sentAt: string;
   receivedAt?: string;
   processedAt?: string;
   processedBy?: string;
   notes?: string;
+}
+
+export interface TrainingCertificate {
+  id: string;
+  tenantId: string;
+  externalPersonnelTenantId?: string;
+  externalPersonnelId?: string;
+  personnelId?: string;
+  fullName: string;
+  position?: string;
+  certificateNumber: string;
+  programId: string;
+  programCode: string;
+  programName: string;
+  groupId?: string;
+  issueDate: string;
+  expiryDate: string;
+  documentFile?: string;
+  documentUrl?: string;
+  status: 'active' | 'expired' | 'revoked';
+  syncedToOrganization: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type AttestationOrderType = 'rostekhnadzor' | 'internal_commission';
+export type AttestationOrderStatus = 'draft' | 'pending' | 'scheduled' | 'completed' | 'cancelled';
+
+export interface AttestationOrder {
+  id: string;
+  tenantId: string;
+  organizationId: string;
+  orderNumber: string;
+  orderDate: string;
+  attestationType: AttestationOrderType;
+  certificationAreaCode: string;
+  certificationAreaName: string;
+  personnel: AttestationOrderPersonnel[];
+  scheduledDate?: string;
+  commissionMembers?: string[];
+  location?: string;
+  status: AttestationOrderStatus;
+  notes?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AttestationOrderPersonnel {
+  personnelId: string;
+  fullName: string;
+  position: string;
+  requiredDocuments: AttestationRequiredDocument[];
+}
+
+export interface AttestationRequiredDocument {
+  documentType: 'training_certificate' | 'medical_certificate' | 'diploma' | 'work_experience' | 'other';
+  documentName: string;
+  certificateId?: string;
+  fileId?: string;
+  fileUrl?: string;
+  status: 'missing' | 'attached' | 'verified';
 }

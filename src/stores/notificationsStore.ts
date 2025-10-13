@@ -32,7 +32,19 @@ interface NotificationsState {
 }
 
 export const useNotificationsStore = create<NotificationsState>((set, get) => ({
-  notifications: [],
+  notifications: [
+    {
+      id: 'notif-training-1',
+      tenantId: 'tenant-1',
+      type: 'success',
+      source: 'training_center',
+      title: 'Завершена подготовка сотрудников',
+      message: 'Учебный центр "УЦ Профессионал" завершил подготовку 3 сотрудников. Удостоверения прикреплены к персоналу.',
+      link: '/attestation',
+      isRead: false,
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    }
+  ],
   history: [
     {
       id: 'hist-1',
@@ -216,4 +228,18 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
   getHistory: () => {
     return get().history;
   },
+  
+  addTrainingCompletionNotification: (tenantId: string, trainingCenterName: string, personnelCount: number, certificateIds: string[]) => {
+    const notification: Omit<Notification, 'id' | 'createdAt'> = {
+      tenantId,
+      type: 'success',
+      source: 'training_center',
+      title: 'Завершена подготовка сотрудников',
+      message: `Учебный центр "${trainingCenterName}" завершил подготовку ${personnelCount} сотрудников. Удостоверения прикреплены к персоналу.`,
+      link: '/attestation',
+      isRead: false
+    };
+    
+    get().addNotification(notification);
+  }
 }));

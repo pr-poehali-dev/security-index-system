@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import CreateOrderDialog from '../CreateOrderDialog';
 import CreateTrainingDialog from '../CreateTrainingDialog';
 import SendToTrainingCenterDialog from '../SendToTrainingCenterDialog';
+import AttestationOrdersList from '../AttestationOrdersList';
 import { useAuthStore } from '@/stores/authStore';
 import { useOrdersStore } from '@/stores/ordersStore';
 import { useTrainingsAttestationStore } from '@/stores/trainingsAttestationStore';
+import { useAttestationOrdersStore } from '@/stores/attestationOrdersStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { createOrderHandlers } from '../orders/orderHandlers';
 import { createTrainingHandlers } from '../orders/trainingHandlers';
@@ -21,6 +23,7 @@ export default function OrdersTrainingTab() {
   const user = useAuthStore((state) => state.user);
   const { orders, getOrdersByTenant } = useOrdersStore();
   const { trainings, getTrainingsByTenant } = useTrainingsAttestationStore();
+  const { getOrdersByTenant: getAttestationOrders } = useAttestationOrdersStore();
   const { personnel, people, positions, getContractorsByType } = useSettingsStore();
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,6 +40,7 @@ export default function OrdersTrainingTab() {
 
   const tenantOrders = user?.tenantId ? getOrdersByTenant(user.tenantId) : [];
   const tenantTrainings = user?.tenantId ? getTrainingsByTenant(user.tenantId) : [];
+  const attestationOrders = user?.tenantId ? getAttestationOrders(user.tenantId) : [];
   const trainingOrgs = user?.tenantId ? getContractorsByType(user.tenantId, 'training_center') : [];
 
   const toggleTrainingExpanded = (trainingId: string) => {
@@ -221,6 +225,10 @@ export default function OrdersTrainingTab() {
             <Icon name="FileText" size={20} />
             <span className="text-xs font-medium">Приказы ({orderStats.total})</span>
           </TabsTrigger>
+          <TabsTrigger value="attestation-orders" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="ClipboardCheck" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Приказы на<br/>аттестацию ({attestationOrders.length})</span>
+          </TabsTrigger>
           <TabsTrigger value="trainings" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="GraduationCap" size={20} />
             <span className="text-xs font-medium">Обучения ({trainingStats.total})</span>
@@ -257,6 +265,10 @@ export default function OrdersTrainingTab() {
             onCreateOrder={() => setShowCreateOrderDialog(true)}
             getOrderActions={getOrderActions}
           />
+        </TabsContent>
+
+        <TabsContent value="attestation-orders">
+          <AttestationOrdersList />
         </TabsContent>
 
         <TabsContent value="trainings">

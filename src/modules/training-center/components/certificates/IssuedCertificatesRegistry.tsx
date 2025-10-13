@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/components/ui/icon';
 import { useTrainingCenterStore } from '@/stores/trainingCenterStore';
 import { useCertificationStore } from '@/stores/certificationStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import BulkIssueCertificatesDialog from './BulkIssueCertificatesDialog';
 import ManualCertificateDialog from './ManualCertificateDialog';
+import SyncCertificatesDialog from './SyncCertificatesDialog';
 import CertificatesFilters from '../registry/CertificatesFilters';
 import CertificatesTable from '../registry/CertificatesTable';
 import GroupedCertificatesView from '../registry/GroupedCertificatesView';
@@ -44,6 +46,8 @@ export default function IssuedCertificatesRegistry() {
   const [groupByOrganization, setGroupByOrganization] = useState(false);
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
   const [manualDialogOpen, setManualDialogOpen] = useState(false);
+  const [syncDialogOpen, setSyncDialogOpen] = useState(false);
+  const [selectedCertIds, setSelectedCertIds] = useState<string[]>([]);
   const [viewDocumentUrl, setViewDocumentUrl] = useState<string | null>(null);
 
   const filteredCertificates = issuedCertificates.filter((cert) => {
@@ -90,6 +94,32 @@ export default function IssuedCertificatesRegistry() {
 
   const { handleExport } = useCertificatesExport(filteredCertificates, organizations, personnel);
 
+  const selectedCertificates = issuedCertificates.filter(cert => selectedCertIds.includes(cert.id));
+  const unsyncedCertificates = filteredCertificates.filter(cert => cert.status !== 'synced');
+
+  const toggleCertSelection = (certId: string) => {
+    setSelectedCertIds(prev => 
+      prev.includes(certId) 
+        ? prev.filter(id => id !== certId)
+        : [...prev, certId]
+    );
+  };
+
+  const selectAllUnsynced = () => {
+    const unsyncedIds = unsyncedCertificates.map(c => c.id);
+    setSelectedCertIds(unsyncedIds);
+  };
+
+  const clearSelection = () => {
+    setSelectedCertIds([]);
+  };
+
+  const handleOpenSyncDialog = () => {
+    if (selectedCertIds.length > 0) {
+      setSyncDialogOpen(true);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -104,6 +134,16 @@ export default function IssuedCertificatesRegistry() {
             </CardDescription>
           </div>
           <div className="flex gap-2">
+            {selectedCertIds.length > 0 && (
+              <Button 
+                onClick={handleOpenSyncDialog} 
+                variant="default" 
+                className="gap-2"
+              >
+                <Icon name="RefreshCw" size={18} />
+                Синхронизировать ({selectedCertIds.length})
+              </Button>
+            )}
             <Button onClick={handleExport} variant="outline" className="gap-2">
               <Icon name="Download" size={18} />
               Экспорт
@@ -120,6 +160,34 @@ export default function IssuedCertificatesRegistry() {
         </div>
       </CardHeader>
       <CardContent>
+        {unsyncedCertificates.length > 0 && (
+          <div className="mb-4 flex items-center justify-between rounded-lg border bg-blue-50 dark:bg-blue-950/20 p-3">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={selectedCertIds.length === unsyncedCertificates.length}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    selectAllUnsynced();
+                  } else {
+                    clearSelection();
+                  }
+                }}
+              />
+              <span className="text-sm font-medium">
+                {selectedCertIds.length > 0 
+                  ? `Выбрано ${selectedCertIds.length} из ${unsyncedCertificates.length}`
+                  : `Выбрать все несинхронизированные (${unsyncedCertificates.length})`
+                }
+              </span>
+            </div>
+            {selectedCertIds.length > 0 && (
+              <Button variant="ghost" size="sm" onClick={clearSelection}>
+                Сбросить
+              </Button>
+            )}
+          </div>
+        )}
+        
         <CertificatesFilters
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
@@ -155,6 +223,8 @@ export default function IssuedCertificatesRegistry() {
             categoryLabels={categoryLabels}
             onViewDocument={setViewDocumentUrl}
             onSync={handleSync}
+            selectedCertIds={selectedCertIds}
+            onToggleSelection={toggleCertSelection}
           />
         )}
 
@@ -177,6 +247,16 @@ export default function IssuedCertificatesRegistry() {
       <DocumentViewerDialog
         documentUrl={viewDocumentUrl}
         onClose={() => setViewDocumentUrl(null)}
+      />
+
+      <SyncCertificatesDialog
+        open={syncDialogOpen}
+        onClose={() => {
+          setSyncDialogOpen(false);
+          setSelectedCertIds([]);
+        }}
+        selectedCertificates={selectedCertificates}
+        trainingCenterName="УЦ Профессионал"
       />
     </Card>
   );

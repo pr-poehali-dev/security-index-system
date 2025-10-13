@@ -12,6 +12,8 @@ interface CertificatesTableProps {
   categoryLabels: Record<string, string>;
   onViewDocument: (url: string) => void;
   onSync: (id: string) => void;
+  selectedCertIds?: string[];
+  onToggleSelection?: (certId: string) => void;
 }
 
 export default function CertificatesTable({
@@ -22,13 +24,18 @@ export default function CertificatesTable({
   statusColors,
   categoryLabels,
   onViewDocument,
-  onSync
+  onSync,
+  selectedCertIds = [],
+  onToggleSelection
 }: CertificatesTableProps) {
+  const showCheckboxes = onToggleSelection !== undefined;
+
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
+            {showCheckboxes && <TableHead className="w-12"></TableHead>}
             <TableHead>Дата выдачи</TableHead>
             <TableHead>ФИО обучающегося</TableHead>
             <TableHead>Организация</TableHead>
@@ -45,7 +52,7 @@ export default function CertificatesTable({
         <TableBody>
           {certificates.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={showCheckboxes ? 12 : 11} className="text-center py-8 text-muted-foreground">
                 Удостоверения не найдены
               </TableCell>
             </TableRow>
@@ -62,6 +69,8 @@ export default function CertificatesTable({
                 onViewDocument={onViewDocument}
                 onSync={onSync}
                 showOrganization={true}
+                isSelected={selectedCertIds.includes(cert.id)}
+                onToggleSelection={onToggleSelection}
               />
             ))
           )}

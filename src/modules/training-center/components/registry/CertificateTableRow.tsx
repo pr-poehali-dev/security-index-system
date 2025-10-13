@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { TableCell, TableRow } from '@/components/ui/table';
 import Icon from '@/components/ui/icon';
 import { format } from 'date-fns';
@@ -17,6 +18,8 @@ interface CertificateTableRowProps {
   onViewDocument: (url: string) => void;
   onSync: (id: string) => void;
   showOrganization?: boolean;
+  isSelected?: boolean;
+  onToggleSelection?: (certId: string) => void;
 }
 
 const statusLabelsDefault = {
@@ -47,15 +50,28 @@ export default function CertificateTableRow({
   categoryLabels = categoryLabelsDefault,
   onViewDocument,
   onSync,
-  showOrganization = true
+  showOrganization = true,
+  isSelected = false,
+  onToggleSelection
 }: CertificateTableRowProps) {
   const person = personnel.find(p => p.id === cert.personnelId);
   const organization = person?.organizationId 
     ? organizations.find(o => o.id === person.organizationId)
     : organizations.find(o => o.id === cert.organizationId);
 
+  const showCheckbox = onToggleSelection !== undefined && cert.status !== 'synced';
+
   return (
     <TableRow>
+      {showCheckbox && (
+        <TableCell>
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={() => onToggleSelection?.(cert.id)}
+            disabled={cert.status === 'synced'}
+          />
+        </TableCell>
+      )}
       <TableCell className="whitespace-nowrap">
         {format(new Date(cert.issueDate), 'dd.MM.yyyy', { locale: ru })}
       </TableCell>
