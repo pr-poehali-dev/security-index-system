@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react';
-import { FixedSizeList as List } from 'react-window';
 import TablePagination from '@/components/ui/table-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -174,16 +173,12 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedObjects = sortedObjects.slice(startIndex, endIndex);
-  
-  const useVirtualization = paginatedObjects.length > 20;
 
-  const TableRow = ({ index, style }: { index: number; style: React.CSSProperties }) => {
-    const obj = paginatedObjects[index];
+  const TableRow = ({ obj }: { obj: IndustrialObject }) => {
     const organization = organizations.find(org => org.id === obj.organizationId);
     
     return (
       <div 
-        style={style}
         className="border-b last:border-b-0 hover:bg-muted/30 transition-colors flex items-stretch"
       >
         <div className="flex w-full items-center">
@@ -346,24 +341,11 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
             </div>
 
             {paginatedObjects.length > 0 && (
-              useVirtualization ? (
-                <List
-                  height={Math.min(paginatedObjects.length * 80, 600)}
-                  itemCount={paginatedObjects.length}
-                  itemSize={80}
-                  width="100%"
-                  className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
-                  overscanCount={5}
-                >
-                  {TableRow as any}
-                </List>
-              ) : (
-                <div>
-                  {paginatedObjects.map((obj, index) => (
-                    <TableRow key={obj.id} index={index} style={{}} />
-                  ))}
-                </div>
-              )
+              <div>
+                {paginatedObjects.map((obj) => (
+                  <TableRow key={obj.id} obj={obj} />
+                ))}
+              </div>
             )}
           </div>
         </div>
