@@ -102,7 +102,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
   programs: [
     {
       id: 'program-b11',
-      tenantId: 'external-org-1',
+      tenantId: 'tenant-3',
       name: 'Промышленная безопасность Б.1.1',
       code: 'B.1.1',
       category: 'industrial_safety',
@@ -120,7 +120,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
     },
     {
       id: 'program-ot',
-      tenantId: 'external-org-1',
+      tenantId: 'tenant-3',
       name: 'Охрана труда для руководителей и специалистов',
       code: 'OT-RS',
       category: 'labor_safety',
@@ -140,7 +140,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
   groups: [
     {
       id: 'group-001',
-      tenantId: 'external-org-1',
+      tenantId: 'tenant-3',
       programId: 'program-b11',
       name: 'Группа Б.1.1 - Октябрь 2024',
       startDate: '2024-09-15',
@@ -183,7 +183,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
     },
     {
       id: 'group-002',
-      tenantId: 'external-org-1',
+      tenantId: 'tenant-3',
       programId: 'program-ot',
       name: 'Группа ОТ - Октябрь 2024',
       startDate: '2024-09-20',
@@ -221,7 +221,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
   locations: [
     {
       id: 'location-1',
-      tenantId: 'external-org-1',
+      tenantId: 'tenant-3',
       name: 'Главный учебный класс',
       address: 'г. Москва, ул. Учебная, д. 10',
       capacity: 30,
@@ -233,7 +233,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
   instructors: [
     {
       id: 'instructor-1',
-      tenantId: 'external-org-1',
+      tenantId: 'tenant-3',
       personnelId: 'instructor-person-1',
       specializations: ['Промышленная безопасность', 'Б.1.1'],
       certifications: ['Аттестация Ростехнадзора'],
@@ -242,7 +242,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
     },
     {
       id: 'instructor-2',
-      tenantId: 'external-org-1',
+      tenantId: 'tenant-3',
       personnelId: 'instructor-person-2',
       specializations: ['Охрана труда'],
       certifications: ['Преподаватель ОТ'],
@@ -254,7 +254,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
   requests: [
     {
       id: 'req-training-1',
-      tenantId: 'external-org-1',
+      tenantId: 'tenant-3',
       fromTenantId: 'tenant-1',
       fromTenantName: 'ООО "ЭнергоПром"',
       organizationId: 'org-1',
@@ -295,7 +295,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
     },
     {
       id: 'req-training-2',
-      tenantId: 'external-org-1',
+      tenantId: 'tenant-3',
       fromTenantId: 'tenant-1',
       fromTenantName: 'ООО "ЭнергоПром"',
       organizationId: 'org-1',
@@ -332,7 +332,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
   issuedCertificates: [
     {
       id: 'issued-1',
-      trainingCenterId: 'external-org-1',
+      trainingCenterId: 'tenant-3',
       clientTenantId: 'tenant-1',
       personnelId: 'personnel-1',
       personnelName: 'Иванов Иван Иванович',
@@ -357,7 +357,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
     },
     {
       id: 'issued-2',
-      trainingCenterId: 'external-org-1',
+      trainingCenterId: 'tenant-3',
       clientTenantId: 'tenant-1',
       personnelId: 'personnel-2',
       personnelName: 'Петров Петр Петрович',
@@ -382,7 +382,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
     },
     {
       id: 'issued-3',
-      trainingCenterId: 'external-org-1',
+      trainingCenterId: 'tenant-3',
       clientTenantId: 'tenant-1',
       personnelId: 'personnel-3',
       personnelName: 'Сидоров Сидор Сидорович',
@@ -407,7 +407,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
     },
     {
       id: 'issued-4',
-      trainingCenterId: 'external-org-1',
+      trainingCenterId: 'tenant-3',
       clientTenantId: 'tenant-1',
       personnelId: 'personnel-3',
       personnelName: 'Сидоров Константин Петрович',
@@ -433,7 +433,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
     },
     {
       id: 'issued-5',
-      trainingCenterId: 'external-org-1',
+      trainingCenterId: 'tenant-3',
       clientTenantId: 'tenant-1',
       personnelId: 'personnel-5',
       personnelName: 'Смирнова Елена Николаевна',
@@ -459,7 +459,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
     },
     {
       id: 'issued-6',
-      trainingCenterId: 'external-org-1',
+      trainingCenterId: 'tenant-3',
       clientTenantId: 'tenant-1',
       personnelId: 'personnel-7',
       personnelName: 'Федорова Татьяна Владимировна',
@@ -485,7 +485,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
     },
     {
       id: 'issued-7',
-      trainingCenterId: 'external-org-1',
+      trainingCenterId: 'tenant-3',
       clientTenantId: 'tenant-1',
       personnelId: 'personnel-4',
       personnelName: 'Козлов Дмитрий Александрович',
@@ -511,7 +511,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
     },
     {
       id: 'issued-8',
-      trainingCenterId: 'external-org-1',
+      trainingCenterId: 'tenant-3',
       clientTenantId: 'tenant-1',
       personnelId: 'personnel-6',
       personnelName: 'Морозова Мария Викторовна',

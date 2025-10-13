@@ -19,7 +19,7 @@ export const useInterOrgDocumentsStore = create<InterOrgDocumentsState>()(persis
   documents: [
     {
       id: 'doc-training-completion-1',
-      fromTenantId: 'external-org-1',
+      fromTenantId: 'tenant-3',
       fromTenantName: 'УЦ Профессионал',
       toTenantId: 'tenant-1',
       toTenantName: 'ООО "ЭнергоПром"',
@@ -61,7 +61,7 @@ export const useInterOrgDocumentsStore = create<InterOrgDocumentsState>()(persis
     },
     {
       id: 'doc-training-completion-2',
-      fromTenantId: 'external-org-1',
+      fromTenantId: 'tenant-3',
       fromTenantName: 'УЦ Профессионал',
       toTenantId: 'tenant-1',
       toTenantName: 'ООО "ЭнергоПром"',
@@ -99,7 +99,7 @@ export const useInterOrgDocumentsStore = create<InterOrgDocumentsState>()(persis
       id: 'doc-training-request-1',
       fromTenantId: 'tenant-1',
       fromTenantName: 'ООО "ЭнергоПром"',
-      toTenantId: 'external-org-1',
+      toTenantId: 'tenant-3',
       toTenantName: 'УЦ Профессионал',
       documentType: 'training_request',
       sourceId: 'req-training-1',

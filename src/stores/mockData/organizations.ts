@@ -31,6 +31,26 @@ export const mockOrganizations: Organization[] = [
     address: 'г. Москва, ул. Строительная, д. 15',
     status: 'active',
     createdAt: new Date(Date.now() - 650 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'org-tc-1',
+    tenantId: 'tenant-3',
+    name: 'УЦ Профессионал',
+    inn: '7707555444',
+    kpp: '770701001',
+    address: 'г. Москва, ул. Учебная, д. 10',
+    status: 'active',
+    createdAt: new Date(Date.now() - 1095 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'org-tc-2',
+    tenantId: 'tenant-4',
+    name: 'УЦ Эксперт',
+    inn: '7707666777',
+    kpp: '770702001',
+    address: 'г. Санкт-Петербург, пр-т Обучения, д. 25',
+    status: 'active',
+    createdAt: new Date(Date.now() - 800 * 24 * 60 * 60 * 1000).toISOString()
   }
 ];
 
