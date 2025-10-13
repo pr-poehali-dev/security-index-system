@@ -42,8 +42,8 @@ export default function CompetenciesTab({ onAdd, onEdit, onDelete }: Competencie
 
   const filteredCompetencies = tenantCompetencies.filter((comp) => {
     const matchesSearch =
-      comp.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      organizations.find(o => o.id === comp.organizationId)?.name.toLowerCase().includes(searchTerm.toLowerCase());
+      (comp.position?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (organizations.find(o => o.id === comp.organizationId)?.name.toLowerCase() || '').includes(searchTerm.toLowerCase());
 
     const matchesOrg = filterOrg === 'all' || comp.organizationId === filterOrg;
 
