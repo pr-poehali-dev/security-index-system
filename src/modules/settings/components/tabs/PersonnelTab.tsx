@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
+import { ViewModeToggle } from '@/components/ui/view-mode-toggle';
 import { exportPersonnelToExcel, importPersonnelFromExcel } from '@/lib/exportUtils';
 import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 import type { Personnel, PersonnelType } from '@/types';
@@ -50,6 +51,11 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
     const saved = localStorage.getItem('personnel-view-mode');
     return (saved as 'table' | 'cards') || 'table';
   });
+
+  const handleViewModeChange = (mode: 'table' | 'cards') => {
+    setViewMode(mode);
+    localStorage.setItem('personnel-view-mode', mode);
+  };
 
   const tenantDepts = getDepartmentsByTenant(user!.tenantId!);
   const tenantPersonnel = getPersonnelByTenant(user!.tenantId!);
@@ -188,30 +194,11 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
           </Select>
         </div>
         <div className="flex gap-2">
-          <div className="flex border rounded-md">
-            <Button
-              variant={viewMode === 'table' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => {
-                setViewMode('table');
-                localStorage.setItem('personnel-view-mode', 'table');
-              }}
-              className="rounded-r-none"
-            >
-              <Icon name="Table" size={16} />
-            </Button>
-            <Button
-              variant={viewMode === 'cards' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => {
-                setViewMode('cards');
-                localStorage.setItem('personnel-view-mode', 'cards');
-              }}
-              className="rounded-l-none"
-            >
-              <Icon name="LayoutGrid" size={16} />
-            </Button>
-          </div>
+          <ViewModeToggle
+            value={viewMode}
+            onChange={handleViewModeChange}
+            modes={['cards', 'table']}
+          />
           <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
             <Icon name="Download" size={14} />
             Экспорт

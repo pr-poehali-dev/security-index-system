@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import { useState } from 'react';
+import { ViewModeToggle } from '@/components/ui/view-mode-toggle';
 import type { CompetencyMatrix } from '@/types';
 import { CERTIFICATION_CATEGORIES } from '@/lib/constants';
 import ImportCompetenciesDialog from '../ImportCompetenciesDialog';
@@ -36,6 +37,11 @@ export default function CompetenciesTab({ onAdd, onEdit, onDelete }: Competencie
     const saved = localStorage.getItem('competencies-view-mode');
     return (saved as 'table' | 'cards') || 'table';
   });
+
+  const handleViewModeChange = (mode: 'table' | 'cards') => {
+    setViewMode(mode);
+    localStorage.setItem('competencies-view-mode', mode);
+  };
 
   const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
   const tenantCompetencies = competencies.filter((c) => c.tenantId === user?.tenantId);
@@ -105,30 +111,11 @@ export default function CompetenciesTab({ onAdd, onEdit, onDelete }: Competencie
             </Select>
           </div>
           <div className="flex gap-2">
-            <div className="flex border rounded-md">
-              <Button
-                variant={viewMode === 'table' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => {
-                  setViewMode('table');
-                  localStorage.setItem('competencies-view-mode', 'table');
-                }}
-                className="rounded-r-none"
-              >
-                <Icon name="Table" size={16} />
-              </Button>
-              <Button
-                variant={viewMode === 'cards' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => {
-                  setViewMode('cards');
-                  localStorage.setItem('competencies-view-mode', 'cards');
-                }}
-                className="rounded-l-none"
-              >
-                <Icon name="LayoutGrid" size={16} />
-              </Button>
-            </div>
+            <ViewModeToggle
+              value={viewMode}
+              onChange={handleViewModeChange}
+              modes={['cards', 'table']}
+            />
             {!isReadOnly && (
               <>
                 <Button onClick={() => setShowImport(true)} variant="outline" size="sm" className="gap-2">

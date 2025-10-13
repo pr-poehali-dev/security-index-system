@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
+import { ViewModeToggle } from '@/components/ui/view-mode-toggle';
 import { exportProductionSitesToExcel, importProductionSitesFromExcel } from '@/lib/exportUtils';
 import ProductionSitesImportDialog from '../ProductionSitesImportDialog';
 import type { ProductionSite } from '@/types';
@@ -39,6 +40,11 @@ export default function ProductionSitesTab({ onAdd, onEdit, onDelete }: Producti
     const saved = localStorage.getItem('production-sites-view-mode');
     return (saved as 'table' | 'cards') || 'table';
   });
+
+  const handleViewModeChange = (mode: 'table' | 'cards') => {
+    setViewMode(mode);
+    localStorage.setItem('production-sites-view-mode', mode);
+  };
 
   const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
   const tenantSites = productionSites.filter((site) => site.tenantId === user?.tenantId);
@@ -125,30 +131,11 @@ export default function ProductionSitesTab({ onAdd, onEdit, onDelete }: Producti
           </Select>
         </div>
         <div className="flex gap-2">
-          <div className="flex border rounded-md">
-            <Button
-              variant={viewMode === 'table' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => {
-                setViewMode('table');
-                localStorage.setItem('production-sites-view-mode', 'table');
-              }}
-              className="rounded-r-none"
-            >
-              <Icon name="Table" size={16} />
-            </Button>
-            <Button
-              variant={viewMode === 'cards' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => {
-                setViewMode('cards');
-                localStorage.setItem('production-sites-view-mode', 'cards');
-              }}
-              className="rounded-l-none"
-            >
-              <Icon name="LayoutGrid" size={16} />
-            </Button>
-          </div>
+          <ViewModeToggle
+            value={viewMode}
+            onChange={handleViewModeChange}
+            modes={['cards', 'table']}
+          />
           <Button variant="outline" size="sm" onClick={handleExport} className="gap-2">
             <Icon name="Download" size={14} />
             Экспорт

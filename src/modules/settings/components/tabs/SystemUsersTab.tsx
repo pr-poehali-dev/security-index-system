@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
+import { ViewModeToggle } from '@/components/ui/view-mode-toggle';
 import { exportToExcel } from '@/lib/exportUtils';
 import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 import type { SystemUser } from '@/types';
@@ -166,22 +167,11 @@ export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersT
             </SelectContent>
           </Select>
 
-          <div className="flex items-center gap-1 bg-muted p-1 rounded-lg">
-            <Button
-              variant={viewMode === 'table' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => handleViewModeChange('table')}
-            >
-              <Icon name="Table" size={16} />
-            </Button>
-            <Button
-              variant={viewMode === 'cards' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => handleViewModeChange('cards')}
-            >
-              <Icon name="LayoutGrid" size={16} />
-            </Button>
-          </div>
+          <ViewModeToggle
+            value={viewMode}
+            onChange={handleViewModeChange}
+            modes={['cards', 'table']}
+          />
 
           <Button variant="outline" size="sm" onClick={handleExport}>
             <Icon name="Download" size={14} className="mr-2" />
