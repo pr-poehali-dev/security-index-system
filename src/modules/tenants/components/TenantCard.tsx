@@ -27,6 +27,7 @@ export default function TenantCard({ tenant, onEdit, onShowCredentials, onToggle
             <div>
               <CardTitle className="text-lg">{tenant.name}</CardTitle>
               <p className="text-sm text-gray-600 dark:text-gray-400">ИНН: {tenant.inn}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-500 font-mono">ID: {tenant.id}</p>
             </div>
           </div>
           <button

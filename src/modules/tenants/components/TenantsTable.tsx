@@ -52,6 +52,7 @@ export default function TenantsTable({ tenants, onEdit, onShowCredentials, onTog
                     <div>
                       <div className="font-medium text-gray-900 dark:text-white">{tenant.name}</div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">ИНН: {tenant.inn}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-500 font-mono">ID: {tenant.id}</div>
                     </div>
                   </div>
                 </TableCell>
