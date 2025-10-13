@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { Order } from '@/stores/attestationStore';
+import type { Order } from '@/stores/ordersStore';
 
 interface OrdersTableViewProps {
   orders: Order[];

@@ -1,4 +1,4 @@
-import type { Order } from '@/types';
+import type { Order } from '@/stores/ordersStore';
 import type { Personnel, Person, Position } from '@/stores/settingsStore';
 import { useTrainingCenterStore } from '@/stores/trainingCenterStore';
 
