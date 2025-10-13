@@ -227,16 +227,36 @@ export const useIncidentsStore = create<IncidentsState>()(persist((set, get) => 
   },
 
   updateIncident: (id, updates) => {
-    const store = get();
-    set((state) => ({
-      incidents: state.incidents.map((inc) => {
-        if (inc.id !== id) return inc;
-        const updated = { ...inc, ...updates, updatedAt: new Date().toISOString() };
-        updated.daysLeft = store.calculateDaysLeft(updated.plannedDate, updated.completedDate);
-        updated.status = store.calculateStatus(updated.plannedDate, updated.completedDate);
-        return updated;
-      })
-    }));
+    set((state) => {
+      const store = get();
+      return {
+        incidents: state.incidents.map((inc) => {
+          if (inc.id !== id) return inc;
+          
+          const updatedIncident = { 
+            ...inc, 
+            ...updates, 
+            updatedAt: new Date().toISOString() 
+          };
+          
+          updatedIncident.daysLeft = store.calculateDaysLeft(
+            updatedIncident.plannedDate, 
+            updatedIncident.completedDate
+          );
+          
+          if (updates.status) {
+            updatedIncident.status = updates.status;
+          } else {
+            updatedIncident.status = store.calculateStatus(
+              updatedIncident.plannedDate, 
+              updatedIncident.completedDate
+            );
+          }
+          
+          return updatedIncident;
+        })
+      };
+    });
   },
 
   deleteIncident: (id) => {
