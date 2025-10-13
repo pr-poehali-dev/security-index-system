@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { List } from 'react-window';
+import { FixedSizeList as List } from 'react-window';
 import TablePagination from '@/components/ui/table-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
