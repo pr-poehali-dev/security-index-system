@@ -38,7 +38,7 @@ export default function OrganizationFormModal({
   mode
 }: OrganizationFormModalProps) {
   const { addOrganization, updateOrganization, organizations } = useCatalogStore();
-  const currentTenant = useAuthStore((state) => state.currentTenant);
+  const user = useAuthStore((state) => state.user);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -119,7 +119,7 @@ export default function OrganizationFormModal({
 
       if (mode === 'create') {
         addOrganization({
-          tenantId: currentTenant?.id || 'tenant-1',
+          tenantId: user?.tenantId || 'tenant-1',
           name: formData.name.trim(),
           inn: formData.inn.trim() || undefined,
           type: formData.type,
