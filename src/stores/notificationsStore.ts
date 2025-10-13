@@ -39,10 +39,32 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
       type: 'success',
       source: 'training_center',
       title: 'Завершена подготовка сотрудников',
-      message: 'Учебный центр "УЦ Профессионал" завершил подготовку 3 сотрудников. Удостоверения прикреплены к персоналу.',
+      message: 'Учебный центр "УЦ Профессионал" завершил подготовку 3 сотрудников по программе Б.1.1. Удостоверения прикреплены к персоналу.',
       link: '/attestation',
       isRead: false,
       createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'notif-training-2',
+      tenantId: 'tenant-1',
+      type: 'success',
+      source: 'training_center',
+      title: 'Завершена подготовка сотрудников',
+      message: 'Учебный центр "УЦ Профессионал" завершил подготовку 2 сотрудников по программе охраны труда. Удостоверения прикреплены к персоналу.',
+      link: '/attestation',
+      isRead: false,
+      createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'notif-attestation-order-1',
+      tenantId: 'tenant-1',
+      type: 'info',
+      source: 'attestation',
+      title: 'Создан приказ на аттестацию',
+      message: 'Приказ ПАТ-001/2024 на аттестацию 3 сотрудников в Ростехнадзоре создан и ожидает утверждения.',
+      link: '/attestation',
+      isRead: true,
+      createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
     }
   ],
   history: [

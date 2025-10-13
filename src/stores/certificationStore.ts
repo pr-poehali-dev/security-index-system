@@ -277,6 +277,216 @@ export const useCertificationStore = create<CertificationState>()(persist((set, 
       ],
       createdAt: new Date(Date.now() - 55 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 50 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'cert-synced-b11-1',
+      personnelId: 'personnel-3',
+      tenantId: 'tenant-1',
+      category: 'industrial_safety',
+      area: 'Б.1.1 Эксплуатация опасных производственных объектов',
+      issueDate: '2024-10-01',
+      expiryDate: '2029-10-01',
+      certificateNumber: 'УД-2024-12345',
+      protocolNumber: 'ПБ-456/2024',
+      protocolDate: '2024-10-01',
+      verified: false,
+      trainingOrganizationId: 'external-org-1',
+      documents: [
+        {
+          id: 'doc-b11-1-cert',
+          certificationId: 'cert-synced-b11-1',
+          type: 'certificate',
+          fileName: 'Удостоверение_УД-2024-12345.pdf',
+          fileUrl: '/files/certificates/cert-b11-12345.pdf',
+          fileSize: 245000,
+          uploadedBy: 'АНО ДПО "УЦ Профессионал"',
+          uploadedByRole: 'training_center',
+          uploadedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+          description: 'Удостоверение о проверке знаний (синхронизировано из УЦ)'
+        },
+        {
+          id: 'doc-b11-1-protocol',
+          certificationId: 'cert-synced-b11-1',
+          type: 'protocol',
+          fileName: 'Протокол_ПБ-456-2024.pdf',
+          fileUrl: '/files/protocols/protocol-b11-456.pdf',
+          fileSize: 189000,
+          uploadedBy: 'АНО ДПО "УЦ Профессионал"',
+          uploadedByRole: 'training_center',
+          uploadedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+          description: 'Протокол заседания комиссии (синхронизировано из УЦ)'
+        }
+      ],
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'cert-synced-b11-2',
+      personnelId: 'personnel-5',
+      tenantId: 'tenant-1',
+      category: 'industrial_safety',
+      area: 'Б.1.1 Эксплуатация опасных производственных объектов',
+      issueDate: '2024-10-01',
+      expiryDate: '2029-10-01',
+      certificateNumber: 'УД-2024-12346',
+      protocolNumber: 'ПБ-456/2024',
+      protocolDate: '2024-10-01',
+      verified: false,
+      trainingOrganizationId: 'external-org-1',
+      documents: [
+        {
+          id: 'doc-b11-2-cert',
+          certificationId: 'cert-synced-b11-2',
+          type: 'certificate',
+          fileName: 'Удостоверение_УД-2024-12346.pdf',
+          fileUrl: '/files/certificates/cert-b11-12346.pdf',
+          fileSize: 245000,
+          uploadedBy: 'АНО ДПО "УЦ Профессионал"',
+          uploadedByRole: 'training_center',
+          uploadedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+          description: 'Удостоверение о проверке знаний (синхронизировано из УЦ)'
+        },
+        {
+          id: 'doc-b11-2-protocol',
+          certificationId: 'cert-synced-b11-2',
+          type: 'protocol',
+          fileName: 'Протокол_ПБ-456-2024.pdf',
+          fileUrl: '/files/protocols/protocol-b11-456.pdf',
+          fileSize: 189000,
+          uploadedBy: 'АНО ДПО "УЦ Профессионал"',
+          uploadedByRole: 'training_center',
+          uploadedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+          description: 'Протокол заседания комиссии (синхронизировано из УЦ)'
+        }
+      ],
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'cert-synced-b11-3',
+      personnelId: 'personnel-7',
+      tenantId: 'tenant-1',
+      category: 'industrial_safety',
+      area: 'Б.1.1 Эксплуатация опасных производственных объектов',
+      issueDate: '2024-10-01',
+      expiryDate: '2029-10-01',
+      certificateNumber: 'УД-2024-12347',
+      protocolNumber: 'ПБ-456/2024',
+      protocolDate: '2024-10-01',
+      verified: false,
+      trainingOrganizationId: 'external-org-1',
+      documents: [
+        {
+          id: 'doc-b11-3-cert',
+          certificationId: 'cert-synced-b11-3',
+          type: 'certificate',
+          fileName: 'Удостоверение_УД-2024-12347.pdf',
+          fileUrl: '/files/certificates/cert-b11-12347.pdf',
+          fileSize: 245000,
+          uploadedBy: 'АНО ДПО "УЦ Профессионал"',
+          uploadedByRole: 'training_center',
+          uploadedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+          description: 'Удостоверение о проверке знаний (синхронизировано из УЦ)'
+        },
+        {
+          id: 'doc-b11-3-protocol',
+          certificationId: 'cert-synced-b11-3',
+          type: 'protocol',
+          fileName: 'Протокол_ПБ-456-2024.pdf',
+          fileUrl: '/files/protocols/protocol-b11-456.pdf',
+          fileSize: 189000,
+          uploadedBy: 'АНО ДПО "УЦ Профессионал"',
+          uploadedByRole: 'training_center',
+          uploadedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+          description: 'Протокол заседания комиссии (синхронизировано из УЦ)'
+        }
+      ],
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'cert-synced-ot-1',
+      personnelId: 'personnel-4',
+      tenantId: 'tenant-1',
+      category: 'labor_safety',
+      area: 'Охрана труда для руководителей и специалистов',
+      issueDate: '2024-10-05',
+      expiryDate: '2027-10-05',
+      certificateNumber: 'ОТ-2024-45678',
+      protocolNumber: 'ОТ-789/2024',
+      protocolDate: '2024-10-05',
+      verified: false,
+      trainingOrganizationId: 'external-org-1',
+      documents: [
+        {
+          id: 'doc-ot-1-cert',
+          certificationId: 'cert-synced-ot-1',
+          type: 'certificate',
+          fileName: 'Удостоверение_ОТ-2024-45678.pdf',
+          fileUrl: '/files/certificates/cert-ot-45678.pdf',
+          fileSize: 230000,
+          uploadedBy: 'АНО ДПО "УЦ Профессионал"',
+          uploadedByRole: 'training_center',
+          uploadedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+          description: 'Удостоверение о проверке знаний (синхронизировано из УЦ)'
+        },
+        {
+          id: 'doc-ot-1-protocol',
+          certificationId: 'cert-synced-ot-1',
+          type: 'protocol',
+          fileName: 'Протокол_ОТ-789-2024.pdf',
+          fileUrl: '/files/protocols/protocol-ot-789.pdf',
+          fileSize: 175000,
+          uploadedBy: 'АНО ДПО "УЦ Профессионал"',
+          uploadedByRole: 'training_center',
+          uploadedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+          description: 'Протокол заседания комиссии (синхронизировано из УЦ)'
+        }
+      ],
+      createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'cert-synced-ot-2',
+      personnelId: 'personnel-6',
+      tenantId: 'tenant-1',
+      category: 'labor_safety',
+      area: 'Охрана труда для руководителей и специалистов',
+      issueDate: '2024-10-05',
+      expiryDate: '2027-10-05',
+      certificateNumber: 'ОТ-2024-45679',
+      protocolNumber: 'ОТ-789/2024',
+      protocolDate: '2024-10-05',
+      verified: false,
+      trainingOrganizationId: 'external-org-1',
+      documents: [
+        {
+          id: 'doc-ot-2-cert',
+          certificationId: 'cert-synced-ot-2',
+          type: 'certificate',
+          fileName: 'Удостоверение_ОТ-2024-45679.pdf',
+          fileUrl: '/files/certificates/cert-ot-45679.pdf',
+          fileSize: 230000,
+          uploadedBy: 'АНО ДПО "УЦ Профессионал"',
+          uploadedByRole: 'training_center',
+          uploadedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+          description: 'Удостоверение о проверке знаний (синхронизировано из УЦ)'
+        },
+        {
+          id: 'doc-ot-2-protocol',
+          certificationId: 'cert-synced-ot-2',
+          type: 'protocol',
+          fileName: 'Протокол_ОТ-789-2024.pdf',
+          fileUrl: '/files/protocols/protocol-ot-789.pdf',
+          fileSize: 175000,
+          uploadedBy: 'АНО ДПО "УЦ Профессионал"',
+          uploadedByRole: 'training_center',
+          uploadedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+          description: 'Протокол заседания комиссии (синхронизировано из УЦ)'
+        }
+      ],
+      createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString()
     }
   ],
 
