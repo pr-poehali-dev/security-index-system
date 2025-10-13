@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useToast } from '@/hooks/use-toast';
+import { useViewMode } from '@/hooks/useViewMode';
 import { exportPersonnelToExcel, importPersonnelFromExcel } from '@/lib/exportUtils';
 import { usePersonnelData } from '../../hooks/usePersonnelData';
 import { usePersonnelFilters } from '../../hooks/usePersonnelFilters';
@@ -31,15 +32,7 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
   const [filterOrg, setFilterOrg] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterType, setFilterType] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'table' | 'cards'>(() => {
-    const saved = localStorage.getItem('personnel-view-mode');
-    return (saved as 'table' | 'cards') || 'table';
-  });
-
-  const handleViewModeChange = (mode: 'table' | 'cards') => {
-    setViewMode(mode);
-    localStorage.setItem('personnel-view-mode', mode);
-  };
+  const { viewMode, setViewMode } = useViewMode('personnel-view-mode');
 
   const tenantDepts = getDepartmentsByTenant(user!.tenantId!);
   const tenantOrgs = getOrganizationsByTenant(user!.tenantId!);
@@ -81,7 +74,7 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
         totalCount={totalCount}
         activeCount={activeCount}
         viewMode={viewMode}
-        onViewModeChange={handleViewModeChange}
+        onViewModeChange={setViewMode}
         onExport={handleExport}
         onImport={handleImport}
         onAdd={onAdd}
