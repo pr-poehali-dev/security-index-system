@@ -1,3 +1,6 @@
+// src/components/common/LoadingSpinner.tsx
+// Компонент универсального лоадера с анимацией загрузки
+
 import Icon from '@/components/ui/icon';
 
 interface LoadingSpinnerProps {

@@ -1,3 +1,6 @@
+// src/components/common/EmptyState.tsx
+// Компонент для отображения пустого состояния с иконкой и текстом
+
 import Icon from '@/components/ui/icon';
 import type { LucideIcon } from 'lucide-react';
 

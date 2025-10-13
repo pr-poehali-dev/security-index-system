@@ -1,3 +1,6 @@
+// src/App.tsx
+// Главный компонент приложения с роутингом и провайдерами
+
 import { memo, Suspense } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { useThemeInitialization } from '@/hooks/useThemeInitialization';

@@ -1,3 +1,6 @@
+// src/components/common/ConfirmDialog.tsx
+// Диалог подтверждения действия с кнопками подтверждения и отмены
+
 import {
   AlertDialog,
   AlertDialogAction,
