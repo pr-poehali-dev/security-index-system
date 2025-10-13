@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { List } from 'react-window';
+import { List, type ListChildComponentProps } from 'react-window';
 import TablePagination from '@/components/ui/table-pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -177,7 +177,7 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
   
   const useVirtualization = paginatedObjects.length > 20;
 
-  const TableRow = ({ index, style }: { index: number; style: React.CSSProperties }) => {
+  const TableRow = ({ index, style }: ListChildComponentProps) => {
     const obj = paginatedObjects[index];
     const organization = organizations.find(org => org.id === obj.organizationId);
     
