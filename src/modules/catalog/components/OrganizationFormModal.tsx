@@ -227,14 +227,14 @@ export default function OrganizationFormModal({
               <div className="space-y-2 col-span-2">
                 <Label htmlFor="parentId">Головная организация</Label>
                 <Select
-                  value={formData.parentId}
-                  onValueChange={(value) => setFormData({ ...formData, parentId: value })}
+                  value={formData.parentId || 'none'}
+                  onValueChange={(value) => setFormData({ ...formData, parentId: value === 'none' ? '' : value })}
                 >
                   <SelectTrigger id="parentId">
                     <SelectValue placeholder="Нет (корневая организация)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Нет (корневая организация)</SelectItem>
+                    <SelectItem value="none">Нет (корневая организация)</SelectItem>
                     {availableParentOrgs.map((org) => (
                       <SelectItem key={org.id} value={org.id}>
                         {org.name}
