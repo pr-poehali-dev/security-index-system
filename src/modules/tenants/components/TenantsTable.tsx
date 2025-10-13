@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,8 +21,16 @@ interface TenantsTableProps {
 }
 
 export default function TenantsTable({ tenants, onEdit, onShowCredentials, onToggleStatus }: TenantsTableProps) {
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
   const getDaysUntilExpiry = (expiresAt: string) => {
     return Math.floor((new Date(expiresAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+  };
+
+  const copyId = async (id: string) => {
+    await navigator.clipboard.writeText(id);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   return (
@@ -52,7 +61,16 @@ export default function TenantsTable({ tenants, onEdit, onShowCredentials, onTog
                     <div>
                       <div className="font-medium text-gray-900 dark:text-white">{tenant.name}</div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">ИНН: {tenant.inn}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-500 font-mono">ID: {tenant.id}</div>
+                      <div className="flex items-center gap-1">
+                        <div className="text-xs text-gray-500 dark:text-gray-500 font-mono">ID: {tenant.id}</div>
+                        <button
+                          onClick={() => copyId(tenant.id)}
+                          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                          title="Скопировать ID"
+                        >
+                          <Icon name={copiedId === tenant.id ? 'Check' : 'Copy'} size={12} className={copiedId === tenant.id ? 'text-emerald-600' : 'text-gray-500'} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </TableCell>

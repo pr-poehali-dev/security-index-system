@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,8 +14,15 @@ interface TenantCardProps {
 }
 
 export default function TenantCard({ tenant, onEdit, onShowCredentials, onToggleStatus }: TenantCardProps) {
+  const [copied, setCopied] = useState(false);
   const daysUntilExpiry = Math.floor((new Date(tenant.expiresAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
   const isExpiring = daysUntilExpiry <= 30;
+
+  const copyId = async () => {
+    await navigator.clipboard.writeText(tenant.id);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <Card className="hover-scale">
@@ -27,7 +35,16 @@ export default function TenantCard({ tenant, onEdit, onShowCredentials, onToggle
             <div>
               <CardTitle className="text-lg">{tenant.name}</CardTitle>
               <p className="text-sm text-gray-600 dark:text-gray-400">ИНН: {tenant.inn}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-500 font-mono">ID: {tenant.id}</p>
+              <div className="flex items-center gap-1 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-500 font-mono">ID: {tenant.id}</p>
+                <button
+                  onClick={copyId}
+                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                  title="Скопировать ID"
+                >
+                  <Icon name={copied ? 'Check' : 'Copy'} size={12} className={copied ? 'text-emerald-600' : 'text-gray-500'} />
+                </button>
+              </div>
             </div>
           </div>
           <button
