@@ -23,17 +23,25 @@ export function ViewModeToggle({
   modes = ['grid', 'list', 'table'] 
 }: ViewModeToggleProps) {
   return (
-    <div className="flex gap-1 border rounded-lg p-1">
+    <div className="inline-flex items-center bg-background border border-border rounded-lg overflow-hidden">
       {modes.map((mode) => (
-        <Button
+        <button
           key={mode}
-          variant={value === mode ? 'secondary' : 'ghost'}
-          size="sm"
           onClick={() => onChange(mode)}
           title={modeConfig[mode].title}
+          className={`
+            px-3 py-2 transition-all duration-200
+            flex items-center justify-center
+            hover:bg-muted/50
+            ${value === mode 
+              ? 'bg-primary text-primary-foreground' 
+              : 'bg-background text-muted-foreground'
+            }
+            ${modes.indexOf(mode) !== modes.length - 1 ? 'border-r border-border' : ''}
+          `}
         >
-          <Icon name={modeConfig[mode].icon} size={16} />
-        </Button>
+          <Icon name={modeConfig[mode].icon} size={18} />
+        </button>
       ))}
     </div>
   );
