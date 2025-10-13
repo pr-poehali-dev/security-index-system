@@ -10,11 +10,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { Training } from '@/stores/attestationStore';
-import type { ExternalOrganization, Personnel, Person, Position } from '@/stores/settingsStore';
+import type { Personnel, Person, Position, OrganizationContractor } from '@/stores/settingsStore';
 
 interface TrainingsCardViewProps {
   trainings: Training[];
-  trainingOrgs: ExternalOrganization[];
+  trainingOrgs: OrganizationContractor[];
   personnel: Personnel[];
   people: Person[];
   positions: Position[];
@@ -99,7 +99,7 @@ export default function TrainingsCardView({
 }: TrainingsCardViewProps) {
   const getOrganizationName = (orgId: string) => {
     const org = trainingOrgs.find(o => o.id === orgId);
-    return org?.name || 'Неизвестная организация';
+    return org?.contractorName || 'Неизвестная организация';
   };
 
   if (trainings.length === 0) {

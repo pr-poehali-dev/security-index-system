@@ -21,7 +21,7 @@ export default function OrdersTrainingTab() {
   const user = useAuthStore((state) => state.user);
   const { orders, getOrdersByTenant } = useOrdersStore();
   const { trainings, getTrainingsByTenant } = useTrainingsAttestationStore();
-  const { personnel, people, positions, getExternalOrganizationsByType } = useSettingsStore();
+  const { personnel, people, positions, getContractorsByType } = useSettingsStore();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('all');
@@ -37,7 +37,7 @@ export default function OrdersTrainingTab() {
 
   const tenantOrders = user?.tenantId ? getOrdersByTenant(user.tenantId) : [];
   const tenantTrainings = user?.tenantId ? getTrainingsByTenant(user.tenantId) : [];
-  const trainingOrgs = user?.tenantId ? getExternalOrganizationsByType(user.tenantId, 'training_center') : [];
+  const trainingOrgs = user?.tenantId ? getContractorsByType(user.tenantId, 'training_center') : [];
 
   const toggleTrainingExpanded = (trainingId: string) => {
     setExpandedTrainings((prev) => {

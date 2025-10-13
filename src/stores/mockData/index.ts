@@ -6,6 +6,7 @@ export { mockProductionSites } from './productionSites';
 export { mockExternalOrganizations } from './externalOrganizations';
 export { mockSystemUsers } from './systemUsers';
 export { mockCompetencyMatrix } from './competencyMatrix';
+export { mockContractors } from './contractors';
 export {
   certificationCategories,
   industrialSafetyAreas,

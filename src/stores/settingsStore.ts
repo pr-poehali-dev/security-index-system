@@ -15,6 +15,7 @@ import {
   mockExternalOrganizations,
   mockSystemUsers,
   mockCompetencyMatrix,
+  mockContractors,
   certificationCategories,
   industrialSafetyAreas,
   energySafetyAreas,
@@ -635,7 +636,7 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     return get().certifications.filter((cert) => cert.tenantId === tenantId);
   },
 
-  contractors: [],
+  contractors: mockContractors,
 
   addContractor: (contractor) => {
     const newContractor: OrganizationContractor = {

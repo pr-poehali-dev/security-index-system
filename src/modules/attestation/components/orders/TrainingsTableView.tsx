@@ -11,11 +11,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { Training } from '@/stores/attestationStore';
-import type { ExternalOrganization } from '@/stores/settingsStore';
+import type { OrganizationContractor } from '@/stores/settingsStore';
 
 interface TrainingsTableViewProps {
   trainings: Training[];
-  trainingOrgs: ExternalOrganization[];
+  trainingOrgs: OrganizationContractor[];
   onView: (trainingId: string) => void;
   onEdit: (trainingId: string) => void;
   onViewDocuments: (trainingId: string) => void;
@@ -98,7 +98,7 @@ export default function TrainingsTableView({
 
   const getOrganizationName = (orgId: string) => {
     const org = trainingOrgs.find(o => o.id === orgId);
-    return org?.name || 'Неизвестная организация';
+    return org?.contractorName || 'Неизвестная организация';
   };
 
   const handleSort = (field: string) => {

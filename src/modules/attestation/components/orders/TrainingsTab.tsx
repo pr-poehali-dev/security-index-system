@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import type { Training } from '@/stores/attestationStore';
-import type { ExternalOrganization, Personnel, Person, Position } from '@/stores/settingsStore';
+import type { Personnel, Person, Position, OrganizationContractor } from '@/stores/settingsStore';
 import TrainingsStats from './TrainingsStats';
 import TrainingsCardView from './TrainingsCardView';
 import TrainingsTableView from './TrainingsTableView';
@@ -16,7 +16,7 @@ interface TrainingsTabProps {
   trainingViewMode: 'cards' | 'table';
   setTrainingViewMode: (mode: 'cards' | 'table') => void;
   filteredTrainings: Training[];
-  trainingOrgs: ExternalOrganization[];
+  trainingOrgs: OrganizationContractor[];
   personnel: Personnel[];
   people: Person[];
   positions: Position[];

@@ -54,9 +54,10 @@ const trainingCategories = [
 export default function CreateTrainingDialog({ open, onOpenChange }: CreateTrainingDialogProps) {
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
-  const { personnel, people, positions, getExternalOrganizationsByType, getPersonnelByTenant } = useSettingsStore();
+  const { personnel, people, positions, getPersonnelByTenant } = useSettingsStore();
+  const { getContractorsByType } = useSettingsStore();
   
-  const trainingOrgs = user?.tenantId ? getExternalOrganizationsByType(user.tenantId, 'training_center') : [];
+  const trainingOrgs = user?.tenantId ? getContractorsByType(user.tenantId, 'training_center') : [];
   const tenantPersonnel = user?.tenantId ? getPersonnelByTenant(user.tenantId) : [];
   const employees = tenantPersonnel.map(p => {
     const info = getPersonnelFullInfo(p, people, positions);
@@ -263,13 +264,21 @@ export default function CreateTrainingDialog({ open, onOpenChange }: CreateTrain
                     </SelectTrigger>
                     <SelectContent>
                       {trainingOrgs.filter(org => org.status === 'active').map((org) => (
-                        <SelectItem key={org.id} value={org.name}>
-                          {org.name}
+                        <SelectItem key={org.id} value={org.contractorName}>
+                          <div className="flex flex-col">
+                            <span>{org.contractorName}</span>
+                            {org.services && org.services.length > 0 && (
+                              <span className="text-xs text-muted-foreground">
+                                {org.services.includes('full_training') && 'Полное обучение'}
+                                {org.services.includes('certification') && ' • Аттестация'}
+                              </span>
+                            )}
+                          </div>
                         </SelectItem>
                       ))}
                       {trainingOrgs.filter(org => org.status === 'active').length === 0 && (
                         <div className="p-2 text-sm text-muted-foreground text-center">
-                          Нет доступных учебных центров
+                          Нет доступных контрагентов (учебных центров)
                         </div>
                       )}
                     </SelectContent>
