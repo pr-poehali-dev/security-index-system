@@ -21,12 +21,9 @@ import {
 
 export default function DirectoriesTab() {
   const user = useAuthStore((state) => state.user);
-  const { competencies, getOrganizationsByTenant } = useSettingsStore();
-  const { getCertificationTypesByTenant } = useCertificationStore();
+  const { competencies, getOrganizationsByTenant, positions } = useSettingsStore();
   const { getTrainingCenters, fetchContractors } = useContractorsStore();
   const [searchQuery, setSearchQuery] = useState('');
-  
-  const certTypes = user?.tenantId ? getCertificationTypesByTenant(user.tenantId) : [];
   
   const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
   const tenantCompetencies = competencies.filter((c) => c.tenantId === user?.tenantId);
@@ -38,14 +35,16 @@ export default function DirectoriesTab() {
   
   const filteredTemplates = tenantCompetencies.filter(comp => {
     const orgName = organizations.find(o => o.id === comp.organizationId)?.name || '';
-    return comp.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const position = positions.find(p => p.id === comp.positionId);
+    const positionName = position?.name || '';
+    return positionName.toLowerCase().includes(searchQuery.toLowerCase()) ||
            orgName.toLowerCase().includes(searchQuery.toLowerCase());
   });
   
   const filteredTrainingOrgs = trainingOrganizations.filter(org =>
     org.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     org.inn?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    org.contactPerson?.toLowerCase().includes(searchQuery.toLowerCase())
+    org.directorName?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -217,8 +216,11 @@ export default function DirectoriesTab() {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               <h3 className="font-semibold">{org.name}</h3>
-                              {org.status === 'inactive' && (
-                                <Badge variant="secondary">Неактивен</Badge>
+                              {org.status !== 'active' && (
+                                <Badge variant="secondary">
+                                  {org.status === 'suspended' ? 'Приостановлен' : 
+                                   org.status === 'blocked' ? 'Заблокирован' : 'Архивирован'}
+                                </Badge>
                               )}
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
@@ -228,22 +230,22 @@ export default function DirectoriesTab() {
                                   ИНН: {org.inn}
                                 </span>
                               )}
-                              {org.contactPerson && (
+                              {org.directorName && (
                                 <span className="flex items-center gap-1">
                                   <Icon name="User" size={14} />
-                                  {org.contactPerson}
+                                  {org.directorName}
                                 </span>
                               )}
-                              {org.phone && (
+                              {org.contactPhone && (
                                 <span className="flex items-center gap-1">
                                   <Icon name="Phone" size={14} />
-                                  {org.phone}
+                                  {org.contactPhone}
                                 </span>
                               )}
-                              {org.email && (
+                              {org.contactEmail && (
                                 <span className="flex items-center gap-1">
                                   <Icon name="Mail" size={14} />
-                                  {org.email}
+                                  {org.contactEmail}
                                 </span>
                               )}
                               {org.website && (
@@ -255,10 +257,10 @@ export default function DirectoriesTab() {
                                 </span>
                               )}
                             </div>
-                            {org.address && (
+                            {org.actualAddress && (
                               <p className="text-sm text-muted-foreground mt-2 flex items-start gap-1">
                                 <Icon name="MapPin" size={14} className="mt-0.5" />
-                                {org.address}
+                                {org.actualAddress}
                               </p>
                             )}
                             {org.accreditations && org.accreditations.length > 0 && (
@@ -352,7 +354,9 @@ export default function DirectoriesTab() {
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
-                                <h3 className="font-semibold">{template.position}</h3>
+                                <h3 className="font-semibold">
+                                  {positions.find(p => p.id === template.positionId)?.name || 'Неизвестная должность'}
+                                </h3>
                                 <Badge variant="secondary">
                                   {organization?.name || 'Без организации'}
                                 </Badge>
