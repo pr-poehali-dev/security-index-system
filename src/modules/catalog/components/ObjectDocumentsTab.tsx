@@ -5,11 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import DocumentUploadModal from './DocumentUploadModal';
-import type { Document, DocumentType, DocumentStatus } from '@/types/catalog';
+import type { ObjectDocument, DocumentType, DocumentStatus } from '@/types/catalog';
 
 interface ObjectDocumentsTabProps {
   objectId: string;
-  allDocuments: Document[];
+  allDocuments: ObjectDocument[];
 }
 
 const documentTypeLabels: Record<DocumentType, string> = {
