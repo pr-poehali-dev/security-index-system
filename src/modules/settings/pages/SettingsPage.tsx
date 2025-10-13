@@ -135,6 +135,26 @@ export default function SettingsPage() {
     }
   };
 
+  const handleCreateContractorFromExternalOrg = (org: ExternalOrganization) => {
+    const newContractor: Partial<OrganizationContractor> = {
+      contractorName: org.name,
+      contractorInn: org.inn,
+      contractorExternalOrgId: org.id,
+      type: org.type as 'training_center' | 'contractor' | 'supplier',
+      services: [],
+      contactPerson: org.contactPerson,
+      contactPhone: org.phone,
+      contactEmail: org.email,
+      status: 'active'
+    };
+    
+    setEditingContractor(newContractor as OrganizationContractor);
+    toast({ 
+      title: 'Создание контрагента', 
+      description: `Заполните данные договора для ${org.name}` 
+    });
+  };
+
 
 
   const handleDeletePositionObj = (id: string) => {
@@ -262,6 +282,7 @@ export default function SettingsPage() {
             onAdd={() => setShowAddExternalOrg(true)}
             onEdit={setEditingExternalOrg}
             onDelete={handleDeleteExternalOrg}
+            onCreateContractor={handleCreateContractorFromExternalOrg}
           />
         </TabsContent>
 

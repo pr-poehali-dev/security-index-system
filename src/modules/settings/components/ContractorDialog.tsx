@@ -51,7 +51,10 @@ export default function ContractorDialog({ open, onOpenChange, contractor }: Con
   const [validatedTenantInfo, setValidatedTenantInfo] = useState<{ name: string; inn?: string } | null>(null);
 
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<FormData>({
-    defaultValues: contractor || {
+    defaultValues: contractor ? {
+      ...contractor,
+      services: contractor.services || [],
+    } : {
       type: 'training_center',
       services: [],
       status: 'active',
@@ -122,7 +125,7 @@ export default function ContractorDialog({ open, onOpenChange, contractor }: Con
       return;
     }
 
-    if (contractor) {
+    if (contractor?.id) {
       updateContractor(contractor.id, data);
       toast({ title: 'Контрагент обновлен' });
     } else {
@@ -151,7 +154,7 @@ export default function ContractorDialog({ open, onOpenChange, contractor }: Con
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {contractor ? 'Редактировать контрагента' : 'Добавить контрагента'}
+            {contractor?.id ? 'Редактировать контрагента' : 'Добавить контрагента'}
           </DialogTitle>
         </DialogHeader>
 

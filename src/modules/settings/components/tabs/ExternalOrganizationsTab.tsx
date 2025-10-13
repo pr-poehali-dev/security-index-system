@@ -25,11 +25,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface ExternalOrganizationsTabProps {
   onAdd: () => void;
   onEdit: (org: ExternalOrganization) => void;
   onDelete: (id: string) => void;
+  onCreateContractor?: (org: ExternalOrganization) => void;
 }
 
 const ORGANIZATION_TYPES: { value: ExternalOrganizationType; label: string; icon: string }[] = [
@@ -41,7 +48,7 @@ const ORGANIZATION_TYPES: { value: ExternalOrganizationType; label: string; icon
   { value: 'other', label: 'Другое', icon: 'Building2' },
 ];
 
-export default function ExternalOrganizationsTab({ onAdd, onEdit, onDelete }: ExternalOrganizationsTabProps) {
+export default function ExternalOrganizationsTab({ onAdd, onEdit, onDelete, onCreateContractor }: ExternalOrganizationsTabProps) {
   const user = useAuthStore((state) => state.user);
   const { externalOrganizations: allOrgs, importExternalOrganizations } = useSettingsStore();
   const { toast } = useToast();
@@ -146,6 +153,20 @@ export default function ExternalOrganizationsTab({ onAdd, onEdit, onDelete }: Ex
   return (
     <>
       <div className="space-y-4">
+        {!isReadOnly && (
+          <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <Icon name="Info" size={18} className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-blue-900 dark:text-blue-100">
+                <p className="font-medium mb-1">Быстрое создание контрагентов</p>
+                <p className="text-blue-700 dark:text-blue-300">
+                  Для учебных центров, подрядчиков и поставщиков доступна кнопка <Icon name="FileSignature" size={12} className="inline" /> — она создаст контрагента с автозаполнением данных из этой организации.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
           {typeStats.map((type) => (
             <Card 
@@ -231,7 +252,7 @@ export default function ExternalOrganizationsTab({ onAdd, onEdit, onDelete }: Ex
                   <TableHead>Контактная информация</TableHead>
                   <TableHead>Дополнительно</TableHead>
                   <TableHead>Статус</TableHead>
-                  {!isReadOnly && <TableHead className="w-24">Действия</TableHead>}
+                  {!isReadOnly && <TableHead className="w-32">Действия</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -308,22 +329,41 @@ export default function ExternalOrganizationsTab({ onAdd, onEdit, onDelete }: Ex
                     </TableCell>
                     {!isReadOnly && (
                       <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onEdit(org)}
-                          >
-                            <Icon name="Edit" size={16} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onDelete(org.id)}
-                          >
-                            <Icon name="Trash2" size={16} />
-                          </Button>
-                        </div>
+                        <TooltipProvider>
+                          <div className="flex gap-1">
+                            {(org.type === 'training_center' || org.type === 'contractor' || org.type === 'supplier') && onCreateContractor && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => onCreateContractor(org)}
+                                    className="gap-1"
+                                  >
+                                    <Icon name="FileSignature" size={14} />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Создать контрагента на основе этой организации</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => onEdit(org)}
+                            >
+                              <Icon name="Edit" size={16} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => onDelete(org.id)}
+                            >
+                              <Icon name="Trash2" size={16} />
+                            </Button>
+                          </div>
+                        </TooltipProvider>
                       </TableCell>
                     )}
                   </TableRow>
