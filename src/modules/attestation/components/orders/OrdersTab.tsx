@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
-import type { Order } from '@/stores/attestationStore';
+import type { Order } from '@/stores/ordersStore';
 import OrdersStats from './OrdersStats';
 import OrdersCardView from './OrdersCardView';
 import OrdersTableView from './OrdersTableView';

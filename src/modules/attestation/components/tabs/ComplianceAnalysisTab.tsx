@@ -56,7 +56,7 @@ export default function ComplianceAnalysisTab() {
       const dept = departments.find(d => d.id === p.departmentId);
       
       const competency = competencies.find(c => c.positionId === p.positionId);
-      const requiredAreas = competency?.requiredAreas.flatMap(ra => ra.areas) || [];
+      const requiredAreas = competency?.requiredAreas?.flatMap(ra => ra.areas) || [];
       
       const personnelCerts = certifications.filter(c => c.personnelId === p.id);
       

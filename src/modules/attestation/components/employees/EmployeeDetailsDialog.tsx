@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
 import type { Employee } from '../../utils/employeeUtils';
 import { getStatusColor, getStatusLabel, getStatusIcon } from '../../utils/employeeUtils';
@@ -29,6 +30,8 @@ export default function EmployeeDetailsDialog({
   onShowExportDialog,
   onShowAddCertDialog
 }: EmployeeDetailsDialogProps) {
+  const { toast } = useToast();
+  
   if (!employee) return null;
 
   return (
@@ -115,7 +118,10 @@ export default function EmployeeDetailsDialog({
                               className="gap-2"
                               onClick={() => {
                                 navigator.clipboard.writeText(cert.protocolNumber || '');
-                                alert('Номер протокола скопирован');
+                                toast({
+                                  title: 'Номер протокола скопирован',
+                                  description: cert.protocolNumber
+                                });
                               }}
                             >
                               <Icon name="Copy" size={14} />

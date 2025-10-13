@@ -8,8 +8,6 @@ import MonthView from '../MonthView';
 import YearView from '../YearView';
 import UpcomingCertificationsList from '../UpcomingCertificationsList';
 import DayCertificationsDialog from '../DayCertificationsDialog';
-import { useCertificationStore } from '@/stores/certificationStore';
-
 interface CalendarCertification {
   id: string;
   employeeName: string;
@@ -23,7 +21,6 @@ interface CalendarCertification {
 }
 
 export default function AttestationCalendarTab() {
-  const { certifications } = useCertificationStore();
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [viewType, setViewType] = useState<'month' | 'year'>('year');
