@@ -17,8 +17,8 @@ export default function CreateObjectDialog({ organizations, onSubmit }: CreateOb
   const [formData, setFormData] = useState({
     code: '',
     name: '',
-    type: 'industrial' as ObjectType,
-    hazardClass: '2' as HazardClass,
+    type: 'opo' as ObjectType,
+    hazardClass: 'II' as HazardClass,
     address: '',
     responsiblePerson: '',
     registrationNumber: '',
@@ -40,8 +40,8 @@ export default function CreateObjectDialog({ organizations, onSubmit }: CreateOb
     setFormData({
       code: '',
       name: '',
-      type: 'industrial',
-      hazardClass: '2',
+      type: 'opo',
+      hazardClass: 'II',
       address: '',
       responsiblePerson: '',
       registrationNumber: '',
@@ -97,10 +97,8 @@ export default function CreateObjectDialog({ organizations, onSubmit }: CreateOb
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="industrial">ОПО</SelectItem>
-                    <SelectItem value="energy">Энергетика</SelectItem>
-                    <SelectItem value="chemical">Химический</SelectItem>
-                    <SelectItem value="gas">Газовый</SelectItem>
+                    <SelectItem value="opo">ОПО</SelectItem>
+                    <SelectItem value="gts">ГТС</SelectItem>
                     <SelectItem value="building">Здание</SelectItem>
                   </SelectContent>
                 </Select>
@@ -112,10 +110,10 @@ export default function CreateObjectDialog({ organizations, onSubmit }: CreateOb
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">I класс (высокий)</SelectItem>
-                    <SelectItem value="2">II класс (средний)</SelectItem>
-                    <SelectItem value="3">III класс (низкий)</SelectItem>
-                    <SelectItem value="4">IV класс (очень низкий)</SelectItem>
+                    <SelectItem value="I">I класс (высокий)</SelectItem>
+                    <SelectItem value="II">II класс (средний)</SelectItem>
+                    <SelectItem value="III">III класс (низкий)</SelectItem>
+                    <SelectItem value="IV">IV класс (очень низкий)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
