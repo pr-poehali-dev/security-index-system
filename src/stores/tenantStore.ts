@@ -45,7 +45,7 @@ export const useTenantStore = create<TenantState>((set, get) => ({
       adminEmail: 'admin@company.ru',
       adminName: 'Иванов Иван Иванович',
       status: 'active',
-      modules: ['attestation', 'catalog', 'incidents', 'checklists', 'tasks', 'examination', 'maintenance', 'budget', 'knowledge-base'] as ModuleType[],
+      modules: ['attestation', 'catalog', 'contractors', 'incidents', 'checklists', 'tasks', 'examination', 'maintenance', 'budget', 'knowledge-base'] as ModuleType[],
       createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
       expiresAt: new Date(Date.now() + 275 * 24 * 60 * 60 * 1000).toISOString()
     },
@@ -56,7 +56,7 @@ export const useTenantStore = create<TenantState>((set, get) => ({
       adminEmail: 'director@energoset.ru',
       adminName: 'Петров Петр Петрович',
       status: 'active',
-      modules: ['attestation', 'catalog', 'examination', 'maintenance', 'knowledge-base'] as ModuleType[],
+      modules: ['attestation', 'catalog', 'contractors', 'examination', 'maintenance', 'knowledge-base'] as ModuleType[],
       createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(),
       expiresAt: new Date(Date.now() + 185 * 24 * 60 * 60 * 1000).toISOString()
     }
