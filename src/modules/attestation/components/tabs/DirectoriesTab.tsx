@@ -10,11 +10,7 @@ import { useCertificationStore } from '@/stores/certificationStore';
 import { useContractorsStore } from '@/modules/catalog/stores/contractorsStore';
 import { 
   CERTIFICATION_CATEGORIES, 
-  CERTIFICATION_AREAS_BY_CATEGORY,
-  INDUSTRIAL_SAFETY_AREAS,
-  ENERGY_SAFETY_AREAS,
-  LABOR_SAFETY_AREAS,
-  ECOLOGY_AREAS
+  CERTIFICATION_AREAS_BY_CATEGORY
 } from '@/lib/constants';
 import { Badge } from '@/components/ui/badge';
 import { 
