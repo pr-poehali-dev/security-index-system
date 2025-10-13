@@ -5,6 +5,7 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
+import { ViewModeToggle } from '@/components/ui/view-mode-toggle';
 import TenantCard from '../TenantCard';
 import TenantsTable from '../TenantsTable';
 import CreateTenantDialog from '../CreateTenantDialog';
@@ -182,26 +183,11 @@ export default function GeneralTab() {
               <SelectItem value="inactive">Неактивные</SelectItem>
             </SelectContent>
           </Select>
-          <div className="flex items-center border rounded-lg overflow-hidden bg-white dark:bg-gray-800">
-            <Button
-              variant={viewMode === 'cards' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('cards')}
-              className="rounded-none gap-2"
-              title="Карточки"
-            >
-              <Icon name="Grid3x3" size={18} />
-            </Button>
-            <Button
-              variant={viewMode === 'table' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('table')}
-              className="rounded-none gap-2"
-              title="Таблица"
-            >
-              <Icon name="List" size={18} />
-            </Button>
-          </div>
+          <ViewModeToggle
+            value={viewMode}
+            onChange={setViewMode}
+            modes={['cards', 'table']}
+          />
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>

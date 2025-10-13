@@ -1,9 +1,9 @@
 // src/components/ui/view-mode-toggle.tsx
-// Описание: UI компонент переключателя режимов отображения (сетка/список/таблица)
+// Описание: UI компонент переключателя режимов отображения (сетка/список/таблица) с иконками и текстом
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 
-export type ViewMode = 'grid' | 'list' | 'table';
+export type ViewMode = 'grid' | 'list' | 'table' | 'cards';
 
 interface ViewModeToggleProps {
   value: ViewMode;
@@ -11,37 +11,31 @@ interface ViewModeToggleProps {
   modes?: ViewMode[];
 }
 
-const modeConfig: Record<ViewMode, { icon: string; title: string }> = {
-  grid: { icon: 'LayoutGrid', title: 'Сетка' },
-  list: { icon: 'List', title: 'Список' },
-  table: { icon: 'Table', title: 'Таблица' }
+const modeConfig: Record<ViewMode, { icon: string; label: string }> = {
+  grid: { icon: 'LayoutGrid', label: 'Сетка' },
+  cards: { icon: 'LayoutGrid', label: 'Карточки' },
+  list: { icon: 'List', label: 'Список' },
+  table: { icon: 'Table', label: 'Таблица' }
 };
 
 export function ViewModeToggle({ 
   value, 
   onChange, 
-  modes = ['grid', 'list', 'table'] 
+  modes = ['cards', 'table'] 
 }: ViewModeToggleProps) {
   return (
-    <div className="inline-flex items-center bg-background border border-border rounded-lg overflow-hidden">
+    <div className="inline-flex items-center gap-2">
       {modes.map((mode) => (
-        <button
+        <Button
           key={mode}
+          variant={value === mode ? 'default' : 'outline'}
+          size="sm"
           onClick={() => onChange(mode)}
-          title={modeConfig[mode].title}
-          className={`
-            px-3 py-2 transition-all duration-200
-            flex items-center justify-center
-            hover:bg-muted/50
-            ${value === mode 
-              ? 'bg-primary text-primary-foreground' 
-              : 'bg-background text-muted-foreground'
-            }
-            ${modes.indexOf(mode) !== modes.length - 1 ? 'border-r border-border' : ''}
-          `}
+          className="gap-2"
         >
-          <Icon name={modeConfig[mode].icon} size={18} />
-        </button>
+          <Icon name={modeConfig[mode].icon} size={16} />
+          {modeConfig[mode].label}
+        </Button>
       ))}
     </div>
   );

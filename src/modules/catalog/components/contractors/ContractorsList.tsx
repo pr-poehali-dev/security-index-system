@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
+import { ViewModeToggle } from '@/components/ui/view-mode-toggle';
 import {
   Table,
   TableBody,
@@ -27,10 +28,15 @@ const ContractorsList = () => {
   const [typeFilter, setTypeFilter] = useState<ContractorType | 'all'>('all');
   const [selectedContractor, setSelectedContractor] = useState<Contractor | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>(() => {
     const saved = localStorage.getItem('contractors-view-mode');
-    return (saved as ViewMode) || 'grid';
+    return (saved as 'cards' | 'table') || 'cards';
   });
+
+  const handleViewModeChange = (mode: 'cards' | 'table') => {
+    setViewMode(mode);
+    localStorage.setItem('contractors-view-mode', mode);
+  };
 
   useEffect(() => {
     fetchContractors();
@@ -136,30 +142,11 @@ const ContractorsList = () => {
             />
           </div>
           
-          <div className="flex border rounded-md">
-            <Button
-              variant={viewMode === 'table' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => {
-                setViewMode('table');
-                localStorage.setItem('contractors-view-mode', 'table');
-              }}
-              className="rounded-r-none"
-            >
-              <Icon name="Table" size={16} />
-            </Button>
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => {
-                setViewMode('grid');
-                localStorage.setItem('contractors-view-mode', 'grid');
-              }}
-              className="rounded-l-none"
-            >
-              <Icon name="LayoutGrid" size={16} />
-            </Button>
-          </div>
+          <ViewModeToggle
+            value={viewMode}
+            onChange={handleViewModeChange}
+            modes={['cards', 'table']}
+          />
         </div>
         
         <div className="flex items-center gap-4">

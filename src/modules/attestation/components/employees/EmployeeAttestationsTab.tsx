@@ -5,6 +5,7 @@ import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/person
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import { ViewModeToggle } from '@/components/ui/view-mode-toggle';
 import DataPagination from '@/components/ui/data-pagination';
 import {
   DropdownMenu,
@@ -235,24 +236,11 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
           <div className="flex items-center justify-between">
             <CardTitle>Реестр сотрудников и аттестаций</CardTitle>
             <div className="flex items-center gap-2">
-              <Button
-                variant={viewMode === 'cards' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('cards')}
-                className="gap-2"
-              >
-                <Icon name="LayoutGrid" size={16} />
-                Карточки
-              </Button>
-              <Button
-                variant={viewMode === 'table' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('table')}
-                className="gap-2"
-              >
-                <Icon name="Table" size={16} />
-                Таблица
-              </Button>
+              <ViewModeToggle
+                value={viewMode}
+                onChange={setViewMode}
+                modes={['cards', 'table']}
+              />
               
               {selectedEmployeeIds.size > 0 && (
                 <DropdownMenu>

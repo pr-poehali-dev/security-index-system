@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import { ViewModeToggle } from '@/components/ui/view-mode-toggle';
 import type { Order } from '@/stores/ordersStore';
 import OrdersStats from './OrdersStats';
 import OrdersCardView from './OrdersCardView';
@@ -93,24 +94,11 @@ export default function OrdersTab({
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <CardTitle>Список приказов</CardTitle>
             <div className="flex items-center gap-2 flex-wrap">
-              <Button
-                variant={orderViewMode === 'cards' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setOrderViewMode('cards')}
-                className="gap-2"
-              >
-                <Icon name="LayoutGrid" size={16} />
-                Карточки
-              </Button>
-              <Button
-                variant={orderViewMode === 'table' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setOrderViewMode('table')}
-                className="gap-2"
-              >
-                <Icon name="Table" size={16} />
-                Таблица
-              </Button>
+              <ViewModeToggle
+                value={orderViewMode}
+                onChange={setOrderViewMode}
+                modes={['cards', 'table']}
+              />
               <Button variant="outline" onClick={onExportToExcel} className="gap-2">
                 <Icon name="Download" size={16} />
                 Экспорт

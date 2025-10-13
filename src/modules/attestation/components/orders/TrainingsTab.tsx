@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import { ViewModeToggle } from '@/components/ui/view-mode-toggle';
 import type { Training } from '@/stores/attestationStore';
 import type { Personnel, Person, Position, OrganizationContractor } from '@/stores/settingsStore';
 import TrainingsStats from './TrainingsStats';
@@ -94,24 +95,11 @@ export default function TrainingsTab({
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <CardTitle>Список обучений</CardTitle>
             <div className="flex items-center gap-2 flex-wrap">
-              <Button
-                variant={trainingViewMode === 'cards' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setTrainingViewMode('cards')}
-                className="gap-2"
-              >
-                <Icon name="LayoutGrid" size={16} />
-                Карточки
-              </Button>
-              <Button
-                variant={trainingViewMode === 'table' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setTrainingViewMode('table')}
-                className="gap-2"
-              >
-                <Icon name="Table" size={16} />
-                Таблица
-              </Button>
+              <ViewModeToggle
+                value={trainingViewMode}
+                onChange={setTrainingViewMode}
+                modes={['cards', 'table']}
+              />
               <Button variant="outline" onClick={onExportToExcel} className="gap-2">
                 <Icon name="Download" size={16} />
                 Экспорт

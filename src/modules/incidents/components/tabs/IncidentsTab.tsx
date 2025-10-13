@@ -5,6 +5,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import { ViewModeToggle } from '@/components/ui/view-mode-toggle';
 import type { Incident } from '@/types';
 import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 import IncidentDialog from '../IncidentDialog';
@@ -44,7 +45,7 @@ export default function IncidentsTab() {
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
 
@@ -180,24 +181,11 @@ export default function IncidentsTab() {
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold">Список инцидентов и мероприятий</h3>
             <div className="flex gap-2">
-              <div className="flex gap-1 border rounded-md p-1">
-                <Button
-                  variant={viewMode === 'table' ? 'secondary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('table')}
-                >
-                  <Icon name="Table" size={16} />
-                  Таблица
-                </Button>
-                <Button
-                  variant={viewMode === 'kanban' ? 'secondary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('kanban')}
-                >
-                  <Icon name="Kanban" size={16} />
-                  Kanban
-                </Button>
-              </div>
+              <ViewModeToggle
+                value={viewMode}
+                onChange={setViewMode}
+                modes={['table', 'cards']}
+              />
               {selectedIds.length > 0 && (
                 <>
                   <Button variant="outline" onClick={handleBulkExport}>
@@ -233,7 +221,7 @@ export default function IncidentsTab() {
             />
           )}
 
-          {viewMode === 'kanban' && (
+          {viewMode === 'cards' && (
             <IncidentsKanbanFilters
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
@@ -278,7 +266,7 @@ export default function IncidentsTab() {
             </>
           )}
 
-          {viewMode === 'kanban' && (
+          {viewMode === 'cards' && (
             <IncidentKanbanBoard 
               searchTerm={searchTerm}
               directionFilter={directionFilter}

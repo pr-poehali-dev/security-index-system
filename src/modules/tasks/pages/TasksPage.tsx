@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import Icon from '@/components/ui/icon';
 import TaskTableView from '../components/TaskTableView';
+import { ViewModeToggle } from '@/components/ui/view-mode-toggle';
 import DataPagination from '@/components/ui/data-pagination';
 import type { Task } from '@/types/tasks';
 
@@ -208,26 +209,11 @@ export default function TasksPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">Фильтры</CardTitle>
-            <div className="flex gap-1 border rounded-lg p-1" role="group" aria-label="Режим отображения">
-              <Button
-                variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('cards')}
-                aria-label="Режим карточек"
-                title="Карточки"
-              >
-                <Icon name="LayoutGrid" size={16} />
-              </Button>
-              <Button
-                variant={viewMode === 'table' ? 'secondary' : 'ghost'}
-                size="sm"
-                aria-label="Режим таблицы"
-                onClick={() => setViewMode('table')}
-                title="Таблица"
-              >
-                <Icon name="Table" size={16} />
-              </Button>
-            </div>
+            <ViewModeToggle
+              value={viewMode}
+              onChange={setViewMode}
+              modes={['cards', 'table']}
+            />
           </div>
         </CardHeader>
         <CardContent>
