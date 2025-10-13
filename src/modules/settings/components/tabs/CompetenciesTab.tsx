@@ -86,30 +86,9 @@ export default function CompetenciesTab({ onAdd, onEdit, onDelete }: Competencie
     <>
       <div className="space-y-4">
         <div className="flex justify-between items-center flex-wrap gap-4">
-          <div className="flex items-center gap-4 flex-wrap">
-            <p className="text-sm text-muted-foreground">
-              Всего записей: {tenantCompetencies.length}
-            </p>
-            <Input
-              placeholder="Поиск по должности или организации..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-72"
-            />
-            <Select value={filterOrg} onValueChange={setFilterOrg}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Организация" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все организации</SelectItem>
-                {organizations.map((org) => (
-                  <SelectItem key={org.id} value={org.id}>
-                    {org.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Всего записей: {tenantCompetencies.length}
+          </p>
           <div className="flex gap-2">
             <ViewModeToggle
               value={viewMode}
@@ -139,6 +118,28 @@ export default function CompetenciesTab({ onAdd, onEdit, onDelete }: Competencie
               </Button>
             )}
           </div>
+        </div>
+
+        <div className="flex items-center gap-4 flex-wrap">
+          <Input
+            placeholder="Поиск по должности или организации..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-72"
+          />
+          <Select value={filterOrg} onValueChange={setFilterOrg}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Организация" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Все организации</SelectItem>
+              {organizations.map((org) => (
+                <SelectItem key={org.id} value={org.id}>
+                  {org.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {viewMode === 'table' ? (

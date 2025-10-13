@@ -149,50 +149,9 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center flex-wrap gap-4">
-        <div className="flex items-center gap-4 flex-wrap">
-          <p className="text-sm text-muted-foreground">
-            Всего: {tenantPersonnel.length} (активных: {tenantPersonnel.filter(p => p.status === 'active').length})
-          </p>
-          <Input
-            placeholder="Поиск по ФИО, должности, email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-72"
-          />
-          <Select value={filterOrg} onValueChange={setFilterOrg}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Организация" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Все организации</SelectItem>
-              {tenantOrgs.map((org) => (
-                <SelectItem key={org.id} value={org.id}>
-                  {org.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Статус" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Все статусы</SelectItem>
-              <SelectItem value="active">Активные</SelectItem>
-              <SelectItem value="inactive">Неактивные</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Тип" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Все типы</SelectItem>
-              <SelectItem value="employee">Штатные</SelectItem>
-              <SelectItem value="contractor">Подрядчики</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          Всего: {tenantPersonnel.length} (активных: {tenantPersonnel.filter(p => p.status === 'active').length})
+        </p>
         <div className="flex gap-2">
           <ViewModeToggle
             value={viewMode}
@@ -224,6 +183,48 @@ export default function PersonnelTab({ onAdd, onEdit, onDelete }: PersonnelTabPr
             Добавить
           </Button>
         </div>
+      </div>
+
+      <div className="flex items-center gap-4 flex-wrap">
+        <Input
+          placeholder="Поиск по ФИО, должности, email..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-72"
+        />
+        <Select value={filterOrg} onValueChange={setFilterOrg}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Организация" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Все организации</SelectItem>
+            {tenantOrgs.map((org) => (
+              <SelectItem key={org.id} value={org.id}>
+                {org.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Статус" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Все статусы</SelectItem>
+            <SelectItem value="active">Активные</SelectItem>
+            <SelectItem value="inactive">Неактивные</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterType} onValueChange={setFilterType}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Тип" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Все типы</SelectItem>
+            <SelectItem value="employee">Штатные</SelectItem>
+            <SelectItem value="contractor">Подрядчики</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {viewMode === 'table' ? (
