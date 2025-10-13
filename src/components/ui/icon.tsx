@@ -3,17 +3,17 @@
 import type { FC } from 'react';
 import {
   AlertCircle, AlertTriangle, Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp,
-  Award, BarChart3, Bell, BookOpen, Building, Building2,
-  Calendar, Check, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
+  Award, BarChart3, Bell, BookMarked, BookOpen, Building, Building2,
+  Calendar, CalendarDays, Check, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
   Circle, CircleAlert, ClipboardCheck, ClipboardList, Clock, Copy,
   Download, Edit, Eye, EyeOff, File, FileText, FileX, Filter, FolderOpen,
   GraduationCap, Grid, HelpCircle, Home, Info,
-  LayoutDashboard, List, ListTodo, LogOut,
+  KeyRound, LayoutDashboard, List, ListTodo, LogOut,
   Mail, MessageSquare, Microscope, Monitor, Moon, MoreHorizontal, MoreVertical,
-  Pencil, Phone, PieChart, Play, PlayCircle, Plus, Printer,
-  RefreshCw, Save, Search, Send, Settings, Shield, Sun,
-  Trash, Trash2, TrendingDown, TrendingUp,
-  Upload, User, Users,
+  Newspaper, Pencil, Phone, PieChart, Play, PlayCircle, Plus, Printer,
+  RefreshCw, Save, Search, Send, Settings, Shield, ShieldCheck, Sun,
+  Target, Trash, Trash2, TrendingDown, TrendingUp,
+  Upload, User, UserPlus, Users,
   Wallet, Wrench, X, XCircle,
   type LucideProps
 } from 'lucide-react';
@@ -25,17 +25,17 @@ interface IconProps extends LucideProps {
 
 const ICON_MAP: Record<string, FC<LucideProps>> = {
   AlertCircle, AlertTriangle, Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp,
-  Award, BarChart3, Bell, BookOpen, Building, Building2,
-  Calendar, Check, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
+  Award, BarChart3, Bell, BookMarked, BookOpen, Building, Building2,
+  Calendar, CalendarDays, Check, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
   Circle, CircleAlert, ClipboardCheck, ClipboardList, Clock, Copy,
   Download, Edit, Eye, EyeOff, File, FileText, FileX, Filter, FolderOpen,
   GraduationCap, Grid, HelpCircle, Home, Info,
-  LayoutDashboard, List, ListTodo, LogOut,
+  KeyRound, LayoutDashboard, List, ListTodo, LogOut,
   Mail, MessageSquare, Microscope, Monitor, Moon, MoreHorizontal, MoreVertical,
-  Pencil, Phone, PieChart, Play, PlayCircle, Plus, Printer,
-  RefreshCw, Save, Search, Send, Settings, Shield, Sun,
-  Trash, Trash2, TrendingDown, TrendingUp,
-  Upload, User, Users,
+  Newspaper, Pencil, Phone, PieChart, Play, PlayCircle, Plus, Printer,
+  RefreshCw, Save, Search, Send, Settings, Shield, ShieldCheck, Sun,
+  Target, Trash, Trash2, TrendingDown, TrendingUp,
+  Upload, User, UserPlus, Users,
   Wallet, Wrench, X, XCircle,
 };
 
