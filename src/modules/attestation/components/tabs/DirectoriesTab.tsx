@@ -47,7 +47,7 @@ export default function DirectoriesTab() {
   });
   
   const filteredTrainingOrgs = trainingOrganizations.filter(org =>
-    org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    org.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     org.inn?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     org.contactPerson?.toLowerCase().includes(searchQuery.toLowerCase())
   );
