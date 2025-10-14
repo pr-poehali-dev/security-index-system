@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
-import { useNotificationStore } from '@/stores/notificationStore';
+import { useAttestationNotificationsStore } from '@/stores/attestationNotificationsStore';
 
 export default function NotificationsTab() {
   const user = useAuthStore((state) => state.user);
@@ -23,7 +23,7 @@ export default function NotificationsTab() {
     getNotificationRulesByTenant, 
     getNotificationLogsByTenant,
     updateNotificationRule 
-  } = useNotificationStore();
+  } = useAttestationNotificationsStore();
   
   const rules = user?.tenantId ? getNotificationRulesByTenant(user.tenantId) : [];
   const logs = user?.tenantId ? getNotificationLogsByTenant(user.tenantId) : [];

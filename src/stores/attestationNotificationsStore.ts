@@ -1,9 +1,9 @@
-// src/stores/notificationStore.ts
-// Описание: Zustand store для управления уведомлениями платформы
+// src/stores/attestationNotificationsStore.ts
+// Описание: Zustand store для управления автоматическими уведомлениями об истечении сроков аттестации
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export interface NotificationRule {
+export interface AttestationNotificationRule {
   id: string;
   tenantId: string;
   name: string;
@@ -18,7 +18,7 @@ export interface NotificationRule {
   updatedAt: string;
 }
 
-export interface NotificationLog {
+export interface AttestationNotificationLog {
   id: string;
   tenantId: string;
   date: string;
@@ -30,20 +30,20 @@ export interface NotificationLog {
   createdAt: string;
 }
 
-interface NotificationState {
-  notificationRules: NotificationRule[];
-  notificationLogs: NotificationLog[];
+interface AttestationNotificationsState {
+  notificationRules: AttestationNotificationRule[];
+  notificationLogs: AttestationNotificationLog[];
   
-  addNotificationRule: (rule: Omit<NotificationRule, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateNotificationRule: (id: string, updates: Partial<NotificationRule>) => void;
+  addNotificationRule: (rule: Omit<AttestationNotificationRule, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateNotificationRule: (id: string, updates: Partial<AttestationNotificationRule>) => void;
   deleteNotificationRule: (id: string) => void;
-  getNotificationRulesByTenant: (tenantId: string) => NotificationRule[];
+  getNotificationRulesByTenant: (tenantId: string) => AttestationNotificationRule[];
   
-  addNotificationLog: (log: Omit<NotificationLog, 'id' | 'createdAt'>) => void;
-  getNotificationLogsByTenant: (tenantId: string) => NotificationLog[];
+  addNotificationLog: (log: Omit<AttestationNotificationLog, 'id' | 'createdAt'>) => void;
+  getNotificationLogsByTenant: (tenantId: string) => AttestationNotificationLog[];
 }
 
-export const useNotificationStore = create<NotificationState>()(persist((set, get) => ({
+export const useAttestationNotificationsStore = create<AttestationNotificationsState>()(persist((set, get) => ({
   notificationRules: [
     {
       id: 'rule-1',
@@ -90,7 +90,7 @@ export const useNotificationStore = create<NotificationState>()(persist((set, ge
   ],
 
   addNotificationRule: (rule) => {
-    const newRule: NotificationRule = {
+    const newRule: AttestationNotificationRule = {
       ...rule,
       id: `rule-${Date.now()}`,
       createdAt: new Date().toISOString(),
@@ -154,7 +154,7 @@ export const useNotificationStore = create<NotificationState>()(persist((set, ge
   ],
 
   addNotificationLog: (log) => {
-    const newLog: NotificationLog = {
+    const newLog: AttestationNotificationLog = {
       ...log,
       id: `log-${Date.now()}`,
       createdAt: new Date().toISOString()
@@ -166,5 +166,5 @@ export const useNotificationStore = create<NotificationState>()(persist((set, ge
     return get().notificationLogs.filter((log) => log.tenantId === tenantId);
   }
 }), {
-  name: 'notification-storage'
+  name: 'attestation-notifications-storage'
 }));
