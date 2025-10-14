@@ -76,7 +76,11 @@ export default function UnifiedDocumentDialog({
 }: UnifiedDocumentDialogProps) {
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
-  const { personnel, people, positions, getPersonnelByTenant, departments, contractors } = useSettingsStore();
+  const personnel = useSettingsStore((state) => state.personnel);
+  const people = useSettingsStore((state) => state.people);
+  const positions = useSettingsStore((state) => state.positions);
+  const departments = useSettingsStore((state) => state.departments);
+  const contractors = useSettingsStore((state) => state.contractors);
   const { certifications } = useCertificationStore();
   
   const trainingOrganizations = useMemo(() => {
@@ -117,7 +121,9 @@ export default function UnifiedDocumentDialog({
   });
   const [contractorDialogOpen, setContractorDialogOpen] = useState(false);
 
-  const tenantPersonnel = user?.tenantId ? getPersonnelByTenant(user.tenantId) : [];
+  const tenantPersonnel = useMemo(() => 
+    user?.tenantId ? personnel.filter(p => p.tenantId === user.tenantId) : []
+  , [user?.tenantId, personnel]);
 
   const employees = useMemo<Employee[]>(() => {
     return tenantPersonnel.map((p) => {

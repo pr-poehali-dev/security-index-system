@@ -46,25 +46,27 @@ const DashboardPage = memo(function DashboardPage() {
     return <Navigate to={ROUTES.TENANTS} replace />;
   }
   
-  const { objects, organizations } = useCatalogStore();
+  const { objects, organizations: catalogOrganizations } = useCatalogStore();
   const { tasks, getTaskStats, getOverdueTasks } = useTaskStore();
   const { incidents } = useIncidentsStore();
-  const { 
-    personnel, 
-    competencies, 
-    getOrganizationsByTenant, 
-    getPersonnelByTenant,
-    people,
-    positions
-  } = useSettingsStore();
+  const personnel = useSettingsStore((state) => state.personnel);
+  const competencies = useSettingsStore((state) => state.competencies);
+  const settingsOrganizations = useSettingsStore((state) => state.organizations);
+  const people = useSettingsStore((state) => state.people);
+  const positions = useSettingsStore((state) => state.positions);
 
   const taskStats = getTaskStats();
   const overdueTasks = getOverdueTasks();
   const openIncidents = incidents.filter(inc => inc.status === 'created');
   const inProgressIncidents = incidents.filter(inc => inc.status === 'in_progress');
 
-  const tenantPersonnel = user?.tenantId ? getPersonnelByTenant(user.tenantId) : [];
-  const tenantOrganizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
+  const tenantPersonnel = useMemo(() => 
+    user?.tenantId ? personnel.filter(p => p.tenantId === user.tenantId) : []
+  , [user?.tenantId, personnel]);
+  
+  const tenantOrganizations = useMemo(() => 
+    user?.tenantId ? settingsOrganizations.filter(o => o.tenantId === user.tenantId) : []
+  , [user?.tenantId, settingsOrganizations]);
   
   const competencyReport = useMemo(() => {
     if (!user?.availableModules.includes('settings')) return null;
