@@ -251,11 +251,26 @@ export default function TasksTab() {
     setSelectedTasks(new Set([taskId]));
     setMassActionType(orderType);
     setShowMassActionDialog(true);
+    
+    // Автоматически переводим задачу в статус "В работе"
+    if (task.status === 'pending') {
+      handleTaskStatusChange(taskId, 'in_progress');
+    }
   };
 
   const handleBulkGenerateOrder = (orderType: string) => {
     setMassActionType(orderType);
     setShowMassActionDialog(true);
+    
+    // Автоматически переводим выбранные задачи в статус "В работе"
+    const updates: Record<string, { status: 'in_progress', completedAt?: string }> = {};
+    selectedTasks.forEach(taskId => {
+      const task = tasksWithStatuses.find(t => t.id === taskId);
+      if (task && task.status === 'pending') {
+        updates[taskId] = { status: 'in_progress' };
+      }
+    });
+    setTaskStatuses(prev => ({ ...prev, ...updates }));
   };
 
   const getSelectedEmployees = () => {
@@ -306,7 +321,7 @@ export default function TasksTab() {
               </h3>
               <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
                 Система автоматически создаёт задачи-напоминания о необходимости продления аттестаций сотрудников. 
-                Вы не упустите ни одного срока! Для каждой задачи можно сформировать приказ на обучение или аттестацию.
+                Чтобы взять задачу в работу — создайте приказ на обучение или аттестацию. После создания приказа задача автоматически перейдёт в статус "В работе".
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="flex items-start gap-2 text-sm">
@@ -411,7 +426,6 @@ export default function TasksTab() {
               setFilterOrderStatus={setFilterOrderStatus}
               departments={departments}
               selectedTasksCount={selectedTasks.size}
-              onBulkInProgress={() => handleBulkStatusChange('in_progress')}
               onBulkCompleted={() => handleBulkStatusChange('completed')}
               onBulkGenerateOrder={handleBulkGenerateOrder}
             />

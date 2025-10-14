@@ -25,7 +25,6 @@ interface TaskFiltersProps {
   setFilterOrderStatus: (value: string) => void;
   departments: string[];
   selectedTasksCount: number;
-  onBulkInProgress: () => void;
   onBulkCompleted: () => void;
   onBulkGenerateOrder?: (orderType: string) => void;
 }
@@ -41,7 +40,6 @@ export default function TaskFilters({
   setFilterOrderStatus,
   departments,
   selectedTasksCount,
-  onBulkInProgress,
   onBulkCompleted,
   onBulkGenerateOrder
 }: TaskFiltersProps) {
@@ -106,24 +104,6 @@ export default function TaskFilters({
             </span>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onBulkInProgress}
-              className="gap-2 bg-white dark:bg-slate-800"
-            >
-              <Icon name="PlayCircle" size={14} />
-              Взять в работу
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onBulkCompleted}
-              className="gap-2 bg-white dark:bg-slate-800"
-            >
-              <Icon name="CheckCircle2" size={14} />
-              Отметить выполненными
-            </Button>
             {onBulkGenerateOrder && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -132,8 +112,8 @@ export default function TaskFilters({
                     size="sm"
                     className="gap-2"
                   >
-                    <Icon name="FileText" size={14} />
-                    Сформировать приказ
+                    <Icon name="PlayCircle" size={14} />
+                    Взять в работу
                     <Icon name="ChevronDown" size={12} />
                   </Button>
                 </DropdownMenuTrigger>
@@ -157,6 +137,15 @@ export default function TaskFilters({
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onBulkCompleted}
+              className="gap-2 bg-white dark:bg-slate-800"
+            >
+              <Icon name="CheckCircle2" size={14} />
+              Завершить выбранные
+            </Button>
           </div>
         </div>
       )}

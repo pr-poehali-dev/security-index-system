@@ -129,60 +129,17 @@ export default function TaskCard({
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              {task.status === 'pending' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onStatusChange('in_progress');
-                  }}
-                  className="gap-2"
-                >
-                  <Icon name="PlayCircle" size={14} />
-                  Взять в работу
-                </Button>
-              )}
-              {task.status === 'in_progress' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onStatusChange('completed');
-                  }}
-                  className="gap-2"
-                >
-                  <Icon name="CheckCircle2" size={14} />
-                  Завершить
-                </Button>
-              )}
-              {task.status === 'completed' && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onStatusChange('pending');
-                  }}
-                  className="gap-2"
-                >
-                  <Icon name="RotateCcw" size={14} />
-                  Вернуть в работу
-                </Button>
-              )}
-              {onGenerateOrder && (
+              {task.status === 'pending' && onGenerateOrder && !task.hasActiveOrder && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
-                      variant={task.hasActiveOrder ? "outline" : "default"}
+                      variant="default"
                       size="sm"
                       onClick={(e) => e.stopPropagation()}
                       className="gap-2"
-                      title={task.hasActiveOrder ? `Уже создан приказ ${task.orderNumber}` : undefined}
                     >
-                      <Icon name="FileText" size={14} />
-                      {task.hasActiveOrder ? 'Создать ещё приказ' : 'Сформировать приказ'}
+                      <Icon name="PlayCircle" size={14} />
+                      Взять в работу
                       <Icon name="ChevronDown" size={12} />
                     </Button>
                   </DropdownMenuTrigger>
@@ -217,6 +174,81 @@ export default function TaskCard({
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+              )}
+              {task.status === 'pending' && onGenerateOrder && task.hasActiveOrder && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => e.stopPropagation()}
+                      className="gap-2"
+                      title={`Уже создан приказ ${task.orderNumber}`}
+                    >
+                      <Icon name="FileText" size={14} />
+                      Создать ещё приказ
+                      <Icon name="ChevronDown" size={12} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[320px]">
+                    <DropdownMenuItem onClick={(e) => {
+                      e.stopPropagation();
+                      onGenerateOrder('sdo');
+                    }}>
+                      <Icon name="Monitor" size={16} className="mr-2" />
+                      О подготовке в СДО Интеллектуальная система
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => {
+                      e.stopPropagation();
+                      onGenerateOrder('training_center');
+                    }}>
+                      <Icon name="School" size={16} className="mr-2" />
+                      О подготовке в учебный центр
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => {
+                      e.stopPropagation();
+                      onGenerateOrder('internal_attestation');
+                    }}>
+                      <Icon name="ClipboardCheck" size={16} className="mr-2" />
+                      О аттестации в ЕПТ организации
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => {
+                      e.stopPropagation();
+                      onGenerateOrder('rostechnadzor');
+                    }}>
+                      <Icon name="Building2" size={16} className="mr-2" />
+                      О направлении на аттестацию в Ростехнадзор
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+              {task.status === 'in_progress' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onStatusChange('completed');
+                  }}
+                  className="gap-2"
+                >
+                  <Icon name="CheckCircle2" size={14} />
+                  Завершить задачу
+                </Button>
+              )}
+              {task.status === 'completed' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onStatusChange('pending');
+                  }}
+                  className="gap-2"
+                >
+                  <Icon name="RotateCcw" size={14} />
+                  Вернуть в работу
+                </Button>
               )}
               <Button
                 variant="ghost"
