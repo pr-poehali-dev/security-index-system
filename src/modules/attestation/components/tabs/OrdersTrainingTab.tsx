@@ -45,6 +45,8 @@ export default function OrdersTrainingTab() {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'date' | 'status' | 'type'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [showCreateOrderDialog, setShowCreateOrderDialog] = useState(false);
   const [showCreateTrainingDialog, setShowCreateTrainingDialog] = useState(false);
@@ -117,7 +119,7 @@ export default function OrdersTrainingTab() {
   }, [tenantOrders, attestationOrders, tenantTrainings, trainingOrgs]);
 
   const filteredDocuments = useMemo(() => {
-    return unifiedDocuments.filter(doc => {
+    const filtered = unifiedDocuments.filter(doc => {
       const matchesSearch = 
         doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         doc.number.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -128,7 +130,23 @@ export default function OrdersTrainingTab() {
       
       return matchesSearch && matchesType && matchesStatus;
     });
-  }, [unifiedDocuments, searchQuery, typeFilter, statusFilter]);
+
+    filtered.sort((a, b) => {
+      let compareResult = 0;
+      
+      if (sortBy === 'date') {
+        compareResult = new Date(a.date).getTime() - new Date(b.date).getTime();
+      } else if (sortBy === 'status') {
+        compareResult = a.status.localeCompare(b.status);
+      } else if (sortBy === 'type') {
+        compareResult = a.type.localeCompare(b.type);
+      }
+      
+      return sortOrder === 'asc' ? compareResult : -compareResult;
+    });
+
+    return filtered;
+  }, [unifiedDocuments, searchQuery, typeFilter, statusFilter, sortBy, sortOrder]);
 
   const stats = useMemo(() => {
     return {
@@ -287,6 +305,27 @@ export default function OrdersTrainingTab() {
               <SelectItem value="in_progress">В процессе</SelectItem>
             </SelectContent>
           </Select>
+
+          <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'date' | 'status' | 'type')}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Сортировка" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date">По дате</SelectItem>
+              <SelectItem value="status">По статусу</SelectItem>
+              <SelectItem value="type">По типу</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="gap-2"
+          >
+            <Icon name={sortOrder === 'asc' ? 'ArrowUp' : 'ArrowDown'} size={16} />
+            {sortOrder === 'asc' ? 'По возрастанию' : 'По убыванию'}
+          </Button>
         </div>
 
         <div className="flex gap-2">
