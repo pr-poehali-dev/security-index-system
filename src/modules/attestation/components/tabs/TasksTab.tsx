@@ -212,15 +212,72 @@ export default function TasksTab() {
 
   return (
     <div className="space-y-6">
+      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-900">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-blue-600 text-white">
+              <Icon name="Info" size={24} />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                Автоматический контроль сроков аттестаций
+              </h3>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+                Система автоматически создаёт задачи-напоминания о необходимости продления аттестаций сотрудников. 
+                Вы не упустите ни одного срока!
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="flex items-start gap-2 text-sm">
+                  <div className="flex items-center justify-center w-6 h-6 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                    <Icon name="Clock" size={14} />
+                  </div>
+                  <div>
+                    <p className="font-medium text-blue-900 dark:text-blue-100">За 90 дней</p>
+                    <p className="text-xs text-blue-600 dark:text-blue-400">Низкий приоритет</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 text-sm">
+                  <div className="flex items-center justify-center w-6 h-6 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300">
+                    <Icon name="Clock" size={14} />
+                  </div>
+                  <div>
+                    <p className="font-medium text-blue-900 dark:text-blue-100">За 60 дней</p>
+                    <p className="text-xs text-blue-600 dark:text-blue-400">Средний приоритет</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 text-sm">
+                  <div className="flex items-center justify-center w-6 h-6 rounded bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300">
+                    <Icon name="AlertCircle" size={14} />
+                  </div>
+                  <div>
+                    <p className="font-medium text-blue-900 dark:text-blue-100">За 30 дней</p>
+                    <p className="text-xs text-blue-600 dark:text-blue-400">Высокий приоритет</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 text-sm">
+                  <div className="flex items-center justify-center w-6 h-6 rounded bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
+                    <Icon name="AlertTriangle" size={14} />
+                  </div>
+                  <div>
+                    <p className="font-medium text-blue-900 dark:text-blue-100">Просрочено</p>
+                    <p className="text-xs text-blue-600 dark:text-blue-400">Критический</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <TaskStatisticsCards statistics={statistics} />
 
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <CardTitle>Автоматические задачи</CardTitle>
+              <CardTitle>Список задач</CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
-                Задачи создаются автоматически за 90/60/30 дней до истечения аттестаций
+                Отслеживайте и управляйте задачами по продлению аттестаций
               </p>
             </div>
           </div>
@@ -250,9 +307,24 @@ export default function TasksTab() {
               </div>
 
               {filteredTasks.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Icon name="CheckCircle2" size={48} className="mx-auto mb-2 opacity-20" />
-                  <p>Нет задач по выбранным фильтрам</p>
+                <div className="text-center py-12">
+                  <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30">
+                    <Icon name="CheckCircle2" size={32} className="text-green-600 dark:text-green-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">
+                    {tasksWithStatuses.length === 0 ? 'Отлично! Все аттестации актуальны' : 'Нет задач по выбранным фильтрам'}
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    {tasksWithStatuses.length === 0 
+                      ? 'Задачи появятся автоматически, когда сроки аттестаций приблизятся к истечению'
+                      : 'Измените фильтры, чтобы увидеть другие задачи'}
+                  </p>
+                  {tasksWithStatuses.length === 0 && (
+                    <Button variant="outline" onClick={() => window.location.href = '/attestation?tab=employees'} className="gap-2">
+                      <Icon name="Users" size={16} />
+                      Перейти к сотрудникам
+                    </Button>
+                  )}
                 </div>
               ) : (
                 filteredTasks.map(task => (

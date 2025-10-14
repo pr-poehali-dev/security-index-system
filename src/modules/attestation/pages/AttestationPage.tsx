@@ -31,7 +31,7 @@ const AttestationPage = memo(function AttestationPage() {
           </TabsTrigger>
           <TabsTrigger value="tasks" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="ListTodo" size={20} />
-            <span className="text-xs font-medium">Задачи</span>
+            <span className="text-xs font-medium text-center leading-tight">Контроль<br/>сроков</span>
           </TabsTrigger>
           <TabsTrigger value="calendar" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="CalendarDays" size={20} />

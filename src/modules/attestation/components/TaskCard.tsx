@@ -111,7 +111,7 @@ export default function TaskCard({
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {task.status === 'pending' && (
                 <Button
                   variant="outline"
@@ -154,6 +154,18 @@ export default function TaskCard({
                   Вернуть в работу
                 </Button>
               )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.location.href = `/attestation?employee=${task.employeeId}`;
+                }}
+                className="gap-2"
+              >
+                <Icon name="User" size={14} />
+                Карточка сотрудника
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"

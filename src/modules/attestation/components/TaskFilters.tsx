@@ -75,28 +75,33 @@ export default function TaskFilters({
       </div>
 
       {selectedTasksCount > 0 && (
-        <div className="flex items-center gap-2 p-4 bg-slate-50 dark:bg-slate-900 rounded-lg">
-          <span className="text-sm font-medium">
-            Выбрано: {selectedTasksCount}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onBulkInProgress}
-            className="gap-2"
-          >
-            <Icon name="PlayCircle" size={14} />
-            Взять в работу
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onBulkCompleted}
-            className="gap-2"
-          >
-            <Icon name="CheckCircle2" size={14} />
-            Отметить выполненными
-          </Button>
+        <div className="flex items-center justify-between gap-2 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="flex items-center gap-2">
+            <Icon name="Info" size={16} className="text-blue-600 dark:text-blue-400" />
+            <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+              Выбрано задач: {selectedTasksCount}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onBulkInProgress}
+              className="gap-2 bg-white dark:bg-slate-800"
+            >
+              <Icon name="PlayCircle" size={14} />
+              Взять в работу
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onBulkCompleted}
+              className="gap-2 bg-white dark:bg-slate-800"
+            >
+              <Icon name="CheckCircle2" size={14} />
+              Отметить выполненными
+            </Button>
+          </div>
         </div>
       )}
     </div>
