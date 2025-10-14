@@ -21,7 +21,7 @@ export default function KnowledgeBasePage() {
   const user = useAuthStore((state) => state.user);
   const { documents, getDocumentsByCategory, incrementViews, incrementDownloads, deleteDocument } = useKnowledgeBaseStore();
   
-  const [activeTab, setActiveTab] = useState<DocumentCategory>('user_guide');
+  const [activeTab, setActiveTab] = useState<DocumentCategory>('regulatory');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<RegulatoryDocumentType | 'all'>('all');
   const [selectedAuthority, setSelectedAuthority] = useState<FederalAuthority | 'all'>('all');
@@ -60,7 +60,6 @@ export default function KnowledgeBasePage() {
 
   const stats = useMemo(() => {
     return {
-      userGuides: getDocumentsByCategory('user_guide').length,
       regulatory: getDocumentsByCategory('regulatory').length,
       organization: getDocumentsByCategory('organization').length,
       platformInstructions: getDocumentsByCategory('platform_instruction').length,
@@ -75,8 +74,8 @@ export default function KnowledgeBasePage() {
   };
 
   const handleEditDocument = (doc: KnowledgeDocument) => {
-    if ((doc.category === 'platform_instruction' || doc.category === 'user_guide') && user?.role !== 'SuperAdmin') {
-      toast.error('Только суперадминистратор может редактировать этот документ');
+    if (doc.category === 'platform_instruction' && user?.role !== 'SuperAdmin') {
+      toast.error('Только суперадминистратор может редактировать инструкции платформы');
       return;
     }
     setSelectedDocument(doc);
@@ -100,8 +99,8 @@ export default function KnowledgeBasePage() {
   };
 
   const handleDeleteClick = (doc: KnowledgeDocument) => {
-    if ((doc.category === 'platform_instruction' || doc.category === 'user_guide') && user?.role !== 'SuperAdmin') {
-      toast.error('Только суперадминистратор может удалять этот документ');
+    if (doc.category === 'platform_instruction' && user?.role !== 'SuperAdmin') {
+      toast.error('Только суперадминистратор может удалять инструкции платформы');
       return;
     }
     setSelectedDocument(doc);
@@ -175,7 +174,7 @@ export default function KnowledgeBasePage() {
     }
   };
 
-  const canCreateDocumentInTab = activeTab === 'user_guide' || activeTab === 'platform_instruction'
+  const canCreateDocumentInTab = activeTab === 'platform_instruction'
     ? user?.role === 'SuperAdmin'
     : canManage;
 
@@ -191,7 +190,6 @@ export default function KnowledgeBasePage() {
       />
 
       <KnowledgeBaseStats
-        userGuides={stats.userGuides}
         regulatory={stats.regulatory}
         organization={stats.organization}
         platformInstructions={stats.platformInstructions}

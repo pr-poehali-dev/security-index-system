@@ -691,7 +691,7 @@ export interface Notification {
   createdAt: string;
 }
 
-export type DocumentCategory = 'user_guide' | 'regulatory' | 'organization';
+export type DocumentCategory = 'regulatory' | 'organization' | 'platform_instruction';
 export type DocumentStatus = 'draft' | 'published' | 'archived';
 
 export type RegulatoryDocumentType = 
