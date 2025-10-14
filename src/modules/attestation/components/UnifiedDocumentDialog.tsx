@@ -76,17 +76,18 @@ export default function UnifiedDocumentDialog({
 }: UnifiedDocumentDialogProps) {
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
-  const { personnel, people, positions, getPersonnelByTenant, departments, getContractorsByType } = useSettingsStore();
+  const { personnel, people, positions, getPersonnelByTenant, departments, contractors } = useSettingsStore();
   const { certifications } = useCertificationStore();
   
   const trainingOrganizations = useMemo(() => {
-    return user?.tenantId 
-      ? getContractorsByType(user.tenantId, 'training_center').map(contractor => ({
-          id: contractor.id,
-          name: contractor.contractorName,
-        }))
-      : [];
-  }, [user?.tenantId, getContractorsByType]);
+    if (!user?.tenantId) return [];
+    return contractors
+      .filter(c => c.tenantId === user.tenantId && c.type === 'training_center')
+      .map(contractor => ({
+        id: contractor.id,
+        name: contractor.contractorName,
+      }));
+  }, [user?.tenantId, contractors]);
 
   const handleAddOrganization = useCallback(() => {
     setContractorDialogOpen(true);
