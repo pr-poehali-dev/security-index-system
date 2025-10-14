@@ -5,7 +5,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export interface Employee {
   id: string;
@@ -15,7 +14,7 @@ export interface Employee {
   [key: string]: any;
 }
 
-export type CertificationStatusFilter = 'all' | 'valid' | 'expiring' | 'expired';
+export type CertificationStatusFilter = 'all' | 'valid' | 'expiring' | 'expired' | 'missing';
 
 interface EmployeeSelectionStepProps {
   employees: Employee[];
@@ -35,7 +34,7 @@ export default function EmployeeSelectionStep({
   getCertificationStatus,
 }: EmployeeSelectionStepProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [certStatusFilter, setCertStatusFilter] = useState<CertificationStatusFilter>('all');
+  const [certStatusFilters, setCertStatusFilters] = useState<Set<CertificationStatusFilter>>(new Set());
 
   const filteredEmployees = useMemo(() => {
     let filtered = employees;
@@ -50,12 +49,12 @@ export default function EmployeeSelectionStep({
       );
     }
 
-    if (enableCertificationFilter && certStatusFilter !== 'all' && getCertificationStatus) {
-      filtered = filtered.filter((emp) => getCertificationStatus(emp) === certStatusFilter);
+    if (enableCertificationFilter && certStatusFilters.size > 0 && getCertificationStatus) {
+      filtered = filtered.filter((emp) => certStatusFilters.has(getCertificationStatus(emp)));
     }
 
     return filtered;
-  }, [employees, searchQuery, certStatusFilter, enableCertificationFilter, getCertificationStatus]);
+  }, [employees, searchQuery, certStatusFilters, enableCertificationFilter, getCertificationStatus]);
 
   const handleToggle = (employeeId: string) => {
     if (selected.includes(employeeId)) {
@@ -81,6 +80,16 @@ export default function EmployeeSelectionStep({
     onSelect(newSelected);
   };
 
+  const toggleStatusFilter = (status: CertificationStatusFilter) => {
+    const newFilters = new Set(certStatusFilters);
+    if (newFilters.has(status)) {
+      newFilters.delete(status);
+    } else {
+      newFilters.add(status);
+    }
+    setCertStatusFilters(newFilters);
+  };
+
   const isAllSelected = selected.length === filteredEmployees.length && filteredEmployees.length > 0;
 
   return (
@@ -101,20 +110,51 @@ export default function EmployeeSelectionStep({
             />
           </div>
 
-          {enableCertificationFilter && (
-            <Select value={certStatusFilter} onValueChange={(value) => setCertStatusFilter(value as CertificationStatusFilter)}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все сотрудники</SelectItem>
-                <SelectItem value="valid">Аттестация действует</SelectItem>
-                <SelectItem value="expiring">Истекает скоро</SelectItem>
-                <SelectItem value="expired">Просрочена</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
+
         </div>
+
+        {enableCertificationFilter && getCertificationStatus && (
+          <div className="space-y-3">
+            <div className="text-sm font-medium">Фильтр по статусу аттестации:</div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Checkbox 
+                  id="filter-expired"
+                  checked={certStatusFilters.has('expired')}
+                  onCheckedChange={() => toggleStatusFilter('expired')}
+                />
+                <label htmlFor="filter-expired" className="text-sm cursor-pointer flex items-center gap-1.5">
+                  <Icon name="AlertCircle" size={14} className="text-red-600" />
+                  Просроченные
+                </label>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Checkbox 
+                  id="filter-expiring"
+                  checked={certStatusFilters.has('expiring')}
+                  onCheckedChange={() => toggleStatusFilter('expiring')}
+                />
+                <label htmlFor="filter-expiring" className="text-sm cursor-pointer flex items-center gap-1.5">
+                  <Icon name="Clock" size={14} className="text-orange-600" />
+                  Истекающие
+                </label>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Checkbox 
+                  id="filter-missing"
+                  checked={certStatusFilters.has('missing')}
+                  onCheckedChange={() => toggleStatusFilter('missing')}
+                />
+                <label htmlFor="filter-missing" className="text-sm cursor-pointer flex items-center gap-1.5">
+                  <Icon name="XCircle" size={14} className="text-gray-600" />
+                  Отсутствующие
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={handleSelectAll}>
@@ -141,6 +181,16 @@ export default function EmployeeSelectionStep({
               >
                 <Icon name="Clock" size={14} className="text-orange-600" />
                 Выбрать с истекающими
+              </Button>
+
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleSelectByStatus('missing')}
+                className="gap-2"
+              >
+                <Icon name="XCircle" size={14} className="text-gray-600" />
+                Выбрать с отсутствующими
               </Button>
             </>
           )}

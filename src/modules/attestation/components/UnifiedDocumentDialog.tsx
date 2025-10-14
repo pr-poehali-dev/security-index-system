@@ -136,7 +136,7 @@ export default function UnifiedDocumentDialog({
 
   const getEmployeeCertStatus = (employee: Employee): CertificationStatusFilter => {
     if (!employee.certifications || employee.certifications.length === 0) {
-      return 'all';
+      return 'missing';
     }
 
     let hasExpired = false;
