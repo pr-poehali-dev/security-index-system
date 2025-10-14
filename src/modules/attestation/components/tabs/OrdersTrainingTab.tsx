@@ -6,8 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import CreateOrderDialog from '../CreateOrderDialog';
-import CreateTrainingDialog from '../CreateTrainingDialog';
+import UnifiedDocumentDialog from '../UnifiedDocumentDialog';
 import SendToTrainingCenterDialog from '../SendToTrainingCenterDialog';
 import { useAuthStore } from '@/stores/authStore';
 import { useDocumentsStore } from '@/stores/documentsStore';
@@ -52,8 +51,8 @@ export default function OrdersTrainingTab() {
   const [sortBy, setSortBy] = useState<'date' | 'status' | 'type'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
-  const [showCreateOrderDialog, setShowCreateOrderDialog] = useState(false);
-  const [showCreateTrainingDialog, setShowCreateTrainingDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [createDialogType, setCreateDialogType] = useState<'order' | 'training' | undefined>(undefined);
   const [showSendToTCDialog, setShowSendToTCDialog] = useState(false);
   const [selectedOrderForTC, setSelectedOrderForTC] = useState<Order | null>(null);
 
@@ -267,12 +266,24 @@ export default function OrdersTrainingTab() {
             Excel
           </Button>
 
-          <Button onClick={() => setShowCreateOrderDialog(true)} className="gap-2">
+          <Button 
+            onClick={() => {
+              setCreateDialogType('order');
+              setShowCreateDialog(true);
+            }} 
+            className="gap-2"
+          >
             <Icon name="Plus" size={16} />
             Создать приказ
           </Button>
 
-          <Button onClick={() => setShowCreateTrainingDialog(true)} className="gap-2">
+          <Button 
+            onClick={() => {
+              setCreateDialogType('training');
+              setShowCreateDialog(true);
+            }} 
+            className="gap-2"
+          >
             <Icon name="GraduationCap" size={16} />
             Создать обучение
           </Button>
@@ -364,14 +375,13 @@ export default function OrdersTrainingTab() {
         </div>
       )}
 
-      <CreateOrderDialog
-        open={showCreateOrderDialog}
-        onOpenChange={setShowCreateOrderDialog}
-      />
-
-      <CreateTrainingDialog
-        open={showCreateTrainingDialog}
-        onOpenChange={setShowCreateTrainingDialog}
+      <UnifiedDocumentDialog
+        open={showCreateDialog}
+        onOpenChange={(open) => {
+          setShowCreateDialog(open);
+          if (!open) setCreateDialogType(undefined);
+        }}
+        documentType={createDialogType}
       />
 
       <SendToTrainingCenterDialog
