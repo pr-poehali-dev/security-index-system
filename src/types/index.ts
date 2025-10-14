@@ -694,6 +694,48 @@ export interface Notification {
 export type DocumentCategory = 'user_guide' | 'regulatory' | 'organization';
 export type DocumentStatus = 'draft' | 'published' | 'archived';
 
+export type RegulatoryDocumentType = 
+  | 'federal_law'
+  | 'government_decree'
+  | 'rostekhnadzor_order'
+  | 'minenergo_order'
+  | 'mchs_order'
+  | 'minprirody_order'
+  | 'minstroy_order'
+  | 'mintrans_order'
+  | 'mintrud_order';
+
+export type FederalAuthority = 
+  | 'rostekhnadzor'
+  | 'minenergo'
+  | 'mchs'
+  | 'minprirody'
+  | 'minstroy'
+  | 'mintrans'
+  | 'mintrud';
+
+export const REGULATORY_DOCUMENT_TYPES: Record<RegulatoryDocumentType, string> = {
+  federal_law: 'Федеральный закон',
+  government_decree: 'Постановление Правительства РФ',
+  rostekhnadzor_order: 'Приказ Ростехнадзора',
+  minenergo_order: 'Приказ Минэнерго России',
+  mchs_order: 'Приказ МЧС России',
+  minprirody_order: 'Приказ Минприроды России',
+  minstroy_order: 'Приказ Минстрой России',
+  mintrans_order: 'Приказ Минтранс России',
+  mintrud_order: 'Приказ Минтруд России',
+};
+
+export const FEDERAL_AUTHORITIES: Record<FederalAuthority, string> = {
+  rostekhnadzor: 'Ростехнадзор',
+  minenergo: 'Минэнерго России',
+  mchs: 'МЧС России',
+  minprirody: 'Минприроды России',
+  minstroy: 'Минстрой России',
+  mintrans: 'Минтранс России',
+  mintrud: 'Минтруд России',
+};
+
 export interface DocumentVersion {
   versionNumber: string;
   createdAt: string;
@@ -722,6 +764,11 @@ export interface KnowledgeDocument {
   viewsCount: number;
   downloadsCount: number;
   versions?: DocumentVersion[];
+  regulatoryType?: RegulatoryDocumentType;
+  documentNumber?: string;
+  adoptionDate?: string;
+  effectiveDate?: string;
+  authority?: FederalAuthority;
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;

@@ -13,6 +13,7 @@ import Icon from '@/components/ui/icon';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type { KnowledgeDocument } from '@/types';
+import { REGULATORY_DOCUMENT_TYPES, FEDERAL_AUTHORITIES } from '@/types';
 
 interface DocumentViewDialogProps {
   open: boolean;
@@ -76,29 +77,60 @@ export default function DocumentViewDialog({
         </DialogHeader>
 
         <div className="space-y-6">
-          <div className="flex flex-wrap gap-4 text-sm text-muted-foreground pb-4 border-b">
-            <div className="flex items-center gap-2">
-              <Icon name="FolderOpen" size={16} />
-              <span>{getCategoryLabel(document.category)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Icon name="User" size={16} />
-              <span>{document.author}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Icon name="Calendar" size={16} />
-              <span>{format(new Date(document.publishedAt || document.createdAt), 'd MMMM yyyy', { locale: ru })}</span>
-            </div>
-            {document.version && (
+          <div className="space-y-3 pb-4 border-b">
+            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
-                <Icon name="GitBranch" size={16} />
-                <span>{document.version}</span>
+                <Icon name="FolderOpen" size={16} />
+                <span>{getCategoryLabel(document.category)}</span>
               </div>
-            )}
-            {document.fileName && (
               <div className="flex items-center gap-2">
-                <Icon name="HardDrive" size={16} />
-                <span>{formatFileSize(document.fileSize)}</span>
+                <Icon name="User" size={16} />
+                <span>{document.author}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Icon name="Calendar" size={16} />
+                <span>{format(new Date(document.adoptionDate || document.publishedAt || document.createdAt), 'd MMMM yyyy', { locale: ru })}</span>
+              </div>
+              {document.version && (
+                <div className="flex items-center gap-2">
+                  <Icon name="GitBranch" size={16} />
+                  <span>{document.version}</span>
+                </div>
+              )}
+              {document.fileName && (
+                <div className="flex items-center gap-2">
+                  <Icon name="HardDrive" size={16} />
+                  <span>{formatFileSize(document.fileSize)}</span>
+                </div>
+              )}
+            </div>
+
+            {document.category === 'regulatory' && (
+              <div className="flex flex-wrap gap-4 text-sm">
+                {document.regulatoryType && (
+                  <div className="flex items-center gap-2">
+                    <Icon name="FileCheck" size={16} className="text-primary" />
+                    <span className="font-medium">{REGULATORY_DOCUMENT_TYPES[document.regulatoryType]}</span>
+                  </div>
+                )}
+                {document.documentNumber && (
+                  <div className="flex items-center gap-2">
+                    <Icon name="Hash" size={16} className="text-primary" />
+                    <span className="font-medium">{document.documentNumber}</span>
+                  </div>
+                )}
+                {document.authority && (
+                  <div className="flex items-center gap-2">
+                    <Icon name="Building2" size={16} className="text-primary" />
+                    <span>{FEDERAL_AUTHORITIES[document.authority]}</span>
+                  </div>
+                )}
+                {document.effectiveDate && (
+                  <div className="flex items-center gap-2">
+                    <Icon name="CalendarCheck" size={16} className="text-primary" />
+                    <span>Вступил в силу: {format(new Date(document.effectiveDate), 'd MMMM yyyy', { locale: ru })}</span>
+                  </div>
+                )}
               </div>
             )}
           </div>

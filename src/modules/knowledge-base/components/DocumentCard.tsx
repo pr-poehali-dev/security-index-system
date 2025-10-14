@@ -11,6 +11,7 @@ import Icon from '@/components/ui/icon';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import type { KnowledgeDocument } from '@/types';
+import { REGULATORY_DOCUMENT_TYPES, FEDERAL_AUTHORITIES } from '@/types';
 
 interface DocumentCardProps {
   document: KnowledgeDocument;
@@ -56,13 +57,30 @@ export default function DocumentCard({
               </p>
             )}
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-muted-foreground">
+              {doc.regulatoryType && (
+                <Badge variant="secondary" className="text-[10px] sm:text-xs">
+                  {REGULATORY_DOCUMENT_TYPES[doc.regulatoryType]}
+                </Badge>
+              )}
+              {doc.documentNumber && (
+                <div className="flex items-center gap-1 font-medium">
+                  <Icon name="Hash" size={12} />
+                  {doc.documentNumber}
+                </div>
+              )}
+              {doc.authority && (
+                <div className="flex items-center gap-1">
+                  <Icon name="Building2" size={12} />
+                  {FEDERAL_AUTHORITIES[doc.authority]}
+                </div>
+              )}
               <div className="flex items-center gap-1">
                 <Icon name="User" size={12} />
                 <span className="truncate max-w-[100px] sm:max-w-none">{doc.author}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Icon name="Calendar" size={12} />
-                {format(new Date(doc.publishedAt || doc.createdAt), 'd MMM yyyy', { locale: ru })}
+                {format(new Date(doc.adoptionDate || doc.publishedAt || doc.createdAt), 'd MMM yyyy', { locale: ru })}
               </div>
               {doc.version && (
                 <div className="flex items-center gap-1">

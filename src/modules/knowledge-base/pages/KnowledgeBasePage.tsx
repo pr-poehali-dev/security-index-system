@@ -5,7 +5,7 @@ import { useKnowledgeBaseStore } from '@/stores/knowledgeBaseStore';
 import { useAuthStore } from '@/stores/authStore';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import type { DocumentCategory, KnowledgeDocument } from '@/types';
+import type { DocumentCategory, KnowledgeDocument, RegulatoryDocumentType, FederalAuthority } from '@/types';
 import KnowledgeBaseHeader from '@/modules/knowledge-base/components/KnowledgeBaseHeader';
 import KnowledgeBaseStats from '@/modules/knowledge-base/components/KnowledgeBaseStats';
 import KnowledgeBaseSearch from '@/modules/knowledge-base/components/KnowledgeBaseSearch';
@@ -15,6 +15,7 @@ import DocumentFormDialog from '@/modules/knowledge-base/components/DocumentForm
 import DocumentViewDialog from '@/modules/knowledge-base/components/DocumentViewDialog';
 import DocumentVersionsDialog from '@/modules/knowledge-base/components/DocumentVersionsDialog';
 import DeleteDocumentDialog from '@/modules/knowledge-base/components/DeleteDocumentDialog';
+import RegulatoryFilters from '@/modules/knowledge-base/components/RegulatoryFilters';
 
 export default function KnowledgeBasePage() {
   const user = useAuthStore((state) => state.user);
@@ -22,6 +23,8 @@ export default function KnowledgeBasePage() {
   
   const [activeTab, setActiveTab] = useState<DocumentCategory>('user_guide');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedType, setSelectedType] = useState<RegulatoryDocumentType | 'all'>('all');
+  const [selectedAuthority, setSelectedAuthority] = useState<FederalAuthority | 'all'>('all');
   const [formOpen, setFormOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -33,7 +36,16 @@ export default function KnowledgeBasePage() {
   const canView = true;
 
   const filteredDocuments = useMemo(() => {
-    const categoryDocs = getDocumentsByCategory(activeTab);
+    let categoryDocs = getDocumentsByCategory(activeTab);
+    
+    if (activeTab === 'regulatory') {
+      if (selectedType !== 'all') {
+        categoryDocs = categoryDocs.filter(doc => doc.regulatoryType === selectedType);
+      }
+      if (selectedAuthority !== 'all') {
+        categoryDocs = categoryDocs.filter(doc => doc.authority === selectedAuthority);
+      }
+    }
     
     if (!searchQuery) return categoryDocs;
     
@@ -41,9 +53,10 @@ export default function KnowledgeBasePage() {
     return categoryDocs.filter(doc => 
       doc.title.toLowerCase().includes(query) ||
       doc.description?.toLowerCase().includes(query) ||
-      doc.tags?.some(tag => tag.toLowerCase().includes(query))
+      doc.tags?.some(tag => tag.toLowerCase().includes(query)) ||
+      doc.documentNumber?.toLowerCase().includes(query)
     );
-  }, [activeTab, searchQuery, documents, getDocumentsByCategory]);
+  }, [activeTab, searchQuery, selectedType, selectedAuthority, documents, getDocumentsByCategory]);
 
   const stats = useMemo(() => {
     return {
@@ -174,6 +187,19 @@ export default function KnowledgeBasePage() {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
+
+      {activeTab === 'regulatory' && (
+        <RegulatoryFilters
+          selectedType={selectedType}
+          selectedAuthority={selectedAuthority}
+          onTypeChange={setSelectedType}
+          onAuthorityChange={setSelectedAuthority}
+          onReset={() => {
+            setSelectedType('all');
+            setSelectedAuthority('all');
+          }}
+        />
+      )}
 
       <KnowledgeBaseTabs
         activeTab={activeTab}
