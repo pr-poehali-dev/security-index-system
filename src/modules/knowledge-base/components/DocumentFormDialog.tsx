@@ -280,6 +280,77 @@ export default function DocumentFormDialog({
             />
           </div>
 
+          {category === 'regulatory' && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="regulatoryType">Тип нормативного документа</Label>
+                <Select value={regulatoryType} onValueChange={(v) => setRegulatoryType(v as RegulatoryDocumentType)}>
+                  <SelectTrigger id="regulatoryType">
+                    <SelectValue placeholder="Выберите тип документа" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(REGULATORY_DOCUMENT_TYPES).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="documentNumber">Номер документа</Label>
+                <Input
+                  id="documentNumber"
+                  value={documentNumber}
+                  onChange={(e) => setDocumentNumber(e.target.value)}
+                  placeholder="123-ФЗ, N 1234, и т.д."
+                  maxLength={100}
+                />
+              </div>
+
+              {regulatoryType && (regulatoryType.includes('order') || regulatoryType === 'government_decree') && (
+                <div className="space-y-2">
+                  <Label htmlFor="authority">Ведомство</Label>
+                  <Select value={authority} onValueChange={(v) => setAuthority(v as FederalAuthority)}>
+                    <SelectTrigger id="authority">
+                      <SelectValue placeholder="Выберите ведомство" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(FEDERAL_AUTHORITIES).map(([key, label]) => (
+                        <SelectItem key={key} value={key}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="adoptionDate">Дата принятия</Label>
+                  <Input
+                    id="adoptionDate"
+                    type="date"
+                    value={adoptionDate}
+                    onChange={(e) => setAdoptionDate(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="effectiveDate">Дата вступления в силу</Label>
+                  <Input
+                    id="effectiveDate"
+                    type="date"
+                    value={effectiveDate}
+                    onChange={(e) => setEffectiveDate(e.target.value)}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
           <div className="space-y-2">
             <Label>
               Тип содержимого <span className="text-red-500">*</span>
@@ -356,77 +427,6 @@ export default function DocumentFormDialog({
                 </div>
               </div>
             </div>
-          )}
-
-          {category === 'regulatory' && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="regulatoryType">Тип нормативного документа</Label>
-                <Select value={regulatoryType} onValueChange={(v) => setRegulatoryType(v as RegulatoryDocumentType)}>
-                  <SelectTrigger id="regulatoryType">
-                    <SelectValue placeholder="Выберите тип документа" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(REGULATORY_DOCUMENT_TYPES).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="documentNumber">Номер документа</Label>
-                <Input
-                  id="documentNumber"
-                  value={documentNumber}
-                  onChange={(e) => setDocumentNumber(e.target.value)}
-                  placeholder="123-ФЗ, N 1234, и т.д."
-                  maxLength={100}
-                />
-              </div>
-
-              {regulatoryType && (regulatoryType.includes('order') || regulatoryType === 'government_decree') && (
-                <div className="space-y-2">
-                  <Label htmlFor="authority">Ведомство</Label>
-                  <Select value={authority} onValueChange={(v) => setAuthority(v as FederalAuthority)}>
-                    <SelectTrigger id="authority">
-                      <SelectValue placeholder="Выберите ведомство" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(FEDERAL_AUTHORITIES).map(([key, label]) => (
-                        <SelectItem key={key} value={key}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="adoptionDate">Дата принятия</Label>
-                  <Input
-                    id="adoptionDate"
-                    type="date"
-                    value={adoptionDate}
-                    onChange={(e) => setAdoptionDate(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="effectiveDate">Дата вступления в силу</Label>
-                  <Input
-                    id="effectiveDate"
-                    type="date"
-                    value={effectiveDate}
-                    onChange={(e) => setEffectiveDate(e.target.value)}
-                  />
-                </div>
-              </div>
-            </>
           )}
 
           <div className="grid grid-cols-2 gap-4">
