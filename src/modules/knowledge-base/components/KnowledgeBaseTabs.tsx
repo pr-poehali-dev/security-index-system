@@ -10,6 +10,7 @@ interface KnowledgeBaseTabsProps {
     userGuides: number;
     regulatory: number;
     organization: number;
+    platformInstructions: number;
   };
   children: React.ReactNode;
 }
@@ -34,7 +35,7 @@ export default function KnowledgeBaseTabs({
           <Icon name="BookOpen" size={18} />
           <div className="flex flex-col sm:flex-row items-center gap-0.5 sm:gap-1">
             <span className="text-[10px] sm:text-xs font-medium text-center">
-              Инструкции платформы Индекс безопасности
+              Инструкции пользователя
             </span>
             <Badge
               variant="secondary"
@@ -75,6 +76,23 @@ export default function KnowledgeBaseTabs({
               className="text-[10px] sm:text-xs h-4 px-1"
             >
               {stats.organization}
+            </Badge>
+          </div>
+        </TabsTrigger>
+        <TabsTrigger
+          value="platform_instruction"
+          className="flex-col gap-1.5 sm:gap-2 h-16 sm:h-20 px-3 sm:px-6 flex-1 sm:flex-initial data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+        >
+          <Icon name="Shield" size={18} />
+          <div className="flex flex-col sm:flex-row items-center gap-0.5 sm:gap-1">
+            <span className="text-[10px] sm:text-xs font-medium text-center">
+              Инструкции платформы
+            </span>
+            <Badge
+              variant="secondary"
+              className="text-[10px] sm:text-xs h-4 px-1"
+            >
+              {stats.platformInstructions}
             </Badge>
           </div>
         </TabsTrigger>

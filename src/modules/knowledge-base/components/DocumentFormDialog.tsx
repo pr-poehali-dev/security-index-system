@@ -218,7 +218,12 @@ export default function DocumentFormDialog({
     { value: 'user_guide', label: 'Инструкции пользователя', icon: 'BookOpen' },
     { value: 'regulatory', label: 'Нормативные документы', icon: 'Scale' },
     { value: 'organization', label: 'Документы организации', icon: 'Building2' },
-  ];
+  ].filter(cat => {
+    if (cat.value === 'platform_instruction' && user?.role !== 'SuperAdmin') {
+      return false;
+    }
+    return true;
+  });
 
   const statuses = [
     { value: 'draft', label: 'Черновик' },

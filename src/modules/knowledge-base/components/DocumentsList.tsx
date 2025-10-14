@@ -9,6 +9,7 @@ interface DocumentsListProps {
   documents: KnowledgeDocument[];
   searchQuery: string;
   canManage: boolean;
+  userRole?: string;
   onView: (doc: KnowledgeDocument) => void;
   onDownload: (docId: string) => void;
   onEdit: (doc: KnowledgeDocument) => void;
@@ -21,6 +22,7 @@ export default function DocumentsList({
   documents,
   searchQuery,
   canManage,
+  userRole,
   onView,
   onDownload,
   onEdit,
@@ -45,18 +47,24 @@ export default function DocumentsList({
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {documents.map((doc) => (
-            <DocumentCard
-              key={doc.id}
-              document={doc}
-              canManage={canManage}
-              onView={onView}
-              onDownload={onDownload}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              onViewVersions={onViewVersions}
-            />
-          ))}
+          {documents.map((doc) => {
+            const canManageDoc = doc.category === 'platform_instruction' 
+              ? userRole === 'SuperAdmin'
+              : canManage;
+            
+            return (
+              <DocumentCard
+                key={doc.id}
+                document={doc}
+                canManage={canManageDoc}
+                onView={onView}
+                onDownload={onDownload}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onViewVersions={onViewVersions}
+              />
+            );
+          })}
         </div>
       )}
     </TabsContent>

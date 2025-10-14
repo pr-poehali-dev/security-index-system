@@ -63,6 +63,7 @@ export default function KnowledgeBasePage() {
       userGuides: getDocumentsByCategory('user_guide').length,
       regulatory: getDocumentsByCategory('regulatory').length,
       organization: getDocumentsByCategory('organization').length,
+      platformInstructions: getDocumentsByCategory('platform_instruction').length,
       total: documents.filter(d => d.status === 'published').length,
     };
   }, [documents, getDocumentsByCategory]);
@@ -74,6 +75,10 @@ export default function KnowledgeBasePage() {
   };
 
   const handleEditDocument = (doc: KnowledgeDocument) => {
+    if (doc.category === 'platform_instruction' && user?.role !== 'SuperAdmin') {
+      toast.error('Только суперадминистратор может редактировать инструкции платформы');
+      return;
+    }
     setSelectedDocument(doc);
     setFormMode('edit');
     setFormOpen(true);
@@ -95,6 +100,10 @@ export default function KnowledgeBasePage() {
   };
 
   const handleDeleteClick = (doc: KnowledgeDocument) => {
+    if (doc.category === 'platform_instruction' && user?.role !== 'SuperAdmin') {
+      toast.error('Только суперадминистратор может удалять инструкции платформы');
+      return;
+    }
     setSelectedDocument(doc);
     setDeleteDialogOpen(true);
   };
@@ -180,6 +189,7 @@ export default function KnowledgeBasePage() {
         userGuides={stats.userGuides}
         regulatory={stats.regulatory}
         organization={stats.organization}
+        platformInstructions={stats.platformInstructions}
         total={stats.total}
       />
 
@@ -211,6 +221,7 @@ export default function KnowledgeBasePage() {
           documents={filteredDocuments}
           searchQuery={searchQuery}
           canManage={canManage}
+          userRole={user?.role}
           onView={handleViewDocument}
           onDownload={handleDownloadDocument}
           onEdit={handleEditDocument}

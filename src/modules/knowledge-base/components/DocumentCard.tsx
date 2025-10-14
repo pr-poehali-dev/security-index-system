@@ -50,7 +50,15 @@ export default function DocumentCard({
             />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-base sm:text-lg mb-1">{doc.title}</h3>
+            <div className="flex items-start gap-2 mb-1">
+              <h3 className="font-semibold text-base sm:text-lg flex-1">{doc.title}</h3>
+              {doc.category === 'platform_instruction' && (
+                <Badge variant="outline" className="text-[10px] sm:text-xs bg-blue-50 text-blue-700 border-blue-200 flex-shrink-0">
+                  <Icon name="Shield" size={10} className="mr-1" />
+                  Платформа
+                </Badge>
+              )}
+            </div>
             {doc.description && (
               <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">
                 {doc.description}

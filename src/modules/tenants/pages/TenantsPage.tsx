@@ -12,6 +12,7 @@ import StatisticsTab from '../components/tabs/StatisticsTab';
 import ReportsTab from '../components/tabs/ReportsTab';
 import NotificationsTab from '../components/tabs/NotificationsTab';
 import PlatformNewsTab from '../components/tabs/PlatformNewsTab';
+import PlatformInstructionsTab from '../components/tabs/PlatformInstructionsTab';
 
 export default function TenantsPage() {
   const user = useAuthStore((state) => state.user);
@@ -51,6 +52,10 @@ export default function TenantsPage() {
             <Icon name="Newspaper" size={20} />
             <span className="text-xs font-medium text-center leading-tight">Новости<br/>платформы</span>
           </TabsTrigger>
+          <TabsTrigger value="instructions" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="BookOpen" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Инструкции<br/>платформы</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="general">
@@ -71,6 +76,10 @@ export default function TenantsPage() {
 
         <TabsContent value="news">
           <PlatformNewsTab />
+        </TabsContent>
+
+        <TabsContent value="instructions">
+          <PlatformInstructionsTab />
         </TabsContent>
       </Tabs>
     </div>

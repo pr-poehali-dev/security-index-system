@@ -5,6 +5,7 @@ interface KnowledgeBaseStatsProps {
   userGuides: number;
   regulatory: number;
   organization: number;
+  platformInstructions: number;
   total: number;
 }
 
@@ -12,10 +13,11 @@ export default function KnowledgeBaseStats({
   userGuides,
   regulatory,
   organization,
+  platformInstructions,
   total
 }: KnowledgeBaseStatsProps) {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
       <Card className="p-3 sm:p-4">
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="p-1.5 sm:p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex-shrink-0">
@@ -48,6 +50,18 @@ export default function KnowledgeBaseStats({
           <div className="min-w-0">
             <p className="text-xl sm:text-2xl font-bold">{organization}</p>
             <p className="text-xs sm:text-sm text-muted-foreground truncate">Документов</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-3 sm:p-4">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="p-1.5 sm:p-2 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg flex-shrink-0">
+            <Icon name="Shield" size={18} className="text-cyan-600 dark:text-cyan-400" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xl sm:text-2xl font-bold">{platformInstructions}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground truncate">Платформы</p>
           </div>
         </div>
       </Card>
