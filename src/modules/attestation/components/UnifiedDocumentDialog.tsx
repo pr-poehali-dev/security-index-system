@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -11,6 +11,7 @@ import TypeSelectionStep, { TypeOption } from '@/components/shared/wizard-steps/
 import BasicInfoStep, { BasicInfoData } from '@/components/shared/wizard-steps/BasicInfoStep';
 import EmployeeSelectionStep, { Employee, CertificationStatusFilter } from '@/components/shared/wizard-steps/EmployeeSelectionStep';
 import TrainingDetailsStep, { TrainingDetailsData } from '@/components/shared/wizard-steps/TrainingDetailsStep';
+import ContractorDialog from '@/modules/settings/components/ContractorDialog';
 import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 import type { OrderDocument, TrainingDocument } from '@/stores/documentsStore';
 
@@ -78,12 +79,22 @@ export default function UnifiedDocumentDialog({
   const { personnel, people, positions, getPersonnelByTenant, departments, getContractorsByType } = useSettingsStore();
   const { certifications } = useCertificationStore();
   
-  const trainingOrganizations = user?.tenantId 
-    ? getContractorsByType(user.tenantId, 'training_center').map(contractor => ({
-        id: contractor.id,
-        name: contractor.contractorName,
-      }))
-    : [];
+  const trainingOrganizations = useMemo(() => {
+    return user?.tenantId 
+      ? getContractorsByType(user.tenantId, 'training_center').map(contractor => ({
+          id: contractor.id,
+          name: contractor.contractorName,
+        }))
+      : [];
+  }, [user?.tenantId, getContractorsByType]);
+
+  const handleAddOrganization = useCallback(() => {
+    setContractorDialogOpen(true);
+  }, []);
+
+  const handleContractorDialogClose = useCallback((open: boolean) => {
+    setContractorDialogOpen(open);
+  }, []);
   const { addDocument } = useDocumentsStore();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -103,6 +114,7 @@ export default function UnifiedDocumentDialog({
     cost: '0',
     program: '',
   });
+  const [contractorDialogOpen, setContractorDialogOpen] = useState(false);
 
   const tenantPersonnel = user?.tenantId ? getPersonnelByTenant(user.tenantId) : [];
 
@@ -251,6 +263,7 @@ export default function UnifiedDocumentDialog({
             data={trainingDetails}
             onChange={setTrainingDetails}
             organizations={trainingOrganizations}
+            onAddOrganization={handleAddOrganization}
           />
         ),
       });
@@ -401,14 +414,22 @@ export default function UnifiedDocumentDialog({
   };
 
   return (
-    <DocumentCreationWizard
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Создание приказа"
-      description="Следуйте шагам для создания нового документа"
-      steps={steps}
-      onComplete={handleComplete}
-      isSubmitting={isSubmitting}
-    />
+    <>
+      <DocumentCreationWizard
+        open={open}
+        onOpenChange={onOpenChange}
+        title="Создание приказа"
+        description="Следуйте шагам для создания нового документа"
+        steps={steps}
+        onComplete={handleComplete}
+        isSubmitting={isSubmitting}
+      />
+      
+      <ContractorDialog
+        open={contractorDialogOpen}
+        onOpenChange={handleContractorDialogClose}
+        contractor={null}
+      />
+    </>
   );
 }
