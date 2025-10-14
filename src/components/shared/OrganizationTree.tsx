@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { useCatalogStore } from '@/stores/catalogStore';
 import Icon from '@/components/ui/icon';
 import { Badge } from '@/components/ui/badge';
@@ -32,20 +32,19 @@ interface OrganizationTreeNodeProps {
 
 function OrganizationTreeNode({ organization, level = 0, onEdit, onDelete }: OrganizationTreeNodeProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const { 
-    selectedOrganization, 
-    expandedNodes, 
-    toggleExpandNode, 
-    setSelectedOrganization,
-    getObjectsByOrganization,
-    deleteOrganization,
-    organizations
-  } = useCatalogStore();
+  const selectedOrganization = useCatalogStore((state) => state.selectedOrganization);
+  const expandedNodes = useCatalogStore((state) => state.expandedNodes);
+  const toggleExpandNode = useCatalogStore((state) => state.toggleExpandNode);
+  const setSelectedOrganization = useCatalogStore((state) => state.setSelectedOrganization);
+  const deleteOrganization = useCatalogStore((state) => state.deleteOrganization);
+  const objects = useCatalogStore((state) => state.objects);
   
   const isExpanded = expandedNodes.includes(organization.id);
   const isSelected = selectedOrganization === organization.id;
   const hasChildren = organization.children && organization.children.length > 0;
-  const objectsCount = getObjectsByOrganization(organization.id).length;
+  const objectsCount = useMemo(() => 
+    objects.filter(obj => obj.organizationId === organization.id).length
+  , [objects, organization.id]);
   
   const handleDelete = () => {
     if (hasChildren) {
@@ -211,8 +210,31 @@ interface OrganizationTreeProps {
 }
 
 const OrganizationTree = memo(function OrganizationTree({ onEdit, onDelete }: OrganizationTreeProps = {}) {
-  const { getOrganizationTree } = useCatalogStore();
-  const tree = getOrganizationTree();
+  const organizations = useCatalogStore((state) => state.organizations);
+  const tree = useMemo(() => {
+    const orgMap = new Map<string, Organization>();
+    const rootOrgs: Organization[] = [];
+
+    organizations.forEach(org => {
+      orgMap.set(org.id, { ...org, children: [] });
+    });
+
+    organizations.forEach(org => {
+      const node = orgMap.get(org.id);
+      if (!node) return;
+      if (org.parentId) {
+        const parent = orgMap.get(org.parentId);
+        if (parent) {
+          parent.children = parent.children || [];
+          parent.children.push(node);
+        }
+      } else {
+        rootOrgs.push(node);
+      }
+    });
+
+    return rootOrgs;
+  }, [organizations]);
   
   if (tree.length === 0) {
     return (

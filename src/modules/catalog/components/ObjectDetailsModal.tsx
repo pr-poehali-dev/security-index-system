@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -42,12 +43,15 @@ const getTypeLabel = (type: IndustrialObject['type']) => {
 };
 
 export default function ObjectDetailsModal({ open, onOpenChange, object, onEdit }: ObjectDetailsModalProps) {
-  const { organizations, getDocumentsByObject } = useCatalogStore();
+  const organizations = useCatalogStore((state) => state.organizations);
+  const documents = useCatalogStore((state) => state.documents);
   
   if (!object) return null;
   
   const organization = organizations.find(org => org.id === object.organizationId);
-  const allDocuments = getDocumentsByObject(object.id);
+  const allDocuments = useMemo(() => 
+    documents.filter(doc => doc.objectId === object.id)
+  , [documents, object.id]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
