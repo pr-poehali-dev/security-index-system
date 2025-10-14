@@ -126,7 +126,7 @@ const Sidebar = memo(function Sidebar() {
         )}
 
         {user.availableModules.map((moduleKey) => {
-          if (moduleKey === 'settings') return null;
+          if (moduleKey === 'settings' || moduleKey === 'contractors') return null;
           
           if (moduleKey === 'tenants') {
             return (
