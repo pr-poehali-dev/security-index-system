@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,7 @@ import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 interface CreateOrderDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialOrderType?: string;
 }
 
 const orderTypes = [
@@ -43,7 +44,7 @@ const orderTypes = [
 
 
 
-export default function CreateOrderDialog({ open, onOpenChange }: CreateOrderDialogProps) {
+export default function CreateOrderDialog({ open, onOpenChange, initialOrderType }: CreateOrderDialogProps) {
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
   const { personnel, people, positions, getPersonnelByTenant } = useSettingsStore();
@@ -58,8 +59,8 @@ export default function CreateOrderDialog({ open, onOpenChange }: CreateOrderDia
       department: '—'
     };
   });
-  const [step, setStep] = useState(1);
-  const [orderType, setOrderType] = useState('');
+  const [step, setStep] = useState(initialOrderType ? 2 : 1);
+  const [orderType, setOrderType] = useState(initialOrderType || '');
   const [orderNumber, setOrderNumber] = useState('');
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split('T')[0]);
   const [orderTitle, setOrderTitle] = useState('');
@@ -68,6 +69,12 @@ export default function CreateOrderDialog({ open, onOpenChange }: CreateOrderDia
   const [searchEmployee, setSearchEmployee] = useState('');
 
   const selectedType = orderTypes.find(t => t.value === orderType);
+
+  useEffect(() => {
+    if (initialOrderType && !orderTitle) {
+      setOrderTitle(getDefaultTitle(initialOrderType));
+    }
+  }, [initialOrderType]);
 
   const filteredEmployees = employees.filter(emp =>
     emp.name.toLowerCase().includes(searchEmployee.toLowerCase()) ||
@@ -115,8 +122,8 @@ export default function CreateOrderDialog({ open, onOpenChange }: CreateOrderDia
   };
 
   const handleClose = () => {
-    setStep(1);
-    setOrderType('');
+    setStep(initialOrderType ? 2 : 1);
+    setOrderType(initialOrderType || '');
     setOrderNumber('');
     setOrderDate(new Date().toISOString().split('T')[0]);
     setOrderTitle('');
@@ -156,7 +163,11 @@ export default function CreateOrderDialog({ open, onOpenChange }: CreateOrderDia
             Создание приказа
           </DialogTitle>
           <DialogDescription>
-            Шаг {step} из 3: {step === 1 ? 'Выбор типа' : step === 2 ? 'Основная информация' : 'Выбор сотрудников'}
+            {initialOrderType ? (
+              <>Шаг {step - 1} из 2: {step === 2 ? 'Основная информация' : 'Выбор сотрудников'}</>
+            ) : (
+              <>Шаг {step} из 3: {step === 1 ? 'Выбор типа' : step === 2 ? 'Основная информация' : 'Выбор сотрудников'}</>
+            )}
           </DialogDescription>
         </DialogHeader>
 
@@ -341,7 +352,7 @@ export default function CreateOrderDialog({ open, onOpenChange }: CreateOrderDia
         </div>
 
         <DialogFooter className="gap-2">
-          {step > 1 && (
+          {(initialOrderType ? step > 2 : step > 1) && (
             <Button variant="outline" onClick={handleBack}>
               <Icon name="ChevronLeft" size={16} className="mr-1" />
               Назад
