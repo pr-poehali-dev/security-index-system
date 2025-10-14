@@ -24,20 +24,6 @@ interface TaskState {
   
   // Filters
   setFilters: (filters: Partial<TaskState['filters']>) => void;
-  getFilteredTasks: () => Task[];
-  
-  // Getters
-  getTasksByAssignee: (userId: string) => Task[];
-  getTasksByStatus: (status: Task['status']) => Task[];
-  getOverdueTasks: () => Task[];
-  getTaskStats: () => {
-    total: number;
-    open: number;
-    inProgress: number;
-    completed: number;
-    overdue: number;
-    critical: number;
-  };
   
   // Error handling
   setError: (error: string | null) => void;
@@ -203,58 +189,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     set((state) => ({
       filters: { ...state.filters, ...newFilters }
     }));
-  },
-  
-  getFilteredTasks: () => {
-    const { tasks, filters } = get();
-    return tasks.filter((task) => {
-      if (filters.status !== 'all' && task.status !== filters.status) return false;
-      if (filters.priority !== 'all' && task.priority !== filters.priority) return false;
-      if (filters.type !== 'all' && task.type !== filters.type) return false;
-      if (filters.assignedTo !== 'all' && task.assignedTo !== filters.assignedTo) return false;
-      
-      if (filters.search) {
-        const searchLower = filters.search.toLowerCase();
-        const matchesTitle = task.title.toLowerCase().includes(searchLower);
-        const matchesDescription = task.description?.toLowerCase().includes(searchLower);
-        const matchesObject = task.objectName?.toLowerCase().includes(searchLower);
-        if (!matchesTitle && !matchesDescription && !matchesObject) return false;
-      }
-      
-      return true;
-    });
-  },
-  
-  getTasksByAssignee: (userId) => {
-    return get().tasks.filter((task) => task.assignedTo === userId);
-  },
-  
-  getTasksByStatus: (status) => {
-    return get().tasks.filter((task) => task.status === status);
-  },
-  
-  getOverdueTasks: () => {
-    const now = new Date();
-    return get().tasks.filter((task) => {
-      if (task.status === 'completed' || task.status === 'cancelled') return false;
-      return task.dueDate && new Date(task.dueDate) < now;
-    });
-  },
-  
-  getTaskStats: () => {
-    const { tasks } = get();
-    const now = new Date();
-    
-    return {
-      total: tasks.length,
-      open: tasks.filter((t) => t.status === 'open').length,
-      inProgress: tasks.filter((t) => t.status === 'in_progress').length,
-      completed: tasks.filter((t) => t.status === 'completed').length,
-      overdue: tasks.filter(
-        (t) => t.status !== 'completed' && t.status !== 'cancelled' && t.dueDate && new Date(t.dueDate) < now
-      ).length,
-      critical: tasks.filter((t) => t.priority === 'critical' && t.status !== 'completed').length
-    };
   },
   
   setError: (error) => {

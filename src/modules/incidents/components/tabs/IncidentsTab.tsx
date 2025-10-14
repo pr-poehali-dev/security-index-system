@@ -19,15 +19,13 @@ import { useIncidentsExport } from '../useIncidentsExport';
 
 export default function IncidentsTab() {
   const user = useAuthStore((state) => state.user);
-  const { 
-    getIncidentsByTenant, 
-    sources, 
-    directions, 
-    fundingTypes, 
-    categories, 
-    subcategories,
-    deleteIncident 
-  } = useIncidentsStore();
+  const allIncidents = useIncidentsStore((state) => state.incidents);
+  const sources = useIncidentsStore((state) => state.sources);
+  const directions = useIncidentsStore((state) => state.directions);
+  const fundingTypes = useIncidentsStore((state) => state.fundingTypes);
+  const categories = useIncidentsStore((state) => state.categories);
+  const subcategories = useIncidentsStore((state) => state.subcategories);
+  const deleteIncident = useIncidentsStore((state) => state.deleteIncident);
   
   const { 
     organizations, 
@@ -49,7 +47,9 @@ export default function IncidentsTab() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
 
-  const incidents = user?.tenantId ? getIncidentsByTenant(user.tenantId) : [];
+  const incidents = useMemo(() => 
+    user?.tenantId ? allIncidents.filter(inc => inc.tenantId === user.tenantId) : []
+  , [allIncidents, user?.tenantId]);
 
   const filteredIncidents = useMemo(() => {
     return incidents.filter((inc) => {

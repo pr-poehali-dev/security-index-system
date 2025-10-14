@@ -40,10 +40,15 @@ export default function IncidentKanbanBoard({
   siteFilter = 'all'
 }: IncidentKanbanBoardProps) {
   const user = useAuthStore((state) => state.user);
-  const { getIncidentsByTenant, updateIncident, directions } = useIncidentsStore();
+  const allIncidents = useIncidentsStore((state) => state.incidents);
+  const updateIncident = useIncidentsStore((state) => state.updateIncident);
+  const directions = useIncidentsStore((state) => state.directions);
   const { organizations, productionSites, personnel, people, positions } = useSettingsStore();
 
-  const incidents = user?.tenantId ? getIncidentsByTenant(user.tenantId) : [];
+  const incidents = useMemo(() => 
+    user?.tenantId ? allIncidents.filter(inc => inc.tenantId === user.tenantId) : []
+  , [allIncidents, user?.tenantId]);
+  
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
 
   const filteredIncidents = useMemo(() => {

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Card, CardContent } from '@/components/ui/card';
@@ -34,12 +34,15 @@ const categoryLabels = {
 
 export default function PositionsDirectoryTab({ onAdd, onEdit, onDelete }: PositionsDirectoryTabProps) {
   const user = useAuthStore((state) => state.user);
-  const { getPositionsByTenant, importPositions } = useSettingsStore();
+  const allPositions = useSettingsStore((state) => state.positions);
+  const importPositions = useSettingsStore((state) => state.importPositions);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const positions = user?.tenantId ? getPositionsByTenant(user.tenantId) : [];
+  const positions = useMemo(() => 
+    user?.tenantId ? allPositions.filter(p => p.tenantId === user.tenantId) : []
+  , [allPositions, user?.tenantId]);
 
   const filteredPositions = positions.filter((position) => {
     const searchLower = searchTerm.toLowerCase();

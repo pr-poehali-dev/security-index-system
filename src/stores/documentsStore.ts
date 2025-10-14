@@ -89,10 +89,6 @@ interface DocumentsState {
   updateDocument: (id: string, updates: Partial<Document>) => void;
   deleteDocument: (id: string) => void;
   
-  getDocumentsByTenant: (tenantId: string) => Document[];
-  getDocumentsByType: <T extends Document['type']>(tenantId: string, type: T) => Extract<Document, { type: T }>[];
-  getDocumentsByStatus: (tenantId: string, status: DocumentStatus) => Document[];
-  
   updateDocumentStatus: (id: string, status: DocumentStatus) => void;
 }
 
@@ -135,22 +131,6 @@ export const useDocumentsStore = create<DocumentsState>()(
         set((state) => ({
           documents: state.documents.filter((doc) => doc.id !== id),
         }));
-      },
-      
-      getDocumentsByTenant: (tenantId) => {
-        return get().documents.filter((doc) => doc.tenantId === tenantId);
-      },
-      
-      getDocumentsByType: (tenantId, type) => {
-        return get().documents.filter(
-          (doc) => doc.tenantId === tenantId && doc.type === type
-        ) as any;
-      },
-      
-      getDocumentsByStatus: (tenantId, status) => {
-        return get().documents.filter(
-          (doc) => doc.tenantId === tenantId && doc.status === status
-        );
       },
       
       updateDocumentStatus: (id, status) => {

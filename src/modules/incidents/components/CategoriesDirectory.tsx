@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useIncidentsStore } from '@/stores/incidentsStore';
 import { Card, CardContent } from '@/components/ui/card';
@@ -35,17 +35,14 @@ import type { IncidentCategory, IncidentSubcategory } from '@/types';
 
 export default function CategoriesDirectory() {
   const user = useAuthStore((state) => state.user);
-  const { 
-    getCategoriesByTenant, 
-    addCategory, 
-    updateCategory, 
-    deleteCategory,
-    getSubcategoriesByTenant,
-    getSubcategoriesByCategory,
-    addSubcategory,
-    updateSubcategory,
-    deleteSubcategory
-  } = useIncidentsStore();
+  const allCategories = useIncidentsStore((state) => state.categories);
+  const allSubcategories = useIncidentsStore((state) => state.subcategories);
+  const addCategory = useIncidentsStore((state) => state.addCategory);
+  const updateCategory = useIncidentsStore((state) => state.updateCategory);
+  const deleteCategory = useIncidentsStore((state) => state.deleteCategory);
+  const addSubcategory = useIncidentsStore((state) => state.addSubcategory);
+  const updateSubcategory = useIncidentsStore((state) => state.updateSubcategory);
+  const deleteSubcategory = useIncidentsStore((state) => state.deleteSubcategory);
   const { toast } = useToast();
   
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
@@ -61,8 +58,16 @@ export default function CategoriesDirectory() {
     status: 'active' as const 
   });
 
-  const categories = user?.tenantId ? getCategoriesByTenant(user.tenantId) : [];
-  const subcategories = user?.tenantId ? getSubcategoriesByTenant(user.tenantId) : [];
+  const categories = useMemo(() => 
+    user?.tenantId ? allCategories.filter(c => c.tenantId === user.tenantId) : []
+  , [allCategories, user?.tenantId]);
+  
+  const subcategories = useMemo(() => 
+    user?.tenantId ? allSubcategories.filter(s => s.tenantId === user.tenantId) : []
+  , [allSubcategories, user?.tenantId]);
+  
+  const getSubcategoriesByCategory = (categoryId: string) => 
+    allSubcategories.filter(s => s.categoryId === categoryId);
 
   const handleCategorySubmit = () => {
     if (!categoryFormData.name.trim() || !user?.tenantId) {

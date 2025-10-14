@@ -10,9 +10,6 @@ interface AttestationOrdersState {
   addOrder: (order: Omit<AttestationOrder, 'id' | 'createdAt' | 'updatedAt'>) => AttestationOrder;
   updateOrder: (id: string, updates: Partial<AttestationOrder>) => void;
   deleteOrder: (id: string) => void;
-  getOrdersByTenant: (tenantId: string) => AttestationOrder[];
-  getOrdersByOrganization: (organizationId: string) => AttestationOrder[];
-  getOrdersByStatus: (status: AttestationOrderStatus) => AttestationOrder[];
 }
 
 export const useAttestationOrdersStore = create<AttestationOrdersState>()(persist((set, get) => ({
@@ -138,15 +135,5 @@ export const useAttestationOrdersStore = create<AttestationOrdersState>()(persis
     }));
   },
   
-  getOrdersByTenant: (tenantId) => {
-    return get().orders.filter((order) => order.tenantId === tenantId);
-  },
-  
-  getOrdersByOrganization: (organizationId) => {
-    return get().orders.filter((order) => order.organizationId === organizationId);
-  },
-  
-  getOrdersByStatus: (status) => {
-    return get().orders.filter((order) => order.status === status);
-  }
+
 }), { name: 'attestation-orders-storage' }));

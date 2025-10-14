@@ -1,6 +1,6 @@
 // src/modules/tasks/pages/TasksPage.tsx
 // Описание: Страница управления задачами с фильтрацией и приоритетами
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTaskStore } from '@/stores/taskStore';
 import { useAuthStore } from '@/stores/authStore';
 import PageHeader from '@/components/layout/PageHeader';
@@ -24,15 +24,10 @@ export default function TasksPage() {
     const timer = setTimeout(() => setIsLoading(false), 400);
     return () => clearTimeout(timer);
   }, []);
-  const {
-    tasks,
-    filters,
-    setFilters,
-    getFilteredTasks,
-    getTaskStats,
-    getOverdueTasks,
-    completeTask
-  } = useTaskStore();
+  const tasks = useTaskStore((state) => state.tasks);
+  const filters = useTaskStore((state) => state.filters);
+  const setFilters = useTaskStore((state) => state.setFilters);
+  const completeTask = useTaskStore((state) => state.completeTask);
   
   const user = useAuthStore((state) => state.user);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -41,9 +36,47 @@ export default function TasksPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const filteredTasks = getFilteredTasks();
-  const stats = getTaskStats();
-  const overdueTasks = getOverdueTasks();
+  const filteredTasks = useMemo(() => {
+    return tasks.filter((task) => {
+      if (filters.status !== 'all' && task.status !== filters.status) return false;
+      if (filters.priority !== 'all' && task.priority !== filters.priority) return false;
+      if (filters.type !== 'all' && task.type !== filters.type) return false;
+      if (filters.assignedTo !== 'all' && task.assignedTo !== filters.assignedTo) return false;
+      
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        const matchesTitle = task.title.toLowerCase().includes(searchLower);
+        const matchesDescription = task.description?.toLowerCase().includes(searchLower);
+        const matchesObject = task.objectName?.toLowerCase().includes(searchLower);
+        if (!matchesTitle && !matchesDescription && !matchesObject) return false;
+      }
+      
+      return true;
+    });
+  }, [tasks, filters]);
+  
+  const stats = useMemo(() => {
+    const now = new Date();
+    
+    return {
+      total: tasks.length,
+      open: tasks.filter((t) => t.status === 'open').length,
+      inProgress: tasks.filter((t) => t.status === 'in_progress').length,
+      completed: tasks.filter((t) => t.status === 'completed').length,
+      overdue: tasks.filter(
+        (t) => t.status !== 'completed' && t.status !== 'cancelled' && t.dueDate && new Date(t.dueDate) < now
+      ).length,
+      critical: tasks.filter((t) => t.priority === 'critical' && t.status !== 'completed').length
+    };
+  }, [tasks]);
+  
+  const overdueTasks = useMemo(() => {
+    const now = new Date();
+    return tasks.filter((task) => {
+      if (task.status === 'completed' || task.status === 'cancelled') return false;
+      return task.dueDate && new Date(task.dueDate) < now;
+    });
+  }, [tasks]);
 
   const getPriorityColor = (priority: Task['priority']) => {
     switch (priority) {

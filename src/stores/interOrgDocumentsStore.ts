@@ -10,9 +10,6 @@ interface InterOrgDocumentsState {
   addDocument: (doc: Omit<InterOrgDocument, 'id' | 'sentAt'>) => InterOrgDocument;
   updateDocument: (id: string, updates: Partial<InterOrgDocument>) => void;
   deleteDocument: (id: string) => void;
-  getDocumentsByTenant: (tenantId: string, direction: 'sent' | 'received') => InterOrgDocument[];
-  getDocumentsByType: (type: InterOrgDocumentType) => InterOrgDocument[];
-  getDocumentsByStatus: (status: InterOrgDocumentStatus) => InterOrgDocument[];
 }
 
 export const useInterOrgDocumentsStore = create<InterOrgDocumentsState>()(persist((set, get) => ({
@@ -145,21 +142,5 @@ export const useInterOrgDocumentsStore = create<InterOrgDocumentsState>()(persis
     set((state) => ({
       documents: state.documents.filter((doc) => doc.id !== id)
     }));
-  },
-  
-  getDocumentsByTenant: (tenantId, direction) => {
-    return get().documents.filter((doc) =>
-      direction === 'sent' 
-        ? doc.fromTenantId === tenantId 
-        : doc.toTenantId === tenantId
-    );
-  },
-  
-  getDocumentsByType: (type) => {
-    return get().documents.filter((doc) => doc.documentType === type);
-  },
-  
-  getDocumentsByStatus: (status) => {
-    return get().documents.filter((doc) => doc.status === status);
   }
 }), { name: 'inter-org-documents-storage' }));

@@ -55,13 +55,11 @@ interface SettingsState {
   addPerson: (person: Omit<Person, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updatePerson: (id: string, updates: Partial<Person>) => void;
   deletePerson: (id: string) => void;
-  getPeopleByTenant: (tenantId: string) => Person[];
   importPeople: (people: Omit<Person, 'id' | 'createdAt' | 'updatedAt'>[]) => void;
   
   addPosition: (position: Omit<Position, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updatePosition: (id: string, updates: Partial<Position>) => void;
   deletePosition: (id: string) => void;
-  getPositionsByTenant: (tenantId: string) => Position[];
   importPositions: (positions: Omit<Position, 'id' | 'createdAt' | 'updatedAt'>[]) => void;
   
   addPersonnel: (person: Omit<Personnel, 'id' | 'createdAt' | 'updatedAt'>) => void;
@@ -77,57 +75,38 @@ interface SettingsState {
   importPersonnel: (people: Omit<Personnel, 'id' | 'createdAt'>[]) => void;
   importCompetencies: (comps: Omit<CompetencyMatrix, 'id' | 'createdAt' | 'updatedAt'>[]) => void;
   
-  getOrganizationsByTenant: (tenantId: string) => Organization[];
-  getDepartmentsByTenant: (tenantId: string) => Department[];
-  getDepartmentsByOrganization: (organizationId: string) => Department[];
-  getPersonnelByTenant: (tenantId: string) => Personnel[];
-  getPersonnelByOrganization: (organizationId: string) => Personnel[];
-  getPersonnelByDepartment: (departmentId: string) => Personnel[];
-  getCompetenciesByTenant: (tenantId: string) => CompetencyMatrix[];
-  getCompetenciesByOrganization: (organizationId: string) => CompetencyMatrix[];
-  
   addProductionSite: (site: Omit<ProductionSite, 'id' | 'createdAt'>) => void;
   updateProductionSite: (id: string, updates: Partial<ProductionSite>) => void;
   deleteProductionSite: (id: string) => void;
-  getProductionSitesByOrganization: (organizationId: string) => ProductionSite[];
   importProductionSites: (sites: Omit<ProductionSite, 'id' | 'createdAt'>[]) => void;
   
   addSystemUser: (user: Omit<SystemUser, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateSystemUser: (id: string, updates: Partial<SystemUser>) => void;
   deleteSystemUser: (id: string) => void;
-  getSystemUsersByTenant: (tenantId: string) => SystemUser[];
   
   addExternalOrganization: (org: Omit<ExternalOrganization, 'id' | 'createdAt'>) => void;
   updateExternalOrganization: (id: string, updates: Partial<ExternalOrganization>) => void;
   deleteExternalOrganization: (id: string) => void;
-  getExternalOrganizationsByTenant: (tenantId: string) => ExternalOrganization[];
-  getExternalOrganizationsByType: (tenantId: string, type: ExternalOrganization['type']) => ExternalOrganization[];
   importExternalOrganizations: (orgs: Omit<ExternalOrganization, 'id' | 'createdAt'>[]) => void;
 
   addCompetencyDir: (competency: Omit<Competency, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateCompetencyDir: (id: string, updates: Partial<Competency>) => void;
   deleteCompetencyDir: (id: string) => void;
-  getCompetenciesDirByTenant: (tenantId: string) => Competency[];
   importCompetenciesDir: (comps: Omit<Competency, 'id' | 'createdAt' | 'updatedAt'>[]) => void;
 
   addCertification: (cert: Omit<Certification, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => void;
   updateCertification: (id: string, updates: Partial<Certification>) => void;
   deleteCertification: (id: string) => void;
-  getCertificationsByPerson: (personId: string) => Certification[];
-  getCertificationsByTenant: (tenantId: string) => Certification[];
 
   contractors: OrganizationContractor[];
   addContractor: (contractor: Omit<OrganizationContractor, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateContractor: (id: string, updates: Partial<OrganizationContractor>) => void;
   deleteContractor: (id: string) => void;
-  getContractorsByTenant: (tenantId: string) => OrganizationContractor[];
-  getContractorsByType: (tenantId: string, type: OrganizationContractor['type']) => OrganizationContractor[];
 
   interOrgDocuments: InterOrgDocument[];
   addInterOrgDocument: (doc: Omit<InterOrgDocument, 'id' | 'sentAt'>) => void;
   updateInterOrgDocument: (id: string, updates: Partial<InterOrgDocument>) => void;
   deleteInterOrgDocument: (id: string) => void;
-  getInterOrgDocumentsByTenant: (tenantId: string, direction: 'sent' | 'received' | 'all') => InterOrgDocument[];
 }
 
 export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
@@ -234,9 +213,7 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }));
   },
 
-  getPeopleByTenant: (tenantId) => {
-    return get().people.filter((person) => person.tenantId === tenantId);
-  },
+
 
   importPeople: (people) => {
     const newPeople = people.map((person, index) => ({
@@ -273,9 +250,7 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }));
   },
 
-  getPositionsByTenant: (tenantId) => {
-    return get().positions.filter((position) => position.tenantId === tenantId);
-  },
+
 
   importPositions: (positions) => {
     const newPositions = positions.map((position, index) => ({
@@ -344,29 +319,7 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }));
   },
 
-  getOrganizationsByTenant: (tenantId) => {
-    return get().organizations.filter((org) => org.tenantId === tenantId);
-  },
 
-  getDepartmentsByTenant: (tenantId) => {
-    return get().departments.filter((dept) => dept.tenantId === tenantId);
-  },
-
-  getDepartmentsByOrganization: (organizationId) => {
-    return get().departments.filter((dept) => dept.organizationId === organizationId);
-  },
-
-  getPersonnelByTenant: (tenantId) => {
-    return get().personnel.filter((person) => person.tenantId === tenantId);
-  },
-
-  getPersonnelByOrganization: (organizationId) => {
-    return get().personnel.filter((person) => person.organizationId === organizationId);
-  },
-
-  getPersonnelByDepartment: (departmentId) => {
-    return get().personnel.filter((person) => person.departmentId === departmentId);
-  },
 
   competencies: mockCompetencyMatrix,
 
@@ -408,13 +361,7 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }));
   },
 
-  getCompetenciesByTenant: (tenantId) => {
-    return get().competencies.filter((comp) => comp.tenantId === tenantId);
-  },
 
-  getCompetenciesByOrganization: (organizationId) => {
-    return get().competencies.filter((comp) => comp.organizationId === organizationId);
-  },
 
   productionSites: mockProductionSites,
 
@@ -441,9 +388,7 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }));
   },
 
-  getProductionSitesByOrganization: (organizationId) => {
-    return get().productionSites.filter((site) => site.organizationId === organizationId);
-  },
+
 
   importProductionSites: (sites) => {
     const newSites = sites.map((site, index) => ({
@@ -482,9 +427,7 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }));
   },
 
-  getSystemUsersByTenant: (tenantId) => {
-    return get().systemUsers.filter((user) => user.tenantId === tenantId);
-  },
+
 
   externalOrganizations: mockExternalOrganizations,
 
@@ -511,13 +454,7 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }));
   },
 
-  getExternalOrganizationsByTenant: (tenantId) => {
-    return get().externalOrganizations.filter((org) => org.tenantId === tenantId);
-  },
 
-  getExternalOrganizationsByType: (tenantId, type) => {
-    return get().externalOrganizations.filter((org) => org.tenantId === tenantId && org.type === type);
-  },
 
   importExternalOrganizations: (orgs) => {
     const newOrgs = orgs.map((org, index) => ({
@@ -558,9 +495,7 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }));
   },
 
-  getCompetenciesDirByTenant: (tenantId) => {
-    return get().competenciesDirectory.filter((comp) => comp.tenantId === tenantId);
-  },
+
 
   importCompetenciesDir: (comps) => {
     const newComps = comps.map((comp, index) => ({
@@ -628,13 +563,7 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }));
   },
 
-  getCertificationsByPerson: (personId) => {
-    return get().certifications.filter((cert) => cert.personId === personId);
-  },
 
-  getCertificationsByTenant: (tenantId) => {
-    return get().certifications.filter((cert) => cert.tenantId === tenantId);
-  },
 
   contractors: mockContractors,
 
@@ -662,13 +591,7 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }));
   },
 
-  getContractorsByTenant: (tenantId) => {
-    return get().contractors.filter((c) => c.tenantId === tenantId);
-  },
 
-  getContractorsByType: (tenantId, type) => {
-    return get().contractors.filter((c) => c.tenantId === tenantId && c.type === type);
-  },
 
   interOrgDocuments: [],
 
@@ -695,14 +618,5 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }));
   },
 
-  getInterOrgDocumentsByTenant: (tenantId, direction) => {
-    const docs = get().interOrgDocuments;
-    if (direction === 'sent') {
-      return docs.filter((doc) => doc.fromTenantId === tenantId);
-    } else if (direction === 'received') {
-      return docs.filter((doc) => doc.toTenantId === tenantId);
-    } else {
-      return docs.filter((doc) => doc.fromTenantId === tenantId || doc.toTenantId === tenantId);
-    }
-  }
+
 }), { name: 'settings-storage-v3' }));

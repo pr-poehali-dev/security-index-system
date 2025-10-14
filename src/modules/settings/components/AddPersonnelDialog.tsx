@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -27,22 +27,31 @@ interface CertificationForm {
 
 export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelDialogProps) {
   const user = useAuthStore((state) => state.user);
-  const { 
-    addPerson, 
-    addPersonnel,
-    addCertification,
-    getOrganizationsByTenant,
-    getExternalOrganizationsByType,
-    getDepartmentsByOrganization,
-    getPositionsByTenant,
-    getCompetenciesDirByTenant
-  } = useSettingsStore();
+  const addPerson = useSettingsStore((state) => state.addPerson);
+  const addPersonnel = useSettingsStore((state) => state.addPersonnel);
+  const addCertification = useSettingsStore((state) => state.addCertification);
+  const allOrganizations = useSettingsStore((state) => state.organizations);
+  const allExternalOrgs = useSettingsStore((state) => state.externalOrganizations);
+  const allDepartments = useSettingsStore((state) => state.departments);
+  const allPositions = useSettingsStore((state) => state.positions);
+  const allCompetencies = useSettingsStore((state) => state.competenciesDirectory);
   const { toast } = useToast();
 
-  const tenantOrgs = getOrganizationsByTenant(user!.tenantId!);
-  const contractorOrgs = getExternalOrganizationsByType(user!.tenantId!, 'contractor');
-  const tenantPositions = getPositionsByTenant(user!.tenantId!);
-  const tenantCompetencies = getCompetenciesDirByTenant(user!.tenantId!);
+  const tenantOrgs = useMemo(() => 
+    user?.tenantId ? allOrganizations.filter(o => o.tenantId === user.tenantId) : []
+  , [allOrganizations, user?.tenantId]);
+  
+  const contractorOrgs = useMemo(() => 
+    user?.tenantId ? allExternalOrgs.filter(o => o.tenantId === user.tenantId && o.type === 'contractor') : []
+  , [allExternalOrgs, user?.tenantId]);
+  
+  const tenantPositions = useMemo(() => 
+    user?.tenantId ? allPositions.filter(p => p.tenantId === user.tenantId) : []
+  , [allPositions, user?.tenantId]);
+  
+  const tenantCompetencies = useMemo(() => 
+    user?.tenantId ? allCompetencies.filter(c => c.tenantId === user.tenantId) : []
+  , [allCompetencies, user?.tenantId]);
 
   const [personnelType, setPersonnelType] = useState<PersonnelType>('employee');
 
@@ -70,9 +79,11 @@ export default function AddPersonnelDialog({ open, onOpenChange }: AddPersonnelD
 
   const [certifications, setCertifications] = useState<CertificationForm[]>([]);
 
-  const departments = personnelData.organizationId 
-    ? getDepartmentsByOrganization(personnelData.organizationId)
-    : [];
+  const departments = useMemo(() => 
+    personnelData.organizationId 
+      ? allDepartments.filter(d => d.organizationId === personnelData.organizationId)
+      : []
+  , [allDepartments, personnelData.organizationId]);
 
   const handlePersonnelTypeChange = (type: PersonnelType) => {
     setPersonnelType(type);

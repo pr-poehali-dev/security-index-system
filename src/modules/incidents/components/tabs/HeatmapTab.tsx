@@ -4,11 +4,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 import IncidentHeatmap from '../IncidentHeatmap';
 
+import { useMemo } from 'react';
+
 export default function HeatmapTab() {
   const user = useAuthStore((state) => state.user);
-  const { getIncidentsByTenant } = useIncidentsStore();
+  const allIncidents = useIncidentsStore((state) => state.incidents);
 
-  const incidents = user?.tenantId ? getIncidentsByTenant(user.tenantId) : [];
+  const incidents = useMemo(() => 
+    user?.tenantId ? allIncidents.filter(inc => inc.tenantId === user.tenantId) : []
+  , [allIncidents, user?.tenantId]);
 
   if (incidents.length === 0) {
     return (

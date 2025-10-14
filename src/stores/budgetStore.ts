@@ -151,23 +151,14 @@ interface BudgetState {
   addCategory: (category: Omit<BudgetCategory, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateCategory: (id: string, updates: Partial<BudgetCategory>) => void;
   deleteCategory: (id: string) => void;
-  getCategoriesByYear: (year: number) => BudgetCategory[];
 
   addExpense: (expense: Omit<BudgetExpense, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateExpense: (id: string, updates: Partial<BudgetExpense>) => void;
   deleteExpense: (id: string) => void;
-  getExpensesByCategory: (categoryId: string) => BudgetExpense[];
 
   addOrganizationPlan: (plan: Omit<OrganizationBudgetPlan, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateOrganizationPlan: (id: string, updates: Partial<OrganizationBudgetPlan>) => void;
   deleteOrganizationPlan: (id: string) => void;
-  getOrganizationPlan: (organizationId: string, year: number) => OrganizationBudgetPlan | undefined;
-  getOrganizationPlansByYear: (year: number) => OrganizationBudgetPlan[];
-
-  getBudgetSummary: (year: number) => BudgetSummary[];
-  getTotalPlanned: (year: number) => number;
-  getTotalSpent: (year: number) => number;
-  getTotalUtilization: (year: number) => number;
 
   setSelectedYear: (year: number) => void;
 }
@@ -200,9 +191,7 @@ export const useBudgetStore = create<BudgetState>()(persist((set, get) => ({
     set((state) => ({ categories: state.categories.filter((cat) => cat.id !== id) }));
   },
 
-  getCategoriesByYear: (year) => {
-    return get().categories.filter((cat) => cat.year === year && cat.status === 'active');
-  },
+
 
   addExpense: (expense) => {
     const newExpense: BudgetExpense = {
@@ -226,9 +215,7 @@ export const useBudgetStore = create<BudgetState>()(persist((set, get) => ({
     set((state) => ({ expenses: state.expenses.filter((exp) => exp.id !== id) }));
   },
 
-  getExpensesByCategory: (categoryId) => {
-    return get().expenses.filter((exp) => exp.categoryId === categoryId);
-  },
+
 
   addOrganizationPlan: (plan) => {
     const newPlan: OrganizationBudgetPlan = {
@@ -254,60 +241,9 @@ export const useBudgetStore = create<BudgetState>()(persist((set, get) => ({
     }));
   },
 
-  getOrganizationPlan: (organizationId, year) => {
-    return get().organizationPlans.find(
-      (plan) => plan.organizationId === organizationId && plan.year === year
-    );
-  },
 
-  getOrganizationPlansByYear: (year) => {
-    return get().organizationPlans.filter((plan) => plan.year === year);
-  },
 
-  getBudgetSummary: (year) => {
-    const categories = get().getCategoriesByYear(year);
-    const expenses = get().expenses;
 
-    return categories.map((category) => {
-      const categoryExpenses = expenses.filter((exp) => exp.categoryId === category.id);
-      const spentAmount = categoryExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-      const remainingAmount = category.plannedAmount - spentAmount;
-      const utilizationRate = category.plannedAmount > 0 
-        ? Math.round((spentAmount / category.plannedAmount) * 100) 
-        : 0;
-
-      return {
-        categoryId: category.id,
-        categoryName: category.name,
-        plannedAmount: category.plannedAmount,
-        spentAmount,
-        remainingAmount,
-        utilizationRate,
-        expensesCount: categoryExpenses.length
-      };
-    });
-  },
-
-  getTotalPlanned: (year) => {
-    const categories = get().getCategoriesByYear(year);
-    return categories.reduce((sum, cat) => sum + cat.plannedAmount, 0);
-  },
-
-  getTotalSpent: (year) => {
-    const categories = get().getCategoriesByYear(year);
-    const expenses = get().expenses;
-    
-    return categories.reduce((sum, cat) => {
-      const categoryExpenses = expenses.filter((exp) => exp.categoryId === cat.id);
-      return sum + categoryExpenses.reduce((expSum, exp) => expSum + exp.amount, 0);
-    }, 0);
-  },
-
-  getTotalUtilization: (year) => {
-    const totalPlanned = get().getTotalPlanned(year);
-    const totalSpent = get().getTotalSpent(year);
-    return totalPlanned > 0 ? Math.round((totalSpent / totalPlanned) * 100) : 0;
-  },
 
   setSelectedYear: (year) => {
     set({ selectedYear: year });

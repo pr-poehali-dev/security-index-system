@@ -35,7 +35,6 @@ interface OrdersState {
   addOrder: (order: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateOrder: (id: string, updates: Partial<Order>) => void;
   deleteOrder: (id: string) => void;
-  getOrdersByTenant: (tenantId: string) => Order[];
   sendOrderToTrainingCenter: (orderId: string, contractorId: string, requestType: 'full_training' | 'sdo_access_only') => string | null;
 }
 
@@ -166,10 +165,6 @@ export const useOrdersStore = create<OrdersState>()(persist((set, get) => ({
     set((state) => ({
       orders: state.orders.filter((order) => order.id !== id)
     }));
-  },
-
-  getOrdersByTenant: (tenantId) => {
-    return get().orders.filter((order) => order.tenantId === tenantId);
   },
 
   sendOrderToTrainingCenter: (orderId, contractorId, requestType) => {

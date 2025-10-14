@@ -1,6 +1,6 @@
 // src/modules/checklists/pages/ChecklistsPage.tsx
 // Описание: Страница чек-листов и аудитов с шаблонами и историей проверок
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useChecklistsStore } from '@/stores/checklistsStore';
 import { useTemplatesStore } from '@/stores/templatesStore';
 import PageHeader from '@/components/layout/PageHeader';
@@ -21,13 +21,9 @@ import StatsCards from '../components/StatsCards';
 import type { Checklist, Audit } from '@/types';
 
 export default function ChecklistsPage() {
-  const {
-    checklists,
-    audits,
-    getAuditsByStatus,
-    getUpcomingAudits,
-    deleteChecklist
-  } = useChecklistsStore();
+  const checklists = useChecklistsStore((state) => state.checklists);
+  const allAudits = useChecklistsStore((state) => state.audits);
+  const deleteChecklist = useChecklistsStore((state) => state.deleteChecklist);
 
   const [currentTab, setCurrentTab] = useState('checklists');
   const [checklistDialogOpen, setChecklistDialogOpen] = useState(false);
@@ -73,10 +69,29 @@ export default function ChecklistsPage() {
     setConductingAudit(audit);
   };
 
-  const scheduledAudits = getAuditsByStatus('scheduled');
-  const inProgressAudits = getAuditsByStatus('in_progress');
-  const completedAudits = getAuditsByStatus('completed');
-  const upcomingAudits = getUpcomingAudits();
+  const scheduledAudits = useMemo(() => 
+    allAudits.filter(audit => audit.status === 'scheduled')
+  , [allAudits]);
+  
+  const inProgressAudits = useMemo(() => 
+    allAudits.filter(audit => audit.status === 'in_progress')
+  , [allAudits]);
+  
+  const completedAudits = useMemo(() => 
+    allAudits.filter(audit => audit.status === 'completed')
+  , [allAudits]);
+  
+  const upcomingAudits = useMemo(() => {
+    const now = new Date();
+    const thirtyDaysLater = new Date();
+    thirtyDaysLater.setDate(now.getDate() + 30);
+    
+    return allAudits.filter(audit => {
+      if (audit.status !== 'scheduled') return false;
+      const scheduledDate = new Date(audit.scheduledDate);
+      return scheduledDate >= now && scheduledDate <= thirtyDaysLater;
+    });
+  }, [allAudits]);
 
   return (
     <div>
@@ -134,7 +149,7 @@ export default function ChecklistsPage() {
           </TabsTrigger>
           <TabsTrigger value="audits" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="Search" size={20} />
-            <span className="text-xs font-medium">Аудиты ({audits.length})</span>
+            <span className="text-xs font-medium">Аудиты ({allAudits.length})</span>
           </TabsTrigger>
           <TabsTrigger value="upcoming" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="Calendar" size={20} />
@@ -166,7 +181,7 @@ export default function ChecklistsPage() {
 
         <TabsContent value="audits" className="mt-6">
           <div className="space-y-4">
-            {audits.map((audit) => {
+            {allAudits.map((audit) => {
               const checklist = checklists.find(c => c.id === audit.checklistId);
               return (
                 <AuditCard 

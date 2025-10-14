@@ -27,7 +27,13 @@ interface IncidentDialogProps {
 export default function IncidentDialog({ incident, open, onOpenChange }: IncidentDialogProps) {
   const user = useAuthStore((state) => state.user);
   const { toast } = useToast();
-  const { addIncident, updateIncident, sources, directions, fundingTypes, categories, subcategories, getSubcategoriesByCategory } = useIncidentsStore();
+  const addIncident = useIncidentsStore((state) => state.addIncident);
+  const updateIncident = useIncidentsStore((state) => state.updateIncident);
+  const sources = useIncidentsStore((state) => state.sources);
+  const directions = useIncidentsStore((state) => state.directions);
+  const fundingTypes = useIncidentsStore((state) => state.fundingTypes);
+  const categories = useIncidentsStore((state) => state.categories);
+  const subcategories = useIncidentsStore((state) => state.subcategories);
   const { organizations, productionSites, personnel, people, positions } = useSettingsStore();
 
   const { formData, updateField, handleCategoryChange, validateForm } = useIncidentForm(incident);
@@ -50,7 +56,7 @@ export default function IncidentDialog({ incident, open, onOpenChange }: Inciden
   const activeCategories = categories.filter(c => c.status === 'active');
   
   const availableSubcategories = formData.categoryId 
-    ? getSubcategoriesByCategory(formData.categoryId).filter(s => s.status === 'active')
+    ? subcategories.filter(s => s.categoryId === formData.categoryId && s.status === 'active')
     : [];
 
   const handleSubmit = () => {

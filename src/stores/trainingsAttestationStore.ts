@@ -41,7 +41,6 @@ interface TrainingsAttestationState {
   addTraining: (training: Omit<Training, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateTraining: (id: string, updates: Partial<Training>) => void;
   deleteTraining: (id: string) => void;
-  getTrainingsByTenant: (tenantId: string) => Training[];
 }
 
 export const useTrainingsAttestationStore = create<TrainingsAttestationState>()(persist((set, get) => ({
@@ -289,10 +288,6 @@ export const useTrainingsAttestationStore = create<TrainingsAttestationState>()(
     set((state) => ({
       trainings: state.trainings.filter((training) => training.id !== id)
     }));
-  },
-
-  getTrainingsByTenant: (tenantId) => {
-    return get().trainings.filter((training) => training.tenantId === tenantId);
   }
 }), {
   name: 'trainings-attestation-storage'

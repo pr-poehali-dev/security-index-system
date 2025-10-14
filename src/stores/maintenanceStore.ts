@@ -28,16 +28,6 @@ interface MaintenanceState {
   addWork: (work: Omit<MaintenanceWork, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateWork: (id: string, updates: Partial<MaintenanceWork>) => void;
   deleteWork: (id: string) => void;
-  getWorksByStatus: (status: MaintenanceWork['status']) => MaintenanceWork[];
-  getWorksByType: (type: MaintenanceWork['type']) => MaintenanceWork[];
-  getWorksByObject: (objectId: string) => MaintenanceWork[];
-  getStatistics: () => {
-    planned: number;
-    inProgress: number;
-    completed: number;
-    overdue: number;
-    completionRate: number;
-  };
 }
 
 export const useMaintenanceStore = create<MaintenanceState>()(persist((set, get) => ({
@@ -150,36 +140,6 @@ export const useMaintenanceStore = create<MaintenanceState>()(persist((set, get)
   
   deleteWork: (id) => {
     set((state) => ({ works: state.works.filter((work) => work.id !== id) }));
-  },
-  
-  getWorksByStatus: (status) => {
-    return get().works.filter((work) => work.status === status);
-  },
-  
-  getWorksByType: (type) => {
-    return get().works.filter((work) => work.type === type);
-  },
-  
-  getWorksByObject: (objectId) => {
-    return get().works.filter((work) => work.objectId === objectId);
-  },
-  
-  getStatistics: () => {
-    const works = get().works;
-    const planned = works.filter((w) => w.status === 'planned').length;
-    const inProgress = works.filter((w) => w.status === 'in_progress').length;
-    const completed = works.filter((w) => w.status === 'completed').length;
-    const overdue = works.filter((w) => w.status === 'overdue').length;
-    const total = works.length;
-    const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
-    
-    return {
-      planned,
-      inProgress,
-      completed,
-      overdue,
-      completionRate
-    };
   }
   
 }), { name: 'maintenance-storage-v1' }));

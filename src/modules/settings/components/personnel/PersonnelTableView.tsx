@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,13 +30,29 @@ interface PersonnelTableViewProps {
 }
 
 export default function PersonnelTableView({ personnel, onEdit, onDelete }: PersonnelTableViewProps) {
-  const {
-    organizations,
-    externalOrganizations,
-    getDepartmentsByTenant,
-    getCertificationsByPerson,
-    competenciesDirectory
-  } = useSettingsStore();
+  const organizations = useSettingsStore((state) => state.organizations);
+  const externalOrganizations = useSettingsStore((state) => state.externalOrganizations);
+  const allDepartments = useSettingsStore((state) => state.departments);
+  const allCertifications = useSettingsStore((state) => state.certifications);
+  const competenciesDirectory = useSettingsStore((state) => state.competenciesDirectory);
+  
+  const departmentsByPerson = useMemo(() => {
+    const map = new Map<string, typeof allDepartments>();
+    personnel.forEach(p => {
+      if (!map.has(p.tenantId)) {
+        map.set(p.tenantId, allDepartments.filter(d => d.tenantId === p.tenantId));
+      }
+    });
+    return map;
+  }, [allDepartments, personnel]);
+  
+  const certificationsByPerson = useMemo(() => {
+    const map = new Map<string, typeof allCertifications>();
+    personnel.forEach(p => {
+      map.set(p.personId, allCertifications.filter(c => c.personId === p.personId));
+    });
+    return map;
+  }, [allCertifications, personnel]);
 
   return (
     <Card>
@@ -65,7 +82,8 @@ export default function PersonnelTableView({ personnel, onEdit, onDelete }: Pers
               </TableRow>
             ) : (
               personnel.map((person) => {
-                const tenantDepts = getDepartmentsByTenant(person.tenantId);
+                const tenantDepts = departmentsByPerson.get(person.tenantId) || [];
+                const certs = certificationsByPerson.get(person.personId) || [];
                 
                 return (
                   <TableRow key={person.id}>
@@ -86,7 +104,6 @@ export default function PersonnelTableView({ personnel, onEdit, onDelete }: Pers
                     </TableCell>
                     <TableCell>
                       {(() => {
-                        const certs = getCertificationsByPerson(person.personId);
                         if (certs.length === 0) {
                           return <span className="text-sm text-muted-foreground">—</span>;
                         }

@@ -15,10 +15,14 @@ import { STATUS_COLORS, STATUS_LABELS } from '../../utils/analyticsUtils';
 
 export default function AnalyticsTab() {
   const user = useAuthStore((state) => state.user);
-  const { getIncidentsByTenant, directions, categories } = useIncidentsStore();
+  const allIncidents = useIncidentsStore((state) => state.incidents);
+  const directions = useIncidentsStore((state) => state.directions);
+  const categories = useIncidentsStore((state) => state.categories);
   const { organizations } = useSettingsStore();
 
-  const incidents = user?.tenantId ? getIncidentsByTenant(user.tenantId) : [];
+  const incidents = useMemo(() => 
+    user?.tenantId ? allIncidents.filter(inc => inc.tenantId === user.tenantId) : []
+  , [allIncidents, user?.tenantId]);
 
   const stats = useMemo(() => {
     const total = incidents.length;

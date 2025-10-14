@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useIncidentsStore } from '@/stores/incidentsStore';
 import { Card, CardContent } from '@/components/ui/card';
@@ -35,14 +35,19 @@ import type { IncidentSource } from '@/types';
 
 export default function SourcesDirectory() {
   const user = useAuthStore((state) => state.user);
-  const { getSourcesByTenant, addSource, updateSource, deleteSource } = useIncidentsStore();
+  const allSources = useIncidentsStore((state) => state.sources);
+  const addSource = useIncidentsStore((state) => state.addSource);
+  const updateSource = useIncidentsStore((state) => state.updateSource);
+  const deleteSource = useIncidentsStore((state) => state.deleteSource);
   const { toast } = useToast();
   
   const [showDialog, setShowDialog] = useState(false);
   const [editingSource, setEditingSource] = useState<IncidentSource | null>(null);
   const [formData, setFormData] = useState({ name: '', status: 'active' as const });
 
-  const sources = user?.tenantId ? getSourcesByTenant(user.tenantId) : [];
+  const sources = useMemo(() => 
+    user?.tenantId ? allSources.filter(s => s.tenantId === user.tenantId) : []
+  , [allSources, user?.tenantId]);
 
   const handleSubmit = () => {
     if (!formData.name.trim() || !user?.tenantId) {

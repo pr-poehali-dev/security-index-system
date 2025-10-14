@@ -173,33 +173,26 @@ interface IncidentsState {
   addIncident: (incident: Omit<Incident, 'id' | 'createdAt' | 'updatedAt' | 'daysLeft'>) => Incident;
   updateIncident: (id: string, updates: Partial<Incident>) => void;
   deleteIncident: (id: string) => void;
-  getIncidentsByTenant: (tenantId: string) => Incident[];
   
   addSource: (source: Omit<IncidentSource, 'id' | 'createdAt'>) => void;
   updateSource: (id: string, updates: Partial<IncidentSource>) => void;
   deleteSource: (id: string) => void;
-  getSourcesByTenant: (tenantId: string) => IncidentSource[];
 
   addDirection: (direction: Omit<IncidentDirection, 'id' | 'createdAt'>) => void;
   updateDirection: (id: string, updates: Partial<IncidentDirection>) => void;
   deleteDirection: (id: string) => void;
-  getDirectionsByTenant: (tenantId: string) => IncidentDirection[];
 
   addFundingType: (fundingType: Omit<IncidentFundingType, 'id' | 'createdAt'>) => void;
   updateFundingType: (id: string, updates: Partial<IncidentFundingType>) => void;
   deleteFundingType: (id: string) => void;
-  getFundingTypesByTenant: (tenantId: string) => IncidentFundingType[];
 
   addCategory: (category: Omit<IncidentCategory, 'id' | 'createdAt'>) => void;
   updateCategory: (id: string, updates: Partial<IncidentCategory>) => void;
   deleteCategory: (id: string) => void;
-  getCategoriesByTenant: (tenantId: string) => IncidentCategory[];
 
   addSubcategory: (subcategory: Omit<IncidentSubcategory, 'id' | 'createdAt'>) => void;
   updateSubcategory: (id: string, updates: Partial<IncidentSubcategory>) => void;
   deleteSubcategory: (id: string) => void;
-  getSubcategoriesByTenant: (tenantId: string) => IncidentSubcategory[];
-  getSubcategoriesByCategory: (categoryId: string) => IncidentSubcategory[];
 
   calculateStatus: (plannedDate: string, completedDate?: string) => IncidentStatus;
   calculateDaysLeft: (plannedDate: string, completedDate?: string) => number;
@@ -263,10 +256,6 @@ export const useIncidentsStore = create<IncidentsState>()(persist((set, get) => 
     set((state) => ({ incidents: state.incidents.filter((inc) => inc.id !== id) }));
   },
 
-  getIncidentsByTenant: (tenantId) => {
-    return get().incidents.filter((inc) => inc.tenantId === tenantId);
-  },
-
   addSource: (source) => {
     const newSource: IncidentSource = {
       ...source,
@@ -284,10 +273,6 @@ export const useIncidentsStore = create<IncidentsState>()(persist((set, get) => 
 
   deleteSource: (id) => {
     set((state) => ({ sources: state.sources.filter((s) => s.id !== id) }));
-  },
-
-  getSourcesByTenant: (tenantId) => {
-    return get().sources.filter((s) => s.tenantId === tenantId);
   },
 
   addDirection: (direction) => {
@@ -309,10 +294,6 @@ export const useIncidentsStore = create<IncidentsState>()(persist((set, get) => 
     set((state) => ({ directions: state.directions.filter((d) => d.id !== id) }));
   },
 
-  getDirectionsByTenant: (tenantId) => {
-    return get().directions.filter((d) => d.tenantId === tenantId);
-  },
-
   addFundingType: (fundingType) => {
     const newFundingType: IncidentFundingType = {
       ...fundingType,
@@ -330,10 +311,6 @@ export const useIncidentsStore = create<IncidentsState>()(persist((set, get) => 
 
   deleteFundingType: (id) => {
     set((state) => ({ fundingTypes: state.fundingTypes.filter((f) => f.id !== id) }));
-  },
-
-  getFundingTypesByTenant: (tenantId) => {
-    return get().fundingTypes.filter((f) => f.tenantId === tenantId);
   },
 
   addCategory: (category) => {
@@ -355,10 +332,6 @@ export const useIncidentsStore = create<IncidentsState>()(persist((set, get) => 
     set((state) => ({ categories: state.categories.filter((c) => c.id !== id) }));
   },
 
-  getCategoriesByTenant: (tenantId) => {
-    return get().categories.filter((c) => c.tenantId === tenantId);
-  },
-
   addSubcategory: (subcategory) => {
     const newSubcategory: IncidentSubcategory = {
       ...subcategory,
@@ -376,14 +349,6 @@ export const useIncidentsStore = create<IncidentsState>()(persist((set, get) => 
 
   deleteSubcategory: (id) => {
     set((state) => ({ subcategories: state.subcategories.filter((s) => s.id !== id) }));
-  },
-
-  getSubcategoriesByTenant: (tenantId) => {
-    return get().subcategories.filter((s) => s.tenantId === tenantId);
-  },
-
-  getSubcategoriesByCategory: (categoryId) => {
-    return get().subcategories.filter((s) => s.categoryId === categoryId);
   },
 
   calculateDaysLeft: (plannedDate: string, completedDate?: string) => {

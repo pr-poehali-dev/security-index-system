@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useIncidentsStore } from '@/stores/incidentsStore';
 import { Card, CardContent } from '@/components/ui/card';
@@ -35,14 +35,19 @@ import type { IncidentFundingType } from '@/types';
 
 export default function FundingTypesDirectory() {
   const user = useAuthStore((state) => state.user);
-  const { getFundingTypesByTenant, addFundingType, updateFundingType, deleteFundingType } = useIncidentsStore();
+  const allFundingTypes = useIncidentsStore((state) => state.fundingTypes);
+  const addFundingType = useIncidentsStore((state) => state.addFundingType);
+  const updateFundingType = useIncidentsStore((state) => state.updateFundingType);
+  const deleteFundingType = useIncidentsStore((state) => state.deleteFundingType);
   const { toast } = useToast();
   
   const [showDialog, setShowDialog] = useState(false);
   const [editingFundingType, setEditingFundingType] = useState<IncidentFundingType | null>(null);
   const [formData, setFormData] = useState({ name: '', status: 'active' as const });
 
-  const fundingTypes = user?.tenantId ? getFundingTypesByTenant(user.tenantId) : [];
+  const fundingTypes = useMemo(() => 
+    user?.tenantId ? allFundingTypes.filter(f => f.tenantId === user.tenantId) : []
+  , [allFundingTypes, user?.tenantId]);
 
   const handleSubmit = () => {
     if (!formData.name.trim() || !user?.tenantId) {

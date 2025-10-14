@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -42,13 +42,15 @@ const typeLabels = {
 
 export default function AttestationOrdersList() {
   const user = useAuthStore((state) => state.user);
-  const { orders, getOrdersByTenant } = useAttestationOrdersStore();
+  const allOrders = useAttestationOrdersStore((state) => state.orders);
   const { organizations } = useSettingsStore();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
-  const userOrders = user?.tenantId ? getOrdersByTenant(user.tenantId) : [];
+  const userOrders = useMemo(() => 
+    user?.tenantId ? allOrders.filter(o => o.tenantId === user.tenantId) : []
+  , [allOrders, user?.tenantId]);
 
   const filteredOrders = userOrders.filter((order) => {
     const matchesSearch = 

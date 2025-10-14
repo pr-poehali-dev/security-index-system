@@ -28,22 +28,37 @@ import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 export default function OrdersTrainingTab() {
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
-  const { documents, getDocumentsByTenant } = useDocumentsStore();
-  const { orders, getOrdersByTenant } = useOrdersStore();
-  const { trainings, getTrainingsByTenant } = useTrainingsAttestationStore();
-  const { getOrdersByTenant: getAttestationOrders } = useAttestationOrdersStore();
-  const { personnel, people, positions, getContractorsByType } = useSettingsStore();
+  const documents = useDocumentsStore((state) => state.documents);
+  const allOrders = useOrdersStore((state) => state.orders);
+  const allTrainings = useTrainingsAttestationStore((state) => state.trainings);
+  const allAttestationOrders = useAttestationOrdersStore((state) => state.orders);
+  const personnel = useSettingsStore((state) => state.personnel);
+  const people = useSettingsStore((state) => state.people);
+  const positions = useSettingsStore((state) => state.positions);
+  const allContractors = useSettingsStore((state) => state.contractors);
   
-  const legacyOrders = user?.tenantId ? getOrdersByTenant(user.tenantId) : [];
-  const legacyTrainings = user?.tenantId ? getTrainingsByTenant(user.tenantId) : [];
-  const legacyAttestationOrders = user?.tenantId ? getAttestationOrders(user.tenantId) : [];
+  const legacyOrders = useMemo(() => 
+    user?.tenantId ? allOrders.filter(o => o.tenantId === user.tenantId) : []
+  , [allOrders, user?.tenantId]);
+  
+  const legacyTrainings = useMemo(() => 
+    user?.tenantId ? allTrainings.filter(t => t.tenantId === user.tenantId) : []
+  , [allTrainings, user?.tenantId]);
+  
+  const legacyAttestationOrders = useMemo(() => 
+    user?.tenantId ? allAttestationOrders.filter(o => o.tenantId === user.tenantId) : []
+  , [allAttestationOrders, user?.tenantId]);
+  
+  const contractors = useMemo(() => 
+    user?.tenantId ? allContractors.filter(c => c.tenantId === user.tenantId && c.type === 'training_center') : []
+  , [allContractors, user?.tenantId]);
   
   const migratedDocuments = useMemo(() => {
     if (documents.length === 0 && (legacyOrders.length > 0 || legacyTrainings.length > 0 || legacyAttestationOrders.length > 0)) {
       return migrateAllDocuments(legacyOrders, legacyTrainings, legacyAttestationOrders);
     }
-    return user?.tenantId ? getDocumentsByTenant(user.tenantId) : [];
-  }, [documents, legacyOrders, legacyTrainings, legacyAttestationOrders, user?.tenantId, getDocumentsByTenant]);
+    return user?.tenantId ? documents.filter(d => d.tenantId === user.tenantId) : [];
+  }, [documents, legacyOrders, legacyTrainings, legacyAttestationOrders, user?.tenantId]);
   
   const [filterValues, setFilterValues] = useState<FilterValues>({
     search: '',
@@ -58,10 +73,8 @@ export default function OrdersTrainingTab() {
   const [showSendToTCDialog, setShowSendToTCDialog] = useState(false);
   const [selectedOrderForTC, setSelectedOrderForTC] = useState<Order | null>(null);
 
-  const trainingOrgs = user?.tenantId ? getContractorsByType(user.tenantId, 'training_center') : [];
-
   const orderHandlers = createOrderHandlers(
-    orders,
+    legacyOrders,
     personnel,
     people,
     positions,
@@ -69,7 +82,7 @@ export default function OrdersTrainingTab() {
     user?.tenantId
   );
 
-  const trainingHandlers = createTrainingHandlers(trainings, toast);
+  const trainingHandlers = createTrainingHandlers(legacyTrainings, toast);
 
   const unifiedDocuments = useMemo(() => {
     return migratedDocuments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

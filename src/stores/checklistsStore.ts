@@ -18,8 +18,6 @@ interface ChecklistsState {
   completeAudit: (id: string) => void;
   updateAuditFindings: (auditId: string, findings: Audit['findings']) => void;
   selectAudit: (audit: Audit | null) => void;
-  getAuditsByStatus: (status: Audit['status']) => Audit[];
-  getUpcomingAudits: () => Audit[];
   setError: (error: string | null) => void;
   clearError: () => void;
 }
@@ -244,22 +242,6 @@ export const useChecklistsStore = create<ChecklistsState>((set, get) => ({
   })),
 
   selectAudit: (audit) => set({ selectedAudit: audit }),
-
-  getAuditsByStatus: (status) => {
-    return get().audits.filter((audit) => audit.status === status);
-  },
-
-  getUpcomingAudits: () => {
-    const now = new Date();
-    const thirtyDaysLater = new Date();
-    thirtyDaysLater.setDate(now.getDate() + 30);
-
-    return get().audits.filter((audit) => {
-      if (audit.status !== 'scheduled') return false;
-      const scheduledDate = new Date(audit.scheduledDate);
-      return scheduledDate >= now && scheduledDate <= thirtyDaysLater;
-    });
-  },
   
   error: null,
   

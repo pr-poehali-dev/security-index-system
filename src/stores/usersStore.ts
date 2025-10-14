@@ -9,7 +9,6 @@ interface UsersState {
   addUser: (user: Omit<SystemUser, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateUser: (id: string, data: Partial<SystemUser>) => void;
   deleteUser: (id: string) => void;
-  getUsersByRole: (role: string) => SystemUser[];
 }
 
 export const useUsersStore = create<UsersState>((set, get) => ({
@@ -41,8 +40,4 @@ export const useUsersStore = create<UsersState>((set, get) => ({
     set((state) => ({
       users: state.users.filter((user) => user.id !== id),
     })),
-
-  getUsersByRole: (role) => {
-    return get().users.filter((user) => user.role === role);
-  },
 }));

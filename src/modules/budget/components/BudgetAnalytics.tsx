@@ -1,26 +1,66 @@
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import Icon from '@/components/ui/icon';
 import { useBudgetStore } from '@/stores/budgetStore';
+import type { BudgetSummary } from '@/types';
 
 interface BudgetAnalyticsProps {
   year: number;
 }
 
 export default function BudgetAnalytics({ year }: BudgetAnalyticsProps) {
-  const { getBudgetSummary, getTotalPlanned, getTotalSpent, getTotalUtilization, expenses, categories } = useBudgetStore();
+  const categories = useBudgetStore((state) => state.categories);
+  const expenses = useBudgetStore((state) => state.expenses);
 
-  const summary = getBudgetSummary(year);
-  const totalPlanned = getTotalPlanned(year);
-  const totalSpent = getTotalSpent(year);
-  const totalUtilization = getTotalUtilization(year);
+  const yearCategories = useMemo(() => 
+    categories.filter(c => c.year === year && c.status === 'active')
+  , [categories, year]);
+
+  const summary = useMemo(() => {
+    return yearCategories.map((category) => {
+      const categoryExpenses = expenses.filter((exp) => exp.categoryId === category.id);
+      const spentAmount = categoryExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+      const remainingAmount = category.plannedAmount - spentAmount;
+      const utilizationRate = category.plannedAmount > 0 
+        ? Math.round((spentAmount / category.plannedAmount) * 100) 
+        : 0;
+
+      return {
+        categoryId: category.id,
+        categoryName: category.name,
+        plannedAmount: category.plannedAmount,
+        spentAmount,
+        remainingAmount,
+        utilizationRate,
+        expensesCount: categoryExpenses.length
+      };
+    });
+  }, [yearCategories, expenses]);
+
+  const totalPlanned = useMemo(() => 
+    yearCategories.reduce((sum, cat) => sum + cat.plannedAmount, 0)
+  , [yearCategories]);
+
+  const totalSpent = useMemo(() => {
+    return yearCategories.reduce((sum, cat) => {
+      const categoryExpenses = expenses.filter((exp) => exp.categoryId === cat.id);
+      return sum + categoryExpenses.reduce((expSum, exp) => expSum + exp.amount, 0);
+    }, 0);
+  }, [yearCategories, expenses]);
+
+  const totalUtilization = useMemo(() => 
+    totalPlanned > 0 ? Math.round((totalSpent / totalPlanned) * 100) : 0
+  , [totalPlanned, totalSpent]);
+
   const totalRemaining = totalPlanned - totalSpent;
 
-  const yearCategories = categories.filter(c => c.year === year && c.status === 'active');
-  const yearExpenses = expenses.filter(exp => {
-    const category = categories.find(c => c.id === exp.categoryId);
-    return category && category.year === year;
-  });
+  const yearExpenses = useMemo(() => {
+    return expenses.filter(exp => {
+      const category = categories.find(c => c.id === exp.categoryId);
+      return category && category.year === year;
+    });
+  }, [expenses, categories, year]);
 
   const currentMonth = new Date().getMonth();
   const monthsPassed = currentMonth + 1;

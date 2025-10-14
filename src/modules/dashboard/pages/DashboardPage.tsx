@@ -47,7 +47,7 @@ const DashboardPage = memo(function DashboardPage() {
   }
   
   const { objects, organizations: catalogOrganizations } = useCatalogStore();
-  const { tasks, getTaskStats, getOverdueTasks } = useTaskStore();
+  const tasks = useTaskStore((state) => state.tasks);
   const { incidents } = useIncidentsStore();
   const personnel = useSettingsStore((state) => state.personnel);
   const competencies = useSettingsStore((state) => state.competencies);
@@ -55,8 +55,28 @@ const DashboardPage = memo(function DashboardPage() {
   const people = useSettingsStore((state) => state.people);
   const positions = useSettingsStore((state) => state.positions);
 
-  const taskStats = getTaskStats();
-  const overdueTasks = getOverdueTasks();
+  const taskStats = useMemo(() => {
+    const now = new Date();
+    return {
+      total: tasks.length,
+      open: tasks.filter((t) => t.status === 'open').length,
+      inProgress: tasks.filter((t) => t.status === 'in_progress').length,
+      completed: tasks.filter((t) => t.status === 'completed').length,
+      overdue: tasks.filter(
+        (t) => t.status !== 'completed' && t.status !== 'cancelled' && t.dueDate && new Date(t.dueDate) < now
+      ).length,
+      critical: tasks.filter((t) => t.priority === 'critical' && t.status !== 'completed').length
+    };
+  }, [tasks]);
+  
+  const overdueTasks = useMemo(() => {
+    const now = new Date();
+    return tasks.filter((task) => {
+      if (task.status === 'completed' || task.status === 'cancelled') return false;
+      return task.dueDate && new Date(task.dueDate) < now;
+    });
+  }, [tasks]);
+  
   const openIncidents = incidents.filter(inc => inc.status === 'created');
   const inProgressIncidents = incidents.filter(inc => inc.status === 'in_progress');
 

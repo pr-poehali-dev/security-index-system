@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Card, CardContent } from '@/components/ui/card';
@@ -27,12 +27,15 @@ interface PeopleDirectoryTabProps {
 
 export default function PeopleDirectoryTab({ onAdd, onEdit, onDelete }: PeopleDirectoryTabProps) {
   const user = useAuthStore((state) => state.user);
-  const { getPeopleByTenant, importPeople } = useSettingsStore();
+  const allPeople = useSettingsStore((state) => state.people);
+  const importPeople = useSettingsStore((state) => state.importPeople);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const people = user?.tenantId ? getPeopleByTenant(user.tenantId) : [];
+  const people = useMemo(() => 
+    user?.tenantId ? allPeople.filter(p => p.tenantId === user.tenantId) : []
+  , [allPeople, user?.tenantId]);
 
   const filteredPeople = people.filter((person) => {
     const fullName = `${person.lastName} ${person.firstName} ${person.middleName || ''}`.toLowerCase();

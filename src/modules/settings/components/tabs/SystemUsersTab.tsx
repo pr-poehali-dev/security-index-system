@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Card, CardContent } from '@/components/ui/card';
@@ -29,7 +29,11 @@ interface SystemUsersTabProps {
 
 export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersTabProps) {
   const user = useAuthStore((state) => state.user);
-  const { getSystemUsersByTenant, getPersonnelByTenant, organizations, people, positions } = useSettingsStore();
+  const allSystemUsers = useSettingsStore((state) => state.systemUsers);
+  const allPersonnel = useSettingsStore((state) => state.personnel);
+  const organizations = useSettingsStore((state) => state.organizations);
+  const people = useSettingsStore((state) => state.people);
+  const positions = useSettingsStore((state) => state.positions);
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -39,8 +43,13 @@ export default function SystemUsersTab({ onAdd, onEdit, onDelete }: SystemUsersT
     return (saved as 'table' | 'cards') || 'table';
   });
 
-  const systemUsers = getSystemUsersByTenant(user!.tenantId!);
-  const personnel = getPersonnelByTenant(user!.tenantId!);
+  const systemUsers = useMemo(() => 
+    user?.tenantId ? allSystemUsers.filter(u => u.tenantId === user.tenantId) : []
+  , [allSystemUsers, user?.tenantId]);
+  
+  const personnel = useMemo(() => 
+    user?.tenantId ? allPersonnel.filter(p => p.tenantId === user.tenantId) : []
+  , [allPersonnel, user?.tenantId]);
 
   const getPersonnelInfo = (personnelId?: string) => {
     if (!personnelId) return { name: '—', orgName: '' };

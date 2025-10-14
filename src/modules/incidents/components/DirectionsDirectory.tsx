@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useIncidentsStore } from '@/stores/incidentsStore';
 import { Card, CardContent } from '@/components/ui/card';
@@ -35,14 +35,19 @@ import type { IncidentDirection } from '@/types';
 
 export default function DirectionsDirectory() {
   const user = useAuthStore((state) => state.user);
-  const { getDirectionsByTenant, addDirection, updateDirection, deleteDirection } = useIncidentsStore();
+  const allDirections = useIncidentsStore((state) => state.directions);
+  const addDirection = useIncidentsStore((state) => state.addDirection);
+  const updateDirection = useIncidentsStore((state) => state.updateDirection);
+  const deleteDirection = useIncidentsStore((state) => state.deleteDirection);
   const { toast } = useToast();
   
   const [showDialog, setShowDialog] = useState(false);
   const [editingDirection, setEditingDirection] = useState<IncidentDirection | null>(null);
   const [formData, setFormData] = useState({ name: '', status: 'active' as const });
 
-  const directions = user?.tenantId ? getDirectionsByTenant(user.tenantId) : [];
+  const directions = useMemo(() => 
+    user?.tenantId ? allDirections.filter(d => d.tenantId === user.tenantId) : []
+  , [allDirections, user?.tenantId]);
 
   const handleSubmit = () => {
     if (!formData.name.trim() || !user?.tenantId) {
