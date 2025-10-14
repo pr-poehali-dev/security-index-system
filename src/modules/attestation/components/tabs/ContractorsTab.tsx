@@ -62,7 +62,7 @@ export default function ContractorsTab() {
         </TabsList>
 
         <TabsContent value="contractors" className="space-y-4 mt-4">
-          <ContractorsList />
+          <ContractorsList filterByType="training_center" />
         </TabsContent>
 
         <TabsContent value="employees" className="space-y-4 mt-4">

@@ -21,11 +21,15 @@ import { ru } from 'date-fns/locale';
 
 type ViewMode = 'grid' | 'table';
 
-const ContractorsList = () => {
+interface ContractorsListProps {
+  filterByType?: ContractorType;
+}
+
+const ContractorsList = ({ filterByType }: ContractorsListProps = {}) => {
   const { contractors, loading, fetchContractors, deleteContractor } = useContractorsStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ContractorStatus | 'all'>('all');
-  const [typeFilter, setTypeFilter] = useState<ContractorType | 'all'>('all');
+  const [typeFilter, setTypeFilter] = useState<ContractorType | 'all'>(filterByType || 'all');
   const [selectedContractor, setSelectedContractor] = useState<Contractor | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'cards' | 'table'>(() => {
@@ -149,33 +153,36 @@ const ContractorsList = () => {
           />
         </div>
         
-        <div className="flex items-center gap-4">
-          <div className="flex gap-2">
-            <span className="text-sm text-muted-foreground self-center">Тип:</span>
-            <Button
-              variant={typeFilter === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setTypeFilter('all')}
-            >
-              Все
-            </Button>
-            <Button
-              variant={typeFilter === 'contractor' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setTypeFilter('contractor')}
-            >
-              <Icon name="Briefcase" size={14} className="mr-1" />
-              Подрядчики
-            </Button>
-            <Button
-              variant={typeFilter === 'training_center' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setTypeFilter('training_center')}
-            >
-              <Icon name="GraduationCap" size={14} className="mr-1" />
-              Учебные центры
-            </Button>
+        {!filterByType && (
+          <div className="flex items-center gap-4">
+            <div className="flex gap-2">
+              <span className="text-sm text-muted-foreground self-center">Тип:</span>
+              <Button
+                variant={typeFilter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setTypeFilter('all')}
+              >
+                Все
+              </Button>
+              <Button
+                variant={typeFilter === 'contractor' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setTypeFilter('contractor')}
+              >
+                <Icon name="Briefcase" size={14} className="mr-1" />
+                Подрядчики
+              </Button>
+              <Button
+                variant={typeFilter === 'training_center' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setTypeFilter('training_center')}
+              >
+                <Icon name="GraduationCap" size={14} className="mr-1" />
+                Учебные центры
+              </Button>
+            </div>
           </div>
+        )}
           
           <div className="flex gap-2">
             <span className="text-sm text-muted-foreground self-center">Статус:</span>
