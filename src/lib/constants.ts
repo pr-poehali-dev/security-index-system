@@ -63,6 +63,11 @@ export const MODULES: Record<ModuleType, { name: string; description: string; ic
     description: 'Документация, инструкции и нормативные материалы',
     icon: 'BookMarked'
   },
+  audit: {
+    name: 'Аудит ПБ',
+    description: 'Планирование и проведение аудитов промышленной безопасности',
+    icon: 'ClipboardCheck'
+  },
   settings: {
     name: 'Настройки',
     description: 'Управление организациями, персоналом и компетенциями',
@@ -83,6 +88,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, ModuleType[]> = {
     'maintenance',
     'budget',
     'knowledge-base',
+    'audit',
     'settings'
   ],
   TenantAdmin: [
@@ -96,9 +102,10 @@ export const ROLE_PERMISSIONS: Record<UserRole, ModuleType[]> = {
     'maintenance',
     'budget',
     'knowledge-base',
+    'audit',
     'settings'
   ],
-  Auditor: ['attestation', 'catalog', 'contractors', 'incidents', 'checklists', 'examination', 'knowledge-base'],
+  Auditor: ['attestation', 'catalog', 'contractors', 'incidents', 'checklists', 'examination', 'audit', 'knowledge-base'],
   Manager: ['attestation', 'catalog', 'contractors', 'tasks', 'maintenance', 'knowledge-base'],
   Director: ['attestation', 'incidents', 'budget', 'knowledge-base'],
   TrainingCenterManager: ['training-center', 'knowledge-base']
@@ -130,6 +137,7 @@ export const ROUTES = {
   BUDGET: '/budget',
   TRAINING_CENTER: '/training-center',
   KNOWLEDGE_BASE: '/knowledge-base',
+  AUDIT: '/audit',
   NOTIFICATIONS: '/notifications',
   CREATE_NOTIFICATION: '/notifications/create',
   NOTIFICATIONS_HISTORY: '/notifications/history'

@@ -19,6 +19,7 @@ const MODULE_ROUTES: Record<ModuleType, string> = {
   tenants: ROUTES.TENANTS,
   attestation: ROUTES.ATTESTATION,
   catalog: ROUTES.CATALOG,
+  contractors: ROUTES.CONTRACTORS,
   incidents: ROUTES.INCIDENTS,
   checklists: ROUTES.CHECKLISTS,
   tasks: ROUTES.TASKS,
@@ -27,6 +28,7 @@ const MODULE_ROUTES: Record<ModuleType, string> = {
   budget: ROUTES.BUDGET,
   'training-center': ROUTES.TRAINING_CENTER,
   'knowledge-base': ROUTES.KNOWLEDGE_BASE,
+  audit: ROUTES.AUDIT,
   settings: ROUTES.SETTINGS
 };
 

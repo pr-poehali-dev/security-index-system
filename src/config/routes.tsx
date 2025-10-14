@@ -18,4 +18,5 @@ export const MaintenancePage = lazy(() => import("@/modules/maintenance").then(m
 export const BudgetPage = lazy(() => import("@/modules/budget").then(m => ({ default: m.BudgetPage })));
 export const TrainingCenterPage = lazy(() => import("@/modules/training-center/pages/TrainingCenterPage"));
 export const KnowledgeBasePage = lazy(() => import("@/modules/knowledge-base").then(m => ({ default: m.KnowledgeBasePage })));
+export const AuditPage = lazy(() => import("@/modules/audit").then(m => ({ default: m.AuditPage })));
 export const NotFoundPage = lazy(() => import("@/modules/common").then(m => ({ default: m.NotFoundPage })));

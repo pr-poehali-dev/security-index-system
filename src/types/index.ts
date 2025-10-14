@@ -15,6 +15,7 @@ export type ModuleType =
   | 'budget'
   | 'training-center'
   | 'knowledge-base'
+  | 'audit'
   | 'settings';
 
 export interface User {

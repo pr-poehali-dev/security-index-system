@@ -21,6 +21,7 @@ import {
   BudgetPage,
   TrainingCenterPage,
   KnowledgeBasePage,
+  AuditPage,
   NotFoundPage
 } from '@/config/routes';
 
@@ -178,6 +179,17 @@ export default function AppRoutes() {
           <ProtectedRoute>
             <AuthenticatedLayout>
               <KnowledgeBasePage />
+            </AuthenticatedLayout>
+          </ProtectedRoute>
+        }
+      />
+      
+      <Route
+        path={ROUTES.AUDIT}
+        element={
+          <ProtectedRoute>
+            <AuthenticatedLayout>
+              <AuditPage />
             </AuthenticatedLayout>
           </ProtectedRoute>
         }
