@@ -1,30 +1,28 @@
-// src/modules/catalog/pages/ContractorsPage.tsx
-// Описание: Страница управления подрядчиками, их сотрудниками и доступами
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
-import ContractorsList from '../components/contractors/ContractorsList';
-import EmployeesListFull from '../components/contractors/EmployeesListFull';
-import ObjectAccessManagement from '../components/contractors/ObjectAccessManagement';
-import ContractorFormDialog from '../components/contractors/ContractorFormDialog';
-import EmployeeFormDialog from '../components/contractors/EmployeeFormDialog';
+import ContractorsList from '../contractors/ContractorsList';
+import EmployeesListFull from '../contractors/EmployeesListFull';
+import ObjectAccessManagement from '../contractors/ObjectAccessManagement';
+import ContractorFormDialog from '../contractors/ContractorFormDialog';
+import EmployeeFormDialog from '../contractors/EmployeeFormDialog';
 
-const ContractorsPage = () => {
-  const [activeTab, setActiveTab] = useState('contractors');
+export default function ContractorsTab() {
+  const [activeSubTab, setActiveSubTab] = useState('contractors');
   const [isContractorDialogOpen, setIsContractorDialogOpen] = useState(false);
   const [isEmployeeDialogOpen, setIsEmployeeDialogOpen] = useState(false);
 
   const handleCreateClick = () => {
-    if (activeTab === 'contractors') {
+    if (activeSubTab === 'contractors') {
       setIsContractorDialogOpen(true);
-    } else if (activeTab === 'employees') {
+    } else if (activeSubTab === 'employees') {
       setIsEmployeeDialogOpen(true);
     }
   };
 
   const getCreateButtonText = () => {
-    switch (activeTab) {
+    switch (activeSubTab) {
       case 'contractors':
         return 'Добавить подрядчика';
       case 'employees':
@@ -37,7 +35,7 @@ const ContractorsPage = () => {
   };
 
   const getCreateButtonIcon = () => {
-    switch (activeTab) {
+    switch (activeSubTab) {
       case 'contractors':
         return 'Building2';
       case 'employees':
@@ -50,10 +48,10 @@ const ContractorsPage = () => {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Управление подрядчиками</h1>
+          <h2 className="text-2xl font-bold">Подрядчики на объектах</h2>
           <p className="text-muted-foreground mt-1">
             Реестр подрядных организаций, персонала и контроль доступа к объектам
           </p>
@@ -64,19 +62,19 @@ const ContractorsPage = () => {
         </Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
-          <TabsTrigger value="contractors" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="Building2" size={20} />
-            <span className="text-xs font-medium">Организации</span>
+      <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
+        <TabsList>
+          <TabsTrigger value="contractors" className="gap-2">
+            <Icon name="Building2" size={16} />
+            Организации
           </TabsTrigger>
-          <TabsTrigger value="employees" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="Users" size={20} />
-            <span className="text-xs font-medium">Персонал</span>
+          <TabsTrigger value="employees" className="gap-2">
+            <Icon name="Users" size={16} />
+            Персонал
           </TabsTrigger>
-          <TabsTrigger value="access" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="ShieldCheck" size={20} />
-            <span className="text-xs font-medium text-center leading-tight">Доступ<br/>к объектам</span>
+          <TabsTrigger value="access" className="gap-2">
+            <Icon name="ShieldCheck" size={16} />
+            Доступ к объектам
           </TabsTrigger>
         </TabsList>
 
@@ -104,6 +102,4 @@ const ContractorsPage = () => {
       />
     </div>
   );
-};
-
-export default ContractorsPage;
+}

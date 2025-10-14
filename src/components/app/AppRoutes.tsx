@@ -8,7 +8,6 @@ import {
   TenantsPage,
   SettingsPage,
   CatalogPage,
-  ContractorsPage,
   IncidentsPage,
   ChecklistsPage,
   AttestationPage,
@@ -69,17 +68,6 @@ export default function AppRoutes() {
           <ProtectedRoute>
             <AuthenticatedLayout>
               <CatalogPage />
-            </AuthenticatedLayout>
-          </ProtectedRoute>
-        }
-      />
-      
-      <Route
-        path={ROUTES.CONTRACTORS}
-        element={
-          <ProtectedRoute>
-            <AuthenticatedLayout>
-              <ContractorsPage />
             </AuthenticatedLayout>
           </ProtectedRoute>
         }
