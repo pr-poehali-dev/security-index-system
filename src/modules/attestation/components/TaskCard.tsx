@@ -4,6 +4,12 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/components/ui/icon';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   getTaskTypeLabel,
   getTaskTypeIcon,
   getPriorityColor,
@@ -36,6 +42,7 @@ interface TaskCardProps {
   onSelect: (checked: boolean) => void;
   onStatusChange: (newStatus: 'pending' | 'in_progress' | 'completed') => void;
   onViewDetails: () => void;
+  onGenerateOrder?: (orderType: string) => void;
 }
 
 export default function TaskCard({
@@ -43,7 +50,8 @@ export default function TaskCard({
   isSelected,
   onSelect,
   onStatusChange,
-  onViewDetails
+  onViewDetails,
+  onGenerateOrder
 }: TaskCardProps) {
   return (
     <Card
@@ -153,6 +161,52 @@ export default function TaskCard({
                   <Icon name="RotateCcw" size={14} />
                   Вернуть в работу
                 </Button>
+              )}
+              {onGenerateOrder && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={(e) => e.stopPropagation()}
+                      className="gap-2"
+                    >
+                      <Icon name="FileText" size={14} />
+                      Сформировать приказ
+                      <Icon name="ChevronDown" size={12} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[320px]">
+                    <DropdownMenuItem onClick={(e) => {
+                      e.stopPropagation();
+                      onGenerateOrder('sdo');
+                    }}>
+                      <Icon name="Monitor" size={16} className="mr-2" />
+                      О подготовке в СДО Интеллектуальная система
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => {
+                      e.stopPropagation();
+                      onGenerateOrder('training_center');
+                    }}>
+                      <Icon name="School" size={16} className="mr-2" />
+                      О подготовке в учебный центр
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => {
+                      e.stopPropagation();
+                      onGenerateOrder('internal_attestation');
+                    }}>
+                      <Icon name="ClipboardCheck" size={16} className="mr-2" />
+                      О аттестации в ЕПТ организации
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => {
+                      e.stopPropagation();
+                      onGenerateOrder('rostechnadzor');
+                    }}>
+                      <Icon name="Building2" size={16} className="mr-2" />
+                      О направлении на аттестацию в Ростехнадзор
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
               <Button
                 variant="ghost"

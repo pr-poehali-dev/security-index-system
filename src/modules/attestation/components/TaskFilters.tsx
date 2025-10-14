@@ -7,6 +7,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface TaskFiltersProps {
   filterStatus: string;
@@ -19,6 +25,7 @@ interface TaskFiltersProps {
   selectedTasksCount: number;
   onBulkInProgress: () => void;
   onBulkCompleted: () => void;
+  onBulkGenerateOrder?: (orderType: string) => void;
 }
 
 export default function TaskFilters({
@@ -31,7 +38,8 @@ export default function TaskFilters({
   departments,
   selectedTasksCount,
   onBulkInProgress,
-  onBulkCompleted
+  onBulkCompleted,
+  onBulkGenerateOrder
 }: TaskFiltersProps) {
   return (
     <div className="space-y-4">
@@ -101,6 +109,39 @@ export default function TaskFilters({
               <Icon name="CheckCircle2" size={14} />
               Отметить выполненными
             </Button>
+            {onBulkGenerateOrder && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <Icon name="FileText" size={14} />
+                    Сформировать приказ
+                    <Icon name="ChevronDown" size={12} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[320px]">
+                  <DropdownMenuItem onClick={() => onBulkGenerateOrder('sdo')}>
+                    <Icon name="Monitor" size={16} className="mr-2" />
+                    О подготовке в СДО Интеллектуальная система
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onBulkGenerateOrder('training_center')}>
+                    <Icon name="School" size={16} className="mr-2" />
+                    О подготовке в учебный центр
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onBulkGenerateOrder('internal_attestation')}>
+                    <Icon name="ClipboardCheck" size={16} className="mr-2" />
+                    О аттестации в ЕПТ организации
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onBulkGenerateOrder('rostechnadzor')}>
+                    <Icon name="Building2" size={16} className="mr-2" />
+                    О направлении на аттестацию в Ростехнадзор
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       )}

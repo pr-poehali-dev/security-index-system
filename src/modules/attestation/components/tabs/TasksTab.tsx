@@ -13,6 +13,7 @@ import TaskFilters from '../TaskFilters';
 import TaskCard from '../TaskCard';
 import TaskDetailsDialog from '../TaskDetailsDialog';
 import PriorityStatistics from '../PriorityStatistics';
+import MassActionDialog from '../orders/MassActionDialog';
 import { getStatusLabel } from '../../utils/taskUtils';
 import type { Task } from '../../types/task';
 
@@ -28,6 +29,8 @@ export default function TasksTab() {
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskStatuses, setTaskStatuses] = useState<Record<string, { status: 'pending' | 'in_progress' | 'completed', completedAt?: string }>>({});
+  const [showMassActionDialog, setShowMassActionDialog] = useState(false);
+  const [massActionType, setMassActionType] = useState<string>('');
 
   const tasks = useMemo(() => {
     const result: Task[] = [];
@@ -210,6 +213,54 @@ export default function TasksTab() {
     }
   };
 
+  const handleGenerateOrder = (taskId: string, orderType: string) => {
+    const task = tasksWithStatuses.find(t => t.id === taskId);
+    if (!task) return;
+
+    setSelectedTasks(new Set([taskId]));
+    setMassActionType(orderType);
+    setShowMassActionDialog(true);
+  };
+
+  const handleBulkGenerateOrder = (orderType: string) => {
+    setMassActionType(orderType);
+    setShowMassActionDialog(true);
+  };
+
+  const getSelectedEmployees = () => {
+    const uniqueEmployees = new Map<string, any>();
+    
+    tasksWithStatuses
+      .filter(task => selectedTasks.has(task.id))
+      .forEach(task => {
+        if (!uniqueEmployees.has(task.employeeId)) {
+          const employeeCerts = certifications.filter(c => c.personnelId === task.employeeId);
+          
+          uniqueEmployees.set(task.employeeId, {
+            id: task.employeeId,
+            name: task.employeeName,
+            position: task.employeePosition,
+            department: task.department,
+            organization: user?.tenantId || '',
+            certifications: employeeCerts.map(cert => {
+              const { status, daysLeft } = getCertificationStatus(cert.expiryDate);
+              return {
+                id: cert.id,
+                category: cert.category,
+                area: cert.area,
+                issueDate: cert.issueDate,
+                expiryDate: cert.expiryDate,
+                status,
+                daysLeft
+              };
+            })
+          });
+        }
+      });
+    
+    return Array.from(uniqueEmployees.values());
+  };
+
   return (
     <div className="space-y-6">
       <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-900">
@@ -224,7 +275,7 @@ export default function TasksTab() {
               </h3>
               <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
                 Система автоматически создаёт задачи-напоминания о необходимости продления аттестаций сотрудников. 
-                Вы не упустите ни одного срока!
+                Вы не упустите ни одного срока! Для каждой задачи можно сформировать приказ на обучение или аттестацию.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="flex items-start gap-2 text-sm">
@@ -295,6 +346,7 @@ export default function TasksTab() {
               selectedTasksCount={selectedTasks.size}
               onBulkInProgress={() => handleBulkStatusChange('in_progress')}
               onBulkCompleted={() => handleBulkStatusChange('completed')}
+              onBulkGenerateOrder={handleBulkGenerateOrder}
             />
 
             <div className="space-y-2">
@@ -335,6 +387,7 @@ export default function TasksTab() {
                     onSelect={(checked) => handleSelectTask(task.id, checked)}
                     onStatusChange={(newStatus) => handleTaskStatusChange(task.id, newStatus)}
                     onViewDetails={() => setSelectedTask(task)}
+                    onGenerateOrder={(orderType) => handleGenerateOrder(task.id, orderType)}
                   />
                 ))
               )}
@@ -349,6 +402,13 @@ export default function TasksTab() {
         task={selectedTask}
         open={selectedTask !== null}
         onClose={() => setSelectedTask(null)}
+      />
+
+      <MassActionDialog
+        open={showMassActionDialog}
+        onOpenChange={setShowMassActionDialog}
+        actionType={massActionType}
+        employees={getSelectedEmployees()}
       />
     </div>
   );
