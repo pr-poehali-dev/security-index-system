@@ -31,6 +31,7 @@ interface DocumentFormDialogProps {
   onOpenChange: (open: boolean) => void;
   document?: KnowledgeDocument;
   mode: 'create' | 'edit';
+  initialCategory?: DocumentCategory;
 }
 
 export default function DocumentFormDialog({
@@ -38,6 +39,7 @@ export default function DocumentFormDialog({
   onOpenChange,
   document,
   mode,
+  initialCategory,
 }: DocumentFormDialogProps) {
   const { addDocument, updateDocument } = useKnowledgeBaseStore();
   const user = useAuthStore((state) => state.user);
@@ -80,11 +82,14 @@ export default function DocumentFormDialog({
       setAuthority(document.authority || '');
     } else {
       handleReset();
+      if (initialCategory && mode === 'create') {
+        setCategory(initialCategory);
+      }
     }
-  }, [document, mode, open]);
+  }, [document, mode, open, initialCategory]);
 
   const handleReset = () => {
-    setCategory('user_guide');
+    setCategory(initialCategory || 'user_guide');
     setTitle('');
     setDescription('');
     setContent('');

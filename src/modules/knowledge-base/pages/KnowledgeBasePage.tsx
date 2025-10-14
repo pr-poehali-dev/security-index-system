@@ -224,6 +224,7 @@ export default function KnowledgeBasePage() {
         onOpenChange={setFormOpen}
         document={selectedDocument || undefined}
         mode={formMode}
+        initialCategory={activeTab}
       />
 
       <DocumentViewDialog
