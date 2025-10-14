@@ -200,7 +200,7 @@ const DashboardPage = memo(function DashboardPage() {
       .map(obj => {
         const dueDate = new Date(obj.nextExpertiseDate!);
         const daysLeft = Math.floor((dueDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-        const organization = organizations.find(org => org.id === obj.organizationId);
+        const organization = catalogOrganizations.find(org => org.id === obj.organizationId);
         
         return {
           id: obj.id,
@@ -214,7 +214,7 @@ const DashboardPage = memo(function DashboardPage() {
       .filter(item => item.daysLeft >= -30 && item.daysLeft <= 90)
       .sort((a, b) => a.daysLeft - b.daysLeft)
       .slice(0, 5);
-  }, [objects, organizations]);
+  }, [objects, catalogOrganizations]);
 
   const criticalTasks = useMemo(() => {
     return tasks
