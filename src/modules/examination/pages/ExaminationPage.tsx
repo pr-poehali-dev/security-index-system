@@ -1,39 +1,36 @@
 // src/modules/examination/pages/ExaminationPage.tsx
 // Описание: Страница технической экспертизы - освидетельствования и заключения
-import { useState, useMemo } from 'react';
 import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
-import { SearchBar } from '@/components/ui/search-bar';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import CreateExaminationDialog from '../components/CreateExaminationDialog';
-import ExaminationDetailsDialog from '../components/ExaminationDetailsDialog';
-import UploadConclusionDialog from '../components/UploadConclusionDialog';
-import { useExaminationStore } from '@/stores/examinationStore';
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'scheduled': return 'bg-blue-100 text-blue-700';
-    case 'in_progress': return 'bg-amber-100 text-amber-700';
-    case 'completed': return 'bg-emerald-100 text-emerald-700';
-    case 'overdue': return 'bg-red-100 text-red-700';
-    default: return 'bg-gray-100 text-gray-700';
-  }
-};
 
-const getStatusLabel = (status: string) => {
-  const labels: Record<string, string> = {
-    scheduled: 'Запланировано',
-    in_progress: 'В процессе',
-    completed: 'Завершено',
-    overdue: 'Просрочено'
-  };
-  return labels[status] || status;
-};
 
 export default function ExaminationPage() {
+  return (
+    <div>
+      <PageHeader
+        title="Техническое диагностирование"
+        description="Модуль находится в разработке"
+      />
+      <Card className="mx-6 mt-6">
+        <CardContent className="flex flex-col items-center justify-center min-h-[400px] text-center">
+          <Icon name="Construction" size={64} className="text-muted-foreground mb-4" />
+          <h2 className="text-2xl font-semibold text-muted-foreground mb-2">
+            Модуль находится в разработке
+          </h2>
+          <p className="text-sm text-muted-foreground max-w-md">
+            Функционал технического диагностирования будет доступен в ближайшее время
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+/*
+// Старая версия - будет добавлена позже
+export default function ExaminationPageOld() {
   const { examinations, getStatistics } = useExaminationStore();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
