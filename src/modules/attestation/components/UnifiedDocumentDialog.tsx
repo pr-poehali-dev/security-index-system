@@ -330,6 +330,9 @@ export default function UnifiedDocumentDialog({
     selectedEmployees,
     isTrainingFlow,
     employees,
+    trainingDetails,
+    trainingOrganizations,
+    handleAddOrganization,
     toast,
   ]);
 
