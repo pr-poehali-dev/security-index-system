@@ -28,12 +28,15 @@ interface Task {
   department: string;
   category: string;
   area: string;
+  certificationId: string;
   expiryDate: string;
   daysLeft: number;
   createdAt: string;
   status: 'pending' | 'in_progress' | 'completed';
   assignedTo?: string;
   completedAt?: string;
+  hasActiveOrder?: boolean;
+  orderNumber?: string;
 }
 
 interface TaskCardProps {
@@ -89,6 +92,12 @@ export default function TaskCard({
                 <Badge variant={getStatusColor(task.status) as any}>
                   {getStatusLabel(task.status)}
                 </Badge>
+                {task.hasActiveOrder && (
+                  <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                    <Icon name="FileText" size={12} className="mr-1" />
+                    Приказ {task.orderNumber}
+                  </Badge>
+                )}
               </div>
             </div>
 
@@ -166,13 +175,14 @@ export default function TaskCard({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
-                      variant="default"
+                      variant={task.hasActiveOrder ? "outline" : "default"}
                       size="sm"
                       onClick={(e) => e.stopPropagation()}
                       className="gap-2"
+                      title={task.hasActiveOrder ? `Уже создан приказ ${task.orderNumber}` : undefined}
                     >
                       <Icon name="FileText" size={14} />
-                      Сформировать приказ
+                      {task.hasActiveOrder ? 'Создать ещё приказ' : 'Сформировать приказ'}
                       <Icon name="ChevronDown" size={12} />
                     </Button>
                   </DropdownMenuTrigger>

@@ -8,10 +8,13 @@ export interface Task {
   department: string;
   category: string;
   area: string;
+  certificationId: string;
   expiryDate: string;
   daysLeft: number;
   createdAt: string;
   status: 'pending' | 'in_progress' | 'completed';
   assignedTo?: string;
   completedAt?: string;
+  hasActiveOrder?: boolean;
+  orderNumber?: string;
 }

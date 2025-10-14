@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCertificationStore } from '@/stores/certificationStore';
+import { useOrdersStore } from '@/stores/ordersStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
 import TaskStatisticsCards from '../TaskStatisticsCards';
 import TaskFilters from '../TaskFilters';
@@ -22,10 +23,12 @@ export default function TasksTab() {
   const user = useAuthStore((state) => state.user);
   const { personnel, people, positions, departments: deptList } = useSettingsStore();
   const { certifications } = useCertificationStore();
+  const orders = useOrdersStore((state) => state.orders);
   
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [filterDepartment, setFilterDepartment] = useState<string>('all');
+  const [filterOrderStatus, setFilterOrderStatus] = useState<string>('all');
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskStatuses, setTaskStatuses] = useState<Record<string, { status: 'pending' | 'in_progress' | 'completed', completedAt?: string }>>({});
@@ -53,6 +56,17 @@ export default function TasksTab() {
           labor_safety: 'Охрана труда',
           ecology: 'Экология'
         };
+
+        // Проверка наличия активного приказа для этой сертификации
+        const activeOrder = orders.find(order => 
+          order.tenantId === user?.tenantId &&
+          order.status !== 'cancelled' && 
+          order.status !== 'completed' &&
+          order.certifications?.some(oc => 
+            oc.personnelId === p.id && 
+            oc.certificationId === cert.id
+          )
+        );
         
         if (daysLeft < 0) {
           result.push({
@@ -65,10 +79,13 @@ export default function TasksTab() {
             department: dept?.name || '—',
             category: categoryMap[cert.category] || cert.category,
             area: cert.area,
+            certificationId: cert.id,
             expiryDate: cert.expiryDate,
             daysLeft,
             createdAt: new Date(expiryDate.getTime() + 24 * 60 * 60 * 1000).toISOString(),
             status: 'pending',
+            hasActiveOrder: !!activeOrder,
+            orderNumber: activeOrder?.number
           });
         } else if (daysLeft <= 30) {
           result.push({
@@ -81,10 +98,13 @@ export default function TasksTab() {
             department: dept?.name || '—',
             category: categoryMap[cert.category] || cert.category,
             area: cert.area,
+            certificationId: cert.id,
             expiryDate: cert.expiryDate,
             daysLeft,
             createdAt: new Date(expiryDate.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(),
             status: 'pending',
+            hasActiveOrder: !!activeOrder,
+            orderNumber: activeOrder?.number
           });
         } else if (daysLeft <= 60) {
           result.push({
@@ -97,10 +117,13 @@ export default function TasksTab() {
             department: dept?.name || '—',
             category: categoryMap[cert.category] || cert.category,
             area: cert.area,
+            certificationId: cert.id,
             expiryDate: cert.expiryDate,
             daysLeft,
             createdAt: new Date(expiryDate.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString(),
             status: 'pending',
+            hasActiveOrder: !!activeOrder,
+            orderNumber: activeOrder?.number
           });
         } else if (daysLeft <= 90) {
           result.push({
@@ -113,17 +136,20 @@ export default function TasksTab() {
             department: dept?.name || '—',
             category: categoryMap[cert.category] || cert.category,
             area: cert.area,
+            certificationId: cert.id,
             expiryDate: cert.expiryDate,
             daysLeft,
             createdAt: new Date(expiryDate.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString(),
             status: 'pending',
+            hasActiveOrder: !!activeOrder,
+            orderNumber: activeOrder?.number
           });
         }
       });
     });
     
     return result.sort((a, b) => a.daysLeft - b.daysLeft);
-  }, [user?.tenantId, personnel, people, positions, deptList, certifications]);
+  }, [user?.tenantId, personnel, people, positions, deptList, certifications, orders]);
 
   const tasksWithStatuses = useMemo(() => {
     return tasks.map(task => ({
@@ -141,10 +167,13 @@ export default function TasksTab() {
     return tasksWithStatuses.filter(task => {
       const matchesStatus = filterStatus === 'all' || task.status === filterStatus;
       const matchesPriority = filterPriority === 'all' || task.priority === filterPriority;
+      const matchesOrderStatus = filterOrderStatus === 'all' || 
+        (filterOrderStatus === 'with_order' && task.hasActiveOrder) ||
+        (filterOrderStatus === 'without_order' && !task.hasActiveOrder);
       const matchesDepartment = filterDepartment === 'all' || task.department === filterDepartment;
-      return matchesStatus && matchesPriority && matchesDepartment;
+      return matchesStatus && matchesPriority && matchesDepartment && matchesOrderStatus;
     });
-  }, [tasksWithStatuses, filterStatus, filterPriority, filterDepartment]);
+  }, [tasksWithStatuses, filterStatus, filterPriority, filterDepartment, filterOrderStatus]);
 
   const statistics = useMemo(() => {
     return {
@@ -156,6 +185,8 @@ export default function TasksTab() {
       high: tasksWithStatuses.filter(t => t.priority === 'high').length,
       medium: tasksWithStatuses.filter(t => t.priority === 'medium').length,
       low: tasksWithStatuses.filter(t => t.priority === 'low').length,
+      withOrder: tasksWithStatuses.filter(t => t.hasActiveOrder).length,
+      withoutOrder: tasksWithStatuses.filter(t => !t.hasActiveOrder).length,
     };
   }, [tasksWithStatuses]);
 
@@ -322,6 +353,40 @@ export default function TasksTab() {
 
       <TaskStatisticsCards statistics={statistics} />
 
+      {(statistics.withOrder > 0 || statistics.withoutOrder > 0) && (
+        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border-blue-200 dark:border-blue-900">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-blue-600 text-white">
+                  <Icon name="FileText" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">Статус формирования приказов</h3>
+                  <p className="text-sm text-muted-foreground">Отслеживайте созданные приказы</p>
+                </div>
+              </div>
+              <div className="flex gap-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-600">{statistics.withOrder}</div>
+                  <p className="text-xs text-muted-foreground mt-1">С приказом</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-orange-600">{statistics.withoutOrder}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Без приказа</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600">
+                    {statistics.total > 0 ? Math.round((statistics.withOrder / statistics.total) * 100) : 0}%
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Покрытие</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -342,6 +407,8 @@ export default function TasksTab() {
               setFilterPriority={setFilterPriority}
               filterDepartment={filterDepartment}
               setFilterDepartment={setFilterDepartment}
+              filterOrderStatus={filterOrderStatus}
+              setFilterOrderStatus={setFilterOrderStatus}
               departments={departments}
               selectedTasksCount={selectedTasks.size}
               onBulkInProgress={() => handleBulkStatusChange('in_progress')}

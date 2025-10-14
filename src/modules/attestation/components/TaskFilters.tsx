@@ -21,6 +21,8 @@ interface TaskFiltersProps {
   setFilterPriority: (value: string) => void;
   filterDepartment: string;
   setFilterDepartment: (value: string) => void;
+  filterOrderStatus: string;
+  setFilterOrderStatus: (value: string) => void;
   departments: string[];
   selectedTasksCount: number;
   onBulkInProgress: () => void;
@@ -35,6 +37,8 @@ export default function TaskFilters({
   setFilterPriority,
   filterDepartment,
   setFilterDepartment,
+  filterOrderStatus,
+  setFilterOrderStatus,
   departments,
   selectedTasksCount,
   onBulkInProgress,
@@ -78,6 +82,17 @@ export default function TaskFilters({
             {departments.map(dep => (
               <SelectItem key={dep} value={dep}>{dep}</SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={filterOrderStatus} onValueChange={setFilterOrderStatus}>
+          <SelectTrigger className="w-full sm:w-[200px]">
+            <SelectValue placeholder="Наличие приказа" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Все задачи</SelectItem>
+            <SelectItem value="with_order">С приказом</SelectItem>
+            <SelectItem value="without_order">Без приказа</SelectItem>
           </SelectContent>
         </Select>
       </div>

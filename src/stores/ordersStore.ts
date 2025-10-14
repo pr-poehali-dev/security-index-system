@@ -3,6 +3,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export interface OrderCertification {
+  personnelId: string;
+  certificationId: string;
+  category: string;
+  area: string;
+}
+
 export interface Order {
   id: string;
   tenantId: string;
@@ -11,6 +18,7 @@ export interface Order {
   type: 'attestation' | 'training' | 'suspension' | 'lms' | 'internal';
   title: string;
   employeeIds: string[];
+  certifications?: OrderCertification[];
   status: 'draft' | 'prepared' | 'approved' | 'active' | 'completed' | 'cancelled';
   createdBy: string;
   description?: string;

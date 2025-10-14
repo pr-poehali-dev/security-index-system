@@ -22,6 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useOrdersStore } from '@/stores/ordersStore';
+import { useAuthStore } from '@/stores/authStore';
+import { useToast } from '@/hooks/use-toast';
 
 interface Certification {
   id: string;
@@ -61,6 +64,9 @@ export default function MassActionDialog({
   actionType,
   employees,
 }: MassActionDialogProps) {
+  const { toast } = useToast();
+  const user = useAuthStore((state) => state.user);
+  const addOrder = useOrdersStore((state) => state.addOrder);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -214,24 +220,72 @@ export default function MassActionDialog({
   };
 
   const handleSubmit = () => {
-    const result: Array<{ employeeId: string; employeeName: string; areas: string[] }> = [];
+    if (!user?.tenantId) return;
+
+    const selectedEmployeeIds: string[] = [];
+    const orderCertifications: Array<{ personnelId: string; certificationId: string; category: string; area: string }> = [];
     
     employeeSelections.forEach((areas, employeeId) => {
       const employee = employees.find(e => e.id === employeeId);
       if (employee && areas.size > 0) {
-        const selectedAreas = employee.certifications
-          .filter(cert => areas.has(cert.id))
-          .map(cert => cert.area);
+        selectedEmployeeIds.push(employeeId);
         
-        result.push({
-          employeeId,
-          employeeName: employee.name,
-          areas: selectedAreas,
-        });
+        employee.certifications
+          .filter(cert => areas.has(cert.id))
+          .forEach(cert => {
+            orderCertifications.push({
+              personnelId: employeeId,
+              certificationId: cert.id,
+              category: cert.category,
+              area: cert.area
+            });
+          });
       }
     });
 
-    console.log(`Массовое действие "${actionType}":`, result);
+    if (selectedEmployeeIds.length === 0) {
+      toast({
+        title: 'Ошибка',
+        description: 'Выберите сотрудников и области аттестации',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const orderTitles: Record<string, string> = {
+      'sdo': 'О подготовке в СДО Интеллектуальная система',
+      'training_center': 'О подготовке в учебный центр',
+      'internal_attestation': 'О аттестации в ЕПТ организации',
+      'rostechnadzor': 'О направлении на аттестацию в Ростехнадзор'
+    };
+
+    const orderTypes: Record<string, 'lms' | 'training' | 'internal' | 'attestation'> = {
+      'sdo': 'lms',
+      'training_center': 'training',
+      'internal_attestation': 'internal',
+      'rostechnadzor': 'attestation'
+    };
+
+    const orderNumber = `№${Date.now().toString().slice(-4)}-${actionType.toUpperCase().slice(0, 3)}`;
+
+    addOrder({
+      tenantId: user.tenantId,
+      number: orderNumber,
+      date: new Date().toISOString(),
+      type: orderTypes[actionType] || 'training',
+      title: orderTitles[actionType] || 'Приказ',
+      employeeIds: selectedEmployeeIds,
+      certifications: orderCertifications,
+      status: 'draft',
+      createdBy: user.name || 'Пользователь',
+      description: `Создан из контроля сроков. Областей аттестации: ${orderCertifications.length}, сотрудников: ${selectedEmployeeIds.length}`
+    });
+
+    toast({
+      title: 'Приказ создан',
+      description: `${orderNumber} - ${orderTitles[actionType]}. Сотрудников: ${selectedEmployeeIds.length}`,
+    });
+
     handleClose();
   };
 
