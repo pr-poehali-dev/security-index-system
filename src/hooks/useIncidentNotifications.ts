@@ -1,17 +1,19 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useIncidentsStore } from '@/stores/incidentsStore';
 import { useNotificationsStore } from '@/stores/notificationsStore';
 import { useAuthStore } from '@/stores/authStore';
 
 export function useIncidentNotifications() {
   const user = useAuthStore((state) => state.user);
-  const { getIncidentsByTenant } = useIncidentsStore();
+  const allIncidents = useIncidentsStore((state) => state.incidents);
   const { addNotification, notifications } = useNotificationsStore();
+
+  const incidents = useMemo(() => 
+    user?.tenantId ? allIncidents.filter(inc => inc.tenantId === user.tenantId) : []
+  , [allIncidents, user?.tenantId]);
 
   useEffect(() => {
     if (!user?.tenantId) return;
-
-    const incidents = getIncidentsByTenant(user.tenantId);
     
     const overdue = incidents.filter(inc => inc.status === 'overdue');
     const urgent = incidents.filter(inc => 
@@ -55,5 +57,5 @@ export function useIncidentNotifications() {
         isRead: false,
       });
     });
-  }, [user?.tenantId, user?.id, getIncidentsByTenant, addNotification]);
+  }, [incidents, user?.tenantId, user?.id, addNotification, notifications]);
 }
