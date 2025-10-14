@@ -33,13 +33,27 @@ interface CreateOrderDialogProps {
 }
 
 const orderTypes = [
-  { value: 'attestation', label: 'Аттестация', icon: 'Award', color: 'text-blue-600 bg-blue-100' },
-  { value: 'training', label: 'Обучение', icon: 'GraduationCap', color: 'text-purple-600 bg-purple-100' },
-  { value: 'suspension', label: 'Отстранение', icon: 'Ban', color: 'text-red-600 bg-red-100' },
-  { value: 'sdo', label: 'СДО', icon: 'Monitor', color: 'text-cyan-600 bg-cyan-100' },
-  { value: 'training_center', label: 'Учебный центр', icon: 'Building2', color: 'text-violet-600 bg-violet-100' },
-  { value: 'internal_attestation', label: 'ЕПТ организации', icon: 'ClipboardCheck', color: 'text-indigo-600 bg-indigo-100' },
-  { value: 'rostechnadzor', label: 'Ростехнадзор', icon: 'Shield', color: 'text-emerald-600 bg-emerald-100' },
+  { 
+    value: 'attestation', 
+    label: 'Аттестация', 
+    icon: 'Award', 
+    color: 'text-blue-600 bg-blue-100',
+    description: 'Проведение аттестации сотрудников по требованиям' 
+  },
+  { 
+    value: 'training', 
+    label: 'Обучение', 
+    icon: 'GraduationCap', 
+    color: 'text-purple-600 bg-purple-100',
+    description: 'Направление сотрудников на обучение' 
+  },
+  { 
+    value: 'suspension', 
+    label: 'Отстранение', 
+    icon: 'Ban', 
+    color: 'text-red-600 bg-red-100',
+    description: 'Временное отстранение сотрудников от работы' 
+  },
 ];
 
 
@@ -141,16 +155,8 @@ export default function CreateOrderDialog({ open, onOpenChange, initialOrderType
         return 'О направлении на обучение';
       case 'suspension':
         return 'Об отстранении от работы';
-      case 'sdo':
-        return 'О направлении на обучение в СДО';
-      case 'training_center':
-        return 'О направлении в учебный центр';
-      case 'internal_attestation':
-        return 'О проведении внутренней аттестации';
-      case 'rostechnadzor':
-        return 'О направлении на аттестацию в Ростехнадзор';
       default:
-        return '';
+        return 'О выполнении приказа';
     }
   };
 
@@ -177,11 +183,11 @@ export default function CreateOrderDialog({ open, onOpenChange, initialOrderType
               <div>
                 <Label>Выберите тип приказа</Label>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Тип приказа определяет его назначение и доступные действия
+                  После создания приказа вы сможете направить сотрудников в УЦ, СДО, Ростехнадзор или на внутреннюю аттестацию
                 </p>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 {orderTypes.map((type) => (
                   <button
                     key={type.value}
@@ -202,13 +208,7 @@ export default function CreateOrderDialog({ open, onOpenChange, initialOrderType
                       <div className="flex-1">
                         <div className="font-medium mb-1">{type.label}</div>
                         <div className="text-xs text-muted-foreground">
-                          {type.value === 'attestation' && 'Проведение аттестации по требованиям'}
-                          {type.value === 'training' && 'Направление на обучение в сторонние организации'}
-                          {type.value === 'suspension' && 'Временное отстранение от работы'}
-                          {type.value === 'sdo' && 'Обучение через систему дистанционного обучения'}
-                          {type.value === 'training_center' && 'Направление в аккредитованный учебный центр'}
-                          {type.value === 'internal_attestation' && 'Аттестация в единой платформе тестирования'}
-                          {type.value === 'rostechnadzor' && 'Регистрация и аттестация в Ростехнадзоре'}
+                          {type.description}
                         </div>
                       </div>
                       {orderType === type.value && (
