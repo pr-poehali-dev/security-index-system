@@ -4,8 +4,6 @@ import PageHeader from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 
-
-
 export default function ExaminationPage() {
   return (
     <div>
@@ -27,4 +25,3 @@ export default function ExaminationPage() {
     </div>
   );
 }
-
