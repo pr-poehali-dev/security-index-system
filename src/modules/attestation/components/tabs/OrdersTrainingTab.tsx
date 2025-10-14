@@ -1,12 +1,14 @@
-import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useState, useMemo } from 'react';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import CreateOrderDialog from '../CreateOrderDialog';
 import CreateTrainingDialog from '../CreateTrainingDialog';
 import SendToTrainingCenterDialog from '../SendToTrainingCenterDialog';
-import AttestationOrdersList from '../AttestationOrdersList';
 import { useAuthStore } from '@/stores/authStore';
 import { useOrdersStore } from '@/stores/ordersStore';
 import { useTrainingsAttestationStore } from '@/stores/trainingsAttestationStore';
@@ -15,10 +17,22 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { createOrderHandlers } from '../orders/orderHandlers';
 import { createTrainingHandlers } from '../orders/trainingHandlers';
 import { generateOrderAppendix, generateFullOrderReport } from '../../utils/orderExport';
-import OrdersTab from '../orders/OrdersTab';
-import TrainingsTab from '../orders/TrainingsTab';
 import type { Order } from '@/stores/ordersStore';
 import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
+
+type DocumentType = 'order' | 'attestation-order' | 'training';
+
+interface UnifiedDocument {
+  id: string;
+  type: DocumentType;
+  title: string;
+  number: string;
+  date: string;
+  status: string;
+  description?: string;
+  employeeCount: number;
+  data: any;
+}
 
 export default function OrdersTrainingTab() {
   const { toast } = useToast();
@@ -29,49 +43,18 @@ export default function OrdersTrainingTab() {
   const { personnel, people, positions, getContractorsByType } = useSettingsStore();
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [orderStatusFilter, setOrderStatusFilter] = useState<string>('all');
-  const [orderTypeFilter, setOrderTypeFilter] = useState<string>('all');
-  const [trainingStatusFilter, setTrainingStatusFilter] = useState<string>('all');
-  const [orderViewMode, setOrderViewMode] = useState<'cards' | 'table'>('cards');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [showCreateOrderDialog, setShowCreateOrderDialog] = useState(false);
   const [showCreateTrainingDialog, setShowCreateTrainingDialog] = useState(false);
   const [showSendToTCDialog, setShowSendToTCDialog] = useState(false);
   const [selectedOrderForTC, setSelectedOrderForTC] = useState<Order | null>(null);
-  const [trainingViewMode, setTrainingViewMode] = useState<'cards' | 'table'>('cards');
-  const [expandedTrainings, setExpandedTrainings] = useState<Set<string>>(new Set());
 
   const tenantOrders = user?.tenantId ? getOrdersByTenant(user.tenantId) : [];
   const tenantTrainings = user?.tenantId ? getTrainingsByTenant(user.tenantId) : [];
   const attestationOrders = user?.tenantId ? getAttestationOrders(user.tenantId) : [];
   const trainingOrgs = user?.tenantId ? getContractorsByType(user.tenantId, 'training_center') : [];
-
-  const toggleTrainingExpanded = (trainingId: string) => {
-    setExpandedTrainings((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(trainingId)) {
-        newSet.delete(trainingId);
-      } else {
-        newSet.add(trainingId);
-      }
-      return newSet;
-    });
-  };
-
-  const filteredOrders = tenantOrders.filter(order => {
-    const matchesSearch = order.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          order.number.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = orderStatusFilter === 'all' || order.status === orderStatusFilter;
-    const matchesType = orderTypeFilter === 'all' || order.type === orderTypeFilter;
-    return matchesSearch && matchesStatus && matchesType;
-  });
-
-  const filteredTrainings = tenantTrainings.filter(training => {
-    const org = trainingOrgs.find(o => o.id === training.organizationId);
-    const matchesSearch = training.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (org?.name || '').toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = trainingStatusFilter === 'all' || training.status === trainingStatusFilter;
-    return matchesSearch && matchesStatus;
-  });
 
   const orderHandlers = createOrderHandlers(
     orders,
@@ -84,286 +67,334 @@ export default function OrdersTrainingTab() {
 
   const trainingHandlers = createTrainingHandlers(trainings, toast);
 
-  const handleExportOrdersToExcel = async () => {
+  const unifiedDocuments = useMemo<UnifiedDocument[]>(() => {
+    const docs: UnifiedDocument[] = [];
+
+    tenantOrders.forEach(order => {
+      docs.push({
+        id: order.id,
+        type: 'order',
+        title: order.title,
+        number: order.number,
+        date: order.date,
+        status: order.status,
+        description: order.description,
+        employeeCount: order.employeeIds.length,
+        data: order
+      });
+    });
+
+    attestationOrders.forEach(order => {
+      docs.push({
+        id: order.id,
+        type: 'attestation-order',
+        title: `Приказ на аттестацию ${order.certificationAreaCode}`,
+        number: order.orderNumber,
+        date: order.orderDate,
+        status: order.status || 'draft',
+        description: order.certificationAreaName,
+        employeeCount: order.personnel.length,
+        data: order
+      });
+    });
+
+    tenantTrainings.forEach(training => {
+      const org = trainingOrgs.find(o => o.id === training.organizationId);
+      docs.push({
+        id: training.id,
+        type: 'training',
+        title: training.title,
+        number: `ОБ-${training.id.slice(0, 8)}`,
+        date: training.startDate,
+        status: training.status,
+        description: org?.name || '',
+        employeeCount: training.employeeIds.length,
+        data: training
+      });
+    });
+
+    return docs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [tenantOrders, attestationOrders, tenantTrainings, trainingOrgs]);
+
+  const filteredDocuments = useMemo(() => {
+    return unifiedDocuments.filter(doc => {
+      const matchesSearch = 
+        doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (doc.description?.toLowerCase() || '').includes(searchQuery.toLowerCase());
+      
+      const matchesType = typeFilter === 'all' || doc.type === typeFilter;
+      const matchesStatus = statusFilter === 'all' || doc.status === statusFilter;
+      
+      return matchesSearch && matchesType && matchesStatus;
+    });
+  }, [unifiedDocuments, searchQuery, typeFilter, statusFilter]);
+
+  const stats = useMemo(() => {
+    return {
+      total: unifiedDocuments.length,
+      orders: unifiedDocuments.filter(d => d.type === 'order').length,
+      attestationOrders: unifiedDocuments.filter(d => d.type === 'attestation-order').length,
+      trainings: unifiedDocuments.filter(d => d.type === 'training').length,
+    };
+  }, [unifiedDocuments]);
+
+  const getTypeLabel = (type: DocumentType) => {
+    switch (type) {
+      case 'order': return 'Приказ';
+      case 'attestation-order': return 'Приказ на аттестацию';
+      case 'training': return 'Обучение';
+    }
+  };
+
+  const getTypeColor = (type: DocumentType) => {
+    switch (type) {
+      case 'order': return 'bg-blue-100 text-blue-800';
+      case 'attestation-order': return 'bg-purple-100 text-purple-800';
+      case 'training': return 'bg-green-100 text-green-800';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      draft: 'Черновик',
+      prepared: 'Подготовлен',
+      approved: 'Согласован',
+      active: 'Активен',
+      completed: 'Выполнен',
+      planned: 'Запланировано',
+      in_progress: 'В процессе',
+      cancelled: 'Отменен'
+    };
+    return labels[status] || status;
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'draft': return 'bg-gray-100 text-gray-800';
+      case 'prepared': return 'bg-yellow-100 text-yellow-800';
+      case 'approved': return 'bg-green-100 text-green-800';
+      case 'active': return 'bg-blue-100 text-blue-800';
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'planned': return 'bg-orange-100 text-orange-800';
+      case 'in_progress': return 'bg-blue-100 text-blue-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const handleExportToExcel = async () => {
     const { utils, writeFile } = await import('xlsx');
     
-    const exportData = filteredOrders.map(order => ({
-      'Номер приказа': order.number,
-      'Дата': new Date(order.date).toLocaleDateString('ru'),
-      'Тип': order.type,
-      'Название': order.title,
-      'Статус': order.status,
-      'Количество сотрудников': order.employeeIds.length,
-      'Создал': order.createdBy,
-      'Описание': order.description || ''
+    const exportData = filteredDocuments.map(doc => ({
+      'Тип': getTypeLabel(doc.type),
+      'Номер': doc.number,
+      'Дата': new Date(doc.date).toLocaleDateString('ru'),
+      'Название': doc.title,
+      'Статус': getStatusLabel(doc.status),
+      'Количество сотрудников': doc.employeeCount,
+      'Описание': doc.description || ''
     }));
 
     const ws = utils.json_to_sheet(exportData);
     
     const colWidths = [
+      { wch: 20 },
       { wch: 15 },
       { wch: 12 },
-      { wch: 25 },
       { wch: 50 },
       { wch: 15 },
-      { wch: 20 },
-      { wch: 40 },
-      { wch: 25 },
+      { wch: 22 },
       { wch: 50 }
     ];
     ws['!cols'] = colWidths;
 
     const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, 'Приказы');
+    utils.book_append_sheet(wb, ws, 'Документы');
 
-    const fileName = `Приказы_${new Date().toLocaleDateString('ru')}.xlsx`;
+    const fileName = `Приказы_и_обучения_${new Date().toLocaleDateString('ru')}.xlsx`;
     writeFile(wb, fileName);
-  };
-
-  const handleExportTrainingsToExcel = async () => {
-    const { utils, writeFile } = await import('xlsx');
-    
-    const exportData = filteredTrainings.map(training => {
-      const org = trainingOrgs.find(o => o.id === training.organizationId);
-      return {
-        'Название': training.title,
-        'Тип': training.type,
-        'Организация': org?.name || '',
-        'Дата начала': new Date(training.startDate).toLocaleDateString('ru'),
-        'Дата окончания': new Date(training.endDate).toLocaleDateString('ru'),
-        'Длительность (дней)': Math.ceil((new Date(training.endDate).getTime() - new Date(training.startDate).getTime()) / (1000 * 60 * 60 * 24)),
-        'Статус': training.status,
-        'Количество сотрудников': training.employeeIds.length,
-        'Стоимость': training.cost,
-        'Стоимость на человека': Math.round(training.cost / training.employeeIds.length),
-        'Программа': training.program || ''
-      };
-    });
-
-    const ws = utils.json_to_sheet(exportData);
-    
-    const colWidths = [
-      { wch: 35 },
-      { wch: 25 },
-      { wch: 25 },
-      { wch: 15 },
-      { wch: 17 },
-      { wch: 18 },
-      { wch: 15 },
-      { wch: 22 },
-      { wch: 35 },
-      { wch: 12 },
-      { wch: 20 },
-      { wch: 50 },
-      { wch: 30 }
-    ];
-    ws['!cols'] = colWidths;
-
-    const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, 'Обучения');
-
-    const fileName = `Обучения_${new Date().toLocaleDateString('ru')}.xlsx`;
-    writeFile(wb, fileName);
-  };
-
-  const handleDownloadOrderAppendix = async (orderId: string) => {
-    const order = orders.find(o => o.id === orderId);
-    if (!order) return;
-
-    const tenantPersonnel = personnel.filter(p => p.tenantId === user?.tenantId);
-    const employees = tenantPersonnel.map(p => {
-      const info = getPersonnelFullInfo(p, people, positions);
-      return {
-        id: p.id,
-        name: info.fullName,
-        position: info.position,
-        department: '—',
-        organization: user?.tenantId || ''
-      };
-    });
-
-    try {
-      await generateOrderAppendix({ order, employees });
-      toast({
-        title: 'Приложение сформировано',
-        description: 'Файл Excel успешно скачан'
-      });
-    } catch (error) {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось сформировать приложение',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const handleDownloadFullReport = async (orderId: string) => {
-    const order = orders.find(o => o.id === orderId);
-    if (!order) return;
-
-    const tenantPersonnel = personnel.filter(p => p.tenantId === user?.tenantId);
-    const employees = tenantPersonnel.map(p => {
-      const info = getPersonnelFullInfo(p, people, positions);
-      return {
-        id: p.id,
-        name: info.fullName,
-        position: info.position,
-        department: '—',
-        organization: user?.tenantId || ''
-      };
-    });
-
-    try {
-      await generateFullOrderReport({ order, employees });
-      toast({
-        title: 'Отчёт сформирован',
-        description: 'Полный отчёт по приказу успешно скачан'
-      });
-    } catch (error) {
-      toast({
-        title: 'Ошибка',
-        description: 'Не удалось сформировать отчёт',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const getOrderActions = (order: Order) => {
-    const actions = [];
-
-    if (order.status === 'prepared') {
-      actions.push(
-        <Button key="approve" variant="outline" size="sm" className="gap-1" onClick={() => orderHandlers.handleChangeOrderStatus(order.id, 'approved')}>
-          <Icon name="CheckCircle2" size={14} />
-          Согласовать
-        </Button>
-      );
-    }
-
-    if (order.status === 'approved') {
-      actions.push(
-        <Button key="send-sdo" variant="outline" size="sm" className="gap-1" onClick={() => orderHandlers.handleSendToSDO(order.id)}>
-          <Icon name="Monitor" size={14} />
-          СДО ИСП
-        </Button>,
-        <Button key="send-tc" variant="outline" size="sm" className="gap-1" onClick={() => {
-          setSelectedOrderForTC(order);
-          setShowSendToTCDialog(true);
-        }}>
-          <Icon name="Building2" size={14} />
-          Учебный центр
-        </Button>,
-        <Button key="send-rostechnadzor" variant="outline" size="sm" className="gap-1" onClick={() => orderHandlers.handleRegisterRostechnadzor(order.id)}>
-          <Icon name="Shield" size={14} />
-          Ростехнадзор
-        </Button>,
-        <Button key="send-internal" variant="outline" size="sm" className="gap-1" onClick={() => orderHandlers.handleScheduleAttestation(order.id)}>
-          <Icon name="ClipboardCheck" size={14} />
-          ЕПТ организации
-        </Button>
-      );
-    }
-
-    return actions;
-  };
-
-  const orderStats = {
-    total: tenantOrders.length,
-    draft: tenantOrders.filter(o => o.status === 'draft').length,
-    active: tenantOrders.filter(o => o.status === 'active').length,
-    completed: tenantOrders.filter(o => o.status === 'completed').length,
-  };
-
-  const trainingStats = {
-    total: tenantTrainings.length,
-    planned: tenantTrainings.filter(t => t.status === 'planned').length,
-    inProgress: tenantTrainings.filter(t => t.status === 'in_progress').length,
-    totalCost: tenantTrainings.reduce((sum, t) => sum + t.cost, 0),
   };
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="orders" className="space-y-6">
-        <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
-          <TabsTrigger value="orders" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="FileText" size={20} />
-            <span className="text-xs font-medium">Приказы ({orderStats.total})</span>
-          </TabsTrigger>
-          <TabsTrigger value="attestation-orders" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="ClipboardCheck" size={20} />
-            <span className="text-xs font-medium text-center leading-tight">Приказы на<br/>аттестацию ({attestationOrders.length})</span>
-          </TabsTrigger>
-          <TabsTrigger value="trainings" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="GraduationCap" size={20} />
-            <span className="text-xs font-medium">Обучения ({trainingStats.total})</span>
-          </TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Всего документов</CardDescription>
+            <CardTitle className="text-3xl">{stats.total}</CardTitle>
+          </CardHeader>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Приказы</CardDescription>
+            <CardTitle className="text-3xl">{stats.orders}</CardTitle>
+          </CardHeader>
+        </Card>
 
-        <TabsContent value="orders">
-          <OrdersTab
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            orderTypeFilter={orderTypeFilter}
-            setOrderTypeFilter={setOrderTypeFilter}
-            orderStatusFilter={orderStatusFilter}
-            setOrderStatusFilter={setOrderStatusFilter}
-            orderViewMode={orderViewMode}
-            setOrderViewMode={setOrderViewMode}
-            filteredOrders={filteredOrders}
-            orderStats={orderStats}
-            onChangeStatus={orderHandlers.handleChangeOrderStatus}
-            onView={orderHandlers.handleViewOrder}
-            onEdit={orderHandlers.handleEditOrder}
-            onDownloadPDF={orderHandlers.handleDownloadOrderPDF}
-            onPrint={orderHandlers.handlePrintOrder}
-            onDelete={orderHandlers.handleDeleteOrder}
-            onSendToTraining={(orderId) => {
-              const order = orders.find(o => o.id === orderId);
-              if (order) {
-                setSelectedOrderForTC(order);
-                setShowSendToTCDialog(true);
-              }
-            }}
-            onSendToSDO={orderHandlers.handleSendToSDO}
-            onDownloadAppendix={handleDownloadOrderAppendix}
-            onDownloadFullReport={handleDownloadFullReport}
-            onExportToExcel={handleExportOrdersToExcel}
-            onCreateOrder={() => setShowCreateOrderDialog(true)}
-            getOrderActions={getOrderActions}
-          />
-        </TabsContent>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Приказы на аттестацию</CardDescription>
+            <CardTitle className="text-3xl">{stats.attestationOrders}</CardTitle>
+          </CardHeader>
+        </Card>
 
-        <TabsContent value="attestation-orders">
-          <AttestationOrdersList />
-        </TabsContent>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Обучения</CardDescription>
+            <CardTitle className="text-3xl">{stats.trainings}</CardTitle>
+          </CardHeader>
+        </Card>
+      </div>
 
-        <TabsContent value="trainings">
-          <TrainingsTab
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            trainingStatusFilter={trainingStatusFilter}
-            setTrainingStatusFilter={setTrainingStatusFilter}
-            trainingViewMode={trainingViewMode}
-            setTrainingViewMode={setTrainingViewMode}
-            filteredTrainings={filteredTrainings}
-            trainingOrgs={trainingOrgs}
-            personnel={personnel}
-            people={people}
-            positions={positions}
-            expandedTrainings={expandedTrainings}
-            trainingStats={trainingStats}
-            onToggleExpanded={toggleTrainingExpanded}
-            onEdit={trainingHandlers.handleEditTraining}
-            onView={trainingHandlers.handleViewTraining}
-            onViewDocuments={trainingHandlers.handleViewDocuments}
-            onViewParticipants={trainingHandlers.handleViewParticipants}
-            onDuplicate={trainingHandlers.handleDuplicateTraining}
-            onDelete={trainingHandlers.handleDeleteTraining}
-            onExportToExcel={handleExportTrainingsToExcel}
-            onCreateTraining={() => setShowCreateTrainingDialog(true)}
-          />
-        </TabsContent>
-      </Tabs>
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="flex flex-1 gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:max-w-sm">
+            <Icon name="Search" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+            <Input
+              placeholder="Поиск по названию, номеру..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Тип документа" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Все типы</SelectItem>
+              <SelectItem value="order">Приказы</SelectItem>
+              <SelectItem value="attestation-order">Приказы на аттестацию</SelectItem>
+              <SelectItem value="training">Обучения</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Статус" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Все статусы</SelectItem>
+              <SelectItem value="draft">Черновик</SelectItem>
+              <SelectItem value="prepared">Подготовлен</SelectItem>
+              <SelectItem value="approved">Согласован</SelectItem>
+              <SelectItem value="active">Активен</SelectItem>
+              <SelectItem value="completed">Выполнен</SelectItem>
+              <SelectItem value="planned">Запланировано</SelectItem>
+              <SelectItem value="in_progress">В процессе</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => setViewMode(viewMode === 'cards' ? 'table' : 'cards')}>
+            <Icon name={viewMode === 'cards' ? 'Table' : 'LayoutGrid'} size={16} />
+          </Button>
+
+          <Button variant="outline" size="sm" onClick={handleExportToExcel}>
+            <Icon name="Download" size={16} className="mr-2" />
+            Excel
+          </Button>
+
+          <Button onClick={() => setShowCreateOrderDialog(true)} className="gap-2">
+            <Icon name="Plus" size={16} />
+            Создать приказ
+          </Button>
+
+          <Button onClick={() => setShowCreateTrainingDialog(true)} className="gap-2">
+            <Icon name="GraduationCap" size={16} />
+            Создать обучение
+          </Button>
+        </div>
+      </div>
+
+      {filteredDocuments.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Icon name="FileX" size={48} className="text-muted-foreground mb-4" />
+            <p className="text-lg font-medium text-muted-foreground mb-2">Документы не найдены</p>
+            <p className="text-sm text-muted-foreground">Попробуйте изменить параметры поиска</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className={viewMode === 'cards' ? 'grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4' : 'space-y-2'}>
+          {filteredDocuments.map((doc) => (
+            <Card key={doc.id} className="hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1 flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="secondary" className={getTypeColor(doc.type)}>
+                        {getTypeLabel(doc.type)}
+                      </Badge>
+                      <Badge variant="outline" className={getStatusColor(doc.status)}>
+                        {getStatusLabel(doc.status)}
+                      </Badge>
+                    </div>
+                    <CardTitle className="text-base">{doc.title}</CardTitle>
+                    <CardDescription className="flex items-center gap-4 text-xs">
+                      <span className="flex items-center gap-1">
+                        <Icon name="Hash" size={12} />
+                        {doc.number}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Icon name="Calendar" size={12} />
+                        {new Date(doc.date).toLocaleDateString('ru')}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Icon name="Users" size={12} />
+                        {doc.employeeCount}
+                      </span>
+                    </CardDescription>
+                    {doc.description && (
+                      <p className="text-xs text-muted-foreground mt-2">{doc.description}</p>
+                    )}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex gap-2 flex-wrap">
+                  {doc.type === 'order' && (
+                    <>
+                      <Button variant="ghost" size="sm" onClick={() => orderHandlers.handleViewOrder(doc.id)}>
+                        <Icon name="Eye" size={14} className="mr-1" />
+                        Просмотр
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => orderHandlers.handleEditOrder(doc.id)}>
+                        <Icon name="Edit" size={14} className="mr-1" />
+                        Изменить
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => orderHandlers.handleDownloadOrderPDF(doc.id)}>
+                        <Icon name="Download" size={14} className="mr-1" />
+                        PDF
+                      </Button>
+                    </>
+                  )}
+                  {doc.type === 'training' && (
+                    <>
+                      <Button variant="ghost" size="sm" onClick={() => trainingHandlers.handleViewTraining(doc.id)}>
+                        <Icon name="Eye" size={14} className="mr-1" />
+                        Просмотр
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => trainingHandlers.handleEditTraining(doc.id)}>
+                        <Icon name="Edit" size={14} className="mr-1" />
+                        Изменить
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => trainingHandlers.handleViewDocuments(doc.id)}>
+                        <Icon name="FileText" size={14} className="mr-1" />
+                        Документы
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <CreateOrderDialog
         open={showCreateOrderDialog}
