@@ -306,13 +306,13 @@ const DashboardPage = memo(function DashboardPage() {
         tasks: criticalTasks,
         incidents,
         objects,
-        organizations
+        organizations: catalogOrganizations
       }, period);
       toast.success('Отчет успешно сформирован!');
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
     }
-  }, [objectsStats, taskStats, overdueTasks, openIncidents, incidents, criticalTasks, objects, organizations]);
+  }, [objectsStats, taskStats, overdueTasks, openIncidents, incidents, criticalTasks, objects, catalogOrganizations]);
 
   const handleGenerateTasksReport = useCallback(async (period: ReportPeriod) => {
     try {
@@ -427,7 +427,7 @@ const DashboardPage = memo(function DashboardPage() {
         />
 
         <OrganizationsCard 
-          organizations={organizations}
+          organizations={catalogOrganizations}
           objects={objects}
           onGenerateReport={handleGenerateOrganizationsReport}
           onNavigate={() => navigate(ROUTES.CATALOG)}
