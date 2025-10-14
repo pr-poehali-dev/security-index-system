@@ -34,6 +34,8 @@ interface OrdersTabProps {
   onDelete: (orderId: string) => void;
   onSendToTraining?: (orderId: string) => void;
   onSendToSDO?: (orderId: string) => void;
+  onDownloadAppendix?: (orderId: string) => void;
+  onDownloadFullReport?: (orderId: string) => void;
   onExportToExcel: () => void;
   onCreateOrder: () => void;
   getOrderActions: (order: Order) => JSX.Element[];
@@ -58,6 +60,8 @@ export default function OrdersTab({
   onDelete,
   onSendToTraining,
   onSendToSDO,
+  onDownloadAppendix,
+  onDownloadFullReport,
   onExportToExcel,
   onCreateOrder,
   getOrderActions
@@ -133,6 +137,8 @@ export default function OrdersTab({
               onDelete={onDelete}
               onSendToTraining={onSendToTraining}
               onSendToSDO={onSendToSDO}
+              onDownloadAppendix={onDownloadAppendix}
+              onDownloadFullReport={onDownloadFullReport}
               getOrderActions={getOrderActions}
             />
           ) : (

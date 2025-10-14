@@ -14,9 +14,11 @@ import { useAttestationOrdersStore } from '@/stores/attestationOrdersStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { createOrderHandlers } from '../orders/orderHandlers';
 import { createTrainingHandlers } from '../orders/trainingHandlers';
+import { generateOrderAppendix, generateFullOrderReport } from '../../utils/orderExport';
 import OrdersTab from '../orders/OrdersTab';
 import TrainingsTab from '../orders/TrainingsTab';
 import type { Order } from '@/stores/ordersStore';
+import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 
 export default function OrdersTrainingTab() {
   const { toast } = useToast();
@@ -164,6 +166,68 @@ export default function OrdersTrainingTab() {
     writeFile(wb, fileName);
   };
 
+  const handleDownloadOrderAppendix = async (orderId: string) => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const tenantPersonnel = personnel.filter(p => p.tenantId === user?.tenantId);
+    const employees = tenantPersonnel.map(p => {
+      const info = getPersonnelFullInfo(p, people, positions);
+      return {
+        id: p.id,
+        name: info.fullName,
+        position: info.position,
+        department: '—',
+        organization: user?.tenantId || ''
+      };
+    });
+
+    try {
+      await generateOrderAppendix({ order, employees });
+      toast({
+        title: 'Приложение сформировано',
+        description: 'Файл Excel успешно скачан'
+      });
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось сформировать приложение',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleDownloadFullReport = async (orderId: string) => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const tenantPersonnel = personnel.filter(p => p.tenantId === user?.tenantId);
+    const employees = tenantPersonnel.map(p => {
+      const info = getPersonnelFullInfo(p, people, positions);
+      return {
+        id: p.id,
+        name: info.fullName,
+        position: info.position,
+        department: '—',
+        organization: user?.tenantId || ''
+      };
+    });
+
+    try {
+      await generateFullOrderReport({ order, employees });
+      toast({
+        title: 'Отчёт сформирован',
+        description: 'Полный отчёт по приказу успешно скачан'
+      });
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось сформировать отчёт',
+        variant: 'destructive'
+      });
+    }
+  };
+
   const getOrderActions = (order: Order) => {
     const actions = [];
 
@@ -261,6 +325,8 @@ export default function OrdersTrainingTab() {
               }
             }}
             onSendToSDO={orderHandlers.handleSendToSDO}
+            onDownloadAppendix={handleDownloadOrderAppendix}
+            onDownloadFullReport={handleDownloadFullReport}
             onExportToExcel={handleExportOrdersToExcel}
             onCreateOrder={() => setShowCreateOrderDialog(true)}
             getOrderActions={getOrderActions}

@@ -22,6 +22,8 @@ interface OrdersCardViewProps {
   onDelete: (orderId: string) => void;
   onSendToTraining?: (orderId: string) => void;
   onSendToSDO?: (orderId: string) => void;
+  onDownloadAppendix?: (orderId: string) => void;
+  onDownloadFullReport?: (orderId: string) => void;
   getOrderActions: (order: Order) => JSX.Element[];
 }
 
@@ -87,7 +89,9 @@ export default function OrdersCardView({
   onPrint,
   onDelete,
   onSendToTraining,
-  onSendToSDO
+  onSendToSDO,
+  onDownloadAppendix,
+  onDownloadFullReport
 }: OrdersCardViewProps) {
   if (orders.length === 0) {
     return (
@@ -138,6 +142,18 @@ export default function OrdersCardView({
                     <Icon name="Download" size={16} className="mr-2" />
                     Скачать PDF
                   </DropdownMenuItem>
+                  {order.certifications && order.certifications.length > 0 && onDownloadAppendix && (
+                    <DropdownMenuItem onClick={() => onDownloadAppendix(order.id)}>
+                      <Icon name="FileSpreadsheet" size={16} className="mr-2" />
+                      Скачать приложение (Excel)
+                    </DropdownMenuItem>
+                  )}
+                  {order.certifications && order.certifications.length > 0 && onDownloadFullReport && (
+                    <DropdownMenuItem onClick={() => onDownloadFullReport(order.id)}>
+                      <Icon name="FileText" size={16} className="mr-2" />
+                      Полный отчёт (Excel)
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={() => onPrint(order.id)}>
                     <Icon name="Printer" size={16} className="mr-2" />
                     Печать
@@ -163,6 +179,13 @@ export default function OrdersCardView({
                 <Icon name="Users" size={14} />
                 <span>Сотрудников: {order.employeeIds.length}</span>
               </div>
+
+              {order.certifications && order.certifications.length > 0 && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Icon name="Award" size={14} />
+                  <span>Областей: {order.certifications.length}</span>
+                </div>
+              )}
 
               {order.createdBy && (
                 <div className="flex items-center gap-2 text-muted-foreground">

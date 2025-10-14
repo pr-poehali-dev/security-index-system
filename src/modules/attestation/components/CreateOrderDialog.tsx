@@ -27,6 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCertificationStore } from '@/stores/certificationStore';
+import { useOrdersStore } from '@/stores/ordersStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
 
 interface CreateOrderDialogProps {
@@ -66,6 +67,7 @@ export default function CreateOrderDialog({ open, onOpenChange, initialOrderType
   const user = useAuthStore((state) => state.user);
   const { personnel, people, positions, getPersonnelByTenant, departments: deptList } = useSettingsStore();
   const { certifications } = useCertificationStore();
+  const addOrder = useOrdersStore((state) => state.addOrder);
   
   const tenantPersonnel = user?.tenantId ? getPersonnelByTenant(user.tenantId) : [];
   
@@ -246,9 +248,47 @@ export default function CreateOrderDialog({ open, onOpenChange, initialOrderType
   };
 
   const handleCreate = () => {
+    if (!user?.tenantId) return;
+
     const selectedType = orderTypes.find(t => t.value === orderType);
     const employeeCount = getEmployeesWithSelections();
     const areasCount = getTotalSelected();
+    
+    // Собираем выбранных сотрудников и их области
+    const selectedEmployeeIds: string[] = [];
+    const orderCertifications: Array<{ personnelId: string; certificationId: string; category: string; area: string }> = [];
+    
+    employeeSelections.forEach((areas, employeeId) => {
+      const employee = employees.find(e => e.id === employeeId);
+      if (employee && areas.size > 0) {
+        selectedEmployeeIds.push(employeeId);
+        
+        employee.certifications
+          .filter(cert => areas.has(cert.id))
+          .forEach(cert => {
+            orderCertifications.push({
+              personnelId: employeeId,
+              certificationId: cert.id,
+              category: cert.category,
+              area: cert.area
+            });
+          });
+      }
+    });
+
+    // Создаём приказ
+    addOrder({
+      tenantId: user.tenantId,
+      number: orderNumber,
+      date: orderDate,
+      type: orderType as 'attestation' | 'training' | 'suspension',
+      title: orderTitle,
+      employeeIds: selectedEmployeeIds,
+      certifications: orderCertifications,
+      status: 'draft',
+      createdBy: user.name || 'Пользователь',
+      description: orderDescription || `Областей аттестации: ${orderCertifications.length}, сотрудников: ${selectedEmployeeIds.length}`
+    });
     
     toast({
       title: "Приказ создан",
