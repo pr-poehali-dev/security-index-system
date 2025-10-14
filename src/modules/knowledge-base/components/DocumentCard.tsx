@@ -52,12 +52,20 @@ export default function DocumentCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-start gap-2 mb-1">
               <h3 className="font-semibold text-base sm:text-lg flex-1">{doc.title}</h3>
-              {doc.category === 'platform_instruction' && (
-                <Badge variant="outline" className="text-[10px] sm:text-xs bg-blue-50 text-blue-700 border-blue-200 flex-shrink-0">
-                  <Icon name="Shield" size={10} className="mr-1" />
-                  Платформа
-                </Badge>
-              )}
+              <div className="flex gap-2 flex-shrink-0">
+                {doc.category === 'platform_instruction' && (
+                  <Badge variant="outline" className="text-[10px] sm:text-xs bg-blue-50 text-blue-700 border-blue-200">
+                    <Icon name="Shield" size={10} className="mr-1" />
+                    Платформа
+                  </Badge>
+                )}
+                {doc.category === 'user_guide' && !canManage && (
+                  <Badge variant="outline" className="text-[10px] sm:text-xs bg-green-50 text-green-700 border-green-200">
+                    <Icon name="Lock" size={10} className="mr-1" />
+                    Только чтение
+                  </Badge>
+                )}
+              </div>
             </div>
             {doc.description && (
               <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">

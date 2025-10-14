@@ -12,6 +12,7 @@ import PageHeader from '@/components/layout/PageHeader';
 
 interface KnowledgeBaseHeaderProps {
   canManage: boolean;
+  canCreateDocument?: boolean;
   onCreateDocument: () => void;
   onExport: () => void;
   onImport: () => void;
@@ -20,6 +21,7 @@ interface KnowledgeBaseHeaderProps {
 
 export default function KnowledgeBaseHeader({
   canManage,
+  canCreateDocument = true,
   onCreateDocument,
   onExport,
   onImport,
@@ -41,11 +43,13 @@ export default function KnowledgeBaseHeader({
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           {canManage && (
             <>
-              <Button onClick={onCreateDocument} className="gap-2 w-full sm:w-auto">
-                <Icon name="Plus" size={16} />
-                <span className="hidden sm:inline">Добавить документ</span>
-                <span className="sm:hidden">Добавить</span>
-              </Button>
+              {canCreateDocument && (
+                <Button onClick={onCreateDocument} className="gap-2 w-full sm:w-auto">
+                  <Icon name="Plus" size={16} />
+                  <span className="hidden sm:inline">Добавить документ</span>
+                  <span className="sm:hidden">Добавить</span>
+                </Button>
+              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="gap-2 w-full sm:w-auto">

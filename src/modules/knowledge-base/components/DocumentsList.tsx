@@ -48,7 +48,7 @@ export default function DocumentsList({
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {documents.map((doc) => {
-            const canManageDoc = doc.category === 'platform_instruction' 
+            const canManageDoc = (doc.category === 'platform_instruction' || doc.category === 'user_guide')
               ? userRole === 'SuperAdmin'
               : canManage;
             

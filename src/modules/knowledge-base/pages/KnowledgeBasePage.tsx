@@ -75,8 +75,8 @@ export default function KnowledgeBasePage() {
   };
 
   const handleEditDocument = (doc: KnowledgeDocument) => {
-    if (doc.category === 'platform_instruction' && user?.role !== 'SuperAdmin') {
-      toast.error('Только суперадминистратор может редактировать инструкции платформы');
+    if ((doc.category === 'platform_instruction' || doc.category === 'user_guide') && user?.role !== 'SuperAdmin') {
+      toast.error('Только суперадминистратор может редактировать этот документ');
       return;
     }
     setSelectedDocument(doc);
@@ -100,8 +100,8 @@ export default function KnowledgeBasePage() {
   };
 
   const handleDeleteClick = (doc: KnowledgeDocument) => {
-    if (doc.category === 'platform_instruction' && user?.role !== 'SuperAdmin') {
-      toast.error('Только суперадминистратор может удалять инструкции платформы');
+    if ((doc.category === 'platform_instruction' || doc.category === 'user_guide') && user?.role !== 'SuperAdmin') {
+      toast.error('Только суперадминистратор может удалять этот документ');
       return;
     }
     setSelectedDocument(doc);
@@ -175,10 +175,15 @@ export default function KnowledgeBasePage() {
     }
   };
 
+  const canCreateDocumentInTab = activeTab === 'user_guide' || activeTab === 'platform_instruction'
+    ? user?.role === 'SuperAdmin'
+    : canManage;
+
   return (
     <div className="space-y-6">
       <KnowledgeBaseHeader
         canManage={canManage}
+        canCreateDocument={canCreateDocumentInTab}
         onCreateDocument={handleCreateDocument}
         onExport={handleExportDocuments}
         onImport={handleImportDocuments}
