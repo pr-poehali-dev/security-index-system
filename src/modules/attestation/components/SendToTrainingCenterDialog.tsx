@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useOrdersStore } from '@/stores/ordersStore';
@@ -19,7 +19,7 @@ interface SendToTrainingCenterDialogProps {
 
 export default function SendToTrainingCenterDialog({ open, onOpenChange, order }: SendToTrainingCenterDialogProps) {
   const user = useAuthStore((state) => state.user);
-  const { getContractorsByType } = useSettingsStore();
+  const allContractors = useSettingsStore((state) => state.contractors);
   const { sendOrderToTrainingCenter } = useOrdersStore();
   const { toast } = useToast();
 
@@ -27,9 +27,11 @@ export default function SendToTrainingCenterDialog({ open, onOpenChange, order }
   const [requestType, setRequestType] = useState<'full_training' | 'sdo_access_only'>('full_training');
   const [isLoading, setIsLoading] = useState(false);
 
-  const trainingCenters = user?.tenantId 
-    ? getContractorsByType(user.tenantId, 'training_center').filter(c => c.status === 'active')
-    : [];
+  const trainingCenters = useMemo(() => 
+    user?.tenantId 
+      ? allContractors.filter(c => c.tenantId === user.tenantId && c.type === 'training_center' && c.status === 'active')
+      : []
+  , [allContractors, user?.tenantId]);
 
   const handleSubmit = () => {
     if (!order || !selectedContractor) {
