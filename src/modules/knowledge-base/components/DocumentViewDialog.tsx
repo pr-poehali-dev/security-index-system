@@ -119,16 +119,28 @@ export default function DocumentViewDialog({
                     <span className="font-medium">{document.documentNumber}</span>
                   </div>
                 )}
+                {document.regulatoryStatus && (
+                  <div className="flex items-center gap-2">
+                    <Icon 
+                      name={document.regulatoryStatus === 'active' ? 'CheckCircle2' : 'XCircle'} 
+                      size={16} 
+                      className={document.regulatoryStatus === 'active' ? 'text-green-600' : 'text-red-600'} 
+                    />
+                    <span className={document.regulatoryStatus === 'active' ? 'text-green-600' : 'text-red-600'}>
+                      {document.regulatoryStatus === 'active' ? 'Действующий' : 'Недействующий'}
+                    </span>
+                  </div>
+                )}
+                {document.expiryDate && (
+                  <div className="flex items-center gap-2">
+                    <Icon name="CalendarX" size={16} className="text-amber-600" />
+                    <span className="text-amber-600">Действует до: {format(new Date(document.expiryDate), 'd MMMM yyyy', { locale: ru })}</span>
+                  </div>
+                )}
                 {document.authority && (
                   <div className="flex items-center gap-2">
                     <Icon name="Building2" size={16} className="text-primary" />
                     <span>{FEDERAL_AUTHORITIES[document.authority]}</span>
-                  </div>
-                )}
-                {document.effectiveDate && (
-                  <div className="flex items-center gap-2">
-                    <Icon name="CalendarCheck" size={16} className="text-primary" />
-                    <span>Вступил в силу: {format(new Date(document.effectiveDate), 'd MMMM yyyy', { locale: ru })}</span>
                   </div>
                 )}
               </div>

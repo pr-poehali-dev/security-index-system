@@ -768,6 +768,8 @@ export interface KnowledgeDocument {
   documentNumber?: string;
   adoptionDate?: string;
   effectiveDate?: string;
+  expiryDate?: string;
+  regulatoryStatus?: 'active' | 'inactive';
   authority?: FederalAuthority;
   createdAt: string;
   updatedAt: string;

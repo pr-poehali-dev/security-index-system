@@ -62,6 +62,14 @@ export default function DocumentCard({
                   {REGULATORY_DOCUMENT_TYPES[doc.regulatoryType]}
                 </Badge>
               )}
+              {doc.regulatoryStatus && (
+                <Badge 
+                  variant={doc.regulatoryStatus === 'active' ? 'default' : 'outline'} 
+                  className="text-[10px] sm:text-xs"
+                >
+                  {doc.regulatoryStatus === 'active' ? 'Действующий' : 'Недействующий'}
+                </Badge>
+              )}
               {doc.documentNumber && (
                 <div className="flex items-center gap-1 font-medium">
                   <Icon name="Hash" size={12} />
@@ -82,6 +90,12 @@ export default function DocumentCard({
                 <Icon name="Calendar" size={12} />
                 {format(new Date(doc.adoptionDate || doc.publishedAt || doc.createdAt), 'd MMM yyyy', { locale: ru })}
               </div>
+              {doc.expiryDate && (
+                <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                  <Icon name="CalendarX" size={12} />
+                  До: {format(new Date(doc.expiryDate), 'd MMM yyyy', { locale: ru })}
+                </div>
+              )}
               {doc.version && (
                 <div className="flex items-center gap-1">
                   <Icon name="GitBranch" size={12} />
