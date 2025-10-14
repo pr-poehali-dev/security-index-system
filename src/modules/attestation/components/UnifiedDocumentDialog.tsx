@@ -290,7 +290,7 @@ export default function UnifiedDocumentDialog({
           employees={employees}
           selected={selectedEmployees}
           onSelect={setSelectedEmployees}
-          enableCertificationFilter={selectedType === 'attestation'}
+          enableCertificationFilter={selectedType === 'attestation' || selectedType === 'training'}
           getCertificationStatus={getEmployeeCertStatus}
           renderEmployeeExtra={(employee) => {
             if (!employee.certifications || employee.certifications.length === 0) return null;
