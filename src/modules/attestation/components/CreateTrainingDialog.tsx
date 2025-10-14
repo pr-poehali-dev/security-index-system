@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -54,20 +54,30 @@ const trainingCategories = [
 export default function CreateTrainingDialog({ open, onOpenChange }: CreateTrainingDialogProps) {
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
-  const { personnel, people, positions, getPersonnelByTenant } = useSettingsStore();
-  const { getContractorsByType } = useSettingsStore();
+  const allPersonnel = useSettingsStore((state) => state.personnel);
+  const people = useSettingsStore((state) => state.people);
+  const positions = useSettingsStore((state) => state.positions);
+  const allContractors = useSettingsStore((state) => state.contractors);
   
-  const trainingOrgs = user?.tenantId ? getContractorsByType(user.tenantId, 'training_center') : [];
-  const tenantPersonnel = user?.tenantId ? getPersonnelByTenant(user.tenantId) : [];
-  const employees = tenantPersonnel.map(p => {
-    const info = getPersonnelFullInfo(p, people, positions);
-    return {
-      id: p.id,
-      name: info.fullName,
-      position: info.position,
-      department: '—'
-    };
-  });
+  const trainingOrgs = useMemo(() => 
+    user?.tenantId ? allContractors.filter(c => c.tenantId === user.tenantId && c.type === 'training_center') : []
+  , [allContractors, user?.tenantId]);
+  
+  const tenantPersonnel = useMemo(() => 
+    user?.tenantId ? allPersonnel.filter(p => p.tenantId === user.tenantId) : []
+  , [allPersonnel, user?.tenantId]);
+  
+  const employees = useMemo(() => 
+    tenantPersonnel.map(p => {
+      const info = getPersonnelFullInfo(p, people, positions);
+      return {
+        id: p.id,
+        name: info.fullName,
+        position: info.position,
+        department: '—'
+      };
+    })
+  , [tenantPersonnel, people, positions]);
   
   const [step, setStep] = useState(1);
   const [trainingTitle, setTrainingTitle] = useState('');

@@ -21,11 +21,20 @@ interface AddSystemUserDialogProps {
 
 export default function AddSystemUserDialog({ open, onOpenChange }: AddSystemUserDialogProps) {
   const user = useAuthStore((state) => state.user);
-  const { addSystemUser, getPersonnelByTenant, getOrganizationsByTenant, people, positions } = useSettingsStore();
+  const addSystemUser = useSettingsStore((state) => state.addSystemUser);
+  const allPersonnel = useSettingsStore((state) => state.personnel);
+  const allOrganizations = useSettingsStore((state) => state.organizations);
+  const people = useSettingsStore((state) => state.people);
+  const positions = useSettingsStore((state) => state.positions);
   const { toast } = useToast();
 
-  const personnel = getPersonnelByTenant(user!.tenantId!);
-  const organizations = getOrganizationsByTenant(user!.tenantId!);
+  const personnel = useMemo(() => 
+    allPersonnel.filter(p => p.tenantId === user!.tenantId!)
+  , [allPersonnel, user]);
+  
+  const organizations = useMemo(() => 
+    allOrganizations.filter(o => o.tenantId === user!.tenantId!)
+  , [allOrganizations, user]);
   
   const personnelWithInfo = useMemo(() => 
     personnel.map(p => ({

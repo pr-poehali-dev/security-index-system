@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Button } from '@/components/ui/button';
@@ -22,11 +22,20 @@ interface EditSystemUserDialogProps {
 
 export default function EditSystemUserDialog({ user: systemUser, open, onOpenChange }: EditSystemUserDialogProps) {
   const currentUser = useAuthStore((state) => state.user);
-  const { updateSystemUser, getPersonnelByTenant, getOrganizationsByTenant, people, positions } = useSettingsStore();
+  const updateSystemUser = useSettingsStore((state) => state.updateSystemUser);
+  const allPersonnel = useSettingsStore((state) => state.personnel);
+  const allOrganizations = useSettingsStore((state) => state.organizations);
+  const people = useSettingsStore((state) => state.people);
+  const positions = useSettingsStore((state) => state.positions);
   const { toast } = useToast();
 
-  const personnel = getPersonnelByTenant(currentUser!.tenantId!);
-  const organizations = getOrganizationsByTenant(currentUser!.tenantId!);
+  const personnel = useMemo(() => 
+    allPersonnel.filter(p => p.tenantId === currentUser!.tenantId!)
+  , [allPersonnel, currentUser]);
+  
+  const organizations = useMemo(() => 
+    allOrganizations.filter(o => o.tenantId === currentUser!.tenantId!)
+  , [allOrganizations, currentUser]);
 
   const [email, setEmail] = useState(systemUser.email);
   const [role, setRole] = useState<UserRole>(systemUser.role);

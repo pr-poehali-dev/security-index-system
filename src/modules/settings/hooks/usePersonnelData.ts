@@ -4,8 +4,13 @@ import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 import type { Personnel } from '@/types';
 
 export function usePersonnelData(tenantId: string) {
-  const { people, positions, getPersonnelByTenant } = useSettingsStore();
-  const tenantPersonnel = getPersonnelByTenant(tenantId);
+  const allPersonnel = useSettingsStore((state) => state.personnel);
+  const people = useSettingsStore((state) => state.people);
+  const positions = useSettingsStore((state) => state.positions);
+  
+  const tenantPersonnel = useMemo(() => 
+    allPersonnel.filter(p => p.tenantId === tenantId)
+  , [allPersonnel, tenantId]);
 
   const personnelWithInfo = useMemo(() => {
     return tenantPersonnel.map(personnel => {

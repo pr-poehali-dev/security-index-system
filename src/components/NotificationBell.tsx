@@ -18,9 +18,15 @@ import { ru } from 'date-fns/locale';
 export default function NotificationBell() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const { notifications, markAsRead, markAllAsRead, deleteNotification, clearAll, getUnreadCount } = useNotificationsStore();
+  const notifications = useNotificationsStore((state) => state.notifications);
+  const markAsRead = useNotificationsStore((state) => state.markAsRead);
+  const markAllAsRead = useNotificationsStore((state) => state.markAllAsRead);
+  const deleteNotification = useNotificationsStore((state) => state.deleteNotification);
+  const clearAll = useNotificationsStore((state) => state.clearAll);
 
-  const unreadCount = getUnreadCount();
+  const unreadCount = useMemo(() => 
+    notifications.filter(n => !n.isRead).length
+  , [notifications]);
 
   const sortedNotifications = useMemo(() => {
     return [...notifications].sort((a, b) => 

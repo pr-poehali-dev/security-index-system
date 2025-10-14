@@ -65,11 +65,16 @@ const orderTypes = [
 export default function CreateOrderDialog({ open, onOpenChange, initialOrderType }: CreateOrderDialogProps) {
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
-  const { personnel, people, positions, getPersonnelByTenant, departments: deptList } = useSettingsStore();
+  const allPersonnel = useSettingsStore((state) => state.personnel);
+  const people = useSettingsStore((state) => state.people);
+  const positions = useSettingsStore((state) => state.positions);
+  const deptList = useSettingsStore((state) => state.departments);
   const { certifications } = useCertificationStore();
   const addOrder = useOrdersStore((state) => state.addOrder);
   
-  const tenantPersonnel = user?.tenantId ? getPersonnelByTenant(user.tenantId) : [];
+  const tenantPersonnel = useMemo(() => 
+    user?.tenantId ? allPersonnel.filter(p => p.tenantId === user.tenantId) : []
+  , [allPersonnel, user?.tenantId]);
   
   const employees = useMemo(() => {
     return tenantPersonnel.map(p => {

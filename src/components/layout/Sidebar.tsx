@@ -1,6 +1,6 @@
 // src/components/layout/Sidebar.tsx
 // Описание: Компонент боковой панели навигации с меню и профилем
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -35,13 +35,21 @@ const Sidebar = memo(function Sidebar() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const { theme, toggleTheme, sidebarCollapsed, toggleSidebar } = useUIStore();
-  const { getNotificationsBySource } = useNotificationsStore();
+  const allNotifications = useNotificationsStore((state) => state.notifications);
 
   if (!user) return null;
   
-  const incidentNotifications = getNotificationsBySource('incident').filter(n => !n.isRead);
-  const attestationNotifications = getNotificationsBySource('attestation').filter(n => !n.isRead);
-  const catalogNotifications = getNotificationsBySource('catalog').filter(n => !n.isRead);
+  const incidentNotifications = useMemo(() => 
+    allNotifications.filter(n => n.source === 'incident' && !n.isRead)
+  , [allNotifications]);
+  
+  const attestationNotifications = useMemo(() => 
+    allNotifications.filter(n => n.source === 'attestation' && !n.isRead)
+  , [allNotifications]);
+  
+  const catalogNotifications = useMemo(() => 
+    allNotifications.filter(n => n.source === 'catalog' && !n.isRead)
+  , [allNotifications]);
 
   const getInitials = (name: string) => {
     return name
