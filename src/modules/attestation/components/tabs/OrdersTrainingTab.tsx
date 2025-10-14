@@ -10,9 +10,13 @@ import CreateOrderDialog from '../CreateOrderDialog';
 import CreateTrainingDialog from '../CreateTrainingDialog';
 import SendToTrainingCenterDialog from '../SendToTrainingCenterDialog';
 import { useAuthStore } from '@/stores/authStore';
+import { useDocumentsStore } from '@/stores/documentsStore';
 import { useOrdersStore } from '@/stores/ordersStore';
 import { useTrainingsAttestationStore } from '@/stores/trainingsAttestationStore';
 import { useAttestationOrdersStore } from '@/stores/attestationOrdersStore';
+import { migrateAllDocuments } from '@/utils/documentMigration';
+import { statusLabels, statusColors } from '@/types/documentStatus';
+import type { Document } from '@/stores/documentsStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { createOrderHandlers } from '../orders/orderHandlers';
 import { createTrainingHandlers } from '../orders/trainingHandlers';
@@ -20,27 +24,27 @@ import { generateOrderAppendix, generateFullOrderReport } from '../../utils/orde
 import type { Order } from '@/stores/ordersStore';
 import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 
-type DocumentType = 'order' | 'attestation-order' | 'training';
 
-interface UnifiedDocument {
-  id: string;
-  type: DocumentType;
-  title: string;
-  number: string;
-  date: string;
-  status: string;
-  description?: string;
-  employeeCount: number;
-  data: any;
-}
 
 export default function OrdersTrainingTab() {
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
+  const { documents, getDocumentsByTenant } = useDocumentsStore();
   const { orders, getOrdersByTenant } = useOrdersStore();
   const { trainings, getTrainingsByTenant } = useTrainingsAttestationStore();
   const { getOrdersByTenant: getAttestationOrders } = useAttestationOrdersStore();
   const { personnel, people, positions, getContractorsByType } = useSettingsStore();
+  
+  const legacyOrders = user?.tenantId ? getOrdersByTenant(user.tenantId) : [];
+  const legacyTrainings = user?.tenantId ? getTrainingsByTenant(user.tenantId) : [];
+  const legacyAttestationOrders = user?.tenantId ? getAttestationOrders(user.tenantId) : [];
+  
+  const migratedDocuments = useMemo(() => {
+    if (documents.length === 0 && (legacyOrders.length > 0 || legacyTrainings.length > 0 || legacyAttestationOrders.length > 0)) {
+      return migrateAllDocuments(legacyOrders, legacyTrainings, legacyAttestationOrders);
+    }
+    return user?.tenantId ? getDocumentsByTenant(user.tenantId) : [];
+  }, [documents, legacyOrders, legacyTrainings, legacyAttestationOrders, user?.tenantId, getDocumentsByTenant]);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
@@ -53,9 +57,6 @@ export default function OrdersTrainingTab() {
   const [showSendToTCDialog, setShowSendToTCDialog] = useState(false);
   const [selectedOrderForTC, setSelectedOrderForTC] = useState<Order | null>(null);
 
-  const tenantOrders = user?.tenantId ? getOrdersByTenant(user.tenantId) : [];
-  const tenantTrainings = user?.tenantId ? getTrainingsByTenant(user.tenantId) : [];
-  const attestationOrders = user?.tenantId ? getAttestationOrders(user.tenantId) : [];
   const trainingOrgs = user?.tenantId ? getContractorsByType(user.tenantId, 'training_center') : [];
 
   const orderHandlers = createOrderHandlers(
@@ -69,54 +70,9 @@ export default function OrdersTrainingTab() {
 
   const trainingHandlers = createTrainingHandlers(trainings, toast);
 
-  const unifiedDocuments = useMemo<UnifiedDocument[]>(() => {
-    const docs: UnifiedDocument[] = [];
-
-    tenantOrders.forEach(order => {
-      docs.push({
-        id: order.id,
-        type: 'order',
-        title: order.title,
-        number: order.number,
-        date: order.date,
-        status: order.status,
-        description: order.description,
-        employeeCount: order.employeeIds.length,
-        data: order
-      });
-    });
-
-    attestationOrders.forEach(order => {
-      docs.push({
-        id: order.id,
-        type: 'attestation-order',
-        title: `Приказ на аттестацию ${order.certificationAreaCode}`,
-        number: order.orderNumber,
-        date: order.orderDate,
-        status: order.status || 'draft',
-        description: order.certificationAreaName,
-        employeeCount: order.personnel.length,
-        data: order
-      });
-    });
-
-    tenantTrainings.forEach(training => {
-      const org = trainingOrgs.find(o => o.id === training.organizationId);
-      docs.push({
-        id: training.id,
-        type: 'training',
-        title: training.title,
-        number: `ОБ-${training.id.slice(0, 8)}`,
-        date: training.startDate,
-        status: training.status,
-        description: org?.name || '',
-        employeeCount: training.employeeIds.length,
-        data: training
-      });
-    });
-
-    return docs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [tenantOrders, attestationOrders, tenantTrainings, trainingOrgs]);
+  const unifiedDocuments = useMemo(() => {
+    return migratedDocuments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [migratedDocuments]);
 
   const filteredDocuments = useMemo(() => {
     const filtered = unifiedDocuments.filter(doc => {
@@ -152,54 +108,28 @@ export default function OrdersTrainingTab() {
     return {
       total: unifiedDocuments.length,
       orders: unifiedDocuments.filter(d => d.type === 'order').length,
-      attestationOrders: unifiedDocuments.filter(d => d.type === 'attestation-order').length,
+      attestationOrders: unifiedDocuments.filter(d => d.type === 'attestation').length,
       trainings: unifiedDocuments.filter(d => d.type === 'training').length,
     };
   }, [unifiedDocuments]);
 
-  const getTypeLabel = (type: DocumentType) => {
+  const getTypeLabel = (type: Document['type']) => {
     switch (type) {
       case 'order': return 'Приказ';
-      case 'attestation-order': return 'Приказ на аттестацию';
+      case 'attestation': return 'Приказ на аттестацию';
       case 'training': return 'Обучение';
     }
   };
 
-  const getTypeColor = (type: DocumentType) => {
+  const getTypeColor = (type: Document['type']) => {
     switch (type) {
-      case 'order': return 'bg-blue-100 text-blue-800';
-      case 'attestation-order': return 'bg-purple-100 text-purple-800';
-      case 'training': return 'bg-green-100 text-green-800';
+      case 'order': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case 'attestation': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
+      case 'training': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      draft: 'Черновик',
-      prepared: 'Подготовлен',
-      approved: 'Согласован',
-      active: 'Активен',
-      completed: 'Выполнен',
-      planned: 'Запланировано',
-      in_progress: 'В процессе',
-      cancelled: 'Отменен'
-    };
-    return labels[status] || status;
-  };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'draft': return 'bg-gray-100 text-gray-800';
-      case 'prepared': return 'bg-yellow-100 text-yellow-800';
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'active': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'planned': return 'bg-orange-100 text-orange-800';
-      case 'in_progress': return 'bg-blue-100 text-blue-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   const handleExportToExcel = async () => {
     const { utils, writeFile } = await import('xlsx');
@@ -209,8 +139,8 @@ export default function OrdersTrainingTab() {
       'Номер': doc.number,
       'Дата': new Date(doc.date).toLocaleDateString('ru'),
       'Название': doc.title,
-      'Статус': getStatusLabel(doc.status),
-      'Количество сотрудников': doc.employeeCount,
+      'Статус': statusLabels[doc.status],
+      'Количество сотрудников': doc.employeeIds.length,
       'Описание': doc.description || ''
     }));
 
@@ -285,7 +215,7 @@ export default function OrdersTrainingTab() {
             <SelectContent>
               <SelectItem value="all">Все типы</SelectItem>
               <SelectItem value="order">Приказы</SelectItem>
-              <SelectItem value="attestation-order">Приказы на аттестацию</SelectItem>
+              <SelectItem value="attestation">Приказы на аттестацию</SelectItem>
               <SelectItem value="training">Обучения</SelectItem>
             </SelectContent>
           </Select>
@@ -301,8 +231,7 @@ export default function OrdersTrainingTab() {
               <SelectItem value="approved">Согласован</SelectItem>
               <SelectItem value="active">Активен</SelectItem>
               <SelectItem value="completed">Выполнен</SelectItem>
-              <SelectItem value="planned">Запланировано</SelectItem>
-              <SelectItem value="in_progress">В процессе</SelectItem>
+              <SelectItem value="cancelled">Отменён</SelectItem>
             </SelectContent>
           </Select>
 
@@ -369,8 +298,8 @@ export default function OrdersTrainingTab() {
                       <Badge variant="secondary" className={getTypeColor(doc.type)}>
                         {getTypeLabel(doc.type)}
                       </Badge>
-                      <Badge variant="outline" className={getStatusColor(doc.status)}>
-                        {getStatusLabel(doc.status)}
+                      <Badge variant="outline" className={statusColors[doc.status]}>
+                        {statusLabels[doc.status]}
                       </Badge>
                     </div>
                     <CardTitle className="text-base">{doc.title}</CardTitle>
@@ -385,7 +314,7 @@ export default function OrdersTrainingTab() {
                       </span>
                       <span className="flex items-center gap-1">
                         <Icon name="Users" size={12} />
-                        {doc.employeeCount}
+                        {doc.employeeIds.length}
                       </span>
                     </CardDescription>
                     {doc.description && (
@@ -396,7 +325,7 @@ export default function OrdersTrainingTab() {
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="flex gap-2 flex-wrap">
-                  {doc.type === 'order' && (
+                  {doc.type === 'order' && doc.id.startsWith('order-') && (
                     <>
                       <Button variant="ghost" size="sm" onClick={() => orderHandlers.handleViewOrder(doc.id)}>
                         <Icon name="Eye" size={14} className="mr-1" />
@@ -412,7 +341,7 @@ export default function OrdersTrainingTab() {
                       </Button>
                     </>
                   )}
-                  {doc.type === 'training' && (
+                  {doc.type === 'training' && doc.id.startsWith('training-') && (
                     <>
                       <Button variant="ghost" size="sm" onClick={() => trainingHandlers.handleViewTraining(doc.id)}>
                         <Icon name="Eye" size={14} className="mr-1" />
