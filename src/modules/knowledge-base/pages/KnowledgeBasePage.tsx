@@ -201,24 +201,24 @@ export default function KnowledgeBasePage() {
         onSearchChange={setSearchQuery}
       />
 
-      {activeTab === 'regulatory' && (
-        <RegulatoryFilters
-          selectedType={selectedType}
-          selectedAuthority={selectedAuthority}
-          onTypeChange={setSelectedType}
-          onAuthorityChange={setSelectedAuthority}
-          onReset={() => {
-            setSelectedType('all');
-            setSelectedAuthority('all');
-          }}
-        />
-      )}
-
       <KnowledgeBaseTabs
         activeTab={activeTab}
         onTabChange={setActiveTab}
         stats={stats}
       >
+        {activeTab === 'regulatory' && (
+          <RegulatoryFilters
+            selectedType={selectedType}
+            selectedAuthority={selectedAuthority}
+            onTypeChange={setSelectedType}
+            onAuthorityChange={setSelectedAuthority}
+            onReset={() => {
+              setSelectedType('all');
+              setSelectedAuthority('all');
+            }}
+          />
+        )}
+
         <DocumentsList
           activeTab={activeTab}
           documents={filteredDocuments}
