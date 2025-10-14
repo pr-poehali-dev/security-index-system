@@ -5,7 +5,7 @@ import { useKnowledgeBaseStore } from '@/stores/knowledgeBaseStore';
 import { useAuthStore } from '@/stores/authStore';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import type { DocumentCategory, KnowledgeDocument, RegulatoryDocumentType, FederalAuthority } from '@/types';
+import type { DocumentCategory, KnowledgeDocument, RegulatoryDocumentType } from '@/types';
 import KnowledgeBaseHeader from '@/modules/knowledge-base/components/KnowledgeBaseHeader';
 import KnowledgeBaseStats from '@/modules/knowledge-base/components/KnowledgeBaseStats';
 import KnowledgeBaseSearch from '@/modules/knowledge-base/components/KnowledgeBaseSearch';
@@ -24,7 +24,7 @@ export default function KnowledgeBasePage() {
   const [activeTab, setActiveTab] = useState<DocumentCategory>('regulatory');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<RegulatoryDocumentType | 'all'>('all');
-  const [selectedAuthority, setSelectedAuthority] = useState<FederalAuthority | 'all'>('all');
+  const [showActive, setShowActive] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -42,9 +42,9 @@ export default function KnowledgeBasePage() {
       if (selectedType !== 'all') {
         categoryDocs = categoryDocs.filter(doc => doc.regulatoryType === selectedType);
       }
-      if (selectedAuthority !== 'all') {
-        categoryDocs = categoryDocs.filter(doc => doc.authority === selectedAuthority);
-      }
+      categoryDocs = categoryDocs.filter(doc => 
+        showActive ? doc.status === 'published' : doc.status !== 'published'
+      );
     }
     
     if (!searchQuery) return categoryDocs;
@@ -56,7 +56,7 @@ export default function KnowledgeBasePage() {
       doc.tags?.some(tag => tag.toLowerCase().includes(query)) ||
       doc.documentNumber?.toLowerCase().includes(query)
     );
-  }, [activeTab, searchQuery, selectedType, selectedAuthority, documents, getDocumentsByCategory]);
+  }, [activeTab, searchQuery, selectedType, showActive, documents, getDocumentsByCategory]);
 
   const stats = useMemo(() => {
     return {
@@ -209,12 +209,12 @@ export default function KnowledgeBasePage() {
         {activeTab === 'regulatory' && (
           <RegulatoryFilters
             selectedType={selectedType}
-            selectedAuthority={selectedAuthority}
+            showActive={showActive}
             onTypeChange={setSelectedType}
-            onAuthorityChange={setSelectedAuthority}
+            onActiveChange={setShowActive}
             onReset={() => {
               setSelectedType('all');
-              setSelectedAuthority('all');
+              setShowActive(true);
             }}
           />
         )}
