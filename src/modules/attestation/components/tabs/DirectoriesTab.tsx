@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCertificationStore } from '@/stores/certificationStore';
-import { useContractorsStore } from '@/modules/catalog/stores/contractorsStore';
+
 import { 
   CERTIFICATION_CATEGORIES, 
   CERTIFICATION_AREAS_BY_CATEGORY
@@ -22,16 +22,10 @@ import {
 export default function DirectoriesTab() {
   const user = useAuthStore((state) => state.user);
   const { competencies, getOrganizationsByTenant, positions } = useSettingsStore();
-  const { getTrainingCenters, fetchContractors } = useContractorsStore();
   const [searchQuery, setSearchQuery] = useState('');
   
   const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
   const tenantCompetencies = competencies.filter((c) => c.tenantId === user?.tenantId);
-  const trainingOrganizations = getTrainingCenters();
-  
-  useEffect(() => {
-    fetchContractors();
-  }, [fetchContractors]);
   
   const filteredTemplates = tenantCompetencies.filter(comp => {
     const orgName = organizations.find(o => o.id === comp.organizationId)?.name || '';
@@ -40,12 +34,6 @@ export default function DirectoriesTab() {
     return positionName.toLowerCase().includes(searchQuery.toLowerCase()) ||
            orgName.toLowerCase().includes(searchQuery.toLowerCase());
   });
-  
-  const filteredTrainingOrgs = trainingOrganizations.filter(org =>
-    org.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    org.inn?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    org.directorName?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <div className="space-y-6">
@@ -54,10 +42,6 @@ export default function DirectoriesTab() {
           <TabsTrigger value="cert-types" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="Award" size={20} />
             <span className="text-xs font-medium text-center leading-tight">Виды<br/>аттестаций</span>
-          </TabsTrigger>
-          <TabsTrigger value="organizations" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="Building2" size={20} />
-            <span className="text-xs font-medium text-center leading-tight">Учебные<br/>центры</span>
           </TabsTrigger>
           <TabsTrigger value="templates" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="FileCheck" size={20} />
@@ -166,142 +150,6 @@ export default function DirectoriesTab() {
                       <p className="text-sm text-blue-700 dark:text-blue-300">
                         Справочник содержит все области аттестации по промышленной безопасности, энергобезопасности, 
                         охране труда и экологии согласно требованиям Ростехнадзора и законодательства РФ.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="organizations">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Учебные центры и организации</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-6">
-                <div className="relative">
-                  <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Поиск по названию или ИНН..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              {filteredTrainingOrgs.length === 0 ? (
-                <div className="text-center py-12">
-                  <Icon name="Building2" size={48} className="mx-auto text-muted-foreground mb-4" />
-                  <p className="text-lg font-medium mb-2">Учебные центры не найдены</p>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {searchQuery ? 'Измените параметры поиска' : 'Учебные центры добавляются в модуле "Подрядчики"'}
-                  </p>
-                  <Button variant="outline" onClick={() => window.location.href = '/contractors'} className="gap-2">
-                    <Icon name="Building2" size={16} />
-                    Перейти к подрядчикам
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {filteredTrainingOrgs.map((org) => (
-                    <Card key={org.id}>
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h3 className="font-semibold">{org.name}</h3>
-                              {org.status !== 'active' && (
-                                <Badge variant="secondary">
-                                  {org.status === 'suspended' ? 'Приостановлен' : 
-                                   org.status === 'blocked' ? 'Заблокирован' : 'Архивирован'}
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
-                              {org.inn && (
-                                <span className="flex items-center gap-1">
-                                  <Icon name="FileText" size={14} />
-                                  ИНН: {org.inn}
-                                </span>
-                              )}
-                              {org.directorName && (
-                                <span className="flex items-center gap-1">
-                                  <Icon name="User" size={14} />
-                                  {org.directorName}
-                                </span>
-                              )}
-                              {org.contactPhone && (
-                                <span className="flex items-center gap-1">
-                                  <Icon name="Phone" size={14} />
-                                  {org.contactPhone}
-                                </span>
-                              )}
-                              {org.contactEmail && (
-                                <span className="flex items-center gap-1">
-                                  <Icon name="Mail" size={14} />
-                                  {org.contactEmail}
-                                </span>
-                              )}
-                              {org.website && (
-                                <span className="flex items-center gap-1">
-                                  <Icon name="Globe" size={14} />
-                                  <a href={org.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                    {org.website.replace('https://', '')}
-                                  </a>
-                                </span>
-                              )}
-                            </div>
-                            {org.actualAddress && (
-                              <p className="text-sm text-muted-foreground mt-2 flex items-start gap-1">
-                                <Icon name="MapPin" size={14} className="mt-0.5" />
-                                {org.actualAddress}
-                              </p>
-                            )}
-                            {org.accreditations && org.accreditations.length > 0 && (
-                              <div className="flex items-center gap-2 mt-2">
-                                <Icon name="Award" size={14} className="text-muted-foreground" />
-                                <div className="flex flex-wrap gap-1">
-                                  {org.accreditations.map((acc, idx) => (
-                                    <Badge key={idx} variant="outline" className="text-xs">
-                                      {acc}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                            {org.rating > 0 && (
-                              <div className="flex items-center gap-2 mt-2">
-                                <Icon name="Star" size={14} className="text-amber-500" />
-                                <span className="text-sm text-muted-foreground">
-                                  Рейтинг: {org.rating}/5
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-
-              <Card className="mt-6 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <Icon name="Info" size={20} className="text-blue-600 dark:text-blue-400 mt-0.5" />
-                    <div>
-                      <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
-                        Об учебных центрах
-                      </h4>
-                      <p className="text-sm text-blue-700 dark:text-blue-300">
-                        Справочник учебных центров отображает данные из модуля "Подрядчики" → "Организации" (тип: Учебный центр).
-                        Здесь показываются только те учебные центры, которые зарегистрированы в системе. Для добавления или редактирования перейдите в модуль "Подрядчики".
                       </p>
                     </div>
                   </div>

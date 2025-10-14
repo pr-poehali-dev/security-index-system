@@ -78,7 +78,12 @@ export default function UnifiedDocumentDialog({
   const { personnel, people, positions, getPersonnelByTenant, departments, getContractorsByType } = useSettingsStore();
   const { certifications } = useCertificationStore();
   
-  const trainingOrganizations = user?.tenantId ? getContractorsByType(user.tenantId, 'training_center') : [];
+  const trainingOrganizations = user?.tenantId 
+    ? getContractorsByType(user.tenantId, 'training_center').map(contractor => ({
+        id: contractor.id,
+        name: contractor.contractorName,
+      }))
+    : [];
   const { addDocument } = useDocumentsStore();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
