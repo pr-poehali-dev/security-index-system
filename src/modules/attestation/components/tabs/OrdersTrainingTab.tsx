@@ -2,8 +2,8 @@ import { useState, useMemo } from 'react';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import DocumentFilters, { FilterValues } from '@/components/shared/DocumentFilters';
+import { documentsFilterConfig } from '@/modules/attestation/utils/filterConfigs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import UnifiedDocumentDialog from '../UnifiedDocumentDialog';
@@ -45,10 +45,12 @@ export default function OrdersTrainingTab() {
     return user?.tenantId ? getDocumentsByTenant(user.tenantId) : [];
   }, [documents, legacyOrders, legacyTrainings, legacyAttestationOrders, user?.tenantId, getDocumentsByTenant]);
   
-  const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'date' | 'status' | 'type'>('date');
+  const [filterValues, setFilterValues] = useState<FilterValues>({
+    search: '',
+    type: 'all',
+    status: 'all',
+    sortBy: 'date',
+  });
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -74,6 +76,11 @@ export default function OrdersTrainingTab() {
   }, [migratedDocuments]);
 
   const filteredDocuments = useMemo(() => {
+    const searchQuery = filterValues.search || '';
+    const typeFilter = filterValues.type || 'all';
+    const statusFilter = filterValues.status || 'all';
+    const sortBy = filterValues.sortBy || 'date';
+
     const filtered = unifiedDocuments.filter(doc => {
       const matchesSearch = 
         doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -101,7 +108,7 @@ export default function OrdersTrainingTab() {
     });
 
     return filtered;
-  }, [unifiedDocuments, searchQuery, typeFilter, statusFilter, sortBy, sortOrder]);
+  }, [unifiedDocuments, filterValues, sortOrder]);
 
   const stats = useMemo(() => {
     return {
@@ -196,74 +203,22 @@ export default function OrdersTrainingTab() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex flex-1 gap-2 w-full sm:w-auto">
-          <div className="relative flex-1 sm:max-w-sm">
-            <Icon name="Search" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
-            <Input
-              placeholder="Поиск по названию, номеру..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Тип документа" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Все типы</SelectItem>
-              <SelectItem value="order">Приказы</SelectItem>
-              <SelectItem value="attestation">Приказы на аттестацию</SelectItem>
-              <SelectItem value="training">Обучения</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Статус" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Все статусы</SelectItem>
-              <SelectItem value="draft">Черновик</SelectItem>
-              <SelectItem value="prepared">Подготовлен</SelectItem>
-              <SelectItem value="approved">Согласован</SelectItem>
-              <SelectItem value="active">Активен</SelectItem>
-              <SelectItem value="completed">Выполнен</SelectItem>
-              <SelectItem value="cancelled">Отменён</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={sortBy} onValueChange={(value) => setSortBy(value as 'date' | 'status' | 'type')}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Сортировка" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="date">По дате</SelectItem>
-              <SelectItem value="status">По статусу</SelectItem>
-              <SelectItem value="type">По типу</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className="gap-2"
-          >
-            <Icon name={sortOrder === 'asc' ? 'ArrowUp' : 'ArrowDown'} size={16} />
-            {sortOrder === 'asc' ? 'По возрастанию' : 'По убыванию'}
-          </Button>
-        </div>
+        <DocumentFilters
+          config={documentsFilterConfig(
+            handleExportToExcel,
+            filterValues.sortBy || 'date',
+            sortOrder,
+            (value) => setFilterValues({ ...filterValues, sortBy: value }),
+            () => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+          )}
+          values={filterValues}
+          onChange={setFilterValues}
+          className="flex-1"
+        />
 
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => setViewMode(viewMode === 'cards' ? 'table' : 'cards')}>
             <Icon name={viewMode === 'cards' ? 'Table' : 'LayoutGrid'} size={16} />
-          </Button>
-
-          <Button variant="outline" size="sm" onClick={handleExportToExcel}>
-            <Icon name="Download" size={16} className="mr-2" />
-            Excel
           </Button>
 
           <Button 
