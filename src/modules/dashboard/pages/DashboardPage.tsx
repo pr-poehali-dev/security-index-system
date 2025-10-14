@@ -337,17 +337,17 @@ const DashboardPage = memo(function DashboardPage() {
   const handleGenerateExpertiseReport = useCallback(async (period: ReportPeriod) => {
     try {
       toast.info('Формируем отчет по экспертизам...');
-      await generateExpertiseReport(objects, organizations, period);
+      await generateExpertiseReport(objects, catalogOrganizations, period);
       toast.success('Отчет по экспертизам сформирован!');
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
     }
-  }, [objects, organizations]);
+  }, [objects, catalogOrganizations]);
 
   const handleGenerateOrganizationsReport = useCallback(async (period: ReportPeriod) => {
     try {
       toast.info('Формируем отчет по организациям...');
-      await generateOrganizationsReport(organizations, objects, period);
+      await generateOrganizationsReport(catalogOrganizations, objects, period);
       toast.success('Отчет по организациям сформирован!');
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
