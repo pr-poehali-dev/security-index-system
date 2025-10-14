@@ -25,7 +25,7 @@ const MOCK_USERS: User[] = [
     name: 'Администратор Тенанта',
     role: 'TenantAdmin',
     tenantId: 'tenant-1',
-    availableModules: ['attestation', 'catalog', 'incidents', 'checklists', 'tasks', 'examination', 'maintenance', 'budget', 'training-center', 'knowledge-base', 'settings']
+    availableModules: ['attestation', 'catalog', 'contractors', 'incidents', 'checklists', 'tasks', 'examination', 'maintenance', 'budget', 'training-center', 'knowledge-base', 'audit', 'settings']
   },
   {
     id: '3',
@@ -33,7 +33,7 @@ const MOCK_USERS: User[] = [
     name: 'Аудитор',
     role: 'Auditor',
     tenantId: 'tenant-1',
-    availableModules: ['attestation', 'catalog', 'incidents', 'checklists', 'examination', 'knowledge-base']
+    availableModules: ['attestation', 'catalog', 'contractors', 'incidents', 'checklists', 'examination', 'audit', 'knowledge-base']
   },
   {
     id: '4',
