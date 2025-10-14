@@ -69,7 +69,7 @@ const descriptions: Record<string, string> = {
   'src/stores/incidentsStore.ts': 'Zustand store для управления инцидентами',
   'src/stores/templatesStore.ts': 'Zustand store для управления шаблонами документов',
   'src/stores/trainingCenterStore.ts': 'Zustand store для управления учебным центром',
-  'src/stores/notificationStore.ts': 'Zustand store для управления уведомлениями',
+  'src/stores/attestationNotificationsStore.ts': 'Zustand store для управления автоматическими уведомлениями об истечении сроков аттестации',
   'src/stores/trainingsAttestationStore.ts': 'Zustand store для управления обучением аттестации',
   'src/stores/budgetStore.ts': 'Zustand store для управления бюджетом',
   'src/stores/knowledgeBaseStore.ts': 'Zustand store для управления базой знаний',
