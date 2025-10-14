@@ -46,25 +46,25 @@ const documentTypes: TypeOption[] = [
 
 const trainingTypes: TypeOption[] = [
   {
-    value: 'initial',
-    label: 'Первичное обучение',
-    icon: 'BookOpen',
-    color: 'text-green-600 bg-green-100 dark:bg-green-900',
-    description: 'Первичное обучение для новых сотрудников',
-  },
-  {
-    value: 'periodic',
-    label: 'Периодическое обучение',
-    icon: 'RefreshCw',
+    value: 'dpo_center',
+    label: 'ДПО в учебном центре',
+    icon: 'Building2',
     color: 'text-blue-600 bg-blue-100 dark:bg-blue-900',
-    description: 'Регулярное повышение квалификации',
+    description: 'Дополнительное профессиональное образование',
   },
   {
-    value: 'extraordinary',
-    label: 'Внеочередное обучение',
-    icon: 'AlertCircle',
-    color: 'text-orange-600 bg-orange-100 dark:bg-orange-900',
-    description: 'Внеплановое обучение при необходимости',
+    value: 'training_center',
+    label: 'Тренинг в учебном центре',
+    icon: 'Users',
+    color: 'text-purple-600 bg-purple-100 dark:bg-purple-900',
+    description: 'Очный тренинг в учебном центре',
+  },
+  {
+    value: 'training_lms',
+    label: 'Тренинг в СДО ИСП',
+    icon: 'Monitor',
+    color: 'text-green-600 bg-green-100 dark:bg-green-900',
+    description: 'Онлайн-обучение в системе дистанционного обучения',
   },
 ];
 
