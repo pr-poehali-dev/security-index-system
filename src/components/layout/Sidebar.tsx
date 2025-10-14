@@ -150,6 +150,8 @@ const Sidebar = memo(function Sidebar() {
           const module = MODULES[moduleKey];
           const route = MODULE_ROUTES[moduleKey];
           
+          if (!module || !route) return null;
+          
           let notifications: any[] = [];
           if (moduleKey === 'incidents') notifications = incidentNotifications;
           if (moduleKey === 'attestation') notifications = attestationNotifications;
