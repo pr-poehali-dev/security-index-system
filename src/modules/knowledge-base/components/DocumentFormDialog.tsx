@@ -254,32 +254,6 @@ export default function DocumentFormDialog({
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="title">
-              Название <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Введите название документа"
-              maxLength={200}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Описание</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Краткое описание содержания документа"
-              rows={3}
-              maxLength={500}
-            />
-          </div>
-
           {category === 'regulatory' && (
             <>
               <div className="space-y-2">
@@ -350,6 +324,32 @@ export default function DocumentFormDialog({
               </div>
             </>
           )}
+
+          <div className="space-y-2">
+            <Label htmlFor="title">
+              Название <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Введите название документа"
+              maxLength={200}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Описание</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Краткое описание содержания документа"
+              rows={3}
+              maxLength={500}
+            />
+          </div>
 
           <div className="space-y-2">
             <Label>
