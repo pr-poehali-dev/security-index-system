@@ -153,8 +153,8 @@ const ContractorsList = ({ filterByType }: ContractorsListProps = {}) => {
           />
         </div>
         
-        {!filterByType && (
-          <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4">
+          {!filterByType && (
             <div className="flex gap-2">
               <span className="text-sm text-muted-foreground self-center">Тип:</span>
               <Button
@@ -181,8 +181,7 @@ const ContractorsList = ({ filterByType }: ContractorsListProps = {}) => {
                 Учебные центры
               </Button>
             </div>
-          </div>
-        )}
+          )}
           
           <div className="flex gap-2">
             <span className="text-sm text-muted-foreground self-center">Статус:</span>
