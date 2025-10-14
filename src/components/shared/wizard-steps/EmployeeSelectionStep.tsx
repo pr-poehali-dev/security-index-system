@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export interface Employee {
   id: string;
@@ -14,11 +15,15 @@ export interface Employee {
   [key: string]: any;
 }
 
+export type CertificationStatusFilter = 'all' | 'valid' | 'expiring' | 'expired';
+
 interface EmployeeSelectionStepProps {
   employees: Employee[];
   selected: string[];
   onSelect: (ids: string[]) => void;
   renderEmployeeExtra?: (employee: Employee) => React.ReactNode;
+  enableCertificationFilter?: boolean;
+  getCertificationStatus?: (employee: Employee) => CertificationStatusFilter;
 }
 
 export default function EmployeeSelectionStep({
@@ -26,20 +31,31 @@ export default function EmployeeSelectionStep({
   selected,
   onSelect,
   renderEmployeeExtra,
+  enableCertificationFilter = false,
+  getCertificationStatus,
 }: EmployeeSelectionStepProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [certStatusFilter, setCertStatusFilter] = useState<CertificationStatusFilter>('all');
 
   const filteredEmployees = useMemo(() => {
-    if (!searchQuery) return employees;
+    let filtered = employees;
 
-    const query = searchQuery.toLowerCase();
-    return employees.filter(
-      (emp) =>
-        emp.name.toLowerCase().includes(query) ||
-        emp.position.toLowerCase().includes(query) ||
-        emp.department.toLowerCase().includes(query)
-    );
-  }, [employees, searchQuery]);
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (emp) =>
+          emp.name.toLowerCase().includes(query) ||
+          emp.position.toLowerCase().includes(query) ||
+          emp.department.toLowerCase().includes(query)
+      );
+    }
+
+    if (enableCertificationFilter && certStatusFilter !== 'all' && getCertificationStatus) {
+      filtered = filtered.filter((emp) => getCertificationStatus(emp) === certStatusFilter);
+    }
+
+    return filtered;
+  }, [employees, searchQuery, certStatusFilter, enableCertificationFilter, getCertificationStatus]);
 
   const handleToggle = (employeeId: string) => {
     if (selected.includes(employeeId)) {
@@ -57,28 +73,78 @@ export default function EmployeeSelectionStep({
     }
   };
 
+  const handleSelectByStatus = (status: CertificationStatusFilter) => {
+    if (!getCertificationStatus) return;
+    
+    const employeesWithStatus = employees.filter((emp) => getCertificationStatus(emp) === status);
+    const newSelected = [...new Set([...selected, ...employeesWithStatus.map((emp) => emp.id)])];
+    onSelect(newSelected);
+  };
+
   const isAllSelected = selected.length === filteredEmployees.length && filteredEmployees.length > 0;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="relative flex-1">
-          <Icon
-            name="Search"
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
-            size={18}
-          />
-          <Input
-            placeholder="Поиск по ФИО, должности, подразделению..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Icon
+              name="Search"
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+              size={18}
+            />
+            <Input
+              placeholder="Поиск по ФИО, должности, подразделению..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {enableCertificationFilter && (
+            <Select value={certStatusFilter} onValueChange={(value) => setCertStatusFilter(value as CertificationStatusFilter)}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Все сотрудники</SelectItem>
+                <SelectItem value="valid">Аттестация действует</SelectItem>
+                <SelectItem value="expiring">Истекает скоро</SelectItem>
+                <SelectItem value="expired">Просрочена</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
-        <Button variant="outline" size="sm" onClick={handleSelectAll}>
-          {isAllSelected ? 'Снять выбор' : 'Выбрать всех'}
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" size="sm" onClick={handleSelectAll}>
+            {isAllSelected ? 'Снять выбор' : 'Выбрать всех'}
+          </Button>
+
+          {enableCertificationFilter && getCertificationStatus && (
+            <>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleSelectByStatus('expired')}
+                className="gap-2"
+              >
+                <Icon name="AlertCircle" size={14} className="text-red-600" />
+                Выбрать с просроченными
+              </Button>
+
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => handleSelectByStatus('expiring')}
+                className="gap-2"
+              >
+                <Icon name="Clock" size={14} className="text-orange-600" />
+                Выбрать с истекающими
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">

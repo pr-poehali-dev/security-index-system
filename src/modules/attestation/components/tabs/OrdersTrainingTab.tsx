@@ -223,24 +223,13 @@ export default function OrdersTrainingTab() {
 
           <Button 
             onClick={() => {
-              setCreateDialogType('order');
+              setCreateDialogType(undefined);
               setShowCreateDialog(true);
             }} 
             className="gap-2"
           >
             <Icon name="Plus" size={16} />
             Создать приказ
-          </Button>
-
-          <Button 
-            onClick={() => {
-              setCreateDialogType('training');
-              setShowCreateDialog(true);
-            }} 
-            className="gap-2"
-          >
-            <Icon name="GraduationCap" size={16} />
-            Создать обучение
           </Button>
         </div>
       </div>

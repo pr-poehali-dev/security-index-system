@@ -2,12 +2,15 @@ import { useState, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useCertificationStore } from '@/stores/certificationStore';
+import { getCertificationStatus } from '@/lib/utils/personnelUtils';
 import { useDocumentsStore } from '@/stores/documentsStore';
 import { DocumentStatus } from '@/types/documentStatus';
 import DocumentCreationWizard, { WizardStep } from '@/components/shared/DocumentCreationWizard';
 import TypeSelectionStep, { TypeOption } from '@/components/shared/wizard-steps/TypeSelectionStep';
 import BasicInfoStep, { BasicInfoData } from '@/components/shared/wizard-steps/BasicInfoStep';
-import EmployeeSelectionStep, { Employee } from '@/components/shared/wizard-steps/EmployeeSelectionStep';
+import EmployeeSelectionStep, { Employee, CertificationStatusFilter } from '@/components/shared/wizard-steps/EmployeeSelectionStep';
+import TrainingDetailsStep, { TrainingDetailsData } from '@/components/shared/wizard-steps/TrainingDetailsStep';
 import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 import type { OrderDocument, TrainingDocument } from '@/stores/documentsStore';
 
@@ -72,7 +75,10 @@ export default function UnifiedDocumentDialog({
 }: UnifiedDocumentDialogProps) {
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
-  const { personnel, people, positions, getPersonnelByTenant, departments } = useSettingsStore();
+  const { personnel, people, positions, getPersonnelByTenant, departments, getContractorsByType } = useSettingsStore();
+  const { certifications } = useCertificationStore();
+  
+  const trainingOrganizations = user?.tenantId ? getContractorsByType(user.tenantId, 'training_center') : [];
   const { addDocument } = useDocumentsStore();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,10 +91,13 @@ export default function UnifiedDocumentDialog({
     description: '',
   });
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
-  const [trainingStartDate, setTrainingStartDate] = useState(new Date().toISOString().split('T')[0]);
-  const [trainingEndDate, setTrainingEndDate] = useState(new Date().toISOString().split('T')[0]);
-  const [trainingOrganization, setTrainingOrganization] = useState('');
-  const [trainingCost, setTrainingCost] = useState('0');
+  const [trainingDetails, setTrainingDetails] = useState<TrainingDetailsData>({
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0],
+    organizationId: '',
+    cost: '0',
+    program: '',
+  });
 
   const tenantPersonnel = user?.tenantId ? getPersonnelByTenant(user.tenantId) : [];
 
@@ -96,17 +105,41 @@ export default function UnifiedDocumentDialog({
     return tenantPersonnel.map((p) => {
       const info = getPersonnelFullInfo(p, people, positions);
       const dept = departments.find((d) => d.id === p.departmentId);
+      const employeeCerts = certifications.filter(c => c.personnelId === p.id);
 
       return {
         id: p.id,
         name: info.fullName,
         position: info.position,
         department: dept?.name || '—',
+        certifications: employeeCerts,
       };
     });
-  }, [tenantPersonnel, people, positions, departments]);
+  }, [tenantPersonnel, people, positions, departments, certifications]);
 
-  const isTrainingFlow = documentType === 'training' || selectedType === 'training';
+  const getEmployeeCertStatus = (employee: Employee): CertificationStatusFilter => {
+    if (!employee.certifications || employee.certifications.length === 0) {
+      return 'all';
+    }
+
+    let hasExpired = false;
+    let hasExpiring = false;
+    let hasValid = false;
+
+    employee.certifications.forEach((cert: any) => {
+      const { status } = getCertificationStatus(cert.expiryDate);
+      if (status === 'expired') hasExpired = true;
+      else if (status === 'expiring') hasExpiring = true;
+      else if (status === 'valid') hasValid = true;
+    });
+
+    if (hasExpired) return 'expired';
+    if (hasExpiring) return 'expiring';
+    if (hasValid) return 'valid';
+    return 'all';
+  };
+
+  const isTrainingFlow = selectedType === 'training';
 
   const steps = useMemo<WizardStep[]>(() => {
     const baseSteps: WizardStep[] = [];
@@ -191,6 +224,33 @@ export default function UnifiedDocumentDialog({
       ),
     });
 
+    if (isTrainingFlow) {
+      baseSteps.push({
+        id: 'training-details',
+        title: 'Детали обучения',
+        description: 'Укажите параметры обучения',
+        icon: 'Settings',
+        validate: () => {
+          if (!trainingDetails.startDate || !trainingDetails.endDate || !trainingDetails.organizationId || !trainingDetails.cost) {
+            toast({
+              title: 'Ошибка',
+              description: 'Заполните все обязательные поля обучения',
+              variant: 'destructive',
+            });
+            return false;
+          }
+          return true;
+        },
+        component: (
+          <TrainingDetailsStep
+            data={trainingDetails}
+            onChange={setTrainingDetails}
+            organizations={trainingOrganizations}
+          />
+        ),
+      });
+    }
+
     baseSteps.push({
       id: 'employees',
       title: 'Выбор сотрудников',
@@ -212,6 +272,33 @@ export default function UnifiedDocumentDialog({
           employees={employees}
           selected={selectedEmployees}
           onSelect={setSelectedEmployees}
+          enableCertificationFilter={selectedType === 'attestation'}
+          getCertificationStatus={getEmployeeCertStatus}
+          renderEmployeeExtra={(employee) => {
+            if (!employee.certifications || employee.certifications.length === 0) return null;
+            
+            return (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {employee.certifications.slice(0, 3).map((cert: any) => {
+                  const { status } = getCertificationStatus(cert.expiryDate);
+                  const colors = {
+                    valid: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+                    expiring: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+                    expired: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+                  };
+                  
+                  return (
+                    <span key={cert.id} className={`text-xs px-2 py-1 rounded ${colors[status]}`}>
+                      {cert.area}
+                    </span>
+                  );
+                })}
+                {employee.certifications.length > 3 && (
+                  <span className="text-xs text-muted-foreground">+{employee.certifications.length - 3}</span>
+                )}
+              </div>
+            );
+          }}
         />
       ),
     });
@@ -234,9 +321,7 @@ export default function UnifiedDocumentDialog({
     setIsSubmitting(true);
 
     try {
-      const finalType = documentType || selectedType;
-
-      if (finalType === 'training') {
+      if (selectedType === 'training') {
         const trainingDoc: Omit<TrainingDocument, 'id' | 'createdAt' | 'updatedAt'> = {
           type: 'training',
           tenantId: user.tenantId,
@@ -248,10 +333,11 @@ export default function UnifiedDocumentDialog({
           createdBy: user.name || 'Система',
           description: basicInfo.description,
           trainingType: (selectedSubType as 'initial' | 'periodic' | 'extraordinary') || 'periodic',
-          startDate: trainingStartDate,
-          endDate: trainingEndDate,
-          organizationId: trainingOrganization || 'org-1',
-          cost: parseFloat(trainingCost) || 0,
+          startDate: trainingDetails.startDate,
+          endDate: trainingDetails.endDate,
+          organizationId: trainingDetails.organizationId,
+          cost: parseFloat(trainingDetails.cost) || 0,
+          program: trainingDetails.program,
         };
 
         addDocument(trainingDoc);
@@ -266,7 +352,7 @@ export default function UnifiedDocumentDialog({
           employeeIds: selectedEmployees,
           createdBy: user.name || 'Система',
           description: basicInfo.description,
-          orderType: (finalType as 'attestation' | 'training' | 'suspension') || 'attestation',
+          orderType: (selectedType as 'attestation' | 'training' | 'suspension') || 'attestation',
         };
 
         addDocument(orderDoc);
@@ -300,13 +386,20 @@ export default function UnifiedDocumentDialog({
       description: '',
     });
     setSelectedEmployees([]);
+    setTrainingDetails({
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date().toISOString().split('T')[0],
+      organizationId: '',
+      cost: '0',
+      program: '',
+    });
   };
 
   return (
     <DocumentCreationWizard
       open={open}
       onOpenChange={onOpenChange}
-      title={isTrainingFlow ? 'Создание обучения' : 'Создание документа'}
+      title="Создание приказа"
       description="Следуйте шагам для создания нового документа"
       steps={steps}
       onComplete={handleComplete}
