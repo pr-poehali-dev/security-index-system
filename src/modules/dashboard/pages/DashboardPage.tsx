@@ -352,7 +352,7 @@ const DashboardPage = memo(function DashboardPage() {
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
     }
-  }, [organizations, objects]);
+  }, [catalogOrganizations, objects]);
 
   if (isLoading) {
     return (
