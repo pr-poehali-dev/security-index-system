@@ -2,16 +2,8 @@ import { useState, useEffect } from 'react';
 import { useKnowledgeBaseStore } from '@/stores/knowledgeBaseStore';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -20,11 +12,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
-import type { KnowledgeDocument, DocumentCategory, DocumentStatus, RegulatoryDocumentType, FederalAuthority } from '@/types';
-import { REGULATORY_DOCUMENT_TYPES, FEDERAL_AUTHORITIES } from '@/types';
+import type { KnowledgeDocument, DocumentCategory, DocumentStatus, RegulatoryDocumentType } from '@/types';
+import DocumentBasicFields from './forms/DocumentBasicFields';
+import RegulatoryDocumentFields from './forms/RegulatoryDocumentFields';
+import DocumentContentField from './forms/DocumentContentField';
+import DocumentTagsField from './forms/DocumentTagsField';
 
 interface DocumentFormDialogProps {
   open: boolean;
@@ -44,7 +38,7 @@ export default function DocumentFormDialog({
   const { addDocument, updateDocument } = useKnowledgeBaseStore();
   const user = useAuthStore((state) => state.user);
 
-  const [category, setCategory] = useState<DocumentCategory>('user_guide');
+  const [category, setCategory] = useState<DocumentCategory>('regulatory');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [content, setContent] = useState('');
@@ -63,7 +57,6 @@ export default function DocumentFormDialog({
   const [effectiveDate, setEffectiveDate] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [regulatoryStatus, setRegulatoryStatus] = useState<'active' | 'inactive'>('active');
-  const [authority, setAuthority] = useState<FederalAuthority | ''>('');
 
   useEffect(() => {
     if (document && mode === 'edit') {
@@ -83,7 +76,6 @@ export default function DocumentFormDialog({
       setEffectiveDate(document.effectiveDate || '');
       setExpiryDate(document.expiryDate || '');
       setRegulatoryStatus(document.regulatoryStatus || 'active');
-      setAuthority(document.authority || '');
     } else {
       handleReset();
       if (initialCategory && mode === 'create') {
@@ -93,7 +85,7 @@ export default function DocumentFormDialog({
   }, [document, mode, open, initialCategory]);
 
   const handleReset = () => {
-    setCategory(initialCategory || 'user_guide');
+    setCategory(initialCategory || 'regulatory');
     setTitle('');
     setDescription('');
     setContent('');
@@ -111,7 +103,6 @@ export default function DocumentFormDialog({
     setEffectiveDate('');
     setExpiryDate('');
     setRegulatoryStatus('active');
-    setAuthority('');
   };
 
   const handleAddTag = () => {
@@ -181,7 +172,6 @@ export default function DocumentFormDialog({
         effectiveDate: effectiveDate || undefined,
         expiryDate: expiryDate || undefined,
         regulatoryStatus: category === 'regulatory' ? regulatoryStatus : undefined,
-        authority: authority || undefined,
       };
 
       if (mode === 'edit' && document) {
@@ -214,23 +204,6 @@ export default function DocumentFormDialog({
     }
   };
 
-  const categories = [
-    { value: 'user_guide', label: 'Инструкции пользователя', icon: 'BookOpen' },
-    { value: 'regulatory', label: 'Нормативные документы', icon: 'Scale' },
-    { value: 'organization', label: 'Документы организации', icon: 'Building2' },
-  ].filter(cat => {
-    if (cat.value === 'platform_instruction' && user?.role !== 'SuperAdmin') {
-      return false;
-    }
-    return true;
-  });
-
-  const statuses = [
-    { value: 'draft', label: 'Черновик' },
-    { value: 'published', label: 'Опубликован' },
-    { value: 'archived', label: 'Архив' },
-  ];
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -246,228 +219,44 @@ export default function DocumentFormDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="category">
-              Раздел <span className="text-red-500">*</span>
-            </Label>
-            <Select value={category} onValueChange={(v) => setCategory(v as DocumentCategory)}>
-              <SelectTrigger id="category">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value}>
-                    <div className="flex items-center gap-2">
-                      <Icon name={cat.icon} size={16} />
-                      {cat.label}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <DocumentBasicFields
+            category={category}
+            onCategoryChange={setCategory}
+            title={title}
+            onTitleChange={setTitle}
+            description={description}
+            onDescriptionChange={setDescription}
+            version={version}
+            onVersionChange={setVersion}
+            status={status}
+            onStatusChange={setStatus}
+            userRole={user?.role}
+          />
 
           {category === 'regulatory' && (
-            <div className="space-y-2">
-              <Label htmlFor="regulatoryType">Тип нормативного документа</Label>
-              <Select value={regulatoryType} onValueChange={(v) => setRegulatoryType(v as RegulatoryDocumentType)}>
-                <SelectTrigger id="regulatoryType">
-                  <SelectValue placeholder="Выберите тип документа" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(REGULATORY_DOCUMENT_TYPES).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="title">
-              Название <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Введите название документа"
-              maxLength={200}
-              required
+            <RegulatoryDocumentFields
+              regulatoryType={regulatoryType}
+              onRegulatoryTypeChange={setRegulatoryType}
+              documentNumber={documentNumber}
+              onDocumentNumberChange={setDocumentNumber}
+              adoptionDate={adoptionDate}
+              onAdoptionDateChange={setAdoptionDate}
+              expiryDate={expiryDate}
+              onExpiryDateChange={setExpiryDate}
+              regulatoryStatus={regulatoryStatus}
+              onRegulatoryStatusChange={setRegulatoryStatus}
             />
-          </div>
-
-          {category === 'regulatory' && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="documentNumber">Номер документа</Label>
-                <Input
-                  id="documentNumber"
-                  value={documentNumber}
-                  onChange={(e) => setDocumentNumber(e.target.value)}
-                  placeholder="116-ФЗ, 782н и т.д."
-                  maxLength={100}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="adoptionDate">Дата документа</Label>
-                <Input
-                  id="adoptionDate"
-                  type="date"
-                  value={adoptionDate}
-                  onChange={(e) => setAdoptionDate(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="expiryDate">Действует до</Label>
-                <Input
-                  id="expiryDate"
-                  type="date"
-                  value={expiryDate}
-                  onChange={(e) => setExpiryDate(e.target.value)}
-                  placeholder="Оставьте пустым, если бессрочно"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="regulatoryStatus">Статус документа</Label>
-                <Select value={regulatoryStatus} onValueChange={(v) => setRegulatoryStatus(v as 'active' | 'inactive')}>
-                  <SelectTrigger id="regulatoryStatus">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Действующий</SelectItem>
-                    <SelectItem value="inactive">Недействующий</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Описание</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Краткое описание содержания документа"
-              rows={3}
-              maxLength={500}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>
-              Тип содержимого <span className="text-red-500">*</span>
-            </Label>
-            <div className="flex gap-4">
-              <Button
-                type="button"
-                variant={contentType === 'text' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setContentType('text')}
-                className="gap-2"
-              >
-                <Icon name="FileText" size={16} />
-                Текстовое содержимое
-              </Button>
-              <Button
-                type="button"
-                variant={contentType === 'file' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setContentType('file')}
-                className="gap-2"
-              >
-                <Icon name="Upload" size={16} />
-                Загрузить файл
-              </Button>
-            </div>
-          </div>
-
-          {contentType === 'text' ? (
-            <div className="space-y-2">
-              <Label htmlFor="content">
-                Содержимое <span className="text-red-500">*</span>
-              </Label>
-              <Textarea
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Введите или вставьте текст документа. Поддерживается Markdown."
-                rows={10}
-                className="font-mono text-sm"
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                Можно использовать Markdown для форматирования: # Заголовок, **жирный**, *курсив*
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <Label htmlFor="file">
-                Файл документа <span className="text-red-500">*</span>
-              </Label>
-              <div className="border-2 border-dashed rounded-lg p-6">
-                <div className="flex flex-col items-center gap-3">
-                  <Icon name="Upload" size={32} className="text-muted-foreground" />
-                  {fileName ? (
-                    <div className="text-center">
-                      <p className="font-medium">{fileName}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {fileSize ? `${(fileSize / 1024).toFixed(0)} КБ` : ''}
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      Загрузите PDF, DOCX, TXT или другой файл
-                    </p>
-                  )}
-                  <Input
-                    id="file"
-                    type="file"
-                    onChange={handleFileChange}
-                    accept=".pdf,.doc,.docx,.txt,.md"
-                    className="cursor-pointer"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="version">Версия</Label>
-              <Input
-                id="version"
-                value={version}
-                onChange={(e) => setVersion(e.target.value)}
-                placeholder="1.0, v2.5, ред. от 01.01.2024"
-                maxLength={50}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="status">
-                Статус <span className="text-red-500">*</span>
-              </Label>
-              <Select value={status} onValueChange={(v) => setStatus(v as DocumentStatus)}>
-                <SelectTrigger id="status">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {statuses.map((s) => (
-                    <SelectItem key={s.value} value={s.value}>
-                      {s.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <DocumentContentField
+            contentType={contentType}
+            onContentTypeChange={setContentType}
+            content={content}
+            onContentChange={setContent}
+            fileName={fileName}
+            fileSize={fileSize}
+            onFileChange={handleFileChange}
+          />
 
           {mode === 'edit' && (
             <div className="space-y-2">
@@ -486,42 +275,13 @@ export default function DocumentFormDialog({
             </div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="tags">Теги</Label>
-            <div className="flex gap-2">
-              <Input
-                id="tags"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddTag();
-                  }
-                }}
-                placeholder="Добавьте тег и нажмите Enter"
-              />
-              <Button type="button" variant="outline" size="icon" onClick={handleAddTag}>
-                <Icon name="Plus" size={16} />
-              </Button>
-            </div>
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="gap-1">
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveTag(tag)}
-                      className="ml-1 hover:text-destructive"
-                    >
-                      <Icon name="X" size={12} />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
+          <DocumentTagsField
+            tags={tags}
+            tagInput={tagInput}
+            onTagInputChange={setTagInput}
+            onAddTag={handleAddTag}
+            onRemoveTag={handleRemoveTag}
+          />
 
           <DialogFooter>
             <Button
