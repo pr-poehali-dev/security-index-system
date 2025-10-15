@@ -184,7 +184,9 @@ export default function ObjectsTab() {
             variant="outline"
             size="sm"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className={`absolute top-2 z-10 shadow-md ${sidebarCollapsed ? 'left-0' : 'right-2'}`}
+            className={`absolute top-1/2 -translate-y-1/2 z-10 shadow-md h-20 w-8 p-0 rounded-r-lg ${
+              sidebarCollapsed ? '-left-0 rounded-l-none border-l-0' : '-right-4 rounded-l-lg'
+            }`}
             title={sidebarCollapsed ? 'Показать организации' : 'Скрыть организации'}
           >
             <Icon name={sidebarCollapsed ? "ChevronRight" : "ChevronLeft"} size={16} />
