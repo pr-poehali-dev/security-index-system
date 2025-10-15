@@ -83,11 +83,15 @@ export default function TenantCard({ tenant, onEdit, onShowCredentials, onToggle
         <div>
           <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Доступные модули ({tenant.modules.length})</p>
           <div className="flex flex-wrap gap-1">
-            {tenant.modules.map((moduleKey) => (
-              <Badge key={moduleKey} variant="outline" className="text-xs">
-                {MODULES[moduleKey].name}
-              </Badge>
-            ))}
+            {tenant.modules.map((moduleKey) => {
+              const module = MODULES[moduleKey];
+              if (!module) return null;
+              return (
+                <Badge key={moduleKey} variant="outline" className="text-xs">
+                  {module.name}
+                </Badge>
+              );
+            })}
           </div>
         </div>
 
