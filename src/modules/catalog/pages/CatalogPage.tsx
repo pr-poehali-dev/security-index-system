@@ -7,6 +7,7 @@ import Icon from '@/components/ui/icon';
 import ObjectsTab from '../components/tabs/ObjectsTab';
 import ContractorsTab from '../components/tabs/ContractorsTab';
 import ReportsTab from '../components/tabs/ReportsTab';
+import OpoCharacteristicsTab from '../components/tabs/OpoCharacteristicsTab';
 
 const CatalogPage = memo(function CatalogPage() {
   return (
@@ -23,6 +24,10 @@ const CatalogPage = memo(function CatalogPage() {
             <Icon name="Building" size={20} />
             <span className="text-xs font-medium text-center leading-tight">Объекты<br/>и оборудование</span>
           </TabsTrigger>
+          <TabsTrigger value="characteristics" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="ClipboardList" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Сведения<br/>характеризующие ОПО</span>
+          </TabsTrigger>
           <TabsTrigger value="contractors" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="Users" size={20} />
             <span className="text-xs font-medium text-center leading-tight">Подрядчики<br/>на объектах</span>
@@ -35,6 +40,10 @@ const CatalogPage = memo(function CatalogPage() {
 
         <TabsContent value="objects">
           <ObjectsTab />
+        </TabsContent>
+
+        <TabsContent value="characteristics">
+          <OpoCharacteristicsTab />
         </TabsContent>
 
         <TabsContent value="contractors">
