@@ -188,7 +188,9 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
               <Icon name="Building" size={18} className="text-blue-600 mt-0.5 flex-shrink-0" />
               <div className="min-w-0">
                 <p className="font-medium truncate">{obj.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{obj.location.address}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {obj.detailedAddress?.fullAddress || obj.location.address}
+                </p>
               </div>
             </div>
           </div>

@@ -123,9 +123,28 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
         coordinates: { lat: 59.9342802, lng: 30.3350986 }
       },
       responsiblePerson: 'Кузнецов А.В.',
+      responsiblePersonId: 'personnel-1',
       nextExpertiseDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       nextDiagnosticDate: '2025-12-15',
       description: 'Котельная производительностью 50 Гкал/ч',
+      
+      typicalNameId: 'typical-1',
+      industryCode: '35.30',
+      detailedAddress: {
+        postalCode: '190000',
+        region: 'г. Санкт-Петербург',
+        city: 'Санкт-Петербург',
+        street: 'ул. Тепловая',
+        building: 'д. 5, корп. 1',
+        oktmo: '40304000',
+        fullAddress: '190000, г. Санкт-Петербург, Санкт-Петербург, ул. Тепловая, д. 5, корп. 1'
+      },
+      ownerId: 'org-2',
+      dangerSigns: ['danger-1', 'danger-2'],
+      classifications: ['class-1', 'class-2'],
+      hazardClassJustification: 'По количеству природного газа (50 т) - II класс; По тепловой мощности котлов (50 Гкал/ч) - II класс.',
+      licensedActivities: ['license-1'],
+      
       createdAt: '2020-03-15T00:00:00Z',
       updatedAt: '2024-01-15T00:00:00Z'
     },
@@ -145,9 +164,27 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
         coordinates: { lat: 60.0074123, lng: 30.2962334 }
       },
       responsiblePerson: 'Смирнов В.Г.',
+      responsiblePersonId: 'personnel-2',
       nextExpertiseDate: '2024-08-20',
       nextTestDate: '2025-05-01',
       description: 'Водозаборное сооружение, класс III',
+      
+      typicalNameId: 'typical-3',
+      industryCode: '42.21',
+      detailedAddress: {
+        postalCode: '197341',
+        region: 'г. Санкт-Петербург',
+        city: 'Санкт-Петербург',
+        street: 'Приморский район',
+        building: 'участок 12',
+        oktmo: '40304000',
+        fullAddress: '197341, г. Санкт-Петербург, Санкт-Петербург, Приморский район, участок 12'
+      },
+      ownerId: 'org-3',
+      dangerSigns: ['danger-4'],
+      classifications: ['class-3'],
+      hazardClassJustification: 'Напор 15 м, объем водохранилища 50 тыс. м³ - III класс опасности по ФЗ-117.',
+      
       createdAt: '2020-04-10T00:00:00Z',
       updatedAt: '2024-02-20T00:00:00Z'
     },
@@ -165,7 +202,20 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
         coordinates: { lat: 59.9340000, lng: 30.3348000 }
       },
       responsiblePerson: 'Петрова М.И.',
+      responsiblePersonId: 'personnel-6',
       description: '3-этажное административное здание',
+      
+      detailedAddress: {
+        postalCode: '190000',
+        region: 'г. Санкт-Петербург',
+        city: 'Санкт-Петербург',
+        street: 'ул. Тепловая',
+        building: 'д. 5',
+        oktmo: '40304000',
+        fullAddress: '190000, г. Санкт-Петербург, Санкт-Петербург, ул. Тепловая, д. 5'
+      },
+      ownerId: 'org-3',
+      
       createdAt: '2020-05-01T00:00:00Z',
       updatedAt: '2023-11-10T00:00:00Z'
     }

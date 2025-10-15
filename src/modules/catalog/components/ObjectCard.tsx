@@ -100,14 +100,35 @@ const ObjectCard = memo(function ObjectCard({ object: obj, onView, onEdit }: Obj
         </div>
         
         <div className="space-y-2 text-sm">
-          <div className="flex items-start gap-2">
-            <Icon name="MapPin" size={16} className="text-muted-foreground mt-0.5 flex-shrink-0" />
-            <span className="text-foreground line-clamp-2">{obj.location.address}</span>
-          </div>
+          {obj.detailedAddress && (
+            <div className="flex items-start gap-2">
+              <Icon name="MapPin" size={16} className="text-muted-foreground mt-0.5 flex-shrink-0" />
+              <span className="text-foreground line-clamp-2">
+                {obj.detailedAddress.fullAddress || obj.location.address}
+              </span>
+            </div>
+          )}
+          
+          {!obj.detailedAddress && (
+            <div className="flex items-start gap-2">
+              <Icon name="MapPin" size={16} className="text-muted-foreground mt-0.5 flex-shrink-0" />
+              <span className="text-foreground line-clamp-2">{obj.location.address}</span>
+            </div>
+          )}
+          
           <div className="flex items-center gap-2">
             <Icon name="User" size={16} className="text-muted-foreground flex-shrink-0" />
             <span className="text-foreground truncate">{obj.responsiblePerson}</span>
           </div>
+          
+          {obj.commissioningDate && (
+            <div className="flex items-center gap-2">
+              <Icon name="Calendar" size={16} className="text-muted-foreground flex-shrink-0" />
+              <span className="text-muted-foreground">
+                Ввод в эксплуатацию: {new Date(obj.commissioningDate).toLocaleDateString('ru-RU')}
+              </span>
+            </div>
+          )}
           
           {obj.nextExpertiseDate && (
             <div className="flex items-center gap-2">
