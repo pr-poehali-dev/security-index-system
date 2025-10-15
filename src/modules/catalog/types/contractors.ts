@@ -166,3 +166,7 @@ export type EmployeeFormData = Omit<ContractorEmployee, 'id' | 'createdAt' | 'up
 export type AttestationFormData = Omit<ContractorEmployeeAttestation, 'id' | 'createdAt' | 'updatedAt' | 'status'>;
 
 export type ObjectAccessFormData = Omit<ContractorEmployeeObject, 'id' | 'createdAt' | 'updatedAt' | 'employee' | 'object'>;
+
+export type Contractor = CatalogContractor;
+export type ContractorStatus = CatalogContractorStatus;
+export type ContractorType = CatalogContractorType;

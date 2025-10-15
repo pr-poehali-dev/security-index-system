@@ -151,7 +151,7 @@ export default function OpoFormWizard({ open, onOpenChange, mode = 'create', obj
       location: {
         address: `${formData.postalCode ? formData.postalCode + ', ' : ''}${formData.region}, ${formData.city}, ${formData.street}, ${formData.building}`
       },
-      responsiblePerson: formData.responsiblePerson,
+      responsiblePerson: formData.responsiblePersonId,
       typicalNameId: formData.typicalNameId,
       industryCode: formData.industryCode,
       detailedAddress: {

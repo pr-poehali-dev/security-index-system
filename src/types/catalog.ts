@@ -114,3 +114,5 @@ export interface Location {
   district?: string;
   settlement?: string;
 }
+
+export type Organization = CatalogOrganization;
