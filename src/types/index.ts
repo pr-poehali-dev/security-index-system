@@ -815,8 +815,8 @@ export interface InterOrgDocument {
   fileUrl?: string;
   fileSize?: number;
   status: InterOrgDocumentStatus;
-  metadata?: Record<string, any>;
-  data?: any;
+  metadata?: Record<string, unknown>;
+  data?: unknown;
   sentAt: string;
   receivedAt?: string;
   processedAt?: string;

@@ -2,6 +2,46 @@
 // Описание: Утилиты для экспорта данных в Excel файлы
 import type { Organization, Department, Personnel, ProductionSite } from '@/types';
 
+interface OrganizationImportRow {
+  'Название': string;
+  'ИНН': string;
+  'КПП'?: string;
+  'Адрес'?: string;
+  'Статус'?: string;
+}
+
+interface ProductionSiteImportRow {
+  'Организация': string;
+  'Название площадки': string;
+  'Код'?: string;
+  'Адрес': string;
+  'Руководитель'?: string;
+  'Телефон'?: string;
+  'Статус'?: string;
+}
+
+interface DepartmentImportRow {
+  'Организация': string;
+  'Название подразделения': string;
+  'Код'?: string;
+  'Родительское подразделение'?: string;
+  'Руководитель'?: string;
+  'Статус'?: string;
+}
+
+interface PersonnelImportRow {
+  'Организация'?: string;
+  'Подразделение'?: string;
+  'ФИО': string;
+  'Должность': string;
+  'Роль'?: string;
+  'Статус'?: string;
+  'Email'?: string;
+  'Телефон'?: string;
+  'Дата приема'?: string;
+  'Дата увольнения'?: string;
+}
+
 export function exportOrganizationsToExcel(
   organizations: Organization[],
   departments: Department[],
@@ -37,7 +77,7 @@ export async function importOrganizationsFromExcel(
   const buffer = await file.arrayBuffer();
   const workbook = XLSX.read(buffer, { type: 'array' });
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows: any[] = XLSX.utils.sheet_to_json(worksheet);
+  const rows = XLSX.utils.sheet_to_json<OrganizationImportRow>(worksheet);
 
   const orgs: Omit<Organization, 'id' | 'createdAt'>[] = [];
 
@@ -271,7 +311,7 @@ export async function importPersonnelFromCSV(
   return personnel;
 }
 
-export function exportToExcel(data: any[], filename: string) {
+export function exportToExcel(data: Record<string, unknown>[], filename: string) {
   import('xlsx').then(XLSX => {
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
@@ -310,7 +350,7 @@ export async function importProductionSitesFromExcel(
   const buffer = await file.arrayBuffer();
   const workbook = XLSX.read(buffer, { type: 'array' });
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows: any[] = XLSX.utils.sheet_to_json(worksheet);
+  const rows = XLSX.utils.sheet_to_json<ProductionSiteImportRow>(worksheet);
 
   const sites: Omit<ProductionSite, 'id' | 'createdAt'>[] = [];
 
@@ -376,7 +416,7 @@ export async function importDepartmentsFromExcel(
   const buffer = await file.arrayBuffer();
   const workbook = XLSX.read(buffer, { type: 'array' });
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows: any[] = XLSX.utils.sheet_to_json(worksheet);
+  const rows = XLSX.utils.sheet_to_json<DepartmentImportRow>(worksheet);
 
   const newDepts: Omit<Department, 'id' | 'createdAt'>[] = [];
 
@@ -442,7 +482,7 @@ export async function importPersonnelFromExcel(
   const buffer = await file.arrayBuffer();
   const workbook = XLSX.read(buffer, { type: 'array' });
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows: any[] = XLSX.utils.sheet_to_json(worksheet);
+  const rows = XLSX.utils.sheet_to_json<PersonnelImportRow>(worksheet);
 
   const personnel: Omit<Personnel, 'id' | 'createdAt'>[] = [];
 

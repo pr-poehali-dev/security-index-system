@@ -1,6 +1,7 @@
 import type { Training } from '@/stores/trainingsAttestationStore';
+import type { toast as ToastFunction } from '@/hooks/use-toast';
 
-export const createTrainingHandlers = (trainings: Training[], toast: any) => {
+export const createTrainingHandlers = (trainings: Training[], toast: typeof ToastFunction) => {
   const handleChangeTrainingStatus = (trainingId: string, newStatus: string) => {
     const training = trainings.find(t => t.id === trainingId);
     toast({

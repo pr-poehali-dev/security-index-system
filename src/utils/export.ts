@@ -5,7 +5,7 @@ import * as XLSX from 'xlsx';
 export interface ExportColumn<T> {
   key: keyof T | string;
   label: string;
-  format?: (value: any, item: T) => string | number;
+  format?: (value: unknown, item: T) => string | number;
 }
 
 export function exportToCSV<T>(
@@ -17,11 +17,11 @@ export function exportToCSV<T>(
   
   const rows = data.map(item => {
     return columns.map(col => {
-      let value: any;
+      let value: unknown;
       
       if (col.key.toString().includes('.')) {
         const keys = col.key.toString().split('.');
-        value = keys.reduce((obj: any, key) => obj?.[key], item);
+        value = keys.reduce((obj: unknown, key) => (obj as Record<string, unknown>)?.[key], item as unknown);
       } else {
         value = item[col.key as keyof T];
       }
@@ -30,7 +30,7 @@ export function exportToCSV<T>(
         value = col.format(value, item);
       }
       
-      const stringValue = value?.toString() || '';
+      const stringValue = (value as string | number | undefined)?.toString() || '';
       
       if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
         return `"${stringValue.replace(/"/g, '""')}"`;
@@ -64,11 +64,11 @@ export function exportToExcel<T>(
   
   const rows = data.map(item => {
     return columns.map(col => {
-      let value: any;
+      let value: unknown;
       
       if (col.key.toString().includes('.')) {
         const keys = col.key.toString().split('.');
-        value = keys.reduce((obj: any, key) => obj?.[key], item);
+        value = keys.reduce((obj: unknown, key) => (obj as Record<string, unknown>)?.[key], item as unknown);
       } else {
         value = item[col.key as keyof T];
       }

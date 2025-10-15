@@ -1,9 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import Icon from '@/components/ui/icon';
+import Icon, { type IconName } from '@/components/ui/icon';
 
 export default function ReportsTab() {
-  const reports = [
+  const reports: Array<{
+    title: string;
+    description: string;
+    icon: IconName;
+    format: string;
+  }> = [
     {
       title: 'Общий отчет по тенантам',
       description: 'Полный список тенантов с информацией о статусе, модулях и сроках действия',
@@ -46,7 +51,7 @@ export default function ReportsTab() {
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Icon name={report.icon as any} className="text-emerald-600" size={24} />
+                      <Icon name={report.icon} className="text-emerald-600" size={24} />
                     </div>
                     <div className="flex-1 space-y-3">
                       <div>

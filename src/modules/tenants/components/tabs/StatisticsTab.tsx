@@ -1,6 +1,6 @@
 import { useTenantStore } from '@/stores/tenantStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import Icon from '@/components/ui/icon';
+import Icon, { type IconName } from '@/components/ui/icon';
 
 export default function StatisticsTab() {
   const { tenants } = useTenantStore();
@@ -18,7 +18,13 @@ export default function StatisticsTab() {
     return daysLeft < 0;
   }).length;
 
-  const stats = [
+  const stats: Array<{
+    title: string;
+    value: number;
+    icon: IconName;
+    color: string;
+    bgColor: string;
+  }> = [
     {
       title: 'Всего тенантов',
       value: tenants.length,
@@ -64,7 +70,7 @@ export default function StatisticsTab() {
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
                 <div className={`w-12 h-12 ${stat.bgColor} rounded-lg flex items-center justify-center`}>
-                  <Icon name={stat.icon as any} className={stat.color} size={24} />
+                  <Icon name={stat.icon} className={stat.color} size={24} />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>

@@ -25,6 +25,14 @@ interface PositionsDirectoryTabProps {
   onDelete: (id: string) => void;
 }
 
+interface PositionImportRow {
+  'Название': string;
+  'Код'?: string;
+  'Категория': string;
+  'Описание'?: string;
+  'Статус'?: string;
+}
+
 const categoryLabels = {
   management: 'Руководство',
   specialist: 'Специалист',
@@ -73,7 +81,7 @@ export default function PositionsDirectoryTab({ onAdd, onEdit, onDelete }: Posit
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json<any>(worksheet);
+      const jsonData = XLSX.utils.sheet_to_json<PositionImportRow>(worksheet);
 
       if (jsonData.length === 0) {
         throw new Error('Файл пустой');

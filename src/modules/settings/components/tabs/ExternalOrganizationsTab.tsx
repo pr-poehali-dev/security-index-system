@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import Icon from '@/components/ui/icon';
+import Icon, { type IconName } from '@/components/ui/icon';
 import { useState, useRef } from 'react';
 import type { ExternalOrganization, ExternalOrganizationType } from '@/types';
 import { exportToExcel } from '@/lib/exportUtils';
@@ -39,7 +39,22 @@ interface ExternalOrganizationsTabProps {
   onCreateContractor?: (org: ExternalOrganization) => void;
 }
 
-const ORGANIZATION_TYPES: { value: ExternalOrganizationType; label: string; icon: string }[] = [
+interface ExternalOrganizationImportRow {
+  'Тип': string;
+  'Название': string;
+  'ИНН'?: string;
+  'КПП'?: string;
+  'Контактное лицо'?: string;
+  'Телефон'?: string;
+  'Email'?: string;
+  'Адрес'?: string;
+  'Сайт'?: string;
+  'Аккредитации'?: string;
+  'Описание'?: string;
+  'Статус'?: string;
+}
+
+const ORGANIZATION_TYPES: { value: ExternalOrganizationType; label: string; icon: IconName }[] = [
   { value: 'training_center', label: 'Учебный центр', icon: 'GraduationCap' },
   { value: 'contractor', label: 'Подрядчик', icon: 'Wrench' },
   { value: 'supplier', label: 'Поставщик', icon: 'Package' },
@@ -76,7 +91,7 @@ export default function ExternalOrganizationsTab({ onAdd, onEdit, onDelete, onCr
   };
 
   const getTypeIcon = (type: ExternalOrganizationType) => {
-    return ORGANIZATION_TYPES.find(t => t.value === type)?.icon || 'Building2';
+    return (ORGANIZATION_TYPES.find(t => t.value === type)?.icon || 'Building2') as IconName;
   };
 
   const handleExport = () => {
@@ -107,7 +122,7 @@ export default function ExternalOrganizationsTab({ onAdd, onEdit, onDelete, onCr
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json<any>(worksheet);
+      const jsonData = XLSX.utils.sheet_to_json<ExternalOrganizationImportRow>(worksheet);
 
       if (jsonData.length === 0) {
         throw new Error('Файл пустой');
@@ -178,7 +193,7 @@ export default function ExternalOrganizationsTab({ onAdd, onEdit, onDelete, onCr
             >
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
-                  <Icon name={type.icon as any} size={18} className="text-muted-foreground" />
+                  <Icon name={type.icon} size={18} className="text-muted-foreground" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-muted-foreground truncate">{type.label}</p>
                     <p className="text-lg font-bold">{type.count}</p>
@@ -260,7 +275,7 @@ export default function ExternalOrganizationsTab({ onAdd, onEdit, onDelete, onCr
                   <TableRow key={org.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Icon name={getTypeIcon(org.type) as any} size={16} className="text-muted-foreground" />
+                        <Icon name={getTypeIcon(org.type)} size={16} className="text-muted-foreground" />
                         <span className="text-sm">{getTypeLabel(org.type)}</span>
                       </div>
                     </TableCell>

@@ -1,6 +1,6 @@
 // src/components/layout/PageHeader.tsx
 // Описание: Компонент заголовка страницы с хлебными крошками
-import Icon from '@/components/ui/icon';
+import Icon, { type IconName } from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { useUIStore } from '@/stores/uiStore';
@@ -8,7 +8,7 @@ import { useUIStore } from '@/stores/uiStore';
 interface PageHeaderProps {
   title: string;
   description?: string;
-  icon?: string;
+  icon?: IconName;
   breadcrumbs?: { label: string; href?: string }[];
   action?: React.ReactNode;
 }
@@ -49,7 +49,7 @@ export default function PageHeader({ title, description, icon, breadcrumbs, acti
           </Button>
           {icon && (
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Icon name={icon as any} className="text-emerald-600" size={20} />
+              <Icon name={icon} className="text-emerald-600" size={20} />
             </div>
           )}
           <div className="min-w-0 flex-1">

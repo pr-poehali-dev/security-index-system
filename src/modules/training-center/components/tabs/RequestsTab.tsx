@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Badge, type BadgeVariant } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
 import {
@@ -66,7 +66,7 @@ export default function RequestsTab() {
   }, [requests, searchTerm, statusFilter]);
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, any> = {
+    const variants: Record<string, BadgeVariant> = {
       new: 'default',
       in_review: 'secondary',
       approved: 'default',

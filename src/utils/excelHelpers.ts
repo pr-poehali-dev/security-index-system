@@ -1,4 +1,4 @@
-export async function exportToExcel<T extends Record<string, any>>(
+export async function exportToExcel<T extends Record<string, unknown>>(
   data: T[],
   columns: Record<keyof T, string>,
   sheetName: string,
@@ -7,7 +7,7 @@ export async function exportToExcel<T extends Record<string, any>>(
   const { utils, writeFile } = await import('xlsx');
   
   const exportData = data.map(item => {
-    const row: Record<string, any> = {};
+    const row: Record<string, unknown> = {};
     Object.entries(columns).forEach(([key, label]) => {
       row[label as string] = item[key];
     });

@@ -197,7 +197,7 @@ export const useOrdersStore = create<OrdersState>()(persist((set, get) => ({
       };
     });
 
-    const request: any = {
+    const request: import('@/types').OrganizationTrainingRequest = {
       id: `req-${Date.now()}`,
       tenantId: contractor.contractorTenantId,
       fromTenantId: user.tenantId,

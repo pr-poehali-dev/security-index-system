@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import Icon from '@/components/ui/icon';
+import Icon, { type IconName } from '@/components/ui/icon';
 import {
   Select,
   SelectContent,
@@ -15,7 +15,7 @@ interface Report {
   id: string;
   title: string;
   description: string;
-  icon: string;
+  icon: IconName;
   category: 'attestation' | 'compliance' | 'training' | 'analytics';
 }
 
@@ -174,7 +174,7 @@ export default function ReportsTab() {
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <div className={`p-3 rounded-lg ${getCategoryColor(report.category)}`}>
-                  <Icon name={report.icon as any} size={24} />
+                  <Icon name={report.icon} size={24} />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-start justify-between mb-2">

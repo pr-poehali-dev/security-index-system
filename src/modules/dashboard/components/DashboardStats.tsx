@@ -1,14 +1,14 @@
 import { memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import Icon from '@/components/ui/icon';
+import Icon, { type IconName } from '@/components/ui/icon';
 
 interface StatItem {
   title: string;
   value: string;
   subtitle: string;
   trend: 'up' | 'down' | 'neutral';
-  icon: string;
+  icon: IconName;
   color: string;
   bgColor: string;
   badge?: {
@@ -34,7 +34,7 @@ const DashboardStats = memo(function DashboardStats({ stats }: DashboardStatsPro
           <CardContent className="p-3 sm:p-6">
             <div className="flex items-start justify-between mb-2 sm:mb-4">
               <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-lg ${stat.bgColor} flex items-center justify-center flex-shrink-0`}>
-                <Icon name={stat.icon as any} className={stat.color} size={20} />
+                <Icon name={stat.icon} className={stat.color} size={20} />
               </div>
               {stat.badge && (
                 <Badge variant={stat.badge.variant} className="text-[10px] sm:text-xs">

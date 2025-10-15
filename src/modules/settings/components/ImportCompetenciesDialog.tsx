@@ -15,6 +15,12 @@ interface ImportCompetenciesDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+interface CompetencyImportRow {
+  'Организация': string;
+  'Должность': string;
+  'Требуемые области аттестации': string;
+}
+
 export default function ImportCompetenciesDialog({ open, onOpenChange }: ImportCompetenciesDialogProps) {
   const user = useAuthStore((state) => state.user);
   const { importCompetencies, getOrganizationsByTenant } = useSettingsStore();
@@ -33,7 +39,7 @@ export default function ImportCompetenciesDialog({ open, onOpenChange }: ImportC
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json<any>(worksheet);
+      const jsonData = XLSX.utils.sheet_to_json<CompetencyImportRow>(worksheet);
 
       const competencies = jsonData
         .map((row) => {
@@ -58,7 +64,7 @@ export default function ImportCompetenciesDialog({ open, onOpenChange }: ImportC
               const category = CERTIFICATION_CATEGORIES.find(c => c.label === categoryLabel);
               if (category) {
                 requiredAreas.push({
-                  category: category.value as any,
+                  category: category.value as 'industrial_safety' | 'energy_safety' | 'labor_safety' | 'ecology',
                   areas: areasList
                 });
               }

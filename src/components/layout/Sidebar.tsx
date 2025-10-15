@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import Icon from '@/components/ui/icon';
+import Icon, { type IconName } from '@/components/ui/icon';
 import NotificationBell from '@/components/NotificationBell';
 import { cn } from '@/lib/utils';
 import type { ModuleType } from '@/types';
@@ -160,7 +160,7 @@ const Sidebar = memo(function Sidebar() {
           
           if (!module || !route) return null;
           
-          let notifications: any[] = [];
+          let notifications: import('@/types').Notification[] = [];
           if (moduleKey === 'incidents') notifications = incidentNotifications;
           if (moduleKey === 'attestation') notifications = attestationNotifications;
           if (moduleKey === 'catalog') notifications = catalogNotifications;
@@ -180,7 +180,7 @@ const Sidebar = memo(function Sidebar() {
                   : "text-gray-300 hover:bg-gray-800 hover:text-white"
               )}
             >
-              <Icon name={module.icon as any} size={20} />
+              <Icon name={module.icon} size={20} />
               {!sidebarCollapsed && (
                 <span className="text-sm font-medium flex items-center gap-2">
                   {module.name}

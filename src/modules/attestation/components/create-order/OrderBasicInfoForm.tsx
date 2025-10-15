@@ -1,4 +1,4 @@
-import Icon from '@/components/ui/icon';
+import Icon, { type IconName } from '@/components/ui/icon';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 interface OrderType {
   value: string;
   label: string;
-  icon: string;
+  icon: IconName;
   color: string;
   description: string;
 }
@@ -39,7 +39,7 @@ export default function OrderBasicInfoForm({
       {selectedType && (
         <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
           <div className={`p-2 rounded-lg ${selectedType.color}`}>
-            <Icon name={selectedType.icon as any} size={18} />
+            <Icon name={selectedType.icon} size={18} />
           </div>
           <div>
             <div className="text-sm font-medium">{selectedType.label}</div>

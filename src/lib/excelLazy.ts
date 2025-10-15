@@ -9,7 +9,7 @@ export async function getXLSX() {
   return xlsxModule;
 }
 
-export async function exportToExcel<T extends Record<string, any>>(
+export async function exportToExcel<T extends Record<string, unknown>>(
   data: T[],
   columns: Array<{ key: keyof T; label: string }>,
   filename: string

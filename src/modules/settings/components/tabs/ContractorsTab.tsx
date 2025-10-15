@@ -4,7 +4,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Badge, type BadgeVariant } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import {
   Table,
@@ -70,7 +70,7 @@ export default function ContractorsTab({ onAdd, onEdit, onDelete }: ContractorsT
   });
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, any> = {
+    const variants: Record<string, BadgeVariant> = {
       active: 'default',
       suspended: 'secondary',
       terminated: 'destructive',

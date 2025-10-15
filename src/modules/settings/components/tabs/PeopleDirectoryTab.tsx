@@ -25,6 +25,20 @@ interface PeopleDirectoryTabProps {
   onDelete: (id: string) => void;
 }
 
+interface PersonImportRow {
+  'Фамилия': string;
+  'Имя': string;
+  'Отчество'?: string;
+  'Дата рождения'?: string;
+  'СНИЛС'?: string;
+  'ИНН'?: string;
+  'Email'?: string;
+  'Телефон'?: string;
+  'Адрес'?: string;
+  'Образование'?: string;
+  'Статус'?: string;
+}
+
 export default function PeopleDirectoryTab({ onAdd, onEdit, onDelete }: PeopleDirectoryTabProps) {
   const user = useAuthStore((state) => state.user);
   const allPeople = useSettingsStore((state) => state.people);
@@ -77,7 +91,7 @@ export default function PeopleDirectoryTab({ onAdd, onEdit, onDelete }: PeopleDi
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json<any>(worksheet);
+      const jsonData = XLSX.utils.sheet_to_json<PersonImportRow>(worksheet);
 
       if (jsonData.length === 0) {
         throw new Error('Файл пустой');

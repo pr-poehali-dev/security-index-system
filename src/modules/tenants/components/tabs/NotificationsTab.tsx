@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import Icon from '@/components/ui/icon';
+import Icon, { type IconName } from '@/components/ui/icon';
 
 export default function NotificationsTab() {
   const [notificationSettings, setNotificationSettings] = useState({
@@ -14,7 +14,14 @@ export default function NotificationsTab() {
     systemUpdates: false
   });
 
-  const notifications = [
+  const notifications: Array<{
+    id: string;
+    title: string;
+    message: string;
+    time: string;
+    type: string;
+    icon: IconName;
+  }> = [
     {
       id: '1',
       title: 'Истекает лицензия: ООО "Промтех"',
@@ -69,7 +76,7 @@ export default function NotificationsTab() {
                     className="flex items-start gap-3 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                   >
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${getTypeColor(notification.type)}`}>
-                      <Icon name={notification.icon as any} size={20} />
+                      <Icon name={notification.icon} size={20} />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium text-gray-900 dark:text-white mb-1">

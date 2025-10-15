@@ -1,13 +1,14 @@
 import type { Order } from '@/stores/ordersStore';
 import type { Personnel, Person, Position } from '@/stores/settingsStore';
 import { useTrainingCenterStore } from '@/stores/trainingCenterStore';
+import type { toast as ToastFunction } from '@/hooks/use-toast';
 
 export const createOrderHandlers = (
   orders: Order[],
   personnel: Personnel[],
   people: Person[],
   positions: Position[],
-  toast: any,
+  toast: typeof ToastFunction,
   tenantId?: string
 ) => {
   const handleChangeOrderStatus = (orderId: string, newStatus: string) => {

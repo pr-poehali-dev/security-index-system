@@ -1,5 +1,5 @@
 import { memo, useState } from 'react';
-import { Badge } from '@/components/ui/badge';
+import { Badge, type BadgeVariant } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/components/ui/icon';
@@ -56,7 +56,7 @@ const IncidentsTableView = memo(function IncidentsTableView({
   const paginatedIncidents = filteredIncidents.slice(startIdx, endIdx);
   
   const getStatusBadge = (status: IncidentStatus) => {
-    const variants: Record<IncidentStatus, any> = {
+    const variants: Record<IncidentStatus, BadgeVariant> = {
       created: 'secondary',
       in_progress: 'default',
       awaiting: 'outline',

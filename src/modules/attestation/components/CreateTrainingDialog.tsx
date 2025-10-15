@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import Icon from '@/components/ui/icon';
+import Icon, { type IconName } from '@/components/ui/icon';
 import {
   Select,
   SelectContent,
@@ -39,7 +39,7 @@ const trainingTypes = [
   'Инструктаж',
 ];
 
-const trainingCategories = [
+const trainingCategories: Array<{ value: string; label: string; icon: IconName }> = [
   { value: 'industrial_safety', label: 'Промышленная безопасность', icon: 'Shield' },
   { value: 'electrical_safety', label: 'Электробезопасность', icon: 'Zap' },
   { value: 'labor_protection', label: 'Охрана труда', icon: 'HardHat' },
@@ -210,7 +210,7 @@ export default function CreateTrainingDialog({ open, onOpenChange }: CreateTrain
                   >
                     <div className="flex items-start gap-3">
                       <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                        <Icon name={category.icon as any} size={20} />
+                        <Icon name={category.icon} size={20} />
                       </div>
                       <div className="flex-1">
                         <div className="font-medium">{category.label}</div>
@@ -230,7 +230,7 @@ export default function CreateTrainingDialog({ open, onOpenChange }: CreateTrain
               {selectedCategory && (
                 <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
                   <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                    <Icon name={selectedCategory.icon as any} size={18} />
+                    <Icon name={selectedCategory.icon} size={18} />
                   </div>
                   <div>
                     <div className="text-sm font-medium">{selectedCategory.label}</div>

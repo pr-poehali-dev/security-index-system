@@ -1,8 +1,9 @@
 // src/lib/constants.ts
 // Описание: Константы приложения - модули, маршруты и роли пользователей
 import type { ModuleType, UserRole } from '@/types';
+import type { IconName } from '@/components/ui/icon';
 
-export const MODULES: Record<ModuleType, { name: string; description: string; icon: string }> = {
+export const MODULES: Record<ModuleType, { name: string; description: string; icon: IconName }> = {
   tenants: {
     name: 'Управление тенантами',
     description: 'Создание и управление организациями',

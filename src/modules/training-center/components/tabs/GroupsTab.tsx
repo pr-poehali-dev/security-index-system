@@ -4,7 +4,7 @@ import { useTrainingCenterStore } from '@/stores/trainingCenterStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Badge, type BadgeVariant } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import {
   Table,
@@ -63,7 +63,7 @@ export default function GroupsTab() {
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, any> = {
+    const variants: Record<string, BadgeVariant> = {
       planned: 'secondary',
       in_progress: 'default',
       completed: 'outline',

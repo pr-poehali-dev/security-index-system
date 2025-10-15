@@ -5,7 +5,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import Icon from '@/components/ui/icon';
+import Icon, { type IconName } from '@/components/ui/icon';
 import type { Incident, IncidentStatus } from '@/types';
 import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
 import IncidentDetailsDialog from './IncidentDetailsDialog';
@@ -14,7 +14,7 @@ interface KanbanColumn {
   id: IncidentStatus;
   title: string;
   color: string;
-  icon: string;
+  icon: IconName;
 }
 
 const KANBAN_COLUMNS: KanbanColumn[] = [
@@ -149,7 +149,7 @@ export default function IncidentKanbanBoard({
             <Card className={`${column.color} border-2`}>
               <CardHeader className="p-4 pb-3">
                 <div className="flex items-center gap-2">
-                  <Icon name={column.icon as any} size={16} />
+                  <Icon name={column.icon} size={16} />
                   <h3 className="font-semibold text-sm">{column.title}</h3>
                   <Badge variant="outline" className="ml-auto">
                     {incidentsByStatus[column.id].length}

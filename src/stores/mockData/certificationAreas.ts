@@ -53,17 +53,22 @@ export const getAreasForCategory = (category: string): readonly string[] => {
   }
 };
 
+type IndustrialSafetyArea = typeof industrialSafetyAreas[number];
+type EnergySafetyArea = typeof energySafetyAreas[number];
+type ElectricalSafetyArea = typeof electricalSafetyAreas[number];
+type HeightWorkArea = typeof heightWorkAreas[number];
+
 export const getCategoryForArea = (area: string): string => {
-  if (industrialSafetyAreas.includes(area as any)) {
+  if ((industrialSafetyAreas as readonly string[]).includes(area)) {
     return 'Промышленная безопасность';
   }
-  if (energySafetyAreas.includes(area as any)) {
+  if ((energySafetyAreas as readonly string[]).includes(area)) {
     return 'Энергобезопасность';
   }
-  if (electricalSafetyAreas.includes(area as any)) {
+  if ((electricalSafetyAreas as readonly string[]).includes(area)) {
     return 'Электробезопасность';
   }
-  if (heightWorkAreas.includes(area as any)) {
+  if ((heightWorkAreas as readonly string[]).includes(area)) {
     return 'Работы на высоте';
   }
   return 'Промышленная безопасность';

@@ -27,7 +27,7 @@ export default function NotificationsTab() {
   
   const rules = user?.tenantId ? getNotificationRulesByTenant(user.tenantId) : [];
   const logs = user?.tenantId ? getNotificationLogsByTenant(user.tenantId) : [];
-  const [editingRule, setEditingRule] = useState<any>(null);
+  const [editingRule, setEditingRule] = useState<import('@/stores/attestationNotificationsStore').AttestationNotificationRule | null>(null);
   const { toast } = useToast();
 
   const toggleRule = (ruleId: string) => {

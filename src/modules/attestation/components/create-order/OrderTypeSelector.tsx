@@ -1,10 +1,10 @@
-import Icon from '@/components/ui/icon';
+import Icon, { type IconName } from '@/components/ui/icon';
 import { Label } from '@/components/ui/label';
 
 interface OrderType {
   value: string;
   label: string;
-  icon: string;
+  icon: IconName;
   color: string;
   description: string;
 }
@@ -38,7 +38,7 @@ export default function OrderTypeSelector({ orderTypes, selectedType, onSelectTy
           >
             <div className="flex items-start gap-3">
               <div className={`p-2 rounded-lg ${type.color}`}>
-                <Icon name={type.icon as any} size={20} />
+                <Icon name={type.icon} size={20} />
               </div>
               <div className="flex-1">
                 <div className="font-medium mb-1">{type.label}</div>

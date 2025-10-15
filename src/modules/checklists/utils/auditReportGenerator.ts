@@ -326,7 +326,7 @@ export function generateAuditReportPDF(
     margin: { left: 20, right: 20 }
   });
 
-  yPosition = (doc as any).lastAutoTable.finalY + 10;
+  yPosition = doc.lastAutoTable.finalY + 10;
 
   doc.setFillColor(239, 246, 255);
   doc.roundedRect(20, yPosition, 170, 40, 3, 3, 'F');

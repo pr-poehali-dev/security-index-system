@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { ExternalOrganization, ExternalOrganizationType } from '@/types';
-import Icon from '@/components/ui/icon';
+import Icon, { type IconName } from '@/components/ui/icon';
 
 interface ExternalOrganizationDialogProps {
   open: boolean;
@@ -17,10 +17,10 @@ interface ExternalOrganizationDialogProps {
   organization?: ExternalOrganization;
 }
 
-const organizationTypes: { value: ExternalOrganizationType; label: string; icon: string }[] = [
+const organizationTypes: { value: ExternalOrganizationType; label: string; icon: IconName }[] = [
   { value: 'training_center', label: 'Учебный центр', icon: 'GraduationCap' },
   { value: 'contractor', label: 'Подрядчик', icon: 'Wrench' },
-  { value: 'supplier', label: 'Поставщик', icon: 'Package' },
+  { value: 'supplier', label: 'Поставщик', icon: 'Building2' },
   { value: 'regulatory_body', label: 'Надзорный орган', icon: 'Shield' },
   { value: 'certification_body', label: 'Орган сертификации', icon: 'Award' },
   { value: 'other', label: 'Другое', icon: 'Building2' }
@@ -135,7 +135,7 @@ export default function ExternalOrganizationDialog({ open, onOpenChange, organiz
                   {organizationTypes.map((type) => (
                     <SelectItem key={type.value} value={type.value}>
                       <div className="flex items-center gap-2">
-                        <Icon name={type.icon as any} size={16} />
+                        <Icon name={type.icon} size={16} />
                         {type.label}
                       </div>
                     </SelectItem>

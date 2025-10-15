@@ -60,15 +60,7 @@ const filterIncidentsByPeriod = (incidents: Incident[], period: ReportPeriod): I
   return incidents.filter(incident => new Date(incident.createdAt) >= start);
 };
 
-// Расширяем тип jsPDF для autoTable
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-    lastAutoTable?: {
-      finalY: number;
-    };
-  }
-}
+// Type declarations moved to src/types/jspdf-autotable.d.ts
 
 // Загрузка шрифта с поддержкой кириллицы
 const loadFont = async (doc: jsPDF) => {

@@ -57,7 +57,7 @@ export interface TaskTimelineEvent {
   description: string;
   userId: string;
   userName: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: string;
 }
 
