@@ -14,11 +14,21 @@ interface Step1BasicInfoProps {
 export default function Step1BasicInfo({ formData, updateFormData }: Step1BasicInfoProps) {
   const { organizations } = useCatalogStore();
   const { typicalOpoNames } = useReferencesStore();
-  const { personnel } = useSettingsStore();
+  const { personnel, people, positions } = useSettingsStore();
 
   const selectedOrgPersonnel = formData.organizationId
-    ? personnel.filter(p => p.organizationId === formData.organizationId)
+    ? personnel.filter(p => p.organizationId === formData.organizationId && p.status === 'active')
     : [];
+
+  const getPersonnelDisplay = (personnelItem: typeof personnel[0]) => {
+    const person = people.find(p => p.id === personnelItem.personId);
+    const position = positions.find(p => p.id === personnelItem.positionId);
+    
+    if (!person || !position) return null;
+    
+    const fullName = `${person.lastName} ${person.firstName} ${person.middleName || ''}`.trim();
+    return { fullName, positionName: position.name };
+  };
 
   return (
     <div className="space-y-6">
@@ -251,11 +261,16 @@ export default function Step1BasicInfo({ formData, updateFormData }: Step1BasicI
                 <SelectValue placeholder={formData.organizationId ? "Выберите сотрудника" : "Сначала выберите организацию"} />
               </SelectTrigger>
               <SelectContent>
-                {selectedOrgPersonnel.map((person) => (
-                  <SelectItem key={person.id} value={person.id}>
-                    {person.fullName} — {person.position}
-                  </SelectItem>
-                ))}
+                {selectedOrgPersonnel.map((personnelItem) => {
+                  const display = getPersonnelDisplay(personnelItem);
+                  if (!display) return null;
+                  
+                  return (
+                    <SelectItem key={personnelItem.id} value={personnelItem.id}>
+                      {display.fullName} — {display.positionName}
+                    </SelectItem>
+                  );
+                })}
                 {selectedOrgPersonnel.length === 0 && formData.organizationId && (
                   <SelectItem value="no-personnel" disabled>
                     Нет сотрудников в выбранной организации

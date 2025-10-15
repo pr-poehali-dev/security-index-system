@@ -12,12 +12,19 @@ interface Step5ReviewProps {
 export default function Step5Review({ formData }: Step5ReviewProps) {
   const { organizations } = useCatalogStore();
   const { typicalOpoNames, dangerSigns, opoClassifications, licensedActivities } = useReferencesStore();
-  const { personnel } = useSettingsStore();
+  const { personnel, people, positions } = useSettingsStore();
 
   const organization = organizations.find(org => org.id === formData.organizationId);
   const owner = organizations.find(org => org.id === formData.ownerId);
   const typicalName = typicalOpoNames.find(tn => tn.id === formData.typicalNameId);
-  const responsiblePerson = personnel.find(p => p.id === formData.responsiblePersonId);
+  
+  const responsiblePersonnel = personnel.find(p => p.id === formData.responsiblePersonId);
+  const responsiblePerson = responsiblePersonnel ? people.find(p => p.id === responsiblePersonnel.personId) : null;
+  const responsiblePosition = responsiblePersonnel ? positions.find(p => p.id === responsiblePersonnel.positionId) : null;
+  
+  const responsiblePersonDisplay = responsiblePerson && responsiblePosition
+    ? `${responsiblePerson.lastName} ${responsiblePerson.firstName} ${responsiblePerson.middleName || ''} — ${responsiblePosition.name}`.trim()
+    : null;
 
   const selectedDangerSigns = formData.dangerSigns.map(id => dangerSigns.find(ds => ds.id === id)).filter(Boolean);
   const selectedClassifications = formData.classifications.map(id => opoClassifications.find(cls => cls.id === id)).filter(Boolean);
@@ -80,7 +87,7 @@ export default function Step5Review({ formData }: Step5ReviewProps) {
               <div className="grid grid-cols-3 gap-2">
                 <span className="text-muted-foreground">Ответственное лицо:</span>
                 <span className="col-span-2">
-                  {responsiblePerson ? `${responsiblePerson.fullName} — ${responsiblePerson.position}` : '—'}
+                  {responsiblePersonDisplay || '—'}
                 </span>
               </div>
               <div className="grid grid-cols-3 gap-2">
