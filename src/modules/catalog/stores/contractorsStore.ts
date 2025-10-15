@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import {
-  Contractor,
+  CatalogContractor,
   ContractorEmployee,
   ContractorEmployeeAttestation,
   ContractorEmployeeObject,
@@ -13,7 +13,7 @@ import {
 } from '../types/contractors';
 
 interface ContractorsState {
-  contractors: Contractor[];
+  contractors: CatalogContractor[];
   employees: ContractorEmployee[];
   attestations: ContractorEmployeeAttestation[];
   objectAccess: ContractorEmployeeObject[];

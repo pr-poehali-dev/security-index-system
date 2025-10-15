@@ -1,7 +1,7 @@
 // src/stores/mockData/organizations.ts
-import type { Organization, Department } from '@/types';
+import type { SettingsOrganization, Department } from '@/types';
 
-export const mockOrganizations: Organization[] = [
+export const mockOrganizations: SettingsOrganization[] = [
   {
     id: 'org-1',
     tenantId: 'tenant-1',

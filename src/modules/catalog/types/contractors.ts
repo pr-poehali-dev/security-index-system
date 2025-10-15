@@ -1,14 +1,15 @@
-export type ContractorStatus = 'active' | 'suspended' | 'blocked' | 'archived';
-export type EmployeeStatus = 'active' | 'suspended' | 'blocked' | 'dismissed';
+export type BaseEntityStatus = 'active' | 'suspended' | 'archived';
+export type CatalogContractorStatus = BaseEntityStatus | 'blocked';
+export type EmployeeStatus = BaseEntityStatus | 'blocked' | 'dismissed';
 export type AccessStatus = 'active' | 'suspended' | 'revoked' | 'expired';
 export type AttestationStatus = 'valid' | 'expiring' | 'expired';
-export type ContractorType = 'contractor' | 'training_center';
+export type CatalogContractorType = 'contractor' | 'training_center';
 
-export interface Contractor {
+export interface CatalogContractor {
   id: string;
   tenantId: string;
   name: string;
-  type: ContractorType;
+  type: CatalogContractorType;
   inn: string;
   kpp?: string;
   legalAddress?: string;
@@ -26,7 +27,7 @@ export interface Contractor {
   insuranceNumber?: string;
   insuranceExpiry?: string;
   rating: number;
-  status: ContractorStatus;
+  status: CatalogContractorStatus;
   notes?: string;
   accreditations?: string[];
   website?: string;
@@ -60,7 +61,7 @@ export interface ContractorEmployee {
   createdBy?: string;
   updatedBy?: string;
   // Populated fields
-  contractor?: Contractor;
+  contractor?: CatalogContractor;
   attestations?: ContractorEmployeeAttestation[];
   objectAccess?: ContractorEmployeeObject[];
 }
@@ -95,7 +96,7 @@ export interface ContractorEmployeeObject {
   updatedAt: string;
   // Populated fields
   employee?: ContractorEmployee;
-  object?: any; // Тип из модуля catalog
+  object?: import('@/types/catalog').IndustrialObject;
 }
 
 export interface ContractorAccessLog {
@@ -158,7 +159,7 @@ export interface ObjectPersonnel {
   };
 }
 
-export type ContractorFormData = Omit<Contractor, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'rating' | 'tenantId'>;
+export type ContractorFormData = Omit<CatalogContractor, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'rating' | 'tenantId'>;
 
 export type EmployeeFormData = Omit<ContractorEmployee, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy' | 'tenantId' | 'contractor' | 'attestations' | 'objectAccess'>;
 

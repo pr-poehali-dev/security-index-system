@@ -3,19 +3,20 @@
 export type HazardClass = 'I' | 'II' | 'III' | 'IV';
 export type ObjectType = 'opo' | 'gts' | 'building';
 export type ObjectStatus = 'active' | 'conservation' | 'liquidated';
-export type DocumentStatus = 'valid' | 'expiring_soon' | 'expired';
-export type DocumentType = 
+export type ObjectDocumentStatus = 'valid' | 'expiring_soon' | 'expired';
+export type ObjectDocumentType = 
   | 'commissioning' 
   | 'safety_declaration' 
   | 'expertise' 
   | 'diagnostic_report' 
   | 'passport' 
   | 'manual' 
-  | 'instructions' 
+  | 'instructions'
+  | 'certificate'
   | 'other';
 export type OrganizationType = 'legal_entity' | 'individual_entrepreneur' | 'individual';
 
-export interface Organization {
+export interface CatalogOrganization {
   id: string;
   tenantId: string;
   name: string;
@@ -24,7 +25,7 @@ export interface Organization {
   type: 'holding' | 'legal_entity' | 'branch';
   legalType?: OrganizationType;
   parentId?: string;
-  children?: Organization[];
+  children?: CatalogOrganization[];
   level: number;
   contactPerson?: string;
   phone?: string;
@@ -88,14 +89,14 @@ export interface ObjectDocument {
   id: string;
   objectId: string;
   title: string;
-  type: DocumentType;
+  type: ObjectDocumentType;
   documentNumber?: string;
   issueDate?: string;
   expiryDate?: string;
   fileUrl?: string;
   fileName?: string;
   fileSize?: number;
-  status?: DocumentStatus;
+  status?: ObjectDocumentStatus;
   createdAt: string;
   uploadedBy?: string;
   

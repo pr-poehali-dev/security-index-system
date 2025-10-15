@@ -62,7 +62,7 @@ export interface CertificationArea {
   requiresRostechnadzor: boolean;
 }
 
-export interface Organization {
+export interface SettingsOrganization {
   id: string;
   tenantId: string;
   name: string;
@@ -692,7 +692,7 @@ export interface Notification {
 }
 
 export type DocumentCategory = 'regulatory' | 'organization' | 'platform_instruction';
-export type DocumentStatus = 'draft' | 'published' | 'archived';
+export type KnowledgeDocumentStatus = 'draft' | 'published' | 'archived';
 
 export type RegulatoryDocumentType = 
   | 'federal_law'
@@ -760,7 +760,7 @@ export interface KnowledgeDocument {
   tags?: string[];
   version?: string;
   author: string;
-  status: DocumentStatus;
+  status: KnowledgeDocumentStatus;
   viewsCount: number;
   downloadsCount: number;
   versions?: DocumentVersion[];

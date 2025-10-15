@@ -1,18 +1,18 @@
 // src/stores/catalogStore.ts
 // Описание: Zustand store для управления каталогом организаций и объектов
 import { create } from 'zustand';
-import type { Organization, IndustrialObject, ObjectDocument } from '@/types/catalog';
+import type { CatalogOrganization, IndustrialObject, ObjectDocument } from '@/types/catalog';
 
 interface CatalogState {
-  organizations: Organization[];
+  organizations: CatalogOrganization[];
   objects: IndustrialObject[];
   documents: ObjectDocument[];
   selectedOrganization: string | null;
   expandedNodes: string[];
   error: string | null;
   
-  addOrganization: (org: Omit<Organization, 'id' | 'createdAt' | 'updatedAt'>) => string;
-  updateOrganization: (id: string, updates: Partial<Organization>) => void;
+  addOrganization: (org: Omit<CatalogOrganization, 'id' | 'createdAt' | 'updatedAt'>) => string;
+  updateOrganization: (id: string, updates: Partial<CatalogOrganization>) => void;
   deleteOrganization: (id: string) => void;
   
   addObject: (obj: Omit<IndustrialObject, 'id' | 'createdAt' | 'updatedAt'>) => string;
@@ -25,7 +25,7 @@ interface CatalogState {
   getDocumentsByObject: (objectId: string) => ObjectDocument[];
   
   getObjectsByOrganization: (organizationId: string) => IndustrialObject[];
-  getOrganizationTree: () => Organization[];
+  getOrganizationTree: () => CatalogOrganization[];
   
   setSelectedOrganization: (id: string | null) => void;
   toggleExpandNode: (id: string) => void;
@@ -33,9 +33,9 @@ interface CatalogState {
   clearError: () => void;
 }
 
-const buildTree = (organizations: Organization[]): Organization[] => {
-  const orgMap = new Map<string, Organization>();
-  const rootOrgs: Organization[] = [];
+const buildTree = (organizations: CatalogOrganization[]): CatalogOrganization[] => {
+  const orgMap = new Map<string, CatalogOrganization>();
+  const rootOrgs: CatalogOrganization[] = [];
 
   organizations.forEach(org => {
     orgMap.set(org.id, { ...org, children: [] });
@@ -240,7 +240,7 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
       id: 'doc-2',
       objectId: 'obj-1',
       title: 'Заключение экспертизы промышленной безопасности',
-      type: 'certificate',
+      type: 'expertise',
       documentNumber: 'ЭПБ-2024-0145',
       issueDate: '2024-01-15',
       expiryDate: '2026-06-15',
@@ -260,7 +260,7 @@ export const useCatalogStore = create<CatalogState>((set, get) => ({
   addOrganization: (org) => {
     try {
       const id = `org-${Date.now()}`;
-      const newOrg: Organization = {
+      const newOrg: CatalogOrganization = {
         ...org,
         id,
         createdAt: new Date().toISOString(),
