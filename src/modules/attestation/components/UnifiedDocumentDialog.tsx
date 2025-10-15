@@ -5,7 +5,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useCertificationStore } from '@/stores/certificationStore';
 import { getCertificationStatus } from '@/lib/utils/personnelUtils';
 import { useDocumentsStore } from '@/stores/documentsStore';
-import { DocumentStatus } from '@/types/documentStatus';
+import { ChecklistDocumentStatus } from '@/types/documentStatus';
 import DocumentCreationWizard, { WizardStep } from '@/components/shared/DocumentCreationWizard';
 import TypeSelectionStep, { TypeOption } from '@/components/shared/wizard-steps/TypeSelectionStep';
 import BasicInfoStep, { BasicInfoData } from '@/components/shared/wizard-steps/BasicInfoStep';

@@ -7,7 +7,7 @@ import {
   TrainingDocument, 
   AttestationDocument 
 } from '@/stores/documentsStore';
-import { mapLegacyStatus, DocumentStatus } from '@/types/documentStatus';
+import { mapLegacyStatus, ChecklistDocumentStatus } from '@/types/documentStatus';
 
 export function migrateOrderToDocument(order: Order): OrderDocument {
   return {
@@ -73,7 +73,7 @@ export function migrateAttestationOrderToDocument(order: AttestationOrder): Atte
     number: order.orderNumber,
     date: order.orderDate,
     title: `Приказ на аттестацию ${order.certificationAreaCode}`,
-    status: DocumentStatus.DRAFT,
+    status: ChecklistDocumentStatus.DRAFT,
     employeeIds,
     createdBy: 'Система',
     createdAt: order.createdAt || new Date().toISOString(),
@@ -128,7 +128,7 @@ export function getMigrationStats(documents: Document[]) {
       training: 0,
       attestation: 0,
     },
-    byStatus: {} as Record<DocumentStatus, number>,
+    byStatus: {} as Record<ChecklistDocumentStatus, number>,
   };
   
   documents.forEach(doc => {
