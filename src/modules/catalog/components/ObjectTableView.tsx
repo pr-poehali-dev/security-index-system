@@ -158,7 +158,12 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
         label: 'Следующая ЭПБ',
         format: (value) => value ? formatDate(value) : '-'
       },
-      { key: 'responsiblePerson', label: 'Ответственный' }
+      { key: 'responsiblePerson', label: 'Ответственный' },
+      { 
+        key: 'documents', 
+        label: 'Документов',
+        format: (value) => value?.length?.toString() || '0'
+      }
     ];
 
     const filename = `Объекты_${new Date().toLocaleDateString('ru-RU').replace(/\./g, '-')}`;
@@ -238,6 +243,11 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
           </div>
           <div className="p-3 flex-1 truncate">
             <p className="text-sm truncate">{obj.responsiblePerson}</p>
+          </div>
+          <div className="p-3 flex-1 text-center">
+            <span className="text-sm">
+              {obj.documents?.length || 0}
+            </span>
           </div>
           <div className="p-3 flex-shrink-0">
             <div className="flex items-center justify-end gap-1">
@@ -340,6 +350,9 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
                 onSort={handleSort}
                 className="flex-1"
               />
+              <div className="text-center p-3 font-semibold text-sm flex-1">
+                Документов
+              </div>
               <div className="text-right p-3 font-semibold text-sm flex-shrink-0 w-32">Действия</div>
             </div>
 

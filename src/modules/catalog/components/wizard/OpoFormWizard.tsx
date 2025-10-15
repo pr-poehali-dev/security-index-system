@@ -9,7 +9,9 @@ import Step1BasicInfo from './Step1BasicInfo';
 import Step2DangerIdentification from './Step2DangerIdentification';
 import Step3Classification from './Step3Classification';
 import Step4Composition from './Step4Composition';
-import Step5Review from './Step5Review';
+import Step5Documents from './Step5Documents';
+import Step6Review from './Step6Review';
+import type { ObjectDocument } from '@/types/catalog';
 
 interface OpoFormWizardProps {
   open: boolean;
@@ -45,6 +47,8 @@ export interface WizardFormData {
   
   licensedActivities: string[];
   
+  documents: ObjectDocument[];
+  
   description: string;
 }
 
@@ -69,6 +73,7 @@ const initialFormData: WizardFormData = {
   hazardClass: '',
   hazardClassJustification: '',
   licensedActivities: [],
+  documents: [],
   description: ''
 };
 
@@ -77,7 +82,8 @@ const steps = [
   { id: 2, title: 'Идентификация опасности', icon: 'AlertTriangle' },
   { id: 3, title: 'Классификация', icon: 'Tags' },
   { id: 4, title: 'Состав ОПО', icon: 'Layers' },
-  { id: 5, title: 'Проверка', icon: 'CheckCircle' }
+  { id: 5, title: 'Документы', icon: 'File' },
+  { id: 6, title: 'Проверка', icon: 'CheckCircle' }
 ];
 
 export default function OpoFormWizard({ open, onOpenChange, mode = 'create', object }: OpoFormWizardProps) {
@@ -131,6 +137,7 @@ export default function OpoFormWizard({ open, onOpenChange, mode = 'create', obj
       hazardClass: formData.hazardClass || undefined,
       hazardClassJustification: formData.hazardClassJustification,
       licensedActivities: formData.licensedActivities,
+      documents: formData.documents,
       description: formData.description
     };
 
@@ -201,7 +208,10 @@ export default function OpoFormWizard({ open, onOpenChange, mode = 'create', obj
               <Step4Composition formData={formData} updateFormData={updateFormData} />
             )}
             {currentStep === 5 && (
-              <Step5Review formData={formData} />
+              <Step5Documents formData={formData} updateFormData={updateFormData} />
+            )}
+            {currentStep === 6 && (
+              <Step6Review formData={formData} />
             )}
           </div>
 

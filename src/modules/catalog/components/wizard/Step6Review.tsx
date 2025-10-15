@@ -6,11 +6,22 @@ import type { WizardFormData } from './OpoFormWizard';
 import Icon from '@/components/ui/icon';
 import { HAZARD_CLASS_LABELS, HAZARD_CLASS_COLORS } from '@/constants/hazardClass';
 
-interface Step5ReviewProps {
+interface Step6ReviewProps {
   formData: WizardFormData;
 }
 
-export default function Step5Review({ formData }: Step5ReviewProps) {
+const DOCUMENT_TYPE_LABELS: Record<string, string> = {
+  commissioning: 'Документ о вводе в эксплуатацию',
+  safety_declaration: 'Декларация промышленной безопасности',
+  expertise: 'Заключение ЭПБ',
+  diagnostic_report: 'Отчет о диагностировании',
+  passport: 'Паспорт объекта',
+  manual: 'Руководство по эксплуатации',
+  instructions: 'Инструкции',
+  other: 'Прочие'
+};
+
+export default function Step6Review({ formData }: Step6ReviewProps) {
   const { organizations } = useCatalogStore();
   const { typicalOpoNames, dangerSigns, opoClassifications, licensedActivities } = useReferencesStore();
   const { personnel, people, positions } = useSettingsStore();
@@ -168,6 +179,32 @@ export default function Step5Review({ formData }: Step5ReviewProps) {
               )}
             </div>
           </div>
+
+          {formData.documents.length > 0 && (
+            <div className="p-4 border rounded-lg bg-card">
+              <div className="flex items-center gap-2 mb-3">
+                <Icon name="File" size={20} className="text-blue-600" />
+                <h4 className="font-semibold">Документы</h4>
+              </div>
+              <div className="space-y-2">
+                {formData.documents.map((doc) => (
+                  <div key={doc.id} className="flex items-start gap-2 p-2 rounded bg-muted/50">
+                    <Icon name="FileText" size={16} className="mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0 text-sm">
+                      <p className="font-medium">{DOCUMENT_TYPE_LABELS[doc.type]}</p>
+                      <p className="text-muted-foreground">{doc.fileName}</p>
+                      {doc.documentNumber && (
+                        <p className="text-xs text-muted-foreground">№ {doc.documentNumber}</p>
+                      )}
+                      {doc.rtnRegistrationNumber && (
+                        <p className="text-xs text-muted-foreground">РТН: {doc.rtnRegistrationNumber}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {formData.description && (
             <div className="p-4 border rounded-lg bg-card">

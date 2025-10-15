@@ -48,9 +48,12 @@ export default function ObjectDetailsModal({ open, onOpenChange, object, onEdit 
   const documents = useCatalogStore((state) => state.documents);
   
   const organization = object ? organizations.find(org => org.id === object.organizationId) : undefined;
-  const allDocuments = useMemo(() => 
-    object ? documents.filter(doc => doc.objectId === object.id) : []
-  , [documents, object?.id]);
+  const allDocuments = useMemo(() => {
+    if (!object) return [];
+    const storeDocuments = documents.filter(doc => doc.objectId === object.id);
+    const objectDocuments = object.documents || [];
+    return [...storeDocuments, ...objectDocuments];
+  }, [documents, object?.id, object?.documents]);
   
   if (!object) return null;
 

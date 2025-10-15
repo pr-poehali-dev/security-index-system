@@ -64,9 +64,13 @@ const isExpired = (date: string | undefined) => {
 };
 
 const ObjectCard = memo(function ObjectCard({ object: obj, onView, onEdit }: ObjectCardProps) {
+  const expertiseDoc = obj.documents?.find(doc => doc.type === 'expertise');
   const needsAttention = isExpired(obj.nextExpertiseDate) || 
                         isExpired(obj.nextDiagnosticDate) || 
-                        isExpired(obj.nextTestDate);
+                        isExpired(obj.nextTestDate) ||
+                        (expertiseDoc?.operationExtendedUntil && isExpired(expertiseDoc.operationExtendedUntil));
+  
+  const documentsCount = obj.documents?.length || 0;
   
   return (
     <Card className={`hover-scale ${needsAttention ? 'border-red-300 dark:border-red-800' : ''}`}>
@@ -152,6 +156,15 @@ const ObjectCard = memo(function ObjectCard({ object: obj, onView, onEdit }: Obj
                 ${isExpirationSoon(obj.nextDiagnosticDate) ? 'text-amber-600 dark:text-amber-400' : ''}
               `}>
                 Диагностика: {new Date(obj.nextDiagnosticDate).toLocaleDateString('ru-RU')}
+              </span>
+            </div>
+          )}
+          
+          {documentsCount > 0 && (
+            <div className="flex items-center gap-2">
+              <Icon name="FileText" size={16} className="text-muted-foreground flex-shrink-0" />
+              <span className="text-muted-foreground">
+                Документов: {documentsCount}
               </span>
             </div>
           )}

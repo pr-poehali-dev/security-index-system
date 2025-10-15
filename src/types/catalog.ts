@@ -4,7 +4,15 @@ export type HazardClass = 'I' | 'II' | 'III' | 'IV';
 export type ObjectType = 'opo' | 'gts' | 'building';
 export type ObjectStatus = 'active' | 'conservation' | 'liquidated';
 export type DocumentStatus = 'valid' | 'expiring_soon' | 'expired';
-export type DocumentType = 'passport' | 'scheme' | 'permit' | 'protocol' | 'certificate' | 'other';
+export type DocumentType = 
+  | 'commissioning' 
+  | 'safety_declaration' 
+  | 'expertise' 
+  | 'diagnostic_report' 
+  | 'passport' 
+  | 'manual' 
+  | 'instructions' 
+  | 'other';
 export type OrganizationType = 'legal_entity' | 'individual_entrepreneur' | 'individual';
 
 export interface Organization {
@@ -70,6 +78,8 @@ export interface IndustrialObject {
   lastChangeDate?: string;
   rtnDepartmentId?: string;
   
+  documents?: ObjectDocument[];
+  
   createdAt: string;
   updatedAt: string;
 }
@@ -80,14 +90,17 @@ export interface ObjectDocument {
   title: string;
   type: DocumentType;
   documentNumber?: string;
-  issueDate: string;
+  issueDate?: string;
   expiryDate?: string;
   fileUrl?: string;
   fileName?: string;
   fileSize?: number;
-  status: DocumentStatus;
+  status?: DocumentStatus;
   createdAt: string;
   uploadedBy?: string;
+  
+  rtnRegistrationNumber?: string;
+  operationExtendedUntil?: string;
 }
 
 export interface Location {
