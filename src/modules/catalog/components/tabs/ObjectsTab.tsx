@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useCatalogStore } from '@/stores/catalogStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { SearchBar } from '@/components/ui/search-bar';
@@ -31,6 +31,14 @@ export default function ObjectsTab() {
   const [orgFormMode, setOrgFormMode] = useState<'create' | 'edit'>('create');
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('catalog-sidebar-collapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('catalog-sidebar-collapsed', JSON.stringify(sidebarCollapsed));
+  }, [sidebarCollapsed]);
 
   const handleCreateOpo = () => {
     setSelectedObject(null);
@@ -154,21 +162,34 @@ export default function ObjectsTab() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 md:gap-6">
-        <Card className="overflow-hidden flex flex-col max-h-[600px]">
-          <CardContent className="p-4 flex-1 overflow-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-lg">Организации</h3>
-              <Button variant="ghost" size="sm" onClick={handleCreateOrganization}>
-                <Icon name="Plus" size={16} />
-              </Button>
-            </div>
-            <OrganizationTree 
-              onEdit={handleEditOrganization}
-              onDelete={handleDeleteOrganization}
-            />
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-4 md:gap-6">
+        <div className="relative">
+          {!sidebarCollapsed && (
+            <Card className="overflow-hidden flex flex-col max-h-[600px] w-[320px]">
+              <CardContent className="p-4 flex-1 overflow-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-lg">Организации</h3>
+                  <Button variant="ghost" size="sm" onClick={handleCreateOrganization}>
+                    <Icon name="Plus" size={16} />
+                  </Button>
+                </div>
+                <OrganizationTree 
+                  onEdit={handleEditOrganization}
+                  onDelete={handleDeleteOrganization}
+                />
+              </CardContent>
+            </Card>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className={`absolute top-2 z-10 shadow-md ${sidebarCollapsed ? 'left-0' : 'right-2'}`}
+            title={sidebarCollapsed ? 'Показать организации' : 'Скрыть организации'}
+          >
+            <Icon name={sidebarCollapsed ? "PanelLeftOpen" : "PanelLeftClose"} size={16} />
+          </Button>
+        </div>
 
         <div className="flex flex-col">
           <div className="flex flex-col sm:flex-row gap-3 mb-4">
