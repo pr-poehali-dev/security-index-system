@@ -184,14 +184,14 @@ export default function ObjectsTab() {
             variant="outline"
             size="sm"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className={`absolute top-0 z-10 shadow-md h-32 w-10 p-0 rounded-r-lg flex flex-col items-center justify-center gap-2 ${
+            className={`absolute top-0 z-10 shadow-md h-32 w-10 p-0 rounded-r-lg flex flex-col items-center justify-center gap-2 bg-primary/5 hover:bg-primary/10 border-primary/20 hover:border-primary/30 transition-colors ${
               sidebarCollapsed ? '-left-0 rounded-l-none border-l-0' : '-right-5 rounded-l-lg'
             }`}
             title={sidebarCollapsed ? 'Показать организации' : 'Скрыть организации'}
           >
-            <Icon name={sidebarCollapsed ? "ChevronRight" : "ChevronLeft"} size={16} />
+            <Icon name={sidebarCollapsed ? "ChevronRight" : "ChevronLeft"} size={16} className="text-primary" />
             <div 
-              className="text-[10px] font-medium leading-tight whitespace-nowrap"
+              className="text-[10px] font-medium leading-tight whitespace-nowrap text-primary"
               style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
             >
               Организации
