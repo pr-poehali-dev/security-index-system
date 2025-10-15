@@ -8,27 +8,16 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCertificationStore } from '@/stores/certificationStore';
 import { useOrdersStore } from '@/stores/ordersStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
+import OrderTypeSelector from './create-order/OrderTypeSelector';
+import OrderBasicInfoForm from './create-order/OrderBasicInfoForm';
+import EmployeeSelectionStep from './create-order/EmployeeSelectionStep';
 
 interface CreateOrderDialogProps {
   open: boolean;
@@ -60,7 +49,44 @@ const orderTypes = [
   },
 ];
 
+const getDefaultTitle = (type: string) => {
+  switch (type) {
+    case 'attestation':
+      return 'О проведении аттестации';
+    case 'training':
+      return 'О направлении на обучение';
+    case 'suspension':
+      return 'Об отстранении от работы';
+    default:
+      return 'О выполнении приказа';
+  }
+};
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'valid':
+      return 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30';
+    case 'expiring_soon':
+      return 'text-amber-600 bg-amber-100 dark:bg-amber-900/30';
+    case 'expired':
+      return 'text-red-600 bg-red-100 dark:bg-red-900/30';
+    default:
+      return 'text-gray-600 bg-gray-100 dark:bg-gray-900/30';
+  }
+};
+
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case 'valid':
+      return 'Действует';
+    case 'expiring_soon':
+      return 'Истекает';
+    case 'expired':
+      return 'Просрочен';
+    default:
+      return status;
+  }
+};
 
 export default function CreateOrderDialog({ open, onOpenChange, initialOrderType }: CreateOrderDialogProps) {
   const { toast } = useToast();
@@ -154,32 +180,6 @@ export default function CreateOrderDialog({ open, onOpenChange, initialOrderType
     });
   }, [allCertifications, searchEmployee, categoryFilter, statusFilter]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'valid':
-        return 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30';
-      case 'expiring_soon':
-        return 'text-amber-600 bg-amber-100 dark:bg-amber-900/30';
-      case 'expired':
-        return 'text-red-600 bg-red-100 dark:bg-red-900/30';
-      default:
-        return 'text-gray-600 bg-gray-100 dark:bg-gray-900/30';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'valid':
-        return 'Действует';
-      case 'expiring_soon':
-        return 'Истекает';
-      case 'expired':
-        return 'Просрочен';
-      default:
-        return status;
-    }
-  };
-
   const isAreaSelected = (employeeId: string, certId: string) => {
     return employeeSelections.get(employeeId)?.has(certId) || false;
   };
@@ -259,7 +259,6 @@ export default function CreateOrderDialog({ open, onOpenChange, initialOrderType
     const employeeCount = getEmployeesWithSelections();
     const areasCount = getTotalSelected();
     
-    // Собираем выбранных сотрудников и их области
     const selectedEmployeeIds: string[] = [];
     const orderCertifications: Array<{ personnelId: string; certificationId: string; category: string; area: string }> = [];
     
@@ -281,7 +280,6 @@ export default function CreateOrderDialog({ open, onOpenChange, initialOrderType
       }
     });
 
-    // Создаём приказ
     addOrder({
       tenantId: user.tenantId,
       number: orderNumber,
@@ -316,17 +314,9 @@ export default function CreateOrderDialog({ open, onOpenChange, initialOrderType
     onOpenChange(false);
   };
 
-  const getDefaultTitle = (type: string) => {
-    switch (type) {
-      case 'attestation':
-        return 'О проведении аттестации';
-      case 'training':
-        return 'О направлении на обучение';
-      case 'suspension':
-        return 'Об отстранении от работы';
-      default:
-        return 'О выполнении приказа';
-    }
+  const handleSelectType = (type: string) => {
+    setOrderType(type);
+    setOrderTitle(getDefaultTitle(type));
   };
 
   return (
@@ -348,251 +338,49 @@ export default function CreateOrderDialog({ open, onOpenChange, initialOrderType
 
         <div className="space-y-4">
           {step === 1 && (
-            <div className="space-y-4">
-              <div>
-                <Label>Выберите тип приказа</Label>
-                <p className="text-sm text-muted-foreground mb-3">
-                  После создания приказа вы сможете направить сотрудников в УЦ, СДО, Ростехнадзор или на внутреннюю аттестацию
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 gap-3">
-                {orderTypes.map((type) => (
-                  <button
-                    key={type.value}
-                    onClick={() => {
-                      setOrderType(type.value);
-                      setOrderTitle(getDefaultTitle(type.value));
-                    }}
-                    className={`p-4 border-2 rounded-lg text-left transition-all hover:shadow-md ${
-                      orderType === type.value
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-lg ${type.color}`}>
-                        <Icon name={type.icon as any} size={20} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-medium mb-1">{type.label}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {type.description}
-                        </div>
-                      </div>
-                      {orderType === type.value && (
-                        <Icon name="CheckCircle2" size={20} className="text-primary" />
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
+            <OrderTypeSelector
+              orderTypes={orderTypes}
+              selectedType={orderType}
+              onSelectType={handleSelectType}
+            />
           )}
 
           {step === 2 && (
-            <div className="space-y-4">
-              {selectedType && (
-                <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                  <div className={`p-2 rounded-lg ${selectedType.color}`}>
-                    <Icon name={selectedType.icon as any} size={18} />
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium">{selectedType.label}</div>
-                    <div className="text-xs text-muted-foreground">Выбранный тип приказа</div>
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="orderNumber">Номер приказа *</Label>
-                  <Input
-                    id="orderNumber"
-                    placeholder="15-А"
-                    value={orderNumber}
-                    onChange={(e) => setOrderNumber(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="orderDate">Дата приказа *</Label>
-                  <Input
-                    id="orderDate"
-                    type="date"
-                    value={orderDate}
-                    onChange={(e) => setOrderDate(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="orderTitle">Название приказа *</Label>
-                <Input
-                  id="orderTitle"
-                  placeholder="О проведении аттестации..."
-                  value={orderTitle}
-                  onChange={(e) => setOrderTitle(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="orderDescription">Описание (необязательно)</Label>
-                <Textarea
-                  id="orderDescription"
-                  placeholder="Дополнительная информация о приказе..."
-                  value={orderDescription}
-                  onChange={(e) => setOrderDescription(e.target.value)}
-                  rows={3}
-                />
-              </div>
-            </div>
+            <OrderBasicInfoForm
+              selectedType={selectedType}
+              orderNumber={orderNumber}
+              orderDate={orderDate}
+              orderTitle={orderTitle}
+              orderDescription={orderDescription}
+              onOrderNumberChange={setOrderNumber}
+              onOrderDateChange={setOrderDate}
+              onOrderTitleChange={setOrderTitle}
+              onOrderDescriptionChange={setOrderDescription}
+            />
           )}
 
           {step === 3 && (
-            <div className="space-y-4">
-              <div className="p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg">
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  <Icon name="Info" size={14} className="inline mr-1" />
-                  Выберите сотрудников и их области аттестации для включения в приказ. Эти данные будут использованы для формирования приложения к приказу.
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Поиск по области, категории или ФИО..."
-                    value={searchEmployee}
-                    onChange={(e) => setSearchEmployee(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue placeholder="Категория" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Все категории</SelectItem>
-                    {uniqueCategories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-[150px]">
-                    <SelectValue placeholder="Статус" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Все статусы</SelectItem>
-                    <SelectItem value="valid">Действует</SelectItem>
-                    <SelectItem value="expiring_soon">Истекает</SelectItem>
-                    <SelectItem value="expired">Просрочен</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                <div className="flex items-center gap-4 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Выбрано областей:</span>
-                    <span className="ml-2 font-semibold">{getTotalSelected()}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Сотрудников:</span>
-                    <span className="ml-2 font-semibold">{getEmployeesWithSelections()} из {employees.length}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={selectAll}>
-                    <Icon name="CheckCheck" size={14} className="mr-1" />
-                    Выбрать все
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={clearAll}>
-                    <Icon name="X" size={14} className="mr-1" />
-                    Очистить
-                  </Button>
-                </div>
-              </div>
-
-              <ScrollArea className="max-h-[400px] pr-4">
-                <div className="space-y-4">
-                  {(() => {
-                    const employeesGrouped = new Map<string, typeof filteredCertifications>();
-                    filteredCertifications.forEach(cert => {
-                      const list = employeesGrouped.get(cert.employeeId) || [];
-                      list.push(cert);
-                      employeesGrouped.set(cert.employeeId, list);
-                    });
-
-                    return Array.from(employeesGrouped.entries()).map(([employeeId, certs]) => {
-                      const employee = employees.find(e => e.id === employeeId);
-                      if (!employee) return null;
-
-                      const allAreaIds = certs.map(c => c.id);
-                      const selectedAreas = employeeSelections.get(employeeId) || new Set();
-                      const allSelected = selectedAreas.size === allAreaIds.length && allAreaIds.length > 0;
-
-                      return (
-                        <Card key={employeeId} className="overflow-hidden">
-                          <div className="p-4 bg-muted/50 border-b">
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-start gap-3 flex-1">
-                                <Checkbox
-                                  checked={allSelected}
-                                  onCheckedChange={() => toggleEmployee(employeeId, allAreaIds)}
-                                />
-                                <div className="flex-1">
-                                  <div className="font-medium">{employee.name}</div>
-                                  <div className="text-sm text-muted-foreground">
-                                    {employee.position} • {employee.department}
-                                  </div>
-                                </div>
-                              </div>
-                              <Badge variant="secondary" className="ml-2">
-                                {selectedAreas.size} / {certs.length}
-                              </Badge>
-                            </div>
-                          </div>
-                          <div className="p-4 space-y-2">
-                            {certs.map(cert => (
-                              <div
-                                key={cert.id}
-                                className="flex items-start gap-3 p-2 rounded hover:bg-muted/50 cursor-pointer"
-                                onClick={() => toggleArea(employeeId, cert.id)}
-                              >
-                                <Checkbox
-                                  checked={isAreaSelected(employeeId, cert.id)}
-                                  onCheckedChange={() => toggleArea(employeeId, cert.id)}
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-sm font-medium truncate">{cert.area}</div>
-                                  <div className="text-xs text-muted-foreground">{cert.category}</div>
-                                </div>
-                                <div className="flex flex-col items-end gap-1">
-                                  <Badge variant="outline" className={`text-xs ${getStatusColor(cert.status)}`}>
-                                    {getStatusLabel(cert.status)}
-                                  </Badge>
-                                  <div className="text-xs text-muted-foreground whitespace-nowrap">
-                                    {cert.daysLeft > 0 ? `${cert.daysLeft} дн.` : 'Просрочено'}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </Card>
-                      );
-                    });
-                  })()}
-                </div>
-              </ScrollArea>
-
-              {filteredCertifications.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Icon name="Users" size={32} className="mx-auto mb-2" />
-                  <p>Сотрудники с областями аттестации не найдены</p>
-                </div>
-              )}
-            </div>
+            <EmployeeSelectionStep
+              searchEmployee={searchEmployee}
+              categoryFilter={categoryFilter}
+              statusFilter={statusFilter}
+              uniqueCategories={uniqueCategories}
+              filteredCertifications={filteredCertifications}
+              employees={employees}
+              employeeSelections={employeeSelections}
+              onSearchChange={setSearchEmployee}
+              onCategoryFilterChange={setCategoryFilter}
+              onStatusFilterChange={setStatusFilter}
+              onSelectAll={selectAll}
+              onClearAll={clearAll}
+              onToggleEmployee={toggleEmployee}
+              onToggleArea={toggleArea}
+              isAreaSelected={isAreaSelected}
+              getTotalSelected={getTotalSelected}
+              getEmployeesWithSelections={getEmployeesWithSelections}
+              getStatusColor={getStatusColor}
+              getStatusLabel={getStatusLabel}
+            />
           )}
         </div>
 
