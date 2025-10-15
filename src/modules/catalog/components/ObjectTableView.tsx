@@ -134,7 +134,19 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
     return diffDays <= 90 && diffDays >= 0;
   };
 
-  const handleExport = (format: 'csv' | 'excel') => {
+  const handleExport = (format: 'csv' | 'excel' | 'json') => {
+    if (format === 'json') {
+      const dataStr = JSON.stringify(sortedObjects, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Объекты_${new Date().toLocaleDateString('ru-RU').replace(/\./g, '-')}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
+
     const columns: ExportColumn<IndustrialObject>[] = [
       { key: 'name', label: 'Название' },
       { key: 'registrationNumber', label: 'Рег. номер' },
@@ -145,8 +157,7 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
       },
       { 
         key: 'organizationId', 
-        label: 'Организация',
-        format: (value) => organizations.find(org => org.id === value)?.name || '-'
+        label: 'ID Организации',
       },
       { 
         key: 'status', 
@@ -154,16 +165,68 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
         format: (value) => getStatusLabel(value)
       },
       { 
+        key: 'location', 
+        label: 'Адрес',
+        format: (value) => value?.address || '-'
+      },
+      { key: 'category', label: 'Категория' },
+      { key: 'hazardClass', label: 'Класс опасности' },
+      { key: 'responsiblePerson', label: 'Ответственный' },
+      { key: 'commissioningDate', label: 'Дата ввода' },
+      { 
+        key: 'detailedAddress', 
+        label: 'Регион',
+        format: (value) => value?.region || '-'
+      },
+      { 
+        key: 'detailedAddress', 
+        label: 'Город',
+        format: (value) => value?.city || '-'
+      },
+      { 
+        key: 'detailedAddress', 
+        label: 'Улица',
+        format: (value) => value?.street || '-'
+      },
+      { 
+        key: 'detailedAddress', 
+        label: 'Здание',
+        format: (value) => value?.building || '-'
+      },
+      { 
+        key: 'detailedAddress', 
+        label: 'ОКТМО',
+        format: (value) => value?.oktmo || '-'
+      },
+      { key: 'typicalNameId', label: 'ID Типового наименования' },
+      { key: 'industryCode', label: 'Код отрасли' },
+      { key: 'ownerId', label: 'ID Собственника' },
+      { 
+        key: 'dangerSigns', 
+        label: 'Признаки опасности',
+        format: (value) => Array.isArray(value) ? value.join(';') : '-'
+      },
+      { 
+        key: 'classifications', 
+        label: 'Классификации',
+        format: (value) => Array.isArray(value) ? value.join(';') : '-'
+      },
+      { 
+        key: 'licensedActivities', 
+        label: 'Лицензируемые виды',
+        format: (value) => Array.isArray(value) ? value.join(';') : '-'
+      },
+      { 
         key: 'nextExpertiseDate', 
         label: 'Следующая ЭПБ',
         format: (value) => value ? formatDate(value) : '-'
       },
-      { key: 'responsiblePerson', label: 'Ответственный' },
       { 
         key: 'documents', 
         label: 'Документов',
         format: (value) => value?.length?.toString() || '0'
-      }
+      },
+      { key: 'description', label: 'Описание' }
     ];
 
     const filename = `Объекты_${new Date().toLocaleDateString('ru-RU').replace(/\./g, '-')}`;
@@ -292,6 +355,10 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
             <DropdownMenuItem onClick={() => handleExport('excel')}>
               <Icon name="FileSpreadsheet" size={16} className="mr-2" />
               Экспорт в Excel
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExport('json')}>
+              <Icon name="FileJson" size={16} className="mr-2" />
+              Экспорт в JSON
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

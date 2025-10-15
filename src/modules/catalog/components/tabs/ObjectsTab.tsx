@@ -10,10 +10,11 @@ import { ViewModeToggle, type ViewMode } from '@/components/ui/view-mode-toggle'
 import OrganizationTree from '@/components/shared/OrganizationTree';
 import ObjectCard from '../ObjectCard';
 import ObjectTableView from '../ObjectTableView';
-import ObjectFormModal from '../ObjectFormModal';
+
 import ObjectDetailsModal from '../ObjectDetailsModal';
 import OrganizationFormModal from '../OrganizationFormModal';
 import OpoFormWizard from '../wizard/OpoFormWizard';
+import ImportModal from '../ImportModal';
 import type { IndustrialObject, Organization } from '@/types/catalog';
 
 export default function ObjectsTab() {
@@ -22,22 +23,18 @@ export default function ObjectsTab() {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [formModalOpen, setFormModalOpen] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [wizardMode, setWizardMode] = useState<'create' | 'edit'>('create');
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedObject, setSelectedObject] = useState<IndustrialObject | null>(null);
-  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [orgFormModalOpen, setOrgFormModalOpen] = useState(false);
   const [orgFormMode, setOrgFormMode] = useState<'create' | 'edit'>('create');
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
-
-  const handleCreateObject = () => {
-    setSelectedObject(null);
-    setFormMode('create');
-    setFormModalOpen(true);
-  };
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   const handleCreateOpo = () => {
+    setSelectedObject(null);
+    setWizardMode('create');
     setWizardOpen(true);
   };
 
@@ -59,8 +56,8 @@ export default function ObjectsTab() {
 
   const handleEditObject = (object: IndustrialObject) => {
     setSelectedObject(object);
-    setFormMode('edit');
-    setFormModalOpen(true);
+    setWizardMode('edit');
+    setWizardOpen(true);
     setDetailsModalOpen(false);
   };
 
@@ -107,12 +104,12 @@ export default function ObjectsTab() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleCreateObject}>
-            <Icon name="Plus" size={18} className="mr-2" />
-            Быстрое добавление
+          <Button variant="outline" onClick={() => setImportModalOpen(true)}>
+            <Icon name="Upload" size={18} className="mr-2" />
+            Импорт
           </Button>
           <Button onClick={handleCreateOpo}>
-            <Icon name="FileText" size={18} className="mr-2" />
+            <Icon name="Plus" size={18} className="mr-2" />
             Создать ОПО
           </Button>
         </div>
@@ -248,13 +245,6 @@ export default function ObjectsTab() {
         </div>
       </div>
 
-      <ObjectFormModal
-        open={formModalOpen}
-        onOpenChange={setFormModalOpen}
-        object={formMode === 'edit' ? selectedObject : undefined}
-        mode={formMode}
-      />
-
       <ObjectDetailsModal
         object={selectedObject}
         open={detailsModalOpen}
@@ -272,7 +262,13 @@ export default function ObjectsTab() {
       <OpoFormWizard
         open={wizardOpen}
         onOpenChange={setWizardOpen}
-        mode="create"
+        mode={wizardMode}
+        object={wizardMode === 'edit' ? selectedObject || undefined : undefined}
+      />
+
+      <ImportModal
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -90,6 +90,38 @@ export default function OpoFormWizard({ open, onOpenChange, mode = 'create', obj
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<WizardFormData>(initialFormData);
   const { addObject, updateObject } = useCatalogStore();
+
+  useEffect(() => {
+    if (mode === 'edit' && object) {
+      setFormData({
+        name: object.name,
+        registrationNumber: object.registrationNumber,
+        typicalNameId: object.typicalNameId || '',
+        industryCode: object.industryCode || '',
+        organizationId: object.organizationId,
+        ownerId: object.ownerId || '',
+        commissioningDate: object.commissioningDate,
+        status: object.status,
+        postalCode: object.detailedAddress?.postalCode || '',
+        region: object.detailedAddress?.region || '',
+        city: object.detailedAddress?.city || '',
+        street: object.detailedAddress?.street || '',
+        building: object.detailedAddress?.building || '',
+        oktmo: object.detailedAddress?.oktmo || '',
+        responsiblePersonId: object.responsiblePersonId || '',
+        dangerSigns: object.dangerSigns || [],
+        classifications: object.classifications || [],
+        hazardClass: object.hazardClass || '',
+        hazardClassJustification: object.hazardClassJustification || '',
+        licensedActivities: object.licensedActivities || [],
+        documents: object.documents || [],
+        description: object.description || ''
+      });
+    } else if (mode === 'create') {
+      setFormData(initialFormData);
+      setCurrentStep(1);
+    }
+  }, [mode, object, open]);
 
   const updateFormData = (data: Partial<WizardFormData>) => {
     setFormData(prev => ({ ...prev, ...data }));
