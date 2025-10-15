@@ -6,6 +6,7 @@ import { useReferencesStore } from '@/stores/referencesStore';
 import type { WizardFormData } from './OpoFormWizard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Icon from '@/components/ui/icon';
+import { HAZARD_CLASS_OPTIONS } from '@/constants/hazardClass';
 
 interface Step3ClassificationProps {
   formData: WizardFormData;
@@ -98,10 +99,11 @@ export default function Step3Classification({ formData, updateFormData }: Step3C
                 <SelectValue placeholder="Выберите класс" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="I">I класс (чрезвычайно высокая опасность)</SelectItem>
-                <SelectItem value="II">II класс (высокая опасность)</SelectItem>
-                <SelectItem value="III">III класс (средняя опасность)</SelectItem>
-                <SelectItem value="IV">IV класс (низкая опасность)</SelectItem>
+                {HAZARD_CLASS_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

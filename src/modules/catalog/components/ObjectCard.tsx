@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import type { IndustrialObject } from '@/types/catalog';
+import { HAZARD_CLASS_SHORT_LABELS } from '@/constants/hazardClass';
 
 interface ObjectCardProps {
   object: IndustrialObject;
@@ -89,7 +90,7 @@ const ObjectCard = memo(function ObjectCard({ object: obj, onView, onEdit }: Obj
         <div className="flex items-center gap-2 flex-wrap">
           <Badge variant="outline">{getTypeLabel(obj.type)}</Badge>
           {obj.hazardClass && (
-            <Badge variant="outline">Класс {obj.hazardClass}</Badge>
+            <Badge variant="outline">{HAZARD_CLASS_SHORT_LABELS[obj.hazardClass]}</Badge>
           )}
           {obj.category && (
             <Badge variant="secondary" className="text-xs max-w-[200px] truncate">

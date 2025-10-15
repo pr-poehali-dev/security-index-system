@@ -4,6 +4,7 @@ import { useReferencesStore } from '@/stores/referencesStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import type { WizardFormData } from './OpoFormWizard';
 import Icon from '@/components/ui/icon';
+import { HAZARD_CLASS_LABELS, HAZARD_CLASS_COLORS } from '@/constants/hazardClass';
 
 interface Step5ReviewProps {
   formData: WizardFormData;
@@ -144,13 +145,8 @@ export default function Step5Review({ formData }: Step5ReviewProps) {
                 <div className="pt-3 border-t">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-sm text-muted-foreground">Класс опасности:</span>
-                    <Badge className={
-                      formData.hazardClass === 'I' ? 'bg-red-600' :
-                      formData.hazardClass === 'II' ? 'bg-orange-600' :
-                      formData.hazardClass === 'III' ? 'bg-yellow-600' :
-                      'bg-green-600'
-                    }>
-                      {formData.hazardClass} класс
+                    <Badge className={HAZARD_CLASS_COLORS[formData.hazardClass]}>
+                      {HAZARD_CLASS_LABELS[formData.hazardClass]}
                     </Badge>
                   </div>
                   {formData.hazardClassJustification && (

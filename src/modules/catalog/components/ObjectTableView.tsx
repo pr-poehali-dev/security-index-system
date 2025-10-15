@@ -13,6 +13,7 @@ import {
 import { useCatalogStore } from '@/stores/catalogStore';
 import { exportToCSV, exportToExcel, type ExportColumn } from '@/utils/export';
 import type { IndustrialObject } from '@/types/catalog';
+import { HAZARD_CLASS_SHORT_LABELS } from '@/constants/hazardClass';
 
 interface ObjectTableViewProps {
   objects: IndustrialObject[];
@@ -199,7 +200,7 @@ export default function ObjectTableView({ objects, onView, onEdit }: ObjectTable
           <div className="p-3 flex-1">
             <Badge variant="outline" className="whitespace-nowrap">
               {getTypeLabel(obj.type)}
-              {obj.hazardClass && ` • ${obj.hazardClass}`}
+              {obj.hazardClass && ` • ${HAZARD_CLASS_SHORT_LABELS[obj.hazardClass]}`}
             </Badge>
           </div>
           <div className="p-3 flex-1 truncate">

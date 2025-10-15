@@ -10,6 +10,7 @@ import ObjectDatesTab from './ObjectDatesTab';
 import ObjectDocumentsTab from './ObjectDocumentsTab';
 import ObjectPersonnelWidget from './contractors/ObjectPersonnelWidget';
 import type { IndustrialObject } from '@/types/catalog';
+import { HAZARD_CLASS_SHORT_LABELS } from '@/constants/hazardClass';
 
 interface ObjectDetailsModalProps {
   open: boolean;
@@ -64,7 +65,7 @@ export default function ObjectDetailsModal({ open, onOpenChange, object, onEdit 
                 <Badge variant="outline">{object.registrationNumber}</Badge>
                 <Badge variant="outline">{getTypeLabel(object.type)}</Badge>
                 {object.hazardClass && (
-                  <Badge variant="outline">Класс {object.hazardClass}</Badge>
+                  <Badge variant="outline">{HAZARD_CLASS_SHORT_LABELS[object.hazardClass]}</Badge>
                 )}
                 <Badge className={getStatusColor(object.status)}>
                   {getStatusLabel(object.status)}

@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
 import { useCatalogStore } from '@/stores/catalogStore';
 import type { IndustrialObject, ObjectType, HazardClass, ObjectStatus } from '@/types/catalog';
+import { HAZARD_CLASS_OPTIONS } from '@/constants/hazardClass';
 
 interface ObjectFormModalProps {
   open: boolean;
@@ -312,10 +313,11 @@ export default function ObjectFormModal({ open, onOpenChange, object, mode }: Ob
                     <SelectValue placeholder="Выберите класс" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="I">I класс</SelectItem>
-                    <SelectItem value="II">II класс</SelectItem>
-                    <SelectItem value="III">III класс</SelectItem>
-                    <SelectItem value="IV">IV класс</SelectItem>
+                    {HAZARD_CLASS_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

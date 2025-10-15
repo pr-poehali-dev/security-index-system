@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import type { HazardClass, ObjectType } from '@/types/catalog';
+import { HAZARD_CLASS_OPTIONS } from '@/constants/hazardClass';
 
 interface CreateObjectDialogProps {
   organizations: Array<{ id: string; name: string }>;
@@ -110,10 +111,11 @@ export default function CreateObjectDialog({ organizations, onSubmit }: CreateOb
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="I">I класс (высокий)</SelectItem>
-                    <SelectItem value="II">II класс (средний)</SelectItem>
-                    <SelectItem value="III">III класс (низкий)</SelectItem>
-                    <SelectItem value="IV">IV класс (очень низкий)</SelectItem>
+                    {HAZARD_CLASS_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
