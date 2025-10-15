@@ -49,6 +49,9 @@ interface SettingsState {
   updateOrganization: (id: string, updates: Partial<Organization>) => void;
   deleteOrganization: (id: string) => void;
   getOrganizationsByTenant: (tenantId: string) => Organization[];
+  getDepartmentsByTenant: (tenantId: string) => Department[];
+  getDepartmentsByOrganization: (orgId: string) => Department[];
+  getProductionSitesByOrganization: (orgId: string) => ProductionSite[];
   addDepartment: (dept: Omit<Department, 'id' | 'createdAt'>) => void;
   updateDepartment: (id: string, updates: Partial<Department>) => void;
   deleteDepartment: (id: string) => void;
@@ -158,6 +161,21 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
 
   getOrganizationsByTenant: (tenantId) => {
     return get().organizations.filter((org) => org.tenantId === tenantId);
+  },
+
+  getDepartmentsByTenant: (tenantId) => {
+    const orgIds = get().organizations
+      .filter(org => org.tenantId === tenantId)
+      .map(org => org.id);
+    return get().departments.filter(dept => orgIds.includes(dept.organizationId));
+  },
+
+  getDepartmentsByOrganization: (orgId) => {
+    return get().departments.filter(dept => dept.organizationId === orgId);
+  },
+
+  getProductionSitesByOrganization: (orgId) => {
+    return get().productionSites.filter(site => site.organizationId === orgId);
   },
 
   addDepartment: (dept) => {
