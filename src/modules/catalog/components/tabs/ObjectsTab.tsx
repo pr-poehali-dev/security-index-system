@@ -187,7 +187,7 @@ export default function ObjectsTab() {
             className={`absolute top-2 z-10 shadow-md ${sidebarCollapsed ? 'left-0' : 'right-2'}`}
             title={sidebarCollapsed ? 'Показать организации' : 'Скрыть организации'}
           >
-            <Icon name={sidebarCollapsed ? "PanelLeftOpen" : "PanelLeftClose"} size={16} />
+            <Icon name={sidebarCollapsed ? "ChevronRight" : "ChevronLeft"} size={16} />
           </Button>
         </div>
 
