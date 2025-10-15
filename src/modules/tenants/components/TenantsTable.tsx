@@ -82,11 +82,15 @@ export default function TenantsTable({ tenants, onEdit, onShowCredentials, onTog
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1 max-w-xs">
-                    {tenant.modules.slice(0, 3).map((moduleKey) => (
-                      <Badge key={moduleKey} variant="outline" className="text-xs">
-                        {MODULES[moduleKey].name}
-                      </Badge>
-                    ))}
+                    {tenant.modules.slice(0, 3).map((moduleKey) => {
+                      const module = MODULES[moduleKey];
+                      if (!module) return null;
+                      return (
+                        <Badge key={moduleKey} variant="outline" className="text-xs">
+                          {module.name}
+                        </Badge>
+                      );
+                    })}
                     {tenant.modules.length > 3 && (
                       <Badge variant="outline" className="text-xs">
                         +{tenant.modules.length - 3}
