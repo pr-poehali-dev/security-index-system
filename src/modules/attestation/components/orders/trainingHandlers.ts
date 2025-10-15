@@ -1,4 +1,4 @@
-import type { Training } from '@/stores/attestationStore';
+import type { Training } from '@/stores/trainingsAttestationStore';
 
 export const createTrainingHandlers = (trainings: Training[], toast: any) => {
   const handleChangeTrainingStatus = (trainingId: string, newStatus: string) => {

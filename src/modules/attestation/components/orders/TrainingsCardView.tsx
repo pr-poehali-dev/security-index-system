@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { Training } from '@/stores/attestationStore';
+import type { Training } from '@/stores/trainingsAttestationStore';
 import type { Personnel, Person, Position, OrganizationContractor } from '@/stores/settingsStore';
 
 interface TrainingsCardViewProps {

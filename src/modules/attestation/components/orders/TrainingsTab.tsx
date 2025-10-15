@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { ViewModeToggle } from '@/components/ui/view-mode-toggle';
-import type { Training } from '@/stores/attestationStore';
+import type { Training } from '@/stores/trainingsAttestationStore';
 import type { Personnel, Person, Position, OrganizationContractor } from '@/stores/settingsStore';
 import TrainingsStats from './TrainingsStats';
 import TrainingsCardView from './TrainingsCardView';

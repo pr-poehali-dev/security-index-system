@@ -11,7 +11,7 @@ import type {
   TrainingScheduleEntry,
   OrganizationTrainingRequest,
 } from '@/types';
-import type { Certification, CertificationDocument } from './attestationStore';
+import type { Certification, CertificationDocument } from './certificationStore';
 
 export interface IssuedCertificate {
   id: string;
