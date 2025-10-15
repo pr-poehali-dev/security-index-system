@@ -199,7 +199,7 @@ export default function AttestationOrdersList() {
 
       <CreateAttestationOrderDialog
         open={createDialogOpen}
-        onClose={() => setCreateDialogOpen(false)}
+        onOpenChange={setCreateDialogOpen}
       />
     </>
   );

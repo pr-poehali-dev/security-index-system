@@ -23,13 +23,19 @@ import type { Personnel, AttestationOrderType, AttestationOrderPersonnel, Attest
 
 interface CreateAttestationOrderDialogProps {
   open: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
+  preselectedEmployeeIds?: string[];
+  preselectedType?: string;
   preSelectedPersonnel?: Personnel[];
 }
 
 export default function CreateAttestationOrderDialog({
   open,
-  onClose,
+  onOpenChange,
+  onSuccess,
+  preselectedEmployeeIds = [],
+  preselectedType,
   preSelectedPersonnel = []
 }: CreateAttestationOrderDialogProps) {
   const user = useAuthStore((state) => state.user);
@@ -40,14 +46,25 @@ export default function CreateAttestationOrderDialog({
 
   const [orderNumber, setOrderNumber] = useState('');
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split('T')[0]);
-  const [attestationType, setAttestationType] = useState<AttestationOrderType>('rostekhnadzor');
+  const getInitialType = (): AttestationOrderType => {
+    if (!preselectedType) return 'rostekhnadzor';
+    const typeMap: Record<string, AttestationOrderType> = {
+      'sdo': 'sdo',
+      'training_center': 'training_center',
+      'internal_attestation': 'internal',
+      'rostechnadzor': 'rostekhnadzor'
+    };
+    return typeMap[preselectedType] || 'rostekhnadzor';
+  };
+
+  const [attestationType, setAttestationType] = useState<AttestationOrderType>(getInitialType());
   const [certificationAreaCode, setCertificationAreaCode] = useState('');
   const [organizationId, setOrganizationId] = useState('');
   const [scheduledDate, setScheduledDate] = useState('');
   const [location, setLocation] = useState('');
   const [commissionMembers, setCommissionMembers] = useState<string[]>([]);
   const [selectedPersonnelIds, setSelectedPersonnelIds] = useState<string[]>(
-    preSelectedPersonnel.map(p => p.id)
+    preselectedEmployeeIds.length > 0 ? preselectedEmployeeIds : preSelectedPersonnel.map(p => p.id)
   );
   const [notes, setNotes] = useState('');
 
@@ -140,7 +157,8 @@ export default function CreateAttestationOrderDialog({
       description: `Приказ №${orderNumber} успешно создан`,
     });
 
-    onClose();
+    onSuccess?.();
+    onOpenChange(false);
   };
 
   const togglePersonnel = (personnelId: string) => {
@@ -152,7 +170,7 @@ export default function CreateAttestationOrderDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -205,14 +223,17 @@ export default function CreateAttestationOrderDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="attestationType">Тип аттестации *</Label>
+              <Label htmlFor="attestationType">Тип приказа *</Label>
               <Select value={attestationType} onValueChange={(v) => setAttestationType(v as AttestationOrderType)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="rostekhnadzor">Ростехнадзор</SelectItem>
-                  <SelectItem value="internal_commission">Комиссия организации</SelectItem>
+                  <SelectItem value="sdo">О подготовке в СДО Интеллектуальная система</SelectItem>
+                  <SelectItem value="training_center">О подготовке в учебный центр</SelectItem>
+                  <SelectItem value="internal">О аттестации в ЕПТ организации</SelectItem>
+                  <SelectItem value="rostekhnadzor">О направлении на аттестацию в Ростехнадзор</SelectItem>
+                  <SelectItem value="internal_commission">Комиссия организации (устаревший)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

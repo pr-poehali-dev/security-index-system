@@ -22,9 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useOrdersStore } from '@/stores/ordersStore';
-import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/hooks/use-toast';
+import CreateAttestationOrderDialog from '../CreateAttestationOrderDialog';
 
 interface Certification {
   id: string;
@@ -53,6 +52,13 @@ interface MassActionDialogProps {
   employees: Employee[];
 }
 
+interface SelectedCertification {
+  personnelId: string;
+  certificationId: string;
+  category: string;
+  area: string;
+}
+
 interface EmployeeWithAreas {
   employeeId: string;
   selectedAreas: Set<string>;
@@ -65,12 +71,15 @@ export default function MassActionDialog({
   employees,
 }: MassActionDialogProps) {
   const { toast } = useToast();
-  const user = useAuthStore((state) => state.user);
-  const addOrder = useOrdersStore((state) => state.addOrder);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [employeeSelections, setEmployeeSelections] = useState<Map<string, Set<string>>>(new Map());
+  const [showOrderDialog, setShowOrderDialog] = useState(false);
+  const [preselectedData, setPreselectedData] = useState<{
+    employeeIds: string[];
+    certifications: SelectedCertification[];
+  } | null>(null);
 
   const getActionTitle = () => {
     switch (actionType) {
@@ -220,10 +229,8 @@ export default function MassActionDialog({
   };
 
   const handleSubmit = () => {
-    if (!user?.tenantId) return;
-
     const selectedEmployeeIds: string[] = [];
-    const orderCertifications: Array<{ personnelId: string; certificationId: string; category: string; area: string }> = [];
+    const orderCertifications: SelectedCertification[] = [];
     
     employeeSelections.forEach((areas, employeeId) => {
       const employee = employees.find(e => e.id === employeeId);
@@ -252,41 +259,11 @@ export default function MassActionDialog({
       return;
     }
 
-    const orderTitles: Record<string, string> = {
-      'sdo': 'О подготовке в СДО Интеллектуальная система',
-      'training_center': 'О подготовке в учебный центр',
-      'internal_attestation': 'О аттестации в ЕПТ организации',
-      'rostechnadzor': 'О направлении на аттестацию в Ростехнадзор'
-    };
-
-    const orderTypes: Record<string, 'lms' | 'training' | 'internal' | 'attestation'> = {
-      'sdo': 'lms',
-      'training_center': 'training',
-      'internal_attestation': 'internal',
-      'rostechnadzor': 'attestation'
-    };
-
-    const orderNumber = `№${Date.now().toString().slice(-4)}-${actionType.toUpperCase().slice(0, 3)}`;
-
-    addOrder({
-      tenantId: user.tenantId,
-      number: orderNumber,
-      date: new Date().toISOString(),
-      type: orderTypes[actionType] || 'training',
-      title: orderTitles[actionType] || 'Приказ',
+    setPreselectedData({
       employeeIds: selectedEmployeeIds,
-      certifications: orderCertifications,
-      status: 'draft',
-      createdBy: user.name || 'Пользователь',
-      description: `Создан из контроля сроков. Областей аттестации: ${orderCertifications.length}, сотрудников: ${selectedEmployeeIds.length}`
+      certifications: orderCertifications
     });
-
-    toast({
-      title: 'Приказ создан',
-      description: `${orderNumber} - ${orderTitles[actionType]}. Сотрудников: ${selectedEmployeeIds.length}`,
-    });
-
-    handleClose();
+    setShowOrderDialog(true);
   };
 
   const handleClose = () => {
@@ -295,6 +272,15 @@ export default function MassActionDialog({
     setStatusFilter('all');
     setEmployeeSelections(new Map());
     onOpenChange(false);
+  };
+
+  const handleOrderCreated = () => {
+    setShowOrderDialog(false);
+    handleClose();
+    toast({
+      title: 'Приказ создан',
+      description: `Сотрудников: ${preselectedData?.employeeIds.length || 0}, областей: ${preselectedData?.certifications.length || 0}`,
+    });
   };
 
   const employeesGrouped = useMemo(() => {
@@ -311,6 +297,7 @@ export default function MassActionDialog({
   const employeesSelected = getEmployeesWithSelections();
 
   return (
+    <>
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
@@ -512,5 +499,14 @@ export default function MassActionDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <CreateAttestationOrderDialog
+      open={showOrderDialog}
+      onOpenChange={setShowOrderDialog}
+      onSuccess={handleOrderCreated}
+      preselectedEmployeeIds={preselectedData?.employeeIds}
+      preselectedType={actionType}
+    />
+    </>
   );
 }

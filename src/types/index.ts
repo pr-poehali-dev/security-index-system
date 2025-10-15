@@ -847,7 +847,7 @@ export interface TrainingCertificate {
   updatedAt: string;
 }
 
-export type AttestationOrderType = 'rostekhnadzor' | 'internal_commission';
+export type AttestationOrderType = 'rostekhnadzor' | 'internal_commission' | 'sdo' | 'training_center' | 'internal';
 export type AttestationOrderStatus = 'draft' | 'pending' | 'scheduled' | 'completed' | 'cancelled';
 
 export interface AttestationOrder {
