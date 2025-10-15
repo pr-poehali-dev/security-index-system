@@ -16,7 +16,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import ImportCertificationsDialog from '../ImportCertificationsDialog';
 import AddCertificationDialog from '../certifications/AddCertificationDialog';
-import MassActionDialog from '../orders/MassActionDialog';
+
 import ExportReportDialog from '../ExportReportDialog';
 import AddEmployeeDialog from './AddEmployeeDialog';
 import EmployeeStatisticsCards from './EmployeeStatisticsCards';
@@ -43,8 +43,6 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showAddCertDialog, setShowAddCertDialog] = useState(false);
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<Set<string>>(new Set());
-  const [showMassActionDialog, setShowMassActionDialog] = useState(false);
-  const [massActionType, setMassActionType] = useState<string>('');
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [showAddEmployeeDialog, setShowAddEmployeeDialog] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -119,11 +117,6 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
     }
   };
 
-  const handleCreateOrder = (type: string) => {
-    setMassActionType(type);
-    setShowMassActionDialog(true);
-  };
-
   const handleExportToExcel = async () => {
     const { utils, writeFile } = await import('xlsx');
     
@@ -169,9 +162,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
     writeFile(wb, fileName);
   };
 
-  const selectedEmployees = useMemo(() => {
-    return mockEmployees.filter(emp => selectedEmployeeIds.has(emp.id));
-  }, [selectedEmployeeIds, mockEmployees]);
+
 
   const uniqueOrganizations = useMemo(() => {
     return Array.from(new Set(mockEmployees.map(emp => emp.organization)));
@@ -241,36 +232,6 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
                 onChange={setViewMode}
                 modes={['cards', 'table']}
               />
-              
-              {selectedEmployeeIds.size > 0 && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="secondary" className="gap-2">
-                      <Icon name="FileText" size={18} />
-                      Сформировать приказ ({selectedEmployeeIds.size})
-                      <Icon name="ChevronDown" size={14} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[320px]">
-                    <DropdownMenuItem onClick={() => handleCreateOrder('sdo')}>
-                      <Icon name="Monitor" size={16} className="mr-2" />
-                      О подготовке в СДО Интеллектуальная система
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleCreateOrder('training_center')}>
-                      <Icon name="School" size={16} className="mr-2" />
-                      О подготовке в учебный центр
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleCreateOrder('internal_attestation')}>
-                      <Icon name="ClipboardCheck" size={16} className="mr-2" />
-                      О аттестации в ЕПТ организации
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleCreateOrder('rostechnadzor')}>
-                      <Icon name="Building2" size={16} className="mr-2" />
-                      О направлении на аттестацию в Ростехнадзор
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -439,13 +400,6 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
         open={showAddCertDialog}
         onOpenChange={setShowAddCertDialog}
         employeeName={selectedEmployee?.name}
-      />
-
-      <MassActionDialog
-        open={showMassActionDialog}
-        onOpenChange={setShowMassActionDialog}
-        actionType={massActionType}
-        employees={selectedEmployees}
       />
 
       <ExportReportDialog
