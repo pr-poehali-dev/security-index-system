@@ -31,7 +31,9 @@ export default function DeadlineCalendar({ tasks = [], expertises = [], onEventC
         title: task.title,
         date: new Date(task.dueDate),
         type: 'task' as const,
-        priority: task.priority as any,
+        priority: (task.priority === 'critical' || task.priority === 'high' || task.priority === 'medium' || task.priority === 'low') 
+          ? task.priority 
+          : undefined,
         status: task.status
       }));
 

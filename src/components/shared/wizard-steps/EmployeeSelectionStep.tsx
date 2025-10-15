@@ -11,7 +11,6 @@ export interface Employee {
   name: string;
   position: string;
   department: string;
-  [key: string]: any;
 }
 
 export type CertificationStatusFilter = 'all' | 'valid' | 'expiring' | 'expired' | 'missing';
