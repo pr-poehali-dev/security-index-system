@@ -13,6 +13,7 @@ import ObjectTableView from '../ObjectTableView';
 import ObjectFormModal from '../ObjectFormModal';
 import ObjectDetailsModal from '../ObjectDetailsModal';
 import OrganizationFormModal from '../OrganizationFormModal';
+import OpoFormWizard from '../wizard/OpoFormWizard';
 import type { IndustrialObject, Organization } from '@/types/catalog';
 
 export default function ObjectsTab() {
@@ -22,6 +23,7 @@ export default function ObjectsTab() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [formModalOpen, setFormModalOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const [selectedObject, setSelectedObject] = useState<IndustrialObject | null>(null);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
@@ -33,6 +35,10 @@ export default function ObjectsTab() {
     setSelectedObject(null);
     setFormMode('create');
     setFormModalOpen(true);
+  };
+
+  const handleCreateOpo = () => {
+    setWizardOpen(true);
   };
 
   const handleCreateOrganization = () => {
@@ -100,10 +106,16 @@ export default function ObjectsTab() {
             Реестр ОПО, оборудования под надзором и зданий
           </p>
         </div>
-        <Button onClick={handleCreateObject}>
-          <Icon name="Plus" size={18} className="mr-2" />
-          Добавить объект
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleCreateObject}>
+            <Icon name="Plus" size={18} className="mr-2" />
+            Быстрое добавление
+          </Button>
+          <Button onClick={handleCreateOpo}>
+            <Icon name="FileText" size={18} className="mr-2" />
+            Создать ОПО
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
@@ -255,6 +267,12 @@ export default function ObjectsTab() {
         onOpenChange={setOrgFormModalOpen}
         organization={orgFormMode === 'edit' ? selectedOrg : undefined}
         mode={orgFormMode}
+      />
+
+      <OpoFormWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        mode="create"
       />
     </div>
   );

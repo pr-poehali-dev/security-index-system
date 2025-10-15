@@ -5,13 +5,16 @@ export type ObjectType = 'opo' | 'gts' | 'building';
 export type ObjectStatus = 'active' | 'conservation' | 'liquidated';
 export type DocumentStatus = 'valid' | 'expiring_soon' | 'expired';
 export type DocumentType = 'passport' | 'scheme' | 'permit' | 'protocol' | 'certificate' | 'other';
+export type OrganizationType = 'legal_entity' | 'individual_entrepreneur' | 'individual';
 
 export interface Organization {
   id: string;
   tenantId: string;
   name: string;
+  fullName?: string;
   inn?: string;
   type: 'holding' | 'legal_entity' | 'branch';
+  legalType?: OrganizationType;
   parentId?: string;
   children?: Organization[];
   level: number;
@@ -21,6 +24,16 @@ export interface Organization {
   address?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface DetailedAddress {
+  postalCode?: string;
+  region: string;
+  city?: string;
+  street?: string;
+  building?: string;
+  oktmo?: string;
+  fullAddress: string;
 }
 
 export interface IndustrialObject {
@@ -44,6 +57,19 @@ export interface IndustrialObject {
   nextDiagnosticDate?: string;
   nextTestDate?: string;
   description?: string;
+  
+  typicalNameId?: string;
+  industryCode?: string;
+  detailedAddress?: DetailedAddress;
+  ownerId?: string;
+  dangerSigns?: string[];
+  classifications?: string[];
+  hazardClassJustification?: string;
+  licensedActivities?: string[];
+  registrationDate?: string;
+  lastChangeDate?: string;
+  rtnDepartmentId?: string;
+  
   createdAt: string;
   updatedAt: string;
 }
