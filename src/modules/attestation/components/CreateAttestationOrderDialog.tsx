@@ -19,6 +19,7 @@ import { useCertificationStore } from '@/stores/certificationStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/hooks/use-toast';
+import { getAreasForCategory, certificationCategories } from '@/stores/mockData/certificationAreas';
 import type { Personnel, AttestationOrderType, AttestationOrderPersonnel, AttestationRequiredDocument } from '@/types';
 
 interface CreateAttestationOrderDialogProps {
@@ -41,7 +42,9 @@ export default function CreateAttestationOrderDialog({
   const user = useAuthStore((state) => state.user);
   const { addOrder } = useAttestationOrdersStore();
   const { certifications } = useCertificationStore();
-  const { organizations, personnel: allPersonnel, certificationAreas } = useSettingsStore();
+  const organizations = useSettingsStore((state) => state.organizations);
+  const allPersonnel = useSettingsStore((state) => state.personnel);
+  const certificationAreas = useSettingsStore((state) => state.certificationAreas);
   const { toast } = useToast();
 
   const [orderNumber, setOrderNumber] = useState('');
@@ -80,7 +83,22 @@ export default function CreateAttestationOrderDialog({
     );
   }, [organizationId, allPersonnel]);
 
-  const selectedArea = certificationAreas.find(a => a.code === certificationAreaCode);
+  const allAreas = useMemo(() => {
+    const areas: Array<{ code: string; name: string; category: string }> = [];
+    certificationCategories.forEach(category => {
+      const categoryAreas = getAreasForCategory(category);
+      categoryAreas.forEach(area => {
+        areas.push({
+          code: area,
+          name: area,
+          category
+        });
+      });
+    });
+    return areas;
+  }, []);
+
+  const selectedArea = allAreas.find(a => a.code === certificationAreaCode);
 
   const getPersonnelCertificates = (personnelId: string) => {
     return certifications.filter(c => 
@@ -246,9 +264,9 @@ export default function CreateAttestationOrderDialog({
                 <SelectValue placeholder="Выберите область" />
               </SelectTrigger>
               <SelectContent>
-                {certificationAreas.map((area) => (
-                  <SelectItem key={area.id} value={area.code}>
-                    {area.code} — {area.name}
+                {allAreas.map((area) => (
+                  <SelectItem key={area.code} value={area.code}>
+                    {area.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -365,7 +383,7 @@ export default function CreateAttestationOrderDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Отмена
           </Button>
           <Button onClick={handleSubmit} className="gap-2">
