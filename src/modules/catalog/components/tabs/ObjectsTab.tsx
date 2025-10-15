@@ -184,7 +184,7 @@ export default function ObjectsTab() {
             variant="outline"
             size="sm"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className={`absolute top-1/2 -translate-y-1/2 z-10 shadow-md h-32 w-10 p-0 rounded-r-lg flex flex-col items-center justify-center gap-2 ${
+            className={`absolute top-0 z-10 shadow-md h-32 w-10 p-0 rounded-r-lg flex flex-col items-center justify-center gap-2 ${
               sidebarCollapsed ? '-left-0 rounded-l-none border-l-0' : '-right-5 rounded-l-lg'
             }`}
             title={sidebarCollapsed ? 'Показать организации' : 'Скрыть организации'}
