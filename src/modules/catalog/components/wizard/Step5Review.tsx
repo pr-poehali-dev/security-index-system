@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { useCatalogStore } from '@/stores/catalogStore';
 import { useReferencesStore } from '@/stores/referencesStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import type { WizardFormData } from './OpoFormWizard';
 import Icon from '@/components/ui/icon';
 
@@ -11,10 +12,12 @@ interface Step5ReviewProps {
 export default function Step5Review({ formData }: Step5ReviewProps) {
   const { organizations } = useCatalogStore();
   const { typicalOpoNames, dangerSigns, opoClassifications, licensedActivities } = useReferencesStore();
+  const { personnel } = useSettingsStore();
 
   const organization = organizations.find(org => org.id === formData.organizationId);
   const owner = organizations.find(org => org.id === formData.ownerId);
   const typicalName = typicalOpoNames.find(tn => tn.id === formData.typicalNameId);
+  const responsiblePerson = personnel.find(p => p.id === formData.responsiblePersonId);
 
   const selectedDangerSigns = formData.dangerSigns.map(id => dangerSigns.find(ds => ds.id === id)).filter(Boolean);
   const selectedClassifications = formData.classifications.map(id => opoClassifications.find(cls => cls.id === id)).filter(Boolean);
@@ -76,7 +79,9 @@ export default function Step5Review({ formData }: Step5ReviewProps) {
               )}
               <div className="grid grid-cols-3 gap-2">
                 <span className="text-muted-foreground">Ответственное лицо:</span>
-                <span className="col-span-2">{formData.responsiblePerson || '—'}</span>
+                <span className="col-span-2">
+                  {responsiblePerson ? `${responsiblePerson.fullName} — ${responsiblePerson.position}` : '—'}
+                </span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <span className="text-muted-foreground">Статус:</span>

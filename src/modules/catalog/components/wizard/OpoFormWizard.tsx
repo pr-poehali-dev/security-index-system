@@ -35,7 +35,7 @@ export interface WizardFormData {
   building: string;
   oktmo: string;
   
-  responsiblePerson: string;
+  responsiblePersonId: string;
   
   dangerSigns: string[];
   
@@ -63,7 +63,7 @@ const initialFormData: WizardFormData = {
   street: '',
   building: '',
   oktmo: '',
-  responsiblePerson: '',
+  responsiblePersonId: '',
   dangerSigns: [],
   classifications: [],
   hazardClass: '',

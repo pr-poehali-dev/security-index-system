@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCatalogStore } from '@/stores/catalogStore';
 import { useReferencesStore } from '@/stores/referencesStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import type { WizardFormData } from './OpoFormWizard';
 
 interface Step1BasicInfoProps {
@@ -13,6 +14,11 @@ interface Step1BasicInfoProps {
 export default function Step1BasicInfo({ formData, updateFormData }: Step1BasicInfoProps) {
   const { organizations } = useCatalogStore();
   const { typicalOpoNames } = useReferencesStore();
+  const { personnel } = useSettingsStore();
+
+  const selectedOrgPersonnel = formData.organizationId
+    ? personnel.filter(p => p.organizationId === formData.organizationId)
+    : [];
 
   return (
     <div className="space-y-6">
@@ -194,7 +200,9 @@ export default function Step1BasicInfo({ formData, updateFormData }: Step1BasicI
             </Label>
             <Select
               value={formData.organizationId}
-              onValueChange={(value) => updateFormData({ organizationId: value })}
+              onValueChange={(value) => {
+                updateFormData({ organizationId: value, responsiblePersonId: '' });
+              }}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Выберите организацию" />
@@ -231,15 +239,30 @@ export default function Step1BasicInfo({ formData, updateFormData }: Step1BasicI
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="responsiblePerson">
+            <Label htmlFor="responsiblePersonId">
               Ответственное лицо <span className="text-red-500">*</span>
             </Label>
-            <Input
-              id="responsiblePerson"
-              value={formData.responsiblePerson}
-              onChange={(e) => updateFormData({ responsiblePerson: e.target.value })}
-              placeholder="Иванов Иван Иванович"
-            />
+            <Select
+              value={formData.responsiblePersonId}
+              onValueChange={(value) => updateFormData({ responsiblePersonId: value })}
+              disabled={!formData.organizationId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={formData.organizationId ? "Выберите сотрудника" : "Сначала выберите организацию"} />
+              </SelectTrigger>
+              <SelectContent>
+                {selectedOrgPersonnel.map((person) => (
+                  <SelectItem key={person.id} value={person.id}>
+                    {person.fullName} — {person.position}
+                  </SelectItem>
+                ))}
+                {selectedOrgPersonnel.length === 0 && formData.organizationId && (
+                  <SelectItem value="no-personnel" disabled>
+                    Нет сотрудников в выбранной организации
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
