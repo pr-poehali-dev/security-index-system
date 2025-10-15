@@ -74,6 +74,60 @@ export default function ObjectsTab() {
     setDetailsModalOpen(true);
   };
 
+  const handleExport = async () => {
+    if (filteredObjects.length === 0) {
+      alert('Нет данных для экспорта');
+      return;
+    }
+
+    try {
+      const { utils, writeFile } = await import('xlsx');
+      const { organizations } = useCatalogStore.getState();
+
+      const getOrganizationName = (orgId: string) => {
+        const org = organizations.find(o => o.id === orgId);
+        return org?.name || 'Не указана';
+      };
+
+      const exportData = filteredObjects.map(obj => ({
+        'Регистрационный номер': obj.registrationNumber || '',
+        'Наименование объекта': obj.name,
+        'Организация': getOrganizationName(obj.organizationId),
+        'Тип объекта': obj.type === 'opo' ? 'ОПО' : obj.type === 'gts' ? 'ГТС' : 'Здание/Сооружение',
+        'Класс опасности': obj.hazardClass || '',
+        'Статус': obj.status === 'active' ? 'Активен' : obj.status === 'suspended' ? 'Приостановлен' : 'Выведен из эксплуатации',
+        'Адрес': obj.location.address,
+        'Субъект РФ': obj.detailedAddress?.region || '',
+        'Код ОКТМО': obj.detailedAddress?.oktmo || '',
+        'Почтовый индекс': obj.detailedAddress?.postalCode || '',
+        'GPS координаты': obj.location.coordinates || '',
+        'Дата ввода в эксплуатацию': obj.commissioningDate || '',
+        'Ответственное лицо': obj.responsiblePerson || '',
+        'Владелец': obj.ownerId || '',
+        'Код отрасли': obj.industryCode || '',
+        'Признаки опасности': obj.dangerSigns?.join(', ') || '',
+        'Классификация': obj.classifications?.join(', ') || '',
+        'Обоснование класса опасности': obj.hazardClassJustification || '',
+        'Лицензируемая деятельность': obj.licensedActivities?.join(', ') || '',
+        'Дата регистрации в РТН': obj.registrationDate || '',
+        'Орган РТН': obj.rtnDepartmentId || '',
+        'Дата следующей экспертизы': obj.nextExpertiseDate || '',
+        'Дата следующей диагностики': obj.nextDiagnosticDate || '',
+        'Количество документов': obj.documents?.length || 0,
+      }));
+
+      const worksheet = utils.json_to_sheet(exportData);
+      const workbook = utils.book_new();
+      utils.book_append_sheet(workbook, worksheet, 'Объекты и оборудование');
+
+      const fileName = `объекты_и_оборудование_${new Date().toISOString().split('T')[0]}.xlsx`;
+      writeFile(workbook, fileName);
+    } catch (error) {
+      console.error('Ошибка экспорта:', error);
+      alert('Произошла ошибка при экспорте данных');
+    }
+  };
+
   const filteredObjects = useMemo(() => {
     return objects.filter((obj) => {
       const matchesSearch = obj.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -115,6 +169,10 @@ export default function ObjectsTab() {
           <Button variant="outline" onClick={() => setImportModalOpen(true)}>
             <Icon name="Upload" size={18} className="mr-2" />
             Импорт
+          </Button>
+          <Button variant="outline" onClick={handleExport}>
+            <Icon name="FileDown" size={18} className="mr-2" />
+            Экспорт
           </Button>
           <Button onClick={handleCreateOpo}>
             <Icon name="Plus" size={18} className="mr-2" />
