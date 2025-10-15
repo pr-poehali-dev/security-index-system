@@ -175,6 +175,91 @@ export default function OpoCharacteristicsTab() {
     console.log('Сформировать сведения для РТН:', objectId);
   };
 
+  const handleGenerateAll = async () => {
+    const sufficientObjects = characteristicsData.filter((item) => item.dataStatus === 'sufficient');
+    
+    if (sufficientObjects.length === 0) {
+      alert('Нет объектов с достаточными данными для формирования');
+      return;
+    }
+
+    try {
+      const zip = await import('jszip');
+      const JSZip = zip.default;
+      const zipFile = new JSZip();
+
+      sufficientObjects.forEach((item) => {
+        const obj = objects.find((o) => o.id === item.objectId);
+        if (!obj) return;
+
+        const content = `СВЕДЕНИЯ, ХАРАКТЕРИЗУЮЩИЕ ОПАСНЫЙ ПРОИЗВОДСТВЕННЫЙ ОБЪЕКТ
+
+` +
+          `Регистрационный номер: ${obj.registrationNumber}
+` +
+          `Наименование: ${obj.name}
+` +
+          `Организация: ${item.organizationName}
+` +
+          `Тип объекта: ${objectTypeLabels[obj.type]}
+` +
+          `Класс опасности: ${obj.hazardClass || '-'}
+` +
+          `Адрес: ${obj.location.address}
+` +
+          `Субъект РФ: ${obj.detailedAddress?.region || '-'}
+` +
+          `Код ОКТМО: ${obj.detailedAddress?.oktmo || '-'}
+` +
+          `Почтовый индекс: ${obj.detailedAddress?.postalCode || '-'}
+` +
+          `GPS координаты: ${obj.location.coordinates || '-'}
+` +
+          `Дата ввода в эксплуатацию: ${obj.commissioningDate || '-'}
+` +
+          `Ответственное лицо: ${obj.responsiblePerson || '-'}
+` +
+          `Владелец: ${obj.ownerId || '-'}
+` +
+          `Код отрасли: ${obj.industryCode || '-'}
+` +
+          `Признаки опасности: ${obj.dangerSigns?.join(', ') || '-'}
+` +
+          `Классификация: ${obj.classifications?.join(', ') || '-'}
+` +
+          `Обоснование класса опасности: ${obj.hazardClassJustification || '-'}
+` +
+          `Лицензируемая деятельность: ${obj.licensedActivities?.join(', ') || '-'}
+` +
+          `Дата регистрации в РТН: ${obj.registrationDate || '-'}
+` +
+          `Орган РТН: ${obj.rtnDepartmentId || '-'}
+` +
+          `Дата следующей экспертизы: ${obj.nextExpertiseDate || '-'}
+` +
+          `Дата следующей диагностики: ${obj.nextDiagnosticDate || '-'}
+` +
+          `Документы: ${obj.documents?.length || 0} шт.`;
+
+        const fileName = `${obj.registrationNumber || obj.id}_${obj.name.replace(/[^a-zA-Zа-яА-Я0-9]/g, '_')}.txt`;
+        zipFile.file(fileName, content);
+      });
+
+      const blob = await zipFile.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `сведения_ОПО_${new Date().toISOString().split('T')[0]}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Ошибка формирования архива:', error);
+      alert('Произошла ошибка при формировании архива');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -184,9 +269,12 @@ export default function OpoCharacteristicsTab() {
             Контрольный перечень для предоставления в Ростехнадзор
           </p>
         </div>
-        <Button>
-          <Icon name="FileDown" size={16} />
-          Выгрузить все сведения
+        <Button
+          onClick={handleGenerateAll}
+          disabled={stats.sufficient === 0}
+        >
+          <Icon name="PackageCheck" size={16} />
+          Сформировать все ({stats.sufficient})
         </Button>
       </div>
 
