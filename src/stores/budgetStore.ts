@@ -263,4 +263,4 @@ export const useBudgetStore = create<BudgetState>()(persist((set, get) => ({
     set({ selectedYear: year });
   }
 
-}), { name: 'budget-storage-v1' }));
+}), { name: 'budget-storage-v2' }));
