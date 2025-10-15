@@ -7,7 +7,7 @@ import Icon from '@/components/ui/icon';
 import { useCatalogStore } from '@/stores/catalogStore';
 import ObjectGeneralTab from './ObjectGeneralTab';
 import ObjectDatesTab from './ObjectDatesTab';
-import ObjectDocumentsTab from './ObjectDocumentsTab';
+import ObjectDocumentsViewTab from './ObjectDocumentsViewTab';
 import ObjectPersonnelWidget from './contractors/ObjectPersonnelWidget';
 import type { IndustrialObject } from '@/types/catalog';
 import { HAZARD_CLASS_SHORT_LABELS } from '@/constants/hazardClass';
@@ -122,9 +122,8 @@ export default function ObjectDetailsModal({ open, onOpenChange, object, onEdit 
           </TabsContent>
 
           <TabsContent value="documents" className="mt-4">
-            <ObjectDocumentsTab 
-              objectId={object.id} 
-              allDocuments={allDocuments}
+            <ObjectDocumentsViewTab 
+              documents={allDocuments}
             />
           </TabsContent>
         </Tabs>
