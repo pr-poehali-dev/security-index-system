@@ -687,7 +687,7 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
     return get().requests.filter((r) => r.tenantId === tenantId);
   },
 
-  approveRequest: (requestId: string, groupId?: string) => {
+  approveRequest: (requestId: string) => {
     set((state) => ({
       requests: state.requests.map((r) =>
         r.id === requestId ? { ...r, status: 'approved' as const, updatedAt: new Date().toISOString() } : r
