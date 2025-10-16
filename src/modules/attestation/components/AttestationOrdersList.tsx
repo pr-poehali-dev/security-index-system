@@ -15,7 +15,7 @@ import Icon from '@/components/ui/icon';
 import { useAttestationOrdersStore } from '@/stores/attestationOrdersStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import CreateAttestationOrderDialog from './CreateAttestationOrderDialog';
+import UnifiedDocumentDialog from './UnifiedDocumentDialog';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
@@ -197,9 +197,10 @@ export default function AttestationOrdersList() {
         </CardContent>
       </Card>
 
-      <CreateAttestationOrderDialog
+      <UnifiedDocumentDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
+        documentType="order"
       />
     </>
   );

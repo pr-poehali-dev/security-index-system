@@ -1,3 +1,34 @@
+/**
+ * UnifiedDocumentDialog - универсальный диалог создания документов
+ * 
+ * Заменяет старые диалоги:
+ * - CreateOrderDialog
+ * - CreateAttestationOrderDialog
+ * - CreateTrainingDialog
+ * 
+ * Использование:
+ * ```tsx
+ * // Создание любого типа документа (с выбором типа)
+ * <UnifiedDocumentDialog 
+ *   open={open} 
+ *   onOpenChange={setOpen} 
+ * />
+ * 
+ * // Создание приказа (без шага выбора типа)
+ * <UnifiedDocumentDialog 
+ *   open={open} 
+ *   onOpenChange={setOpen}
+ *   documentType="order"
+ * />
+ * 
+ * // Создание обучения (без шага выбора типа)
+ * <UnifiedDocumentDialog 
+ *   open={open} 
+ *   onOpenChange={setOpen}
+ *   documentType="training"
+ * />
+ * ```
+ */
 import { useState, useMemo, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';

@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
-import CreateAttestationOrderDialog from '../CreateAttestationOrderDialog';
+import UnifiedDocumentDialog from '../UnifiedDocumentDialog';
 import MassActionFilters from './mass-action/MassActionFilters';
 import MassActionSelectionBar from './mass-action/MassActionSelectionBar';
 import EmployeeList from './mass-action/EmployeeList';
@@ -311,12 +311,10 @@ export default function MassActionDialog({
         </DialogContent>
       </Dialog>
 
-      <CreateAttestationOrderDialog
+      <UnifiedDocumentDialog
         open={showOrderDialog}
         onOpenChange={setShowOrderDialog}
-        onSuccess={handleOrderCreated}
-        preselectedEmployeeIds={preselectedData?.employeeIds}
-        preselectedType={actionType}
+        documentType="order"
       />
     </>
   );
