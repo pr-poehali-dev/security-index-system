@@ -136,7 +136,6 @@ export interface Position {
 }
 
 export type PersonnelType = 'employee' | 'contractor';
-export type PersonnelCategory = 'manager' | 'engineer' | 'worker' | 'dispatcher' | 'specialist' | 'other';
 
 export interface Personnel {
   id: string;
@@ -146,7 +145,6 @@ export interface Personnel {
   organizationId?: string;
   departmentId?: string;
   personnelType: PersonnelType;
-  personnelCategory?: PersonnelCategory;
   requiredCompetencies?: string[];
   status: 'active' | 'dismissed';
   hireDate?: string;
