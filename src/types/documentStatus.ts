@@ -7,6 +7,8 @@ export enum ChecklistDocumentStatus {
   CANCELLED = 'cancelled'
 }
 
+export type DocumentStatus = ChecklistDocumentStatus;
+
 export const statusLabels: Record<ChecklistDocumentStatus, string> = {
   [ChecklistDocumentStatus.DRAFT]: 'Черновик',
   [ChecklistDocumentStatus.PREPARED]: 'Подготовлен',
