@@ -16,7 +16,7 @@ interface TaskState {
   error: string | null;
   
   // Actions
-  addTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => string;
+  addTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => Task;
   updateTask: (id: string, updates: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   selectTask: (task: Task | null) => void;
