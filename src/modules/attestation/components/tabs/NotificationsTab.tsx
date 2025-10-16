@@ -111,6 +111,14 @@ export default function NotificationsTab() {
                               }</span>
                             </div>
                           </div>
+                          {rule.autoCreateTrainingRequest && (
+                            <div className="mt-3 p-2 bg-amber-50 dark:bg-amber-950/20 rounded-md border border-amber-200 dark:border-amber-900">
+                              <div className="flex items-center gap-2 text-xs font-medium text-amber-700 dark:text-amber-300">
+                                <Icon name="FileText" size={14} />
+                                <span>Автоматическое создание заявки на обучение</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                         <Button 
                           variant="ghost" 

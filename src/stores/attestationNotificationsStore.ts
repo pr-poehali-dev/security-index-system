@@ -15,6 +15,7 @@ export interface AttestationNotificationRule {
   emailTemplate: string;
   frequency: 'once' | 'daily' | 'weekly';
   type?: 'certification' | 'qualification' | 'both';
+  autoCreateTrainingRequest?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -103,6 +104,7 @@ export const useAttestationNotificationsStore = create<AttestationNotificationsS
       emailTemplate: 'Срок действия удостоверения повышения квалификации истекает через 90 дней',
       frequency: 'once',
       type: 'qualification',
+      autoCreateTrainingRequest: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     },
@@ -118,6 +120,7 @@ export const useAttestationNotificationsStore = create<AttestationNotificationsS
       emailTemplate: 'Внимание! Удостоверение ПК истекает через 30 дней. Необходимо пройти обучение',
       frequency: 'weekly',
       type: 'qualification',
+      autoCreateTrainingRequest: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }

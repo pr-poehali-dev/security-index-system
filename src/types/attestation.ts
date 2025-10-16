@@ -62,6 +62,28 @@ export interface Training {
   certificateUrl?: string;
 }
 
+export interface TrainingRequest {
+  id: string;
+  tenantId: string;
+  employeeId: string;
+  employeeName: string;
+  position: string;
+  organizationName: string;
+  programId?: string;
+  programName: string;
+  reason: 'expiring_qualification' | 'new_position' | 'mandatory' | 'personal_development';
+  priority: 'high' | 'medium' | 'low';
+  expiryDate?: string;
+  requestDate: string;
+  status: 'pending' | 'approved' | 'rejected' | 'in_progress' | 'completed';
+  approvedBy?: string;
+  approvedDate?: string;
+  notes?: string;
+  autoCreated: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AttestationStats {
   totalEmployees: number;
   validCertifications: number;
