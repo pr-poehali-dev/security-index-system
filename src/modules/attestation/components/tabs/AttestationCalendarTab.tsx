@@ -8,6 +8,10 @@ import MonthView from '../MonthView';
 import YearView from '../YearView';
 import UpcomingCertificationsList from '../UpcomingCertificationsList';
 import DayCertificationsDialog from '../DayCertificationsDialog';
+import { useQualificationStore } from '../../stores/qualificationStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { CERTIFICATION_AREAS_BY_CATEGORY } from '@/lib/constants';
+
 interface CalendarCertification {
   id: string;
   employeeName: string;
@@ -18,6 +22,7 @@ interface CalendarCertification {
   expiryDate: string;
   status: 'valid' | 'expiring_soon' | 'expired';
   daysLeft: number;
+  type?: 'certification' | 'qualification';
 }
 
 export default function AttestationCalendarTab() {
@@ -28,7 +33,39 @@ export default function AttestationCalendarTab() {
   const [filterCategory, setFilterCategory] = useState('all');
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
-  const mockCertifications: CalendarCertification[] = [];
+  const qualificationCertificates = useQualificationStore(state => state.certificates);
+  const { personnel } = useSettingsStore();
+
+  const getCertificationAreaName = (certTypeId: string) => {
+    const allAreas = [
+      ...CERTIFICATION_AREAS_BY_CATEGORY.industrial_safety,
+      ...CERTIFICATION_AREAS_BY_CATEGORY.energy_safety,
+      ...CERTIFICATION_AREAS_BY_CATEGORY.labor_safety,
+      ...CERTIFICATION_AREAS_BY_CATEGORY.ecology,
+    ];
+    const area = allAreas.find(a => a.code === certTypeId);
+    return area ? area.name : certTypeId;
+  };
+
+  const qualificationEvents: CalendarCertification[] = qualificationCertificates.map(cert => {
+    const employee = personnel.find(p => p.id === cert.employeeId);
+    const daysLeft = Math.floor((new Date(cert.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    
+    return {
+      id: `qual-${cert.id}`,
+      employeeName: employee?.name || 'Неизвестный',
+      employeePosition: employee?.position || '',
+      department: employee?.department || '',
+      category: 'Удостоверение ПК',
+      area: getCertificationAreaName(cert.certificationTypeId),
+      expiryDate: cert.expiryDate,
+      status: cert.status,
+      daysLeft,
+      type: 'qualification' as const
+    };
+  });
+
+  const mockCertifications: CalendarCertification[] = [...qualificationEvents];
 
   const departments = Array.from(new Set(mockCertifications.map(c => c.department)));
   const categories = Array.from(new Set(mockCertifications.map(c => c.category)));
