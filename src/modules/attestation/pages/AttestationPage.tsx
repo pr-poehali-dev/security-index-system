@@ -13,6 +13,7 @@ import NotificationsTab from '../components/tabs/NotificationsTab';
 import AttestationCalendarTab from '../components/tabs/AttestationCalendarTab';
 import TasksTab from '../components/tabs/TasksTab';
 import TrainingRequestsTab from '../components/tabs/TrainingRequestsTab';
+import TrainingCentersTab from '../components/tabs/TrainingCentersTab';
 
 const AttestationPage = memo(function AttestationPage() {
   return (
@@ -61,6 +62,10 @@ const AttestationPage = memo(function AttestationPage() {
             <Icon name="FileCheck" size={20} />
             <span className="text-xs font-medium text-center leading-tight">Заявки на<br/>обучение</span>
           </TabsTrigger>
+          <TabsTrigger value="training-centers" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Building2" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Учебные<br/>центры</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="employees">
@@ -97,6 +102,10 @@ const AttestationPage = memo(function AttestationPage() {
 
         <TabsContent value="training-requests">
           <TrainingRequestsTab />
+        </TabsContent>
+
+        <TabsContent value="training-centers">
+          <TrainingCentersTab />
         </TabsContent>
       </Tabs>
     </div>

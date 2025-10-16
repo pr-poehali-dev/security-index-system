@@ -91,3 +91,44 @@ export interface AttestationStats {
   expired: number;
   upcomingCertifications: number;
 }
+
+export interface TrainingCenter {
+  id: string;
+  tenantId: string;
+  name: string;
+  legalName?: string;
+  inn?: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  address?: string;
+  website?: string;
+  specializations: string[];
+  isActive: boolean;
+  autoSendRequests: boolean;
+  apiEnabled: boolean;
+  apiEndpoint?: string;
+  apiKey?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TrainingCenterRequest {
+  id: string;
+  tenantId: string;
+  trainingCenterId: string;
+  trainingCenterName: string;
+  trainingRequestId: string;
+  employeeName: string;
+  programName: string;
+  sendDate: string;
+  status: 'sent' | 'received' | 'confirmed' | 'rejected' | 'failed';
+  responseDate?: string;
+  responseMessage?: string;
+  scheduledStartDate?: string;
+  scheduledEndDate?: string;
+  cost?: number;
+  confirmationNumber?: string;
+  createdAt: string;
+  updatedAt: string;
+}

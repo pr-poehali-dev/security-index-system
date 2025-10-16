@@ -12,13 +12,16 @@ import {
 } from '@/components/ui/select';
 import { useAuthStore } from '@/stores/authStore';
 import { useTrainingRequestsStore } from '@/stores/trainingRequestsStore';
+import { useTrainingCentersStore } from '@/stores/trainingCentersStore';
 import { TrainingRequest } from '@/types/attestation';
 import { useToast } from '@/hooks/use-toast';
 
 export default function TrainingRequestsTab() {
   const user = useAuthStore((state) => state.user);
   const { getRequestsByTenant, updateRequest } = useTrainingRequestsStore();
+  const { getActiveCenters, addCenterRequest } = useTrainingCentersStore();
   const requests = user?.tenantId ? getRequestsByTenant(user.tenantId) : [];
+  const activeCenters = user?.tenantId ? getActiveCenters(user.tenantId).filter(c => c.autoSendRequests) : [];
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
@@ -95,12 +98,33 @@ export default function TrainingRequestsTab() {
   };
 
   const handleApprove = (id: string) => {
+    const request = requests.find(r => r.id === id);
     updateRequest(id, {
       status: 'approved',
       approvedBy: user?.fullName,
       approvedDate: new Date().toISOString()
     });
-    toast({ title: 'Заявка согласована' });
+    
+    if (request && activeCenters.length > 0) {
+      activeCenters.forEach(center => {
+        addCenterRequest({
+          tenantId: request.tenantId,
+          trainingCenterId: center.id,
+          trainingCenterName: center.name,
+          trainingRequestId: request.id,
+          employeeName: request.employeeName,
+          programName: request.programName,
+          sendDate: new Date().toISOString(),
+          status: 'sent'
+        });
+      });
+      toast({ 
+        title: 'Заявка согласована', 
+        description: `Автоматически отправлена в ${activeCenters.length} учебных центров` 
+      });
+    } else {
+      toast({ title: 'Заявка согласована' });
+    }
   };
 
   const handleReject = (id: string) => {
