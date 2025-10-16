@@ -145,7 +145,7 @@ export interface Personnel {
   organizationId?: string;
   departmentId?: string;
   personnelType: PersonnelType;
-  role: 'Auditor' | 'Manager' | 'Director' | 'Contractor';
+  role: 'Auditor' | 'Manager' | 'Director' | 'Contractor' | 'Engineer' | 'Worker' | 'Dispatcher';
   requiredCompetencies?: string[];
   status: 'active' | 'dismissed';
   hireDate?: string;
