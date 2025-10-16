@@ -9,8 +9,10 @@ export default function DirectionsDirectory() {
   const deleteDirection = useIncidentsStore((state) => state.deleteDirection);
 
 
+  const DirectoryComponent = GenericDirectory<IncidentDirection>;
+  
   return (
-    <GenericDirectory<IncidentDirection>
+    <DirectoryComponent
       title="Направления деятельности"
       description="Области, в рамках которых выявляются несоответствия"
       addButtonLabel="Добавить направление"

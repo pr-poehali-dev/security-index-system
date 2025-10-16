@@ -9,8 +9,10 @@ export default function SourcesDirectory() {
   const deleteSource = useIncidentsStore((state) => state.deleteSource);
 
 
+  const DirectoryComponent = GenericDirectory<IncidentSource>;
+  
   return (
-    <GenericDirectory<IncidentSource>
+    <DirectoryComponent
       title="Источники сообщений о несоответствиях"
       description="Определяет в рамках какого процесса выявлено несоответствие"
       addButtonLabel="Добавить источник"
