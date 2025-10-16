@@ -73,6 +73,8 @@ export interface SettingsOrganization {
   createdAt: string;
 }
 
+export type Organization = SettingsOrganization;
+
 export interface ProductionSite {
   id: string;
   tenantId: string;
