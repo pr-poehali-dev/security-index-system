@@ -103,6 +103,7 @@ interface SettingsState {
   deleteCertification: (id: string) => void;
 
   contractors: OrganizationContractor[];
+  getContractorsByTenant: (tenantId: string) => OrganizationContractor[];
   addContractor: (contractor: Omit<OrganizationContractor, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateContractor: (id: string, updates: Partial<OrganizationContractor>) => void;
   deleteContractor: (id: string) => void;
@@ -589,6 +590,10 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
 
 
   contractors: mockContractors,
+
+  getContractorsByTenant: (tenantId) => {
+    return get().contractors.filter((c) => c.tenantId === tenantId);
+  },
 
   addContractor: (contractor) => {
     const newContractor: OrganizationContractor = {
