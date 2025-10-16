@@ -1,76 +1,58 @@
 // src/stores/trainingCentersStore.ts
-// Описание: Zustand store для управления учебными центрами и интеграциями
+// Описание: Zustand store для управления подключениями к учебным центрам (тенантам)
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { TrainingCenter, TrainingCenterRequest } from '@/types/attestation';
+import { TrainingCenterConnection, TrainingCenterRequest } from '@/types/attestation';
 
 interface TrainingCentersState {
-  centers: TrainingCenter[];
+  connections: TrainingCenterConnection[];
   centerRequests: TrainingCenterRequest[];
   
-  addCenter: (center: Omit<TrainingCenter, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateCenter: (id: string, updates: Partial<TrainingCenter>) => void;
-  deleteCenter: (id: string) => void;
-  getCentersByTenant: (tenantId: string) => TrainingCenter[];
-  getActiveCenters: (tenantId: string) => TrainingCenter[];
+  addConnection: (connection: Omit<TrainingCenterConnection, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateConnection: (id: string, updates: Partial<TrainingCenterConnection>) => void;
+  deleteConnection: (id: string) => void;
+  getConnectionsByTenant: (tenantId: string) => TrainingCenterConnection[];
+  getActiveConnections: (tenantId: string) => TrainingCenterConnection[];
   
   addCenterRequest: (request: Omit<TrainingCenterRequest, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateCenterRequest: (id: string, updates: Partial<TrainingCenterRequest>) => void;
   getCenterRequestsByTenant: (tenantId: string) => TrainingCenterRequest[];
   getCenterRequestsByTrainingRequest: (trainingRequestId: string) => TrainingCenterRequest[];
+  getCenterRequestsByTrainingCenter: (trainingCenterTenantId: string) => TrainingCenterRequest[];
 }
 
 export const useTrainingCentersStore = create<TrainingCentersState>()(persist((set, get) => ({
-  centers: [
+  connections: [
     {
-      id: 'tc-1',
+      id: 'conn-1',
       tenantId: 'tenant-1',
-      name: 'Учебный центр "Энергия"',
-      legalName: 'ООО "Учебный центр Энергия"',
-      inn: '7701234567',
-      contactPerson: 'Соколова Елена Викторовна',
-      email: 'info@energia-uc.ru',
-      phone: '+7 495 123-45-67',
-      address: 'г. Москва, ул. Энергетическая, д. 15',
-      website: 'https://energia-uc.ru',
+      trainingCenterTenantId: 'tenant-uc-energia',
+      trainingCenterName: 'Учебный центр "Энергия"',
       specializations: ['Энергетика', 'Охрана труда', 'Промышленная безопасность'],
       isActive: true,
       autoSendRequests: true,
-      apiEnabled: true,
-      apiEndpoint: 'https://api.energia-uc.ru/training-requests',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     },
     {
-      id: 'tc-2',
+      id: 'conn-2',
       tenantId: 'tenant-1',
-      name: 'АНО ДПО "Промбезопасность"',
-      legalName: 'Автономная некоммерческая организация дополнительного профессионального образования "Промбезопасность"',
-      inn: '7702987654',
-      contactPerson: 'Иванов Сергей Петрович',
-      email: 'training@prombez.ru',
-      phone: '+7 495 987-65-43',
-      address: 'г. Москва, пр-т Промышленный, д. 28',
-      website: 'https://prombez.ru',
+      trainingCenterTenantId: 'tenant-uc-prombez',
+      trainingCenterName: 'АНО ДПО "Промбезопасность"',
       specializations: ['Промышленная безопасность', 'Охрана труда', 'Экология'],
       isActive: true,
       autoSendRequests: false,
-      apiEnabled: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     },
     {
-      id: 'tc-3',
+      id: 'conn-3',
       tenantId: 'tenant-1',
-      name: 'Центр повышения квалификации "Технадзор"',
-      contactPerson: 'Петрова Ольга Михайловна',
-      email: 'education@technadzor.ru',
-      phone: '+7 495 555-77-88',
+      trainingCenterTenantId: 'tenant-uc-technadzor',
+      trainingCenterName: 'Центр повышения квалификации "Технадзор"',
       specializations: ['Технический надзор', 'Строительство', 'ГО и ЧС'],
       isActive: true,
       autoSendRequests: true,
-      apiEnabled: true,
-      apiEndpoint: 'https://api.technadzor.ru/v1/requests',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
@@ -80,15 +62,18 @@ export const useTrainingCentersStore = create<TrainingCentersState>()(persist((s
     {
       id: 'tcr-1',
       tenantId: 'tenant-1',
-      trainingCenterId: 'tc-1',
+      trainingCenterTenantId: 'tenant-uc-energia',
       trainingCenterName: 'Учебный центр "Энергия"',
       trainingRequestId: 'req-1',
+      employeeId: 'personnel-2',
       employeeName: 'Петров Иван Сергеевич',
+      position: 'Главный энергетик',
+      organizationName: 'ГЭС-1',
       programName: 'Повышение квалификации энергетиков',
       sendDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-      status: 'confirmed',
+      status: 'received',
       responseDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      responseMessage: 'Заявка принята. Обучение запланировано.',
+      responseMessage: 'Заявка принята. Ожидается начало обучения.',
       scheduledStartDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
       scheduledEndDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
       cost: 35000,
@@ -99,10 +84,13 @@ export const useTrainingCentersStore = create<TrainingCentersState>()(persist((s
     {
       id: 'tcr-2',
       tenantId: 'tenant-1',
-      trainingCenterId: 'tc-2',
+      trainingCenterTenantId: 'tenant-uc-prombez',
       trainingCenterName: 'АНО ДПО "Промбезопасность"',
       trainingRequestId: 'req-2',
+      employeeId: 'personnel-5',
       employeeName: 'Смирнова Ольга Петровна',
+      position: 'Инженер по охране труда',
+      organizationName: 'ГЭС-1',
       programName: 'Охрана труда при работе на высоте',
       sendDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
       status: 'sent',
@@ -111,36 +99,36 @@ export const useTrainingCentersStore = create<TrainingCentersState>()(persist((s
     }
   ],
   
-  addCenter: (center) => {
-    const newCenter: TrainingCenter = {
-      ...center,
-      id: `tc-${Date.now()}`,
+  addConnection: (connection) => {
+    const newConnection: TrainingCenterConnection = {
+      ...connection,
+      id: `conn-${Date.now()}`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    set((state) => ({ centers: [...state.centers, newCenter] }));
+    set((state) => ({ connections: [...state.connections, newConnection] }));
   },
   
-  updateCenter: (id, updates) => {
+  updateConnection: (id, updates) => {
     set((state) => ({
-      centers: state.centers.map((center) =>
-        center.id === id ? { ...center, ...updates, updatedAt: new Date().toISOString() } : center
+      connections: state.connections.map((conn) =>
+        conn.id === id ? { ...conn, ...updates, updatedAt: new Date().toISOString() } : conn
       )
     }));
   },
   
-  deleteCenter: (id) => {
+  deleteConnection: (id) => {
     set((state) => ({
-      centers: state.centers.filter((center) => center.id !== id)
+      connections: state.connections.filter((conn) => conn.id !== id)
     }));
   },
   
-  getCentersByTenant: (tenantId) => {
-    return get().centers.filter((center) => center.tenantId === tenantId);
+  getConnectionsByTenant: (tenantId) => {
+    return get().connections.filter((conn) => conn.tenantId === tenantId);
   },
   
-  getActiveCenters: (tenantId) => {
-    return get().centers.filter((center) => center.tenantId === tenantId && center.isActive);
+  getActiveConnections: (tenantId) => {
+    return get().connections.filter((conn) => conn.tenantId === tenantId && conn.isActive);
   },
   
   addCenterRequest: (request) => {
@@ -167,6 +155,10 @@ export const useTrainingCentersStore = create<TrainingCentersState>()(persist((s
   
   getCenterRequestsByTrainingRequest: (trainingRequestId) => {
     return get().centerRequests.filter((request) => request.trainingRequestId === trainingRequestId);
+  },
+  
+  getCenterRequestsByTrainingCenter: (trainingCenterTenantId) => {
+    return get().centerRequests.filter((request) => request.trainingCenterTenantId === trainingCenterTenantId);
   }
 }), {
   name: 'training-centers-storage'

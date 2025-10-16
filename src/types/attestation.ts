@@ -100,23 +100,14 @@ export interface AttestationStats {
   upcomingCertifications: number;
 }
 
-export interface TrainingCenter {
+export interface TrainingCenterConnection {
   id: string;
   tenantId: string;
-  name: string;
-  legalName?: string;
-  inn?: string;
-  contactPerson: string;
-  email: string;
-  phone: string;
-  address?: string;
-  website?: string;
+  trainingCenterTenantId: string;
+  trainingCenterName: string;
   specializations: string[];
   isActive: boolean;
   autoSendRequests: boolean;
-  apiEnabled: boolean;
-  apiEndpoint?: string;
-  apiKey?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -124,19 +115,29 @@ export interface TrainingCenter {
 export interface TrainingCenterRequest {
   id: string;
   tenantId: string;
-  trainingCenterId: string;
+  trainingCenterTenantId: string;
   trainingCenterName: string;
   trainingRequestId: string;
+  employeeId: string;
   employeeName: string;
+  position: string;
+  organizationName: string;
   programName: string;
   sendDate: string;
-  status: 'sent' | 'received' | 'confirmed' | 'rejected' | 'failed';
+  status: 'sent' | 'received' | 'in_training' | 'completed' | 'rejected';
   responseDate?: string;
   responseMessage?: string;
   scheduledStartDate?: string;
   scheduledEndDate?: string;
+  actualStartDate?: string;
+  actualEndDate?: string;
   cost?: number;
   confirmationNumber?: string;
+  certificateIssued?: boolean;
+  certificateNumber?: string;
+  certificateIssueDate?: string;
+  certificateExpiryDate?: string;
+  certificateValidityYears?: number;
   createdAt: string;
   updatedAt: string;
 }

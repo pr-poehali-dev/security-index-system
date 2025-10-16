@@ -20,10 +20,10 @@ import { useToast } from '@/hooks/use-toast';
 export default function TrainingRequestsTab() {
   const user = useAuthStore((state) => state.user);
   const { getRequestsByTenant, updateRequest } = useTrainingRequestsStore();
-  const { getActiveCenters, addCenterRequest } = useTrainingCentersStore();
+  const { getActiveConnections, addCenterRequest } = useTrainingCentersStore();
   const { autoCreateRenewal } = useQualificationRenewalStore();
   const requests = user?.tenantId ? getRequestsByTenant(user.tenantId) : [];
-  const activeCenters = user?.tenantId ? getActiveCenters(user.tenantId).filter(c => c.autoSendRequests) : [];
+  const activeConnections = user?.tenantId ? getActiveConnections(user.tenantId).filter(c => c.autoSendRequests) : [];
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
@@ -107,14 +107,17 @@ export default function TrainingRequestsTab() {
       approvedDate: new Date().toISOString()
     });
     
-    if (request && activeCenters.length > 0) {
-      activeCenters.forEach(center => {
+    if (request && activeConnections.length > 0) {
+      activeConnections.forEach(conn => {
         addCenterRequest({
           tenantId: request.tenantId,
-          trainingCenterId: center.id,
-          trainingCenterName: center.name,
+          trainingCenterTenantId: conn.trainingCenterTenantId,
+          trainingCenterName: conn.trainingCenterName,
           trainingRequestId: request.id,
+          employeeId: request.employeeId,
           employeeName: request.employeeName,
+          position: request.position,
+          organizationName: request.organizationName,
           programName: request.programName,
           sendDate: new Date().toISOString(),
           status: 'sent'
@@ -122,7 +125,7 @@ export default function TrainingRequestsTab() {
       });
       toast({ 
         title: 'Заявка согласована', 
-        description: `Автоматически отправлена в ${activeCenters.length} учебных центров` 
+        description: `Автоматически отправлена в ${activeConnections.length} учебных центров` 
       });
     } else {
       toast({ title: 'Заявка согласована' });
