@@ -2,7 +2,7 @@
 // Описание: Zustand store для управления бюджетом и расходами
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { BudgetCategory, BudgetExpense, BudgetSummary, OrganizationBudgetPlan } from '@/types';
+import type { BudgetCategory, BudgetExpense, OrganizationBudgetPlan } from '@/types';
 
 const currentYear = new Date().getFullYear();
 
