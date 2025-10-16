@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/stores/authStore';
 import { useTrainingCentersStore } from '@/stores/trainingCentersStore';
-import { useCertificationsStore } from '@/stores/certificationsStore';
+import { useCertificationStore } from '@/stores/certificationStore';
 import { useToast } from '@/hooks/use-toast';
 import {
   Select,
@@ -29,7 +29,7 @@ import { TrainingCenterRequest } from '@/types/attestation';
 export default function IncomingRequestsTab() {
   const user = useAuthStore((state) => state.user);
   const { getCenterRequestsByTrainingCenter, updateCenterRequest } = useTrainingCentersStore();
-  const { addCertification } = useCertificationsStore();
+  const { addCertification } = useCertificationStore();
   const { toast } = useToast();
   
   const incomingRequests = user?.tenantId ? getCenterRequestsByTrainingCenter(user.tenantId) : [];
@@ -97,16 +97,16 @@ export default function IncomingRequestsTab() {
 
     addCertification({
       tenantId: selectedRequest.tenantId,
-      employeeId: selectedRequest.employeeId,
-      type: 'qualification',
-      number: certificateNumber,
+      personnelId: selectedRequest.employeeId,
+      category: 'labor_safety',
+      area: selectedRequest.programName,
       issueDate: certificateIssueDate,
       expiryDate: certificateExpiryDate,
-      issuer: user?.tenantName || 'Учебный центр',
-      position: selectedRequest.position,
-      programName: selectedRequest.programName,
-      status: 'active',
-      autoRenewal: true
+      certificateNumber: certificateNumber,
+      verified: true,
+      verifiedDate: new Date().toISOString(),
+      verifiedBy: user?.fullName || 'Учебный центр',
+      trainingOrganizationId: user?.tenantId
     });
 
     toast({ 
