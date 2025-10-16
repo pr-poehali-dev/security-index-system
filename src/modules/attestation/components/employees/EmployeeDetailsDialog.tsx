@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
 import type { Employee } from '../../utils/employeeUtils';
 import { getStatusColor, getStatusLabel, getStatusIcon } from '../../utils/employeeUtils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import QualificationTab from '../qualification/QualificationTab';
 
 interface EmployeeDetailsDialogProps {
   employee: Employee | null;
@@ -31,6 +34,7 @@ export default function EmployeeDetailsDialog({
   onShowAddCertDialog
 }: EmployeeDetailsDialogProps) {
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState('certifications');
   
   if (!employee) return null;
 
@@ -38,9 +42,21 @@ export default function EmployeeDetailsDialog({
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Аттестации сотрудника</DialogTitle>
+          <DialogTitle>Карточка сотрудника</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="certifications" className="flex items-center gap-2">
+              <Icon name="Award" size={16} />
+              Аттестации
+            </TabsTrigger>
+            <TabsTrigger value="qualifications" className="flex items-center gap-2">
+              <Icon name="GraduationCap" size={16} />
+              Удостоверения ПК
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="certifications" className="space-y-4">
           <div className="pb-4 border-b">
             <h3 className="font-semibold text-lg">{employee.name}</h3>
             <p className="text-sm text-muted-foreground mb-1">
@@ -200,7 +216,18 @@ export default function EmployeeDetailsDialog({
               Добавить аттестацию
             </Button>
           </div>
-        </div>
+          </TabsContent>
+
+          <TabsContent value="qualifications">
+            <QualificationTab
+              employeeId={employee.id}
+              employeeName={employee.name}
+              organization={employee.organization}
+              position={employee.position}
+              department={employee.department}
+            />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
