@@ -14,6 +14,7 @@ export interface AttestationNotificationRule {
   notifyHR: boolean;
   emailTemplate: string;
   frequency: 'once' | 'daily' | 'weekly';
+  type?: 'certification' | 'qualification' | 'both';
   createdAt: string;
   updatedAt: string;
 }
@@ -56,6 +57,7 @@ export const useAttestationNotificationsStore = create<AttestationNotificationsS
       notifyHR: true,
       emailTemplate: 'Срок действия вашей аттестации истекает через 90 дней',
       frequency: 'once',
+      type: 'certification',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     },
@@ -70,6 +72,7 @@ export const useAttestationNotificationsStore = create<AttestationNotificationsS
       notifyHR: true,
       emailTemplate: 'Внимание! Срок действия аттестации истекает через 30 дней',
       frequency: 'weekly',
+      type: 'certification',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     },
@@ -84,6 +87,37 @@ export const useAttestationNotificationsStore = create<AttestationNotificationsS
       notifyHR: true,
       emailTemplate: 'СРОЧНО! Аттестация истекает через 7 дней',
       frequency: 'daily',
+      type: 'certification',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: 'rule-4',
+      tenantId: 'tenant-1',
+      name: 'Удостоверение ПК истекает (90 дней)',
+      enabled: true,
+      daysBeforeExpiry: 90,
+      notifyEmployee: true,
+      notifyManager: true,
+      notifyHR: true,
+      emailTemplate: 'Срок действия удостоверения повышения квалификации истекает через 90 дней',
+      frequency: 'once',
+      type: 'qualification',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: 'rule-5',
+      tenantId: 'tenant-1',
+      name: 'Удостоверение ПК истекает (30 дней)',
+      enabled: true,
+      daysBeforeExpiry: 30,
+      notifyEmployee: true,
+      notifyManager: false,
+      notifyHR: true,
+      emailTemplate: 'Внимание! Удостоверение ПК истекает через 30 дней. Необходимо пройти обучение',
+      frequency: 'weekly',
+      type: 'qualification',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }

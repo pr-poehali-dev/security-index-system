@@ -82,6 +82,9 @@ export default function NotificationsTab() {
                               checked={rule.enabled}
                               onCheckedChange={() => toggleRule(rule.id)}
                             />
+                            {rule.type === 'qualification' && (
+                              <Icon name="GraduationCap" size={16} className="text-purple-600" />
+                            )}
                             <h3 className="font-semibold text-lg">{rule.name}</h3>
                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                               rule.enabled ? 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30' : 
@@ -89,6 +92,11 @@ export default function NotificationsTab() {
                             }`}>
                               {rule.enabled ? 'Активно' : 'Отключено'}
                             </span>
+                            {rule.type === 'qualification' && (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30">
+                                Удостоверение ПК
+                              </span>
+                            )}
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                             <div className="flex items-center gap-2 text-muted-foreground">
@@ -150,9 +158,9 @@ export default function NotificationsTab() {
                         Автоматическая отправка
                       </h4>
                       <p className="text-sm text-blue-700 dark:text-blue-300">
-                        Система автоматически проверяет истекающие аттестации каждые 24 часа и отправляет 
-                        уведомления согласно настроенным правилам. Сотрудники и их руководители получают 
-                        письма на корпоративную почту.
+                        Система автоматически проверяет истекающие аттестации и удостоверения ПК каждые 24 часа 
+                        и отправляет уведомления согласно настроенным правилам. Сотрудники и их руководители 
+                        получают письма на корпоративную почту.
                       </p>
                     </div>
                   </div>
