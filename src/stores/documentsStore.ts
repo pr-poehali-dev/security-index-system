@@ -121,7 +121,7 @@ export const useDocumentsStore = create<DocumentsState>()(
         set((state) => ({
           documents: state.documents.map((doc) =>
             doc.id === id
-              ? { ...doc, ...updates, updatedAt: new Date().toISOString() }
+              ? { ...doc, ...updates, updatedAt: new Date().toISOString() } as Document
               : doc
           ),
         }));
