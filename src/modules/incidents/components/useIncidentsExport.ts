@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import { exportToExcel, type ExportColumn } from '@/utils/export';
 import type { Incident, IncidentStatus } from '@/types';
 
 interface ExportHelpers {
@@ -21,57 +21,43 @@ const STATUS_LABELS: Record<IncidentStatus, string> = {
   completed_late: 'Исполнено с нарушением срока'
 };
 
-const COL_WIDTHS = [
-  { wch: 5 }, { wch: 20 }, { wch: 20 }, { wch: 12 },
-  { wch: 15 }, { wch: 15 }, { wch: 40 }, { wch: 40 },
-  { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 20 },
-  { wch: 12 }, { wch: 10 }, { wch: 25 }, { wch: 30 }
-];
+interface IncidentExport extends Incident {
+  _index?: number;
+}
 
 export function useIncidentsExport(helpers: ExportHelpers) {
-  const createExportData = (incidents: Incident[]) => {
-    return incidents.map((inc, index) => ({
-      '№': index + 1,
-      'Организация': helpers.getOrganizationName(inc.organizationId),
-      'Площадка': helpers.getProductionSiteName(inc.productionSiteId),
-      'Дата': new Date(inc.reportDate).toLocaleDateString('ru-RU'),
-      'Источник': helpers.getSourceName(inc.sourceId),
-      'Направление': helpers.getDirectionName(inc.directionId),
-      'Описание': inc.description,
-      'Корректирующее мероприятие': inc.correctiveAction,
-      'Категория': helpers.getCategoryName(inc.categoryId),
-      'Подкатегория': helpers.getSubcategoryName(inc.subcategoryId),
-      'Обеспечение работ': helpers.getFundingTypeName(inc.fundingTypeId),
-      'Ответственный': helpers.getResponsibleName(inc.responsiblePersonnelId),
-      'Плановая дата': new Date(inc.plannedDate).toLocaleDateString('ru-RU'),
-      'Дней осталось': inc.daysLeft,
-      'Статус': STATUS_LABELS[inc.status],
-      'Комментарий': inc.comments || ''
-    }));
-  };
-
-  const exportToExcel = (incidents: Incident[], fileName: string) => {
-    const exportData = createExportData(incidents);
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Инциденты');
-    
-    worksheet['!cols'] = COL_WIDTHS;
-    
-    XLSX.writeFile(workbook, fileName);
-  };
+  const columns: ExportColumn<IncidentExport>[] = [
+    { key: '_index', label: '№', width: 5, format: (_, item) => (item._index || 0) + 1 },
+    { key: 'organizationId', label: 'Организация', width: 20, format: (val) => helpers.getOrganizationName(val as string) },
+    { key: 'productionSiteId', label: 'Площадка', width: 20, format: (val) => helpers.getProductionSiteName(val as string) },
+    { key: 'reportDate', label: 'Дата', width: 12, format: (val) => new Date(val as string).toLocaleDateString('ru-RU') },
+    { key: 'sourceId', label: 'Источник', width: 15, format: (val) => helpers.getSourceName(val as string) },
+    { key: 'directionId', label: 'Направление', width: 15, format: (val) => helpers.getDirectionName(val as string) },
+    { key: 'description', label: 'Описание', width: 40 },
+    { key: 'correctiveAction', label: 'Корректирующее мероприятие', width: 40 },
+    { key: 'categoryId', label: 'Категория', width: 15, format: (val) => helpers.getCategoryName(val as string) },
+    { key: 'subcategoryId', label: 'Подкатегория', width: 15, format: (val) => helpers.getSubcategoryName(val as string) },
+    { key: 'fundingTypeId', label: 'Обеспечение работ', width: 15, format: (val) => helpers.getFundingTypeName(val as string) },
+    { key: 'responsiblePersonnelId', label: 'Ответственный', width: 20, format: (val) => helpers.getResponsibleName(val as string) },
+    { key: 'plannedDate', label: 'Плановая дата', width: 12, format: (val) => new Date(val as string).toLocaleDateString('ru-RU') },
+    { key: 'daysLeft', label: 'Дней осталось', width: 10 },
+    { key: 'status', label: 'Статус', width: 25, format: (val) => STATUS_LABELS[val as IncidentStatus] },
+    { key: 'comments', label: 'Комментарий', width: 30, format: (val) => val || '' }
+  ];
 
   const handleExportAll = (filteredIncidents: Incident[]) => {
-    const fileName = `Инциденты_${new Date().toLocaleDateString('ru-RU').replace(/\./g, '-')}.xlsx`;
-    exportToExcel(filteredIncidents, fileName);
+    const dataWithIndex = filteredIncidents.map((inc, index) => ({ ...inc, _index: index }));
+    const fileName = `Инциденты_${new Date().toLocaleDateString('ru-RU').replace(/\./g, '-')}`;
+    exportToExcel(dataWithIndex, columns, fileName, 'Инциденты');
   };
 
   const handleExportSelected = (filteredIncidents: Incident[], selectedIds: string[]) => {
     if (selectedIds.length === 0) return;
     
     const selectedIncidents = filteredIncidents.filter(inc => selectedIds.includes(inc.id));
-    const fileName = `Инциденты_выбранные_${new Date().toLocaleDateString('ru-RU').replace(/\./g, '-')}.xlsx`;
-    exportToExcel(selectedIncidents, fileName);
+    const dataWithIndex = selectedIncidents.map((inc, index) => ({ ...inc, _index: index }));
+    const fileName = `Инциденты_выбранные_${new Date().toLocaleDateString('ru-RU').replace(/\./g, '-')}`;
+    exportToExcel(dataWithIndex, columns, fileName, 'Инциденты');
   };
 
   return {
