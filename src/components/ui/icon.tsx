@@ -13,7 +13,7 @@ import {
   Newspaper, Pencil, Phone, PieChart, Play, PlayCircle, Plus, Printer,
   RefreshCw, Save, Search, Send, Settings, Shield, ShieldCheck, Sun,
   Target, Trash, Trash2, TrendingDown, TrendingUp,
-  Upload, User, UserPlus, Users,
+  Upload, User, UserCheck, UserPlus, Users,
   Wallet, Wrench, X, XCircle,
   type LucideProps
 } from 'lucide-react';
@@ -30,7 +30,7 @@ type IconName =
   | 'Newspaper' | 'Pencil' | 'Phone' | 'PieChart' | 'Play' | 'PlayCircle' | 'Plus' | 'Printer'
   | 'RefreshCw' | 'Save' | 'Search' | 'Send' | 'Settings' | 'Shield' | 'ShieldCheck' | 'Sun'
   | 'Target' | 'Trash' | 'Trash2' | 'TrendingDown' | 'TrendingUp'
-  | 'Upload' | 'User' | 'UserPlus' | 'Users'
+  | 'Upload' | 'User' | 'UserCheck' | 'UserPlus' | 'Users'
   | 'Wallet' | 'Wrench' | 'X' | 'XCircle';
 
 interface IconProps extends LucideProps {
@@ -50,7 +50,7 @@ const ICON_MAP: Record<string, FC<LucideProps>> = {
   Newspaper, Pencil, Phone, PieChart, Play, PlayCircle, Plus, Printer,
   RefreshCw, Save, Search, Send, Settings, Shield, ShieldCheck, Sun,
   Target, Trash, Trash2, TrendingDown, TrendingUp,
-  Upload, User, UserPlus, Users,
+  Upload, User, UserCheck, UserPlus, Users,
   Wallet, Wrench, X, XCircle,
 };
 
