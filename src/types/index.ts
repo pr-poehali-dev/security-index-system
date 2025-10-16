@@ -783,7 +783,8 @@ export type ContractorServiceType = 'full_training' | 'sdo_access_only' | 'certi
 export interface OrganizationContractor {
   id: string;
   tenantId: string;
-  contractorTenantId: string;
+  contractorTenantId?: string;
+  contractorExternalOrgId?: string;
   contractorName: string;
   contractorInn?: string;
   type: 'training_center' | 'contractor' | 'supplier';
