@@ -8,8 +8,10 @@ export default function FundingTypesDirectory() {
   const updateFundingType = useIncidentsStore((state) => state.updateFundingType);
   const deleteFundingType = useIncidentsStore((state) => state.deleteFundingType);
 
+  const DirectoryComponent = GenericDirectory<IncidentFundingType>;
+  
   return (
-    <GenericDirectory<IncidentFundingType>
+    <DirectoryComponent
       title="Обеспечение выполнения работ"
       description="Способы финансирования корректирующих мероприятий"
       addButtonLabel="Добавить тип"
