@@ -150,6 +150,7 @@ interface BudgetState {
 
   getCategoriesByYear: (year: number) => BudgetCategory[];
   getExpensesByYear: (year: number) => BudgetExpense[];
+  getOrganizationPlansByYear: (year: number) => OrganizationBudgetPlan[];
 
   addCategory: (category: Omit<BudgetCategory, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateCategory: (id: string, updates: Partial<BudgetCategory>) => void;
@@ -181,6 +182,10 @@ export const useBudgetStore = create<BudgetState>()(persist((set, get) => ({
       .filter((cat) => cat.year === year)
       .map((cat) => cat.id);
     return get().expenses.filter((exp) => categoryIds.includes(exp.categoryId));
+  },
+
+  getOrganizationPlansByYear: (year) => {
+    return get().organizationPlans.filter((plan) => plan.year === year);
   },
 
   addCategory: (category) => {
