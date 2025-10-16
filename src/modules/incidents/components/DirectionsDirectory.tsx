@@ -8,6 +8,7 @@ export default function DirectionsDirectory() {
   const updateDirection = useIncidentsStore((state) => state.updateDirection);
   const deleteDirection = useIncidentsStore((state) => state.deleteDirection);
 
+
   return (
     <GenericDirectory<IncidentDirection>
       title="Направления деятельности"

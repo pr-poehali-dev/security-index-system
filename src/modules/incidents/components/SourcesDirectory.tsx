@@ -8,6 +8,7 @@ export default function SourcesDirectory() {
   const updateSource = useIncidentsStore((state) => state.updateSource);
   const deleteSource = useIncidentsStore((state) => state.deleteSource);
 
+
   return (
     <GenericDirectory<IncidentSource>
       title="Источники сообщений о несоответствиях"
