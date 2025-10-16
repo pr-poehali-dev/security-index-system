@@ -174,7 +174,7 @@ const MOCK_AUDITS: Audit[] = [
   }
 ];
 
-export const useChecklistsStore = create<ChecklistsState>((set, get) => ({
+export const useChecklistsStore = create<ChecklistsState>((set) => ({
   checklists: MOCK_CHECKLISTS,
   audits: MOCK_AUDITS,
   selectedChecklist: null,
