@@ -1,70 +1,43 @@
-import { useEffect } from 'react';
+import { useMemo } from 'react';
 import { useCertificationStore } from '@/stores/certificationStore';
-import { useNotificationsStore } from '@/stores/notificationsStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useExpiryNotifications } from './useExpiryNotifications';
 import { differenceInDays, parseISO } from 'date-fns';
+import type { Certification } from '@/types';
 
 export function useAttestationNotifications() {
   const user = useAuthStore((state) => state.user);
   const { getCertificationsByTenant } = useCertificationStore();
-  const { addNotification, notifications } = useNotificationsStore();
 
-  useEffect(() => {
-    if (!user?.tenantId) return;
+  const certifications = useMemo(
+    () => (user?.tenantId ? getCertificationsByTenant(user.tenantId) : []),
+    [user?.tenantId, getCertificationsByTenant]
+  );
 
-    const certifications = getCertificationsByTenant(user.tenantId);
-    const today = new Date();
-
-    const expiredCerts = certifications.filter(cert => {
+  useExpiryNotifications<Certification>({
+    source: 'attestation',
+    items: certifications,
+    link: '/attestation',
+    criticalFilter: (cert, today) => {
       const expiryDate = parseISO(cert.expiryDate);
       return expiryDate < today;
-    });
-
-    const soonExpiringCerts = certifications.filter(cert => {
+    },
+    warningFilter: (cert, today) => {
       const expiryDate = parseISO(cert.expiryDate);
       const daysLeft = differenceInDays(expiryDate, today);
       return daysLeft > 0 && daysLeft <= 30;
-    });
-
-    const existingNotificationIds = new Set(
-      notifications
-        .filter(n => n.source === 'attestation')
-        .map(n => n.sourceId)
-    );
-
-    expiredCerts.forEach(cert => {
-      if (existingNotificationIds.has(cert.id)) return;
-      
-      addNotification({
-        tenantId: user.tenantId!,
-        userId: user.id,
-        type: 'critical',
-        source: 'attestation',
-        sourceId: cert.id,
-        title: 'Аттестация просрочена',
-        message: `Истек срок действия аттестации по направлению: ${cert.area}`,
-        link: '/attestation',
-        isRead: false,
-      });
-    });
-
-    soonExpiringCerts.forEach(cert => {
-      if (existingNotificationIds.has(cert.id)) return;
-      
+    },
+    getCriticalMessage: (cert) => ({
+      title: 'Аттестация просрочена',
+      message: `Истек срок действия аттестации по направлению: ${cert.area}`,
+    }),
+    getWarningMessage: (cert, today) => {
       const expiryDate = parseISO(cert.expiryDate);
       const daysLeft = differenceInDays(expiryDate, today);
-      
-      addNotification({
-        tenantId: user.tenantId!,
-        userId: user.id,
-        type: 'warning',
-        source: 'attestation',
-        sourceId: cert.id,
+      return {
         title: `Аттестация истекает через ${daysLeft} дн.`,
         message: `Необходимо продлить аттестацию: ${cert.area}`,
-        link: '/attestation',
-        isRead: false,
-      });
-    });
-  }, [user?.tenantId, user?.id, getCertificationsByTenant, addNotification]);
+      };
+    },
+  });
 }
