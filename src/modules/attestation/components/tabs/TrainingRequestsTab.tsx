@@ -13,6 +13,7 @@ import {
 import { useAuthStore } from '@/stores/authStore';
 import { useTrainingRequestsStore } from '@/stores/trainingRequestsStore';
 import { useTrainingCentersStore } from '@/stores/trainingCentersStore';
+import { useQualificationRenewalStore } from '@/stores/qualificationRenewalStore';
 import { TrainingRequest } from '@/types/attestation';
 import { useToast } from '@/hooks/use-toast';
 
@@ -20,6 +21,7 @@ export default function TrainingRequestsTab() {
   const user = useAuthStore((state) => state.user);
   const { getRequestsByTenant, updateRequest } = useTrainingRequestsStore();
   const { getActiveCenters, addCenterRequest } = useTrainingCentersStore();
+  const { autoCreateRenewal } = useQualificationRenewalStore();
   const requests = user?.tenantId ? getRequestsByTenant(user.tenantId) : [];
   const activeCenters = user?.tenantId ? getActiveCenters(user.tenantId).filter(c => c.autoSendRequests) : [];
   const { toast } = useToast();
@@ -343,6 +345,40 @@ export default function TrainingRequestsTab() {
                       >
                         <Icon name="Play" size={16} />
                         Начать обучение
+                      </Button>
+                    </div>
+                  )}
+
+                  {request.status === 'in_progress' && (
+                    <div className="pt-3 border-t">
+                      <Button
+                        size="sm"
+                        className="gap-2"
+                        onClick={() => {
+                          updateRequest(request.id, { status: 'completed' });
+                          
+                          if (user?.tenantId && request.reason === 'expiring_qualification') {
+                            autoCreateRenewal(
+                              user.tenantId,
+                              request.employeeId,
+                              request.employeeName,
+                              `training-${Date.now()}`,
+                              request.programName,
+                              5,
+                              undefined,
+                              request.expiryDate
+                            );
+                            toast({ 
+                              title: 'Обучение завершено', 
+                              description: 'Автоматически создана заявка на продление удостоверения ПК' 
+                            });
+                          } else {
+                            toast({ title: 'Обучение завершено' });
+                          }
+                        }}
+                      >
+                        <Icon name="CheckCircle2" size={16} />
+                        Завершить обучение
                       </Button>
                     </div>
                   )}

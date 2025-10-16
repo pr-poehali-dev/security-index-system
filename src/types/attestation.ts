@@ -37,6 +37,9 @@ export interface Certification {
   documentUrl?: string;
   issuedBy?: string;
   notes?: string;
+  linkedTrainingId?: string;
+  autoRenewed?: boolean;
+  previousCertificationId?: string;
 }
 
 export interface TrainingProgram {
@@ -60,6 +63,11 @@ export interface Training {
   status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
   result?: 'passed' | 'failed';
   certificateUrl?: string;
+  certificateNumber?: string;
+  validityPeriod?: number;
+  autoRenewQualification?: boolean;
+  qualificationRenewed?: boolean;
+  renewalDate?: string;
 }
 
 export interface TrainingRequest {
