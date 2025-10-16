@@ -1,7 +1,6 @@
 // src/stores/tenantStore.ts
 // Описание: Zustand store для управления тенантами и модулями
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import type { Tenant, ModuleType } from '@/types';
 
 interface TenantCredentials {
