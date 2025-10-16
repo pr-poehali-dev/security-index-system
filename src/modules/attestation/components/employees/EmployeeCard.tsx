@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import Icon from '@/components/ui/icon';
+import { getCertificationStatusLabel, getCertificationStatusColor } from '@/modules/attestation/utils/statusHelpers';
 
 interface Employee {
   id: string;
@@ -15,23 +16,7 @@ interface EmployeeCardProps {
   employee: Employee;
 }
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'valid': return 'bg-emerald-100 text-emerald-700';
-    case 'expiring_soon': return 'bg-amber-100 text-amber-700';
-    case 'expired': return 'bg-red-100 text-red-700';
-    default: return 'bg-gray-100 text-gray-700';
-  }
-};
 
-const getStatusLabel = (status: string) => {
-  switch (status) {
-    case 'valid': return 'Действителен';
-    case 'expiring_soon': return 'Истекает';
-    case 'expired': return 'Просрочен';
-    default: return status;
-  }
-};
 
 export default function EmployeeCard({ employee }: EmployeeCardProps) {
   return (
@@ -41,8 +26,8 @@ export default function EmployeeCard({ employee }: EmployeeCardProps) {
           <h4 className="font-medium text-gray-900 dark:text-white">{employee.name}</h4>
           <p className="text-sm text-gray-600 dark:text-gray-400">{employee.position}</p>
         </div>
-        <Badge className={getStatusColor(employee.status)}>
-          {getStatusLabel(employee.status)}
+        <Badge className={getCertificationStatusColor(employee.status)}>
+          {getCertificationStatusLabel(employee.status)}
         </Badge>
       </div>
       <div className="flex items-center justify-between text-sm mb-2">

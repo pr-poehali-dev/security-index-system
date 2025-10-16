@@ -12,6 +12,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { Order } from '@/stores/ordersStore';
+import { getOrderTypeLabel, getOrderTypeColor } from '@/modules/attestation/utils/typeHelpers';
+import { getOrderStatusLabel, getOrderStatusColor } from '@/modules/attestation/utils/statusHelpers';
+import { formatDate } from '@/modules/attestation/utils/formatters';
 
 interface OrdersTableViewProps {
   orders: Order[];
@@ -25,59 +28,7 @@ interface OrdersTableViewProps {
   onSendToSDO?: (orderId: string) => void;
 }
 
-const getOrderTypeLabel = (type: Order['type']) => {
-  switch (type) {
-    case 'attestation': return 'Аттестация';
-    case 'training': return 'Обучение';
-    case 'suspension': return 'Отстранение';
-    case 'lms': return 'СДО';
-    case 'internal': return 'Внутренний';
-    default: return type;
-  }
-};
 
-const getOrderTypeColor = (type: Order['type']) => {
-  switch (type) {
-    case 'attestation': return 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400';
-    case 'training': return 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400';
-    case 'suspension': return 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400';
-    case 'lms': return 'bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400';
-    case 'internal': return 'bg-gray-100 text-gray-700 dark:bg-gray-950/30 dark:text-gray-400';
-    default: return 'bg-gray-100 text-gray-700 dark:bg-gray-950/30 dark:text-gray-400';
-  }
-};
-
-const getStatusLabel = (status: Order['status']) => {
-  switch (status) {
-    case 'draft': return 'Черновик';
-    case 'prepared': return 'Подготовлен';
-    case 'approved': return 'Согласовано';
-    case 'active': return 'Активен';
-    case 'completed': return 'Выполнен';
-    case 'cancelled': return 'Отменен';
-    default: return status;
-  }
-};
-
-const getStatusColor = (status: Order['status']) => {
-  switch (status) {
-    case 'draft': return 'bg-gray-100 text-gray-700 dark:bg-gray-950/30 dark:text-gray-400';
-    case 'prepared': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400';
-    case 'approved': return 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400';
-    case 'active': return 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400';
-    case 'completed': return 'bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400';
-    case 'cancelled': return 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400';
-    default: return 'bg-gray-100 text-gray-700 dark:bg-gray-950/30 dark:text-gray-400';
-  }
-};
-
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('ru-RU', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  });
-};
 
 export default function OrdersTableView({
   orders,
@@ -233,8 +184,8 @@ export default function OrdersTableView({
                   </Badge>
                 </td>
                 <td className="p-3">
-                  <Badge className={getStatusColor(order.status)}>
-                    {getStatusLabel(order.status)}
+                  <Badge className={getOrderStatusColor(order.status)}>
+                    {getOrderStatusLabel(order.status)}
                   </Badge>
                 </td>
                 <td className="p-3">

@@ -11,6 +11,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { Training } from '@/stores/trainingsAttestationStore';
 import type { Personnel, Person, Position, OrganizationContractor } from '@/stores/settingsStore';
+import { getTrainingTypeLabel, getTrainingTypeColor } from '@/modules/attestation/utils/typeHelpers';
+import { getTrainingStatusLabel, getTrainingStatusColor } from '@/modules/attestation/utils/statusHelpers';
+import { formatDate, formatCurrency } from '@/modules/attestation/utils/formatters';
 
 interface TrainingsCardViewProps {
   trainings: Training[];
@@ -28,62 +31,7 @@ interface TrainingsCardViewProps {
   onDelete: (trainingId: string) => void;
 }
 
-const getTrainingTypeLabel = (type: Training['type']) => {
-  switch (type) {
-    case 'initial': return 'Первичное';
-    case 'periodic': return 'Периодическое';
-    case 'extraordinary': return 'Внеочередное';
-    default: return type;
-  }
-};
 
-const getTrainingTypeColor = (type: Training['type']) => {
-  switch (type) {
-    case 'initial': return 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400';
-    case 'periodic': return 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400';
-    case 'extraordinary': return 'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400';
-    default: return 'bg-gray-100 text-gray-700 dark:bg-gray-950/30 dark:text-gray-400';
-  }
-};
-
-const getStatusLabel = (status: Training['status']) => {
-  switch (status) {
-    case 'planned': return 'Запланировано';
-    case 'ongoing': return 'Идет';
-    case 'in_progress': return 'В процессе';
-    case 'completed': return 'Завершено';
-    case 'cancelled': return 'Отменено';
-    default: return status;
-  }
-};
-
-const getStatusColor = (status: Training['status']) => {
-  switch (status) {
-    case 'planned': return 'bg-gray-100 text-gray-700 dark:bg-gray-950/30 dark:text-gray-400';
-    case 'ongoing': return 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400';
-    case 'in_progress': return 'bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400';
-    case 'completed': return 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400';
-    case 'cancelled': return 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400';
-    default: return 'bg-gray-100 text-gray-700 dark:bg-gray-950/30 dark:text-gray-400';
-  }
-};
-
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('ru-RU', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  });
-};
-
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency: 'RUB',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(amount);
-};
 
 export default function TrainingsCardView({
   trainings,
@@ -127,8 +75,8 @@ export default function TrainingsCardView({
                     <Badge className={getTrainingTypeColor(training.type)}>
                       {getTrainingTypeLabel(training.type)}
                     </Badge>
-                    <Badge className={getStatusColor(training.status)}>
-                      {getStatusLabel(training.status)}
+                    <Badge className={getTrainingStatusColor(training.status)}>
+                      {getTrainingStatusLabel(training.status)}
                     </Badge>
                   </div>
                   <h3 className="font-semibold text-lg mb-1">{training.title}</h3>

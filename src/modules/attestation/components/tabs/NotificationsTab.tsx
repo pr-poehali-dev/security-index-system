@@ -16,6 +16,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useAttestationNotificationsStore } from '@/stores/attestationNotificationsStore';
+import { getNotificationStatusLabel, getNotificationStatusColor } from '@/modules/attestation/utils/statusHelpers';
 
 export default function NotificationsTab() {
   const user = useAuthStore((state) => state.user);
@@ -38,23 +39,7 @@ export default function NotificationsTab() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'sent': return 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30';
-      case 'failed': return 'text-red-600 bg-red-100 dark:bg-red-900/30';
-      case 'pending': return 'text-amber-600 bg-amber-100 dark:bg-amber-900/30';
-      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900/30';
-    }
-  };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'sent': return 'Отправлено';
-      case 'failed': return 'Ошибка';
-      case 'pending': return 'В очереди';
-      default: return status;
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -230,9 +215,9 @@ export default function NotificationsTab() {
                         <td className="py-3 text-sm text-muted-foreground">{log.certification}</td>
                         <td className="py-3 text-sm">{new Date(log.expiryDate).toLocaleDateString('ru')}</td>
                         <td className="py-3">
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(log.status)}`}>
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getNotificationStatusColor(log.status)}`}>
                             <Icon name={log.status === 'sent' ? 'CheckCircle2' : log.status === 'failed' ? 'XCircle' : 'Clock'} size={12} />
-                            {getStatusLabel(log.status)}
+                            {getNotificationStatusLabel(log.status)}
                           </span>
                         </td>
                       </tr>

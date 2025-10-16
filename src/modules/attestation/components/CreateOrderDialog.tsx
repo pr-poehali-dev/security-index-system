@@ -18,6 +18,7 @@ import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/person
 import OrderTypeSelector from './create-order/OrderTypeSelector';
 import OrderBasicInfoForm from './create-order/OrderBasicInfoForm';
 import EmployeeSelectionStep from './create-order/EmployeeSelectionStep';
+import { getCertificationStatusLabel, getCertificationStatusColor } from '@/modules/attestation/utils/statusHelpers';
 
 interface CreateOrderDialogProps {
   open: boolean;
@@ -62,31 +63,7 @@ const getDefaultTitle = (type: string) => {
   }
 };
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'valid':
-      return 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30';
-    case 'expiring_soon':
-      return 'text-amber-600 bg-amber-100 dark:bg-amber-900/30';
-    case 'expired':
-      return 'text-red-600 bg-red-100 dark:bg-red-900/30';
-    default:
-      return 'text-gray-600 bg-gray-100 dark:bg-gray-900/30';
-  }
-};
 
-const getStatusLabel = (status: string) => {
-  switch (status) {
-    case 'valid':
-      return 'Действует';
-    case 'expiring_soon':
-      return 'Истекает';
-    case 'expired':
-      return 'Просрочен';
-    default:
-      return status;
-  }
-};
 
 export default function CreateOrderDialog({ open, onOpenChange, initialOrderType }: CreateOrderDialogProps) {
   const { toast } = useToast();
@@ -378,8 +355,8 @@ export default function CreateOrderDialog({ open, onOpenChange, initialOrderType
               isAreaSelected={isAreaSelected}
               getTotalSelected={getTotalSelected}
               getEmployeesWithSelections={getEmployeesWithSelections}
-              getStatusColor={getStatusColor}
-              getStatusLabel={getStatusLabel}
+              getStatusColor={getCertificationStatusColor}
+              getStatusLabel={getCertificationStatusLabel}
             />
           )}
         </div>

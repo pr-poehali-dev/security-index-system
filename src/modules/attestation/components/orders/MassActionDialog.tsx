@@ -14,6 +14,7 @@ import CreateAttestationOrderDialog from '../CreateAttestationOrderDialog';
 import MassActionFilters from './mass-action/MassActionFilters';
 import MassActionSelectionBar from './mass-action/MassActionSelectionBar';
 import EmployeeList from './mass-action/EmployeeList';
+import { getCertificationStatusLabel, getCertificationStatusColor } from '@/modules/attestation/utils/statusHelpers';
 
 interface Certification {
   id: string;
@@ -75,31 +76,7 @@ const getActionDescription = (actionType: string) => {
   }
 };
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'valid':
-      return 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30';
-    case 'expiring_soon':
-      return 'text-amber-600 bg-amber-100 dark:bg-amber-900/30';
-    case 'expired':
-      return 'text-red-600 bg-red-100 dark:bg-red-900/30';
-    default:
-      return 'text-gray-600 bg-gray-100 dark:bg-gray-900/30';
-  }
-};
 
-const getStatusLabel = (status: string) => {
-  switch (status) {
-    case 'valid':
-      return 'Действует';
-    case 'expiring_soon':
-      return 'Истекает';
-    case 'expired':
-      return 'Просрочен';
-    default:
-      return status;
-  }
-};
 
 export default function MassActionDialog({
   open,
@@ -317,8 +294,8 @@ export default function MassActionDialog({
               onToggleEmployee={toggleEmployee}
               onToggleArea={toggleArea}
               isAreaSelected={isAreaSelected}
-              getStatusColor={getStatusColor}
-              getStatusLabel={getStatusLabel}
+              getStatusColor={getCertificationStatusColor}
+              getStatusLabel={getCertificationStatusLabel}
             />
           </div>
 
