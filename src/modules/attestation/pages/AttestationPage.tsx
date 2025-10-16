@@ -14,6 +14,7 @@ import AttestationCalendarTab from '../components/tabs/AttestationCalendarTab';
 import TasksTab from '../components/tabs/TasksTab';
 import TrainingRequestsTab from '../components/tabs/TrainingRequestsTab';
 import TrainingCentersTab from '../components/tabs/TrainingCentersTab';
+import IncomingRequestsTab from '../components/tabs/IncomingRequestsTab';
 import QualificationRenewalTab from '../components/tabs/QualificationRenewalTab';
 
 const AttestationPage = memo(function AttestationPage() {
@@ -67,6 +68,10 @@ const AttestationPage = memo(function AttestationPage() {
             <Icon name="Building2" size={20} />
             <span className="text-xs font-medium text-center leading-tight">Учебные<br/>центры</span>
           </TabsTrigger>
+          <TabsTrigger value="incoming-requests" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Inbox" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Входящие<br/>заявки (УЦ)</span>
+          </TabsTrigger>
           <TabsTrigger value="renewal" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="FileCheck2" size={20} />
             <span className="text-xs font-medium text-center leading-tight">Продление<br/>удостоверений</span>
@@ -111,6 +116,10 @@ const AttestationPage = memo(function AttestationPage() {
 
         <TabsContent value="training-centers">
           <TrainingCentersTab />
+        </TabsContent>
+
+        <TabsContent value="incoming-requests">
+          <IncomingRequestsTab />
         </TabsContent>
 
         <TabsContent value="renewal">
