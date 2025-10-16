@@ -175,20 +175,20 @@ export const useOrdersStore = create<OrdersState>()(persist((set, get) => ({
     const { useTrainingCenterStore } = require('./trainingCenterStore');
     const { useAuthStore } = require('./authStore');
     
-    const contractor = useSettingsStore.getState().contractors.find(c => c.id === contractorId);
+    const contractor = useSettingsStore.getState().contractors.find((c: any) => c.id === contractorId);
     const user = useAuthStore.getState().user;
-    const personnel = useSettingsStore.getState().personnel.filter(p => order.employeeIds.includes(p.id));
+    const personnel = useSettingsStore.getState().personnel.filter((p: any) => order.employeeIds.includes(p.id));
     const people = useSettingsStore.getState().people;
     const positions = useSettingsStore.getState().positions;
     const organizations = useSettingsStore.getState().organizations;
 
     if (!contractor || !contractor.contractorTenantId || !user) return null;
 
-    const org = organizations.find(o => o.id === personnel[0]?.organizationId);
+    const org = organizations.find((o: any) => o.id === personnel[0]?.organizationId);
 
-    const students = personnel.map(p => {
-      const person = people.find(per => per.id === p.personId);
-      const position = positions.find(pos => pos.id === p.positionId);
+    const students = personnel.map((p: any) => {
+      const person = people.find((per: any) => per.id === p.personId);
+      const position = positions.find((pos: any) => pos.id === p.positionId);
       return {
         personnelId: p.id,
         fullName: person ? `${person.lastName} ${person.firstName} ${person.middleName || ''}`.trim() : 'Неизвестно',
