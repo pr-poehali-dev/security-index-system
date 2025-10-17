@@ -4,6 +4,7 @@ import Icon from '@/components/ui/icon';
 import OrganizationsTab from '../components/facility-catalog/OrganizationsTab';
 import FacilitiesTab from '../components/facility-catalog/FacilitiesTab';
 import ComponentsTab from '../components/facility-catalog/ComponentsTab';
+import ContractorsTab from '../components/facility-catalog/ContractorsTab';
 
 export default function FacilityCatalogPage() {
   const [activeTab, setActiveTab] = useState('organizations');
@@ -45,6 +46,13 @@ export default function FacilityCatalogPage() {
             <Icon name="Cpu" size={20} />
             <span className="text-xs font-medium text-center leading-tight">ТУ и ЗС</span>
           </TabsTrigger>
+          <TabsTrigger 
+            value="contractors" 
+            className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          >
+            <Icon name="Users" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Подрядчики<br/>на объектах</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="organizations">
@@ -57,6 +65,10 @@ export default function FacilityCatalogPage() {
 
         <TabsContent value="components">
           <ComponentsTab />
+        </TabsContent>
+
+        <TabsContent value="contractors">
+          <ContractorsTab />
         </TabsContent>
       </Tabs>
     </div>
