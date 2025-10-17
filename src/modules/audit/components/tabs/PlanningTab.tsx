@@ -14,7 +14,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
-import { useCatalogStore } from '@/stores/catalogStore';
+import { useFacilitiesStore } from '@/stores/facilitiesStore';
+import { useAuthStore } from '@/stores/authStore';
 
 interface AuditPlan {
   id: string;
@@ -28,7 +29,9 @@ interface AuditPlan {
 }
 
 export default function PlanningTab() {
-  const { objects } = useCatalogStore();
+  const user = useAuthStore((state) => state.user);
+  const { getFacilitiesByTenant } = useFacilitiesStore();
+  const objects = user?.tenantId ? getFacilitiesByTenant(user.tenantId) : [];
   const [plans, setPlans] = useState<AuditPlan[]>([]);
   const [showForm, setShowForm] = useState(false);
   
