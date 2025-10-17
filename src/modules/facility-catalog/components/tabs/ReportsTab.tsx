@@ -11,6 +11,9 @@ import {
 import Icon from '@/components/ui/icon';
 import { Badge } from '@/components/ui/badge';
 import { useFacilityCatalogStore } from '../../store/useFacilityCatalogStore';
+import { useFacilitiesStore } from '@/stores/facilitiesStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { useAuthStore } from '@/stores/authStore';
 
 interface ReportTemplate {
   id: string;
@@ -80,8 +83,12 @@ const reportTemplates: ReportTemplate[] = [
 ];
 
 export default function ReportsTab() {
-  const facilities = useFacilityCatalogStore((state) => state.facilities);
-  const contractors = useFacilityCatalogStore((state) => state.contractors);
+  const user = useAuthStore((state) => state.user);
+  const { getFacilitiesByTenant } = useFacilitiesStore();
+  const { getContractorsByTenant } = useSettingsStore();
+  
+  const facilities = user?.tenantId ? getFacilitiesByTenant(user.tenantId) : [];
+  const contractors = user?.tenantId ? getContractorsByTenant(user.tenantId) : [];
   const technicalDiagnostics = useFacilityCatalogStore((state) => state.technicalDiagnostics);
   const industrialSafetyExpertises = useFacilityCatalogStore((state) => state.industrialSafetyExpertises);
 
@@ -91,8 +98,8 @@ export default function ReportsTab() {
   const analyticsData = useMemo(() => ({
     totalFacilities: facilities.length,
     totalContractors: contractors.length,
-    activeProjects: contractors.reduce((sum, c) => sum + (c.activeProjects || 0), 0),
-    completedWorks: contractors.reduce((sum, c) => sum + (c.completedProjects || 0), 0),
+    activeProjects: 0,
+    completedWorks: 0,
     upcomingInspections: [...technicalDiagnostics, ...industrialSafetyExpertises].filter(
       item => item.status === 'planned' || item.status === 'in-progress'
     ).length,

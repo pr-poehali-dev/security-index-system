@@ -1,18 +1,19 @@
-# Архитектура модуля Каталог объектов
+# 🏗️ Архитектура модуля Каталог объектов
 
 ## 🎯 Быстрая навигация
 
 ### Где какие данные хранятся?
 
-| Данные | Store | Компоненты |
-|--------|-------|------------|
-| ОПО объекты | `facilitiesStore` (глобальный) | OpoTab, GtsTab |
-| Компоненты оборудования | `facilitiesStore` (глобальный) | ComponentsTab |
-| Подрядчики | `settingsStore` (глобальный) | ContractorsTab |
-| Технические диагностики | `useFacilityCatalogStore` (локальный) | TechnicalDiagnosticsTab |
-| Экспертизы ЭПБ | `useFacilityCatalogStore` (локальный) | IndustrialSafetyExpertiseTab |
-| Характеристики ОПО | `useFacilityCatalogStore` (локальный) | OpoCharacteristicsTab |
-| Аналитика | `useFacilityCatalogStore` (локальный) | ReportsTab |
+| Данные | Store | Уровень доступа | Компоненты |
+|--------|-------|----------------|------------|
+| ОПО объекты | `facilitiesStore` | 👥 Пользователи тенанта | OpoTab, GtsTab |
+| Компоненты оборудования | `facilitiesStore` | 👥 Пользователи тенанта | ComponentsTab |
+| Организации | `settingsStore` | 👤 Админ тенанта | - |
+| Подрядчики | `settingsStore` | 👤 Админ тенанта | ContractorsTab |
+| Технические диагностики | `useFacilityCatalogStore` | 👥 Пользователи тенанта | TechnicalDiagnosticsTab |
+| Экспертизы ЭПБ | `useFacilityCatalogStore` | 👥 Пользователи тенанта | IndustrialSafetyExpertiseTab |
+| Характеристики ОПО | `useFacilityCatalogStore` | 👥 Пользователи тенанта | OpoCharacteristicsTab |
+| Аналитика | `useFacilityCatalogStore` + глобальные | 👥 Пользователи тенанта | ReportsTab |
 
 ## 🏗️ Структура файлов
 
@@ -20,21 +21,21 @@
 facility-catalog/
 │
 ├── 📁 data/
-│   └── mockData.ts                    # Моковые данные для локального store
+│   └── mockData.ts                    # ТОЛЬКО планирование (ТД, ЭПБ, характеристики)
 │
 ├── 📁 store/
-│   └── useFacilityCatalogStore.ts     # Локальный store (планирование, аналитика)
+│   └── useFacilityCatalogStore.ts     # Локальный store (ТОЛЬКО планирование)
 │
 ├── 📁 components/
-│   ├── OpoTab.tsx                     # Использует facilitiesStore
-│   ├── GtsTab.tsx                     # Использует facilitiesStore
-│   ├── ComponentsTab.tsx              # Использует facilitiesStore
-│   ├── ContractorsTab.tsx             # Использует settingsStore
-│   ├── TechnicalDiagnosticsTab.tsx    # Использует useFacilityCatalogStore
-│   ├── IndustrialSafetyExpertiseTab.tsx # Использует useFacilityCatalogStore
-│   ├── OpoCharacteristicsTab.tsx      # Использует useFacilityCatalogStore
+│   ├── OpoTab.tsx                     # ✅ Использует facilitiesStore
+│   ├── GtsTab.tsx                     # ✅ Использует facilitiesStore
+│   ├── ComponentsTab.tsx              # ✅ Использует facilitiesStore
+│   ├── ContractorsTab.tsx             # ✅ Использует settingsStore
+│   ├── TechnicalDiagnosticsTab.tsx    # ✅ Использует useFacilityCatalogStore
+│   ├── IndustrialSafetyExpertiseTab.tsx # ✅ Использует useFacilityCatalogStore
+│   ├── OpoCharacteristicsTab.tsx      # ✅ Использует useFacilityCatalogStore
 │   └── tabs/
-│       └── ReportsTab.tsx             # Использует оба типа stores
+│       └── ReportsTab.tsx             # ✅ Комбинирует оба типа stores
 │
 └── 📁 pages/
     └── FacilityCatalogPage.tsx        # Главная страница модуля
@@ -42,23 +43,58 @@ facility-catalog/
 
 ## 🔄 Потоки данных
 
+### Иерархия создания данных
+
+```
+🏢 СУПЕРАДМИН
+├── создает Tenant (основные организации)
+├── создает Training Centers (учебные центры)
+└── создает External Organizations (подрядчики системы)
+
+👤 АДМИН ТЕНАНТА
+├── создает Organizations (структура внутри тенанта)
+│   ├── холдинги
+│   ├── юр.лица
+│   └── филиалы/подразделения
+└── управляет подрядчиками (OrganizationContractor)
+
+👥 ПОЛЬЗОВАТЕЛИ ТЕНАНТА
+├── создают Facilities (объекты ОПО/ГТС)
+│   └── привязаны к Organization внутри Tenant
+├── создают Components (компоненты объектов)
+└── создают планы обслуживания (ТД, ЭПБ)
+```
+
 ### Глобальные данные (мультитенант)
+
 ```
 User (tenantId) 
-  → facilitiesStore/settingsStore 
-  → OpoTab/GtsTab/ComponentsTab/ContractorsTab
+  → facilitiesStore.getFacilitiesByTenant(tenantId)
+  → OpoTab/GtsTab/ComponentsTab
+
+User (tenantId)
+  → settingsStore.getContractorsByTenant(tenantId)
+  → ContractorsTab
+
+User (tenantId)
+  → settingsStore.getOrganizationsByTenant(tenantId)
+  → Структура организаций
 ```
 
 ### Локальные данные модуля
+
 ```
 mockData.ts 
   → useFacilityCatalogStore 
-  → TechnicalDiagnosticsTab/IndustrialSafetyExpertiseTab/ReportsTab
+  → TechnicalDiagnosticsTab/IndustrialSafetyExpertiseTab/OpoCharacteristicsTab
 ```
 
 ### Комбинированная аналитика
+
 ```
 facilitiesStore (глобальные объекты)
+     +
+settingsStore (подрядчики)
      +
 useFacilityCatalogStore (локальное планирование)
      ↓
@@ -68,16 +104,18 @@ ReportsTab (агрегированная аналитика)
 ## 📝 Правила разработки
 
 ### ✅ Делай так:
-- Используй глобальные stores для данных, которые нужны всему приложению
-- Используй локальный store для данных, специфичных только для этого модуля
-- В ReportsTab комбинируй данные из обоих источников для аналитики
-- Моковые данные храни в `data/mockData.ts`
+- Используй `facilitiesStore` для объектов ОПО/ГТС/компонентов
+- Используй `settingsStore` для организаций и подрядчиков
+- Используй `useFacilityCatalogStore` ТОЛЬКО для планирования (ТД, ЭПБ, характеристики)
+- Всегда фильтруй по `tenantId` из `authStore.user.tenantId`
+- В ReportsTab комбинируй данные из глобальных и локального stores
 
 ### ❌ Не делай так:
-- Не дублируй объекты ОПО в локальном store (они уже в facilitiesStore)
-- Не храни данные подрядчиков локально (они в settingsStore)
-- Не создавай локальные копии данных в компонентах
-- Не смешивай логику глобальных и локальных stores
+- ❌ Не дублируй объекты ОПО в локальном store (они уже в facilitiesStore)
+- ❌ Не храни данные подрядчиков локально (они в settingsStore)
+- ❌ Не создавай локальные копии данных в компонентах
+- ❌ Не смешивай логику глобальных и локальных stores
+- ❌ Не импортируй удаленные mockFacilities, mockContractors
 
 ## 🚀 Быстрый старт
 
@@ -114,6 +152,30 @@ export const useFacilityCatalogStore = create<FacilityCatalogStore>((set) => ({
 ```typescript
 const newEntities = useFacilityCatalogStore((state) => state.newEntities);
 const addNewEntity = useFacilityCatalogStore((state) => state.addNewEntity);
+```
+
+### Получить данные из глобальных stores
+
+```typescript
+import { useAuthStore } from '@/stores/authStore';
+import { useFacilitiesStore } from '@/stores/facilitiesStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+
+function MyComponent() {
+  // 1. Получить tenantId
+  const user = useAuthStore((state) => state.user);
+  const tenantId = user?.tenantId;
+  
+  // 2. Получить объекты тенанта
+  const { getFacilitiesByTenant } = useFacilitiesStore();
+  const facilities = tenantId ? getFacilitiesByTenant(tenantId) : [];
+  
+  // 3. Получить подрядчиков тенанта
+  const { getContractorsByTenant } = useSettingsStore();
+  const contractors = tenantId ? getContractorsByTenant(tenantId) : [];
+  
+  return <div>...</div>;
+}
 ```
 
 ## 🎓 Примеры кода
