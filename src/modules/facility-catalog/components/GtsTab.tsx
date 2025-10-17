@@ -15,6 +15,9 @@ import {
 } from '@/components/ui/select';
 import FacilityDialog from './FacilityDialog';
 import FacilitiesTable from './FacilitiesTable';
+import FacilitiesGrid from './FacilitiesGrid';
+
+type ViewMode = 'grid' | 'table';
 
 export default function GtsTab() {
   const user = useAuthStore((state) => state.user);
@@ -26,6 +29,7 @@ export default function GtsTab() {
   const [hazardClassFilter, setHazardClassFilter] = useState<string>('all');
   const [showDialog, setShowDialog] = useState(false);
   const [editingFacility, setEditingFacility] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   const filteredFacilities = facilities.filter((facility) => {
     const query = searchQuery.toLowerCase();
@@ -71,6 +75,27 @@ export default function GtsTab() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end">
+        <div className="flex items-center gap-2 bg-muted p-1 rounded-lg">
+          <Button
+            size="sm"
+            variant={viewMode === 'grid' ? 'default' : 'ghost'}
+            className="h-8 px-3"
+            onClick={() => setViewMode('grid')}
+          >
+            <Icon name="LayoutGrid" size={16} />
+          </Button>
+          <Button
+            size="sm"
+            variant={viewMode === 'table' ? 'default' : 'ghost'}
+            className="h-8 px-3"
+            onClick={() => setViewMode('table')}
+          >
+            <Icon name="Table" size={16} />
+          </Button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
         <Card>
           <CardContent className="p-4">
@@ -183,11 +208,19 @@ export default function GtsTab() {
             </Select>
           </div>
 
-          <FacilitiesTable
-            facilities={filteredFacilities}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+          {viewMode === 'table' ? (
+            <FacilitiesTable
+              facilities={filteredFacilities}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ) : (
+            <FacilitiesGrid
+              facilities={filteredFacilities}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </CardContent>
       </Card>
 
