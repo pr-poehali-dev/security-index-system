@@ -16,7 +16,7 @@ import BulkImportDialog from './BulkImportDialog';
 export default function OpoTab() {
   const user = useAuthStore((state) => state.user);
   const { getOrganizationsByTenant } = useSettingsStore();
-  const { getFacilitiesByTenant, deleteFacility, getComponentsByFacility, getComponentsByTenant } = useFacilitiesStore();
+  const { getFacilitiesByTenant, deleteFacility, getComponentsByFacility, getComponentsByTenant, deleteComponent } = useFacilitiesStore();
   
   const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
   const allFacilities = user?.tenantId ? getFacilitiesByTenant(user.tenantId) : [];
@@ -66,6 +66,11 @@ export default function OpoTab() {
     setShowComponentDialog(true);
   };
 
+  const handleEditComponent = (componentId: string) => {
+    setEditingComponent(componentId);
+    setShowComponentDialog(true);
+  };
+
   const handleEdit = (facility: Facility) => {
     setEditingFacility(facility.id);
     setSelectedOrganizationId(facility.organizationId);
@@ -103,6 +108,19 @@ export default function OpoTab() {
     
     const itemType = facility?.subType === 'tu' ? 'ТУ' : facility?.subType === 'zs' ? 'ЗС' : 'ОПО';
     toast({ title: `${itemType} удалено` });
+  };
+
+  const handleDeleteComponent = (componentId: string) => {
+    const component = allComponents.find(c => c.id === componentId);
+    if (!component) return;
+    
+    const componentType = component.type === 'technical_device' ? 'ТУ' : 'ЗС';
+    if (!confirm(`Удалить ${componentType}?`)) {
+      return;
+    }
+    
+    deleteComponent(componentId);
+    toast({ title: `${componentType} удалено` });
   };
 
   const stats = {
@@ -253,7 +271,9 @@ export default function OpoTab() {
             onAddOpo={handleAddOpo}
             onAddTuZs={handleAddTuZs}
             onEdit={handleEdit}
+            onEditComponent={handleEditComponent}
             onDelete={handleDelete}
+            onDeleteComponent={handleDeleteComponent}
           />
         </CardContent>
       </Card>

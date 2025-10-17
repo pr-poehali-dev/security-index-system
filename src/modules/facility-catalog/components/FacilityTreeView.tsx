@@ -14,7 +14,9 @@ interface FacilityTreeViewProps {
   onAddOpo: (organizationId: string) => void;
   onAddTuZs: (parentOpoId: string, subType: 'tu' | 'zs') => void;
   onEdit: (facility: Facility) => void;
+  onEditComponent: (componentId: string) => void;
   onDelete: (facilityId: string) => void;
+  onDeleteComponent: (componentId: string) => void;
 }
 
 const getHazardClassColor = (hazardClass?: string) => {
@@ -38,7 +40,9 @@ export default function FacilityTreeView({
   onAddOpo,
   onAddTuZs,
   onEdit,
+  onEditComponent,
   onDelete,
+  onDeleteComponent,
 }: FacilityTreeViewProps) {
   const [expandedOrgs, setExpandedOrgs] = useState<Set<string>>(new Set());
   const [expandedOpos, setExpandedOpos] = useState<Set<string>>(new Set());
@@ -254,7 +258,7 @@ export default function FacilityTreeView({
                                           size="sm"
                                           variant="ghost"
                                           className="h-7 w-7 p-0"
-                                          onClick={() => onEdit(tu)}
+                                          onClick={() => onEditComponent(tu.id)}
                                         >
                                           <Icon name="Pencil" size={12} />
                                         </Button>
@@ -262,7 +266,7 @@ export default function FacilityTreeView({
                                           size="sm"
                                           variant="ghost"
                                           className="h-7 w-7 p-0"
-                                          onClick={() => onDelete(tu.id)}
+                                          onClick={() => onDeleteComponent(tu.id)}
                                         >
                                           <Icon name="Trash2" size={12} />
                                         </Button>
@@ -318,7 +322,7 @@ export default function FacilityTreeView({
                                           size="sm"
                                           variant="ghost"
                                           className="h-7 w-7 p-0"
-                                          onClick={() => onEdit(zs)}
+                                          onClick={() => onEditComponent(zs.id)}
                                         >
                                           <Icon name="Pencil" size={12} />
                                         </Button>
@@ -326,7 +330,7 @@ export default function FacilityTreeView({
                                           size="sm"
                                           variant="ghost"
                                           className="h-7 w-7 p-0"
-                                          onClick={() => onDelete(zs.id)}
+                                          onClick={() => onDeleteComponent(zs.id)}
                                         >
                                           <Icon name="Trash2" size={12} />
                                         </Button>
