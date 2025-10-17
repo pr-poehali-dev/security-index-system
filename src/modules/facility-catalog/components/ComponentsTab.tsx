@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select';
 import ComponentDialog from './ComponentDialog';
 import ComponentsTable from './ComponentsTable';
+import BulkImportDialog from './BulkImportDialog';
 
 export default function ComponentsTab() {
   const user = useAuthStore((state) => state.user);
@@ -26,6 +27,7 @@ export default function ComponentsTab() {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [facilityFilter, setFacilityFilter] = useState<string>('all');
   const [showDialog, setShowDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [editingComponent, setEditingComponent] = useState<string | null>(null);
 
   const filteredComponents = components.filter((component) => {
@@ -132,10 +134,16 @@ export default function ComponentsTab() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Технические устройства и здания/сооружения</CardTitle>
-            <Button onClick={handleAdd}>
-              <Icon name="Plus" size={16} className="mr-2" />
-              Добавить компонент
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowImportDialog(true)}>
+                <Icon name="Upload" size={16} className="mr-2" />
+                Импорт из Excel
+              </Button>
+              <Button onClick={handleAdd}>
+                <Icon name="Plus" size={16} className="mr-2" />
+                Добавить компонент
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -192,6 +200,11 @@ export default function ComponentsTab() {
         open={showDialog}
         onOpenChange={setShowDialog}
         componentId={editingComponent}
+      />
+
+      <BulkImportDialog
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
       />
     </div>
   );

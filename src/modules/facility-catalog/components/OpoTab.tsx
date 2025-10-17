@@ -10,6 +10,7 @@ import { Facility } from '@/types/facilities';
 import FacilityDialog from './FacilityDialog';
 import FacilityTreeView from './FacilityTreeView';
 import ComponentDialog from './ComponentDialog';
+import BulkImportDialog from './BulkImportDialog';
 
 export default function OpoTab() {
   const user = useAuthStore((state) => state.user);
@@ -25,6 +26,7 @@ export default function OpoTab() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showDialog, setShowDialog] = useState(false);
   const [showComponentDialog, setShowComponentDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [editingFacility, setEditingFacility] = useState<string | null>(null);
   const [editingComponent, setEditingComponent] = useState<string | null>(null);
   const [selectedOrganizationId, setSelectedOrganizationId] = useState<string | null>(null);
@@ -214,10 +216,18 @@ export default function OpoTab() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Иерархия ОПО</CardTitle>
-          <p className="text-sm text-muted-foreground mt-2">
-            Организации → ОПО → Технические устройства (ТУ) / Здания и сооружения (ЗС)
-          </p>
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle>Иерархия ОПО</CardTitle>
+              <p className="text-sm text-muted-foreground mt-2">
+                Организации → ОПО → Технические устройства (ТУ) / Здания и сооружения (ЗС)
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setShowImportDialog(true)}>
+              <Icon name="Upload" size={16} className="mr-2" />
+              Импорт ТУ/ЗС
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="relative">
@@ -260,6 +270,11 @@ export default function OpoTab() {
         componentId={editingComponent}
         preselectedFacilityId={selectedParentOpoId}
         preselectedType={selectedComponentType}
+      />
+
+      <BulkImportDialog
+        open={showImportDialog}
+        onOpenChange={setShowImportDialog}
       />
     </div>
   );
