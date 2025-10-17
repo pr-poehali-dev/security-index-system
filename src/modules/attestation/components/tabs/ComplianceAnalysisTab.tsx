@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import Icon from '@/components/ui/icon';
 import {
   DropdownMenu,
@@ -31,12 +32,32 @@ export default function ComplianceAnalysisTab() {
   const [showMassActionDialog, setShowMassActionDialog] = useState(false);
   const [massActionType, setMassActionType] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    setIsLoading(true);
+    setLoadingProgress(0);
+
+    const steps = [
+      { progress: 20, delay: 50 },
+      { progress: 40, delay: 100 },
+      { progress: 60, delay: 150 },
+      { progress: 80, delay: 200 },
+      { progress: 100, delay: 250 }
+    ];
+
+    const timers = steps.map(({ progress, delay }) =>
+      setTimeout(() => setLoadingProgress(progress), delay)
+    );
+
+    const finalTimer = setTimeout(() => {
       setIsLoading(false);
     }, 300);
-    return () => clearTimeout(timer);
+
+    return () => {
+      timers.forEach(clearTimeout);
+      clearTimeout(finalTimer);
+    };
   }, [personnel, people, positions, departments, competencies, attestations]);
 
   const tenantPersonnel = useMemo(() => {
@@ -105,16 +126,29 @@ export default function ComplianceAnalysisTab() {
           ))}
         </div>
         <Card>
-          <CardContent className="p-12 text-center">
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative">
-                <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-              </div>
-              <div className="space-y-2">
-                <p className="font-medium">Обработка данных...</p>
+          <CardContent className="p-12">
+            <div className="max-w-md mx-auto space-y-6">
+              <div className="text-center space-y-2">
+                <div className="flex items-center justify-center gap-2">
+                  <Icon name="BarChart3" size={24} className="text-primary" />
+                  <p className="font-medium text-lg">Обработка данных</p>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   Анализируем соответствие требованиям
                 </p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Прогресс анализа</span>
+                  <span className="font-medium tabular-nums">{loadingProgress}%</span>
+                </div>
+                <Progress value={loadingProgress} className="h-2" />
+              </div>
+
+              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                <span>Обработано {loadingProgress === 100 ? 'всех' : Math.floor(loadingProgress / 20)} из 5 этапов</span>
               </div>
             </div>
           </CardContent>
