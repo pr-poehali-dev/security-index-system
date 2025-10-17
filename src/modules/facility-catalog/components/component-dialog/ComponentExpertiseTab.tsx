@@ -5,6 +5,9 @@ import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ExpertiseRecord } from '@/types/facilities';
+import FileUpload from '@/components/ui/file-upload';
+import { useToast } from '@/hooks/use-toast';
+import { uploadFileToStorage, openStoredFile } from '@/utils/fileStorage';
 
 interface ComponentExpertiseTabProps {
   records: ExpertiseRecord[];
@@ -12,12 +15,29 @@ interface ComponentExpertiseTabProps {
 }
 
 export default function ComponentExpertiseTab({ records, onChange }: ComponentExpertiseTabProps) {
-  const [newRecord, setNewRecord] = useState({ date: '', conclusionNumber: '', expertOrganization: '', operatingPeriod: '', notes: '' });
+  const { toast } = useToast();
+  const [newRecord, setNewRecord] = useState({ date: '', conclusionNumber: '', expertOrganization: '', operatingPeriod: '', notes: '', scanUrl: '' });
+  const [uploading, setUploading] = useState(false);
+
+
+
+  const handleFileUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const fileId = await uploadFileToStorage(file);
+      setNewRecord({...newRecord, scanUrl: fileId});
+      toast({ title: 'Файл загружен', description: 'Скан заключения ЭПБ успешно загружен' });
+    } catch (error) {
+      toast({ title: 'Ошибка', description: 'Не удалось загрузить файл', variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleAdd = () => {
     if (!newRecord.date || !newRecord.conclusionNumber) return;
-    onChange([...records, { id: crypto.randomUUID(), ...newRecord, scanUrl: '' }]);
-    setNewRecord({ date: '', conclusionNumber: '', expertOrganization: '', operatingPeriod: '', notes: '' });
+    onChange([...records, { id: crypto.randomUUID(), ...newRecord }]);
+    setNewRecord({ date: '', conclusionNumber: '', expertOrganization: '', operatingPeriod: '', notes: '', scanUrl: '' });
   };
 
   return (
@@ -44,6 +64,16 @@ export default function ComponentExpertiseTab({ records, onChange }: ComponentEx
             <Input value={newRecord.operatingPeriod} onChange={(e) => setNewRecord({...newRecord, operatingPeriod: e.target.value})} placeholder="10 лет" />
           </div>
         </div>
+        <div className="space-y-2">
+          <Label>Скан заключения ЭПБ</Label>
+          <FileUpload
+            label="Загрузить скан заключения"
+            currentFileUrl={newRecord.scanUrl}
+            onFileSelect={handleFileUpload}
+            onFileRemove={() => setNewRecord({...newRecord, scanUrl: ''})}
+            disabled={uploading}
+          />
+        </div>
         <Button onClick={handleAdd} disabled={!newRecord.date || !newRecord.conclusionNumber} size="sm">
           <Icon name="Plus" size={14} className="mr-2" />Добавить
         </Button>
@@ -58,6 +88,7 @@ export default function ComponentExpertiseTab({ records, onChange }: ComponentEx
                 <TableHead>№ заключения</TableHead>
                 <TableHead>Организация</TableHead>
                 <TableHead>Срок</TableHead>
+                <TableHead>Скан</TableHead>
                 <TableHead className="text-right">Действия</TableHead>
               </TableRow>
             </TableHeader>
@@ -68,6 +99,14 @@ export default function ComponentExpertiseTab({ records, onChange }: ComponentEx
                   <TableCell>{record.conclusionNumber}</TableCell>
                   <TableCell>{record.expertOrganization || '—'}</TableCell>
                   <TableCell>{record.operatingPeriod || '—'}</TableCell>
+                  <TableCell>
+                    {record.scanUrl ? (
+                      <Button size="sm" variant="link" onClick={() => openStoredFile(record.scanUrl!)} className="h-auto p-0">
+                        <Icon name="FileText" size={14} className="mr-1" />
+                        Открыть
+                      </Button>
+                    ) : '—'}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button size="sm" variant="ghost" onClick={() => onChange(records.filter(r => r.id !== record.id))}>
                       <Icon name="Trash2" size={14} />
