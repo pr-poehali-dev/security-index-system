@@ -9,7 +9,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAuthStore } from '@/stores/authStore';
-import { useFacilitiesStore } from '@/stores/facilitiesStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { Facility } from '@/types/facilities';
 
@@ -23,7 +22,7 @@ export default function FacilityBasicInfoTab({
   updateFormField,
 }: FacilityBasicInfoTabProps) {
   const user = useAuthStore((state) => state.user);
-  const { getOrganizationsByTenant } = useFacilitiesStore();
+  const { getOrganizationsByTenant } = useSettingsStore();
   const personnel = useSettingsStore((state) => state.personnel);
   const people = useSettingsStore((state) => state.people);
   const positions = useSettingsStore((state) => state.positions);
