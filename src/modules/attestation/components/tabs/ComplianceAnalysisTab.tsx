@@ -43,7 +43,7 @@ export default function ComplianceAnalysisTab() {
     positions,
     departments,
     competencies,
-    attestations
+    certifications: attestations
   });
 
   const filteredData = complianceData.filter(item => {
