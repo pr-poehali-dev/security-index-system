@@ -1,4 +1,4 @@
-// src/stores/certificationStore.ts
+// src/stores/attestationStore.ts
 // Описание: Zustand store для управления протоколами аттестации (проверка знаний в Ростехнадзоре/комиссии)
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
