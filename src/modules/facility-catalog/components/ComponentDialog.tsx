@@ -166,15 +166,42 @@ export default function ComponentDialog({
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
           <TabsList className="grid w-full grid-cols-9 h-auto">
-            <TabsTrigger value="basic" className="text-xs px-2">Основные сведения</TabsTrigger>
-            <TabsTrigger value="identification" className="text-xs px-2">Идентификация</TabsTrigger>
-            <TabsTrigger value="documentation" className="text-xs px-2">Документация</TabsTrigger>
-            <TabsTrigger value="expertise" className="text-xs px-2">Сведения о ЭПБ</TabsTrigger>
-            <TabsTrigger value="maintenance" className="text-xs px-2">Сведения о ТО</TabsTrigger>
-            <TabsTrigger value="construction" className="text-xs px-2">Данные о конструкции</TabsTrigger>
-            <TabsTrigger value="technical" className="text-xs px-2">Технические параметры</TabsTrigger>
-            <TabsTrigger value="accidents" className="text-xs px-2">Сведения об авариях</TabsTrigger>
-            <TabsTrigger value="directives" className="text-xs px-2">Предписания РТН</TabsTrigger>
+            <TabsTrigger value="basic" className="flex flex-col gap-1 py-2 px-2">
+              <Icon name="Info" size={16} />
+              <span className="text-[10px] leading-tight">Основные сведения</span>
+            </TabsTrigger>
+            <TabsTrigger value="identification" className="flex flex-col gap-1 py-2 px-2">
+              <Icon name="Hash" size={16} />
+              <span className="text-[10px] leading-tight">Идентификация</span>
+            </TabsTrigger>
+            <TabsTrigger value="documentation" className="flex flex-col gap-1 py-2 px-2">
+              <Icon name="FileText" size={16} />
+              <span className="text-[10px] leading-tight">Документация</span>
+            </TabsTrigger>
+            <TabsTrigger value="expertise" className="flex flex-col gap-1 py-2 px-2">
+              <Icon name="ClipboardCheck" size={16} />
+              <span className="text-[10px] leading-tight">Сведения о ЭПБ</span>
+            </TabsTrigger>
+            <TabsTrigger value="maintenance" className="flex flex-col gap-1 py-2 px-2">
+              <Icon name="Wrench" size={16} />
+              <span className="text-[10px] leading-tight">Сведения о ТО</span>
+            </TabsTrigger>
+            <TabsTrigger value="construction" className="flex flex-col gap-1 py-2 px-2">
+              <Icon name="HardHat" size={16} />
+              <span className="text-[10px] leading-tight">Данные о конструкции</span>
+            </TabsTrigger>
+            <TabsTrigger value="technical" className="flex flex-col gap-1 py-2 px-2">
+              <Icon name="Settings" size={16} />
+              <span className="text-[10px] leading-tight">Технические параметры</span>
+            </TabsTrigger>
+            <TabsTrigger value="accidents" className="flex flex-col gap-1 py-2 px-2">
+              <Icon name="AlertTriangle" size={16} />
+              <span className="text-[10px] leading-tight">Сведения об авариях</span>
+            </TabsTrigger>
+            <TabsTrigger value="directives" className="flex flex-col gap-1 py-2 px-2">
+              <Icon name="FileWarning" size={16} />
+              <span className="text-[10px] leading-tight">Предписания РТН</span>
+            </TabsTrigger>
           </TabsList>
 
           <ScrollArea className="flex-1 mt-4">
