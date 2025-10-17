@@ -19,7 +19,6 @@ const MODULE_ROUTES: Record<ModuleType, string> = {
   tenants: ROUTES.TENANTS,
   attestation: ROUTES.ATTESTATION,
   catalog: ROUTES.CATALOG,
-  'facility-catalog': ROUTES.FACILITY_CATALOG,
   contractors: '',
   incidents: ROUTES.INCIDENTS,
   checklists: ROUTES.CHECKLISTS,

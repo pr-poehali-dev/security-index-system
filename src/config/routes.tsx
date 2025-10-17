@@ -4,8 +4,7 @@ export const LoginPage = lazy(() => import("@/modules/auth").then(m => ({ defaul
 export const DashboardPage = lazy(() => import("@/modules/dashboard").then(m => ({ default: m.DashboardPage })));
 export const TenantsPage = lazy(() => import("@/modules/tenants").then(m => ({ default: m.TenantsPage })));
 export const SettingsPage = lazy(() => import("@/modules/settings").then(m => ({ default: m.SettingsPage })));
-export const CatalogPage = lazy(() => import("@/modules/catalog").then(m => ({ default: m.CatalogPage })));
-export const FacilityCatalogPage = lazy(() => import("@/modules/facility-catalog/pages/FacilityCatalogPage"));
+export const CatalogPage = lazy(() => import("@/modules/facility-catalog/pages/FacilityCatalogPage"));
 export const IncidentsPage = lazy(() => import("@/modules/incidents").then(m => ({ default: m.IncidentsPage })));
 export const ChecklistsPage = lazy(() => import("@/modules/checklists").then(m => ({ default: m.ChecklistsPage })));
 export const AttestationPage = lazy(() => import("@/modules/attestation").then(m => ({ default: m.AttestationPage })));
