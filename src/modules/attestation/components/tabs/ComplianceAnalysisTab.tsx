@@ -32,18 +32,19 @@ export default function ComplianceAnalysisTab() {
   const [massActionType, setMassActionType] = useState<string>('');
 
   const tenantPersonnel = useMemo(() => {
-    return user?.tenantId 
-      ? personnel.filter(p => p.tenantId === user.tenantId && p.personnelType === 'employee') 
-      : [];
+    if (!Array.isArray(personnel) || !user?.tenantId) {
+      return [];
+    }
+    return personnel.filter(p => p.tenantId === user.tenantId && p.personnelType === 'employee');
   }, [personnel, user?.tenantId]);
 
   const { complianceData, stats, uniqueDepartments } = useComplianceCalculations({
     personnel: tenantPersonnel,
-    people,
-    positions,
-    departments,
-    competencies,
-    certifications: attestations
+    people: people || [],
+    positions: positions || [],
+    departments: departments || [],
+    competencies: competencies || [],
+    certifications: attestations || []
   });
 
   const filteredData = complianceData.filter(item => {
@@ -71,6 +72,17 @@ export default function ComplianceAnalysisTab() {
   const handleToast = (title: string, description: string) => {
     toast({ title, description });
   };
+
+  if (!user?.tenantId) {
+    return (
+      <Card>
+        <CardContent className="p-12 text-center">
+          <Icon name="AlertCircle" size={48} className="mx-auto mb-4 text-muted-foreground opacity-20" />
+          <p className="text-muted-foreground">Данные недоступны. Пожалуйста, войдите в систему.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">

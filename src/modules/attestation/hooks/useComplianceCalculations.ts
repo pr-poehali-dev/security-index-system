@@ -32,6 +32,16 @@ export function useComplianceCalculations({
   certifications
 }: UseComplianceCalculationsProps) {
   const complianceData = useMemo((): ComplianceData[] => {
+    if (!Array.isArray(personnel) || personnel.length === 0) {
+      return [];
+    }
+
+    if (!Array.isArray(people)) return [];
+    if (!Array.isArray(positions)) return [];
+    if (!Array.isArray(departments)) return [];
+    if (!Array.isArray(competencies)) return [];
+    if (!Array.isArray(certifications)) return [];
+
     return personnel.map(p => {
       const info = getPersonnelFullInfo(p, people, positions);
       const dept = departments.find(d => d.id === p.departmentId);
