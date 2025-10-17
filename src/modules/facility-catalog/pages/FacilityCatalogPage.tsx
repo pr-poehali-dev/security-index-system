@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
-import OrganizationsTab from '../components/OrganizationsTab';
 import OpoTab from '../components/OpoTab';
 import GtsTab from '../components/GtsTab';
 import ComponentsTab from '../components/ComponentsTab';
@@ -9,7 +8,7 @@ import ContractorsTab from '../components/ContractorsTab';
 import ReportsTab from '@/modules/catalog/components/tabs/ReportsTab';
 
 export default function FacilityCatalogPage() {
-  const [activeTab, setActiveTab] = useState('organizations');
+  const [activeTab, setActiveTab] = useState('opo');
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -27,13 +26,6 @@ export default function FacilityCatalogPage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
-          <TabsTrigger 
-            value="organizations" 
-            className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-          >
-            <Icon name="Building" size={20} />
-            <span className="text-xs font-medium text-center leading-tight">Организации</span>
-          </TabsTrigger>
           <TabsTrigger 
             value="opo" 
             className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
@@ -70,10 +62,6 @@ export default function FacilityCatalogPage() {
             <span className="text-xs font-medium text-center leading-tight">Отчеты<br/>и аналитика</span>
           </TabsTrigger>
         </TabsList>
-
-        <TabsContent value="organizations">
-          <OrganizationsTab />
-        </TabsContent>
 
         <TabsContent value="opo">
           <OpoTab />
