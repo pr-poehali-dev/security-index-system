@@ -28,78 +28,38 @@ export default function FacilityCatalogPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="h-auto flex-wrap justify-start gap-1 bg-transparent p-0">
-          <TabsTrigger 
-            value="opo" 
-            className="flex-col gap-1.5 h-20 px-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:border-emerald-500"
-          >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activeTab === 'opo' ? 'bg-white/20' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
-              <Icon name="TriangleAlert" size={18} className={activeTab === 'opo' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'} />
-            </div>
-            <span className="text-xs font-medium text-center leading-tight">ОПО</span>
+        <TabsList className="h-auto flex-wrap justify-start gap-1 md:gap-2 bg-transparent p-0">
+          <TabsTrigger value="opo" className="flex-col gap-1 md:gap-2 h-16 md:h-20 px-3 md:px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="TriangleAlert" size={18} />
+            <span className="text-[10px] md:text-xs font-medium text-center leading-tight">ОПО</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="components" 
-            className="flex-col gap-1.5 h-20 px-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:border-emerald-500"
-          >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activeTab === 'components' ? 'bg-white/20' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
-              <Icon name="Wrench" size={18} className={activeTab === 'components' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'} />
-            </div>
-            <span className="text-xs font-medium text-center leading-tight">ТУ и ЗС</span>
+          <TabsTrigger value="components" className="flex-col gap-1 md:gap-2 h-16 md:h-20 px-3 md:px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Wrench" size={18} />
+            <span className="text-[10px] md:text-xs font-medium text-center leading-tight">ТУ и ЗС</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="gts" 
-            className="flex-col gap-1.5 h-20 px-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:border-emerald-500"
-          >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activeTab === 'gts' ? 'bg-white/20' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
-              <Icon name="Waves" size={18} className={activeTab === 'gts' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'} />
-            </div>
-            <span className="text-xs font-medium text-center leading-tight">ГТС</span>
+          <TabsTrigger value="gts" className="flex-col gap-1 md:gap-2 h-16 md:h-20 px-3 md:px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Waves" size={18} />
+            <span className="text-[10px] md:text-xs font-medium text-center leading-tight">ГТС</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="contractors" 
-            className="flex-col gap-1.5 h-20 px-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:border-emerald-500"
-          >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activeTab === 'contractors' ? 'bg-white/20' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
-              <Icon name="Users" size={18} className={activeTab === 'contractors' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'} />
-            </div>
-            <span className="text-xs font-medium text-center leading-tight">Подрядчики<br/>на объектах</span>
+          <TabsTrigger value="contractors" className="flex-col gap-1 md:gap-2 h-16 md:h-20 px-3 md:px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Users" size={18} />
+            <span className="text-[10px] md:text-xs font-medium text-center leading-tight">Подрядчики<br/>на объектах</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="characteristics" 
-            className="flex-col gap-1.5 h-20 px-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:border-emerald-500"
-          >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activeTab === 'characteristics' ? 'bg-white/20' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
-              <Icon name="ClipboardList" size={18} className={activeTab === 'characteristics' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'} />
-            </div>
-            <span className="text-xs font-medium text-center leading-tight">Сведения<br/>характеризующие ОПО</span>
+          <TabsTrigger value="characteristics" className="flex-col gap-1 md:gap-2 h-16 md:h-20 px-3 md:px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="ClipboardList" size={18} />
+            <span className="text-[10px] md:text-xs font-medium text-center leading-tight">Сведения<br/>характеризующие ОПО</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="reports" 
-            className="flex-col gap-1.5 h-20 px-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:border-emerald-500"
-          >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activeTab === 'reports' ? 'bg-white/20' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
-              <Icon name="FileText" size={18} className={activeTab === 'reports' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'} />
-            </div>
-            <span className="text-xs font-medium text-center leading-tight">Отчеты<br/>и аналитика</span>
+          <TabsTrigger value="reports" className="flex-col gap-1 md:gap-2 h-16 md:h-20 px-3 md:px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="FileText" size={18} />
+            <span className="text-[10px] md:text-xs font-medium text-center leading-tight">Отчеты<br/>и аналитика</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="technical-diagnostics" 
-            className="flex-col gap-1.5 h-20 px-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:border-emerald-500"
-          >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activeTab === 'technical-diagnostics' ? 'bg-white/20' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
-              <Icon name="Stethoscope" size={18} className={activeTab === 'technical-diagnostics' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'} />
-            </div>
-            <span className="text-xs font-medium text-center leading-tight">Планирование<br/>ТД</span>
+          <TabsTrigger value="technical-diagnostics" className="flex-col gap-1 md:gap-2 h-16 md:h-20 px-3 md:px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Stethoscope" size={18} />
+            <span className="text-[10px] md:text-xs font-medium text-center leading-tight">Планирование<br/>ТД</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="industrial-safety-expertise" 
-            className="flex-col gap-1.5 h-20 px-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:border-emerald-500"
-          >
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activeTab === 'industrial-safety-expertise' ? 'bg-white/20' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
-              <Icon name="ShieldCheck" size={18} className={activeTab === 'industrial-safety-expertise' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'} />
-            </div>
-            <span className="text-xs font-medium text-center leading-tight">Планирование<br/>ЭПБ</span>
+          <TabsTrigger value="industrial-safety-expertise" className="flex-col gap-1 md:gap-2 h-16 md:h-20 px-3 md:px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="ShieldCheck" size={18} />
+            <span className="text-[10px] md:text-xs font-medium text-center leading-tight">Планирование<br/>ЭПБ</span>
           </TabsTrigger>
         </TabsList>
 
