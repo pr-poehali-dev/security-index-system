@@ -14,12 +14,12 @@ import ComponentDialog from './ComponentDialog';
 export default function OpoTab() {
   const user = useAuthStore((state) => state.user);
   const { getOrganizationsByTenant } = useSettingsStore();
-  const { getFacilitiesByTenant, deleteFacility, getComponentsByFacility } = useFacilitiesStore();
+  const { getFacilitiesByTenant, deleteFacility, getComponentsByFacility, getComponentsByTenant } = useFacilitiesStore();
   
   const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
   const allFacilities = user?.tenantId ? getFacilitiesByTenant(user.tenantId) : [];
   const facilities = allFacilities.filter(f => f.type === 'opo');
-  const allComponents = user?.tenantId ? useFacilitiesStore.getState().getComponentsByTenant(user.tenantId) : [];
+  const allComponents = user?.tenantId ? getComponentsByTenant(user.tenantId) : [];
   
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
