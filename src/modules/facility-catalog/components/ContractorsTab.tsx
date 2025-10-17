@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import ContractorDialog from './ContractorDialog';
+import ManageFacilitiesDialog from './ManageFacilitiesDialog';
 import type { OrganizationContractor } from '@/types';
 
 const STATUS_LABELS: Record<string, string> = {
@@ -45,12 +46,13 @@ const SERVICE_LABELS: Record<string, string> = {
 
 export default function ContractorsTab() {
   const user = useAuthStore((state) => state.user);
-  const { getContractorsByTenant, deleteContractor } = useSettingsStore();
+  const { getContractorsByTenant, deleteContractor, getContractorFacilityAccessByContractor } = useSettingsStore();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [facilitiesDialogOpen, setFacilitiesDialogOpen] = useState(false);
   const [selectedContractor, setSelectedContractor] = useState<OrganizationContractor | null>(null);
 
   const contractors = user?.tenantId ? getContractorsByTenant(user.tenantId) : [];
@@ -90,6 +92,11 @@ export default function ContractorsTab() {
     if (confirm('Вы уверены, что хотите удалить этого контрагента?')) {
       deleteContractor(id);
     }
+  };
+
+  const handleManageFacilities = (contractor: OrganizationContractor) => {
+    setSelectedContractor(contractor);
+    setFacilitiesDialogOpen(true);
   };
 
   return (
@@ -147,11 +154,11 @@ export default function ContractorsTab() {
                   <TableHead>Название</TableHead>
                   <TableHead>Тип</TableHead>
                   <TableHead>ИНН</TableHead>
+                  <TableHead>Объекты</TableHead>
                   <TableHead>Услуги</TableHead>
                   <TableHead>Договор</TableHead>
-                  <TableHead>Контактное лицо</TableHead>
                   <TableHead>Статус</TableHead>
-                  <TableHead className="w-24">Действия</TableHead>
+                  <TableHead className="w-32">Действия</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -178,6 +185,27 @@ export default function ContractorsTab() {
                       </TableCell>
                       <TableCell className="text-sm">{contractor.contractorInn || '—'}</TableCell>
                       <TableCell>
+                        {(() => {
+                          const accesses = getContractorFacilityAccessByContractor(contractor.id);
+                          const activeAccesses = accesses.filter(a => a.status === 'active');
+                          return (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleManageFacilities(contractor)}
+                              className="gap-2"
+                            >
+                              <Icon name="Building2" size={14} />
+                              {activeAccesses.length > 0 ? (
+                                <span>{activeAccesses.length} объект(ов)</span>
+                              ) : (
+                                <span className="text-muted-foreground">Не назначено</span>
+                              )}
+                            </Button>
+                          );
+                        })()}
+                      </TableCell>
+                      <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {contractor.services.map((service) => (
                             <Badge key={service} variant="secondary" className="text-xs">
@@ -198,12 +226,6 @@ export default function ContractorsTab() {
                           </div>
                         ) : (
                           '—'
-                        )}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {contractor.contactPerson || '—'}
-                        {contractor.contactPhone && (
-                          <div className="text-xs text-muted-foreground">{contractor.contactPhone}</div>
                         )}
                       </TableCell>
                       <TableCell>{getStatusBadge(contractor.status)}</TableCell>
@@ -239,6 +261,14 @@ export default function ContractorsTab() {
         onOpenChange={setDialogOpen}
         contractor={selectedContractor}
       />
+
+      {selectedContractor && (
+        <ManageFacilitiesDialog
+          open={facilitiesDialogOpen}
+          onOpenChange={setFacilitiesDialogOpen}
+          contractor={selectedContractor}
+        />
+      )}
     </>
   );
 }

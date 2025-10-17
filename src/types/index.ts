@@ -801,6 +801,23 @@ export interface OrganizationContractor {
   updatedAt: string;
 }
 
+export interface ContractorFacilityAccess {
+  id: string;
+  tenantId: string;
+  contractorId: string;
+  facilityId: string;
+  facilityName: string;
+  accessType: 'full' | 'limited' | 'temporary';
+  startDate: string;
+  endDate?: string;
+  permitNumber?: string;
+  permitDate?: string;
+  notes?: string;
+  status: 'active' | 'expired' | 'revoked';
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type InterOrgDocumentType = 'training_request' | 'training_completion' | 'certificate' | 'sdo_access' | 'invoice' | 'contract' | 'report';
 export type InterOrgDocumentStatus = 'draft' | 'sent' | 'received' | 'processed' | 'completed' | 'rejected';
 

@@ -2,7 +2,7 @@
 // Описание: Zustand store для управления настройками системы
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization, Person, Position, Certification, Competency, OrganizationContractor, InterOrgDocument } from '@/types';
+import type { Organization, Department, Personnel, CompetencyMatrix, ProductionSite, SystemUser, ExternalOrganization, Person, Position, Certification, Competency, OrganizationContractor, InterOrgDocument, ContractorFacilityAccess } from '@/types';
 import {
   mockOrganizations,
   mockDepartments,
@@ -112,6 +112,14 @@ interface SettingsState {
   addInterOrgDocument: (doc: Omit<InterOrgDocument, 'id' | 'sentAt'>) => void;
   updateInterOrgDocument: (id: string, updates: Partial<InterOrgDocument>) => void;
   deleteInterOrgDocument: (id: string) => void;
+
+  contractorFacilityAccesses: ContractorFacilityAccess[];
+  getContractorFacilityAccessByTenant: (tenantId: string) => ContractorFacilityAccess[];
+  getContractorFacilityAccessByContractor: (contractorId: string) => ContractorFacilityAccess[];
+  getContractorFacilityAccessByFacility: (facilityId: string) => ContractorFacilityAccess[];
+  addContractorFacilityAccess: (access: Omit<ContractorFacilityAccess, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateContractorFacilityAccess: (id: string, updates: Partial<ContractorFacilityAccess>) => void;
+  deleteContractorFacilityAccess: (id: string) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
@@ -646,5 +654,42 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }));
   },
 
+  contractorFacilityAccesses: [],
+
+  getContractorFacilityAccessByTenant: (tenantId) => {
+    return get().contractorFacilityAccesses.filter((a) => a.tenantId === tenantId);
+  },
+
+  getContractorFacilityAccessByContractor: (contractorId) => {
+    return get().contractorFacilityAccesses.filter((a) => a.contractorId === contractorId);
+  },
+
+  getContractorFacilityAccessByFacility: (facilityId) => {
+    return get().contractorFacilityAccesses.filter((a) => a.facilityId === facilityId);
+  },
+
+  addContractorFacilityAccess: (access) => {
+    const newAccess: ContractorFacilityAccess = {
+      ...access,
+      id: `access-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    set((state) => ({ contractorFacilityAccesses: [...state.contractorFacilityAccesses, newAccess] }));
+  },
+
+  updateContractorFacilityAccess: (id, updates) => {
+    set((state) => ({
+      contractorFacilityAccesses: state.contractorFacilityAccesses.map((a) =>
+        a.id === id ? { ...a, ...updates, updatedAt: new Date().toISOString() } : a
+      )
+    }));
+  },
+
+  deleteContractorFacilityAccess: (id) => {
+    set((state) => ({
+      contractorFacilityAccesses: state.contractorFacilityAccesses.filter((a) => a.id !== id)
+    }));
+  },
 
 }), { name: 'settings-storage-v3' }));
