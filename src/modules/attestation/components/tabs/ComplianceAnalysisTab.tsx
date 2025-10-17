@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
@@ -30,6 +30,14 @@ export default function ComplianceAnalysisTab() {
   const [complianceFilter, setComplianceFilter] = useState<string>('all');
   const [showMassActionDialog, setShowMassActionDialog] = useState(false);
   const [massActionType, setMassActionType] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [personnel, people, positions, departments, competencies, attestations]);
 
   const tenantPersonnel = useMemo(() => {
     if (!Array.isArray(personnel) || !user?.tenantId) {
@@ -81,6 +89,37 @@ export default function ComplianceAnalysisTab() {
           <p className="text-muted-foreground">Данные недоступны. Пожалуйста, войдите в систему.</p>
         </CardContent>
       </Card>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-4">
+                <div className="h-20 bg-muted rounded" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card>
+          <CardContent className="p-12 text-center">
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+              </div>
+              <div className="space-y-2">
+                <p className="font-medium">Обработка данных...</p>
+                <p className="text-sm text-muted-foreground">
+                  Анализируем соответствие требованиям
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
