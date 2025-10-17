@@ -16,6 +16,7 @@ import TrainingRequestsTab from '../components/tabs/TrainingRequestsTab';
 import TrainingCentersTab from '../components/tabs/TrainingCentersTab';
 import IncomingRequestsTab from '../components/tabs/IncomingRequestsTab';
 import QualificationRenewalTab from '../components/tabs/QualificationRenewalTab';
+import PersonnelComplianceTab from '../components/tabs/PersonnelComplianceTab';
 
 const AttestationPage = memo(function AttestationPage() {
   return (
@@ -26,8 +27,12 @@ const AttestationPage = memo(function AttestationPage() {
         icon="GraduationCap"
       />
 
-      <Tabs defaultValue="employees" className="space-y-6">
+      <Tabs defaultValue="personnel" className="space-y-6">
         <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
+          <TabsTrigger value="personnel" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="UserCheck" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Соответствие<br/>персонала</span>
+          </TabsTrigger>
           <TabsTrigger value="employees" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="Users" size={20} />
             <span className="text-xs font-medium text-center leading-tight">Сотрудники и<br/>аттестации</span>
@@ -77,6 +82,10 @@ const AttestationPage = memo(function AttestationPage() {
             <span className="text-xs font-medium text-center leading-tight">Продление<br/>удостоверений</span>
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="personnel">
+          <PersonnelComplianceTab />
+        </TabsContent>
 
         <TabsContent value="employees">
           <EmployeeAttestationsTab />
