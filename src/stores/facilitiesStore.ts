@@ -54,7 +54,7 @@ const mockTerritorialAuthorities: TerritorialAuthority[] = [
 const demoOrganizations: Organization[] = [
   {
     id: 'org-1',
-    tenantId: 'tenant-demo',
+    tenantId: 'tenant-1',
     name: 'ООО "Газпром нефть"',
     inn: '7736050003',
     kpp: '773601001',
@@ -70,7 +70,7 @@ const demoOrganizations: Organization[] = [
   },
   {
     id: 'org-2',
-    tenantId: 'tenant-demo',
+    tenantId: 'tenant-1',
     name: 'ПАО "Лукойл"',
     inn: '7708004767',
     kpp: '770801001',
@@ -89,7 +89,7 @@ const demoOrganizations: Organization[] = [
 const demoFacilities: Facility[] = [
   {
     id: 'fac-1',
-    tenantId: 'tenant-demo',
+    tenantId: 'tenant-1',
     organizationId: 'org-1',
     type: 'opo',
     registrationNumber: 'A01-12345-2024',
@@ -111,7 +111,7 @@ const demoFacilities: Facility[] = [
   },
   {
     id: 'fac-2',
-    tenantId: 'tenant-demo',
+    tenantId: 'tenant-1',
     organizationId: 'org-1',
     type: 'gts',
     registrationNumber: 'G02-54321-2023',
@@ -132,7 +132,7 @@ const demoFacilities: Facility[] = [
   },
   {
     id: 'fac-3',
-    tenantId: 'tenant-demo',
+    tenantId: 'tenant-1',
     organizationId: 'org-2',
     type: 'opo',
     registrationNumber: 'A03-98765-2023',
@@ -157,7 +157,7 @@ const demoFacilities: Facility[] = [
 const demoComponents: FacilityComponent[] = [
   {
     id: 'comp-1',
-    tenantId: 'tenant-demo',
+    tenantId: 'tenant-1',
     facilityId: 'fac-1',
     type: 'building',
     name: 'Операторная',
@@ -175,7 +175,7 @@ const demoComponents: FacilityComponent[] = [
   },
   {
     id: 'comp-2',
-    tenantId: 'tenant-demo',
+    tenantId: 'tenant-1',
     facilityId: 'fac-1',
     type: 'equipment',
     name: 'Центробежный компрессор ГПА-Ц-16',
@@ -195,7 +195,7 @@ const demoComponents: FacilityComponent[] = [
   },
   {
     id: 'comp-3',
-    tenantId: 'tenant-demo',
+    tenantId: 'tenant-1',
     facilityId: 'fac-2',
     type: 'pipeline',
     name: 'Участок газопровода км 0-25',
@@ -214,7 +214,7 @@ const demoComponents: FacilityComponent[] = [
   },
   {
     id: 'comp-4',
-    tenantId: 'tenant-demo',
+    tenantId: 'tenant-1',
     facilityId: 'fac-2',
     type: 'equipment',
     name: 'Задвижка запорная DN1400 PN75',
@@ -232,7 +232,7 @@ const demoComponents: FacilityComponent[] = [
   },
   {
     id: 'comp-5',
-    tenantId: 'tenant-demo',
+    tenantId: 'tenant-1',
     facilityId: 'fac-3',
     type: 'equipment',
     name: 'Ректификационная колонна К-101',
