@@ -20,11 +20,12 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
-import { mockIndustrialSafetyExpertises, mockFacilities, mockContractors } from '../data/mockData';
-import type { IndustrialSafetyExpertise } from '../data/mockData';
+import { useFacilityCatalogStore } from '../store/useFacilityCatalogStore';
 
 export default function IndustrialSafetyExpertiseTab() {
-  const [expertises] = useState<IndustrialSafetyExpertise[]>(mockIndustrialSafetyExpertises);
+  const expertises = useFacilityCatalogStore((state) => state.industrialSafetyExpertises);
+  const facilities = useFacilityCatalogStore((state) => state.facilities);
+  const contractors = useFacilityCatalogStore((state) => state.contractors);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
