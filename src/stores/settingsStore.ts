@@ -648,5 +648,3 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
 
 
 }), { name: 'settings-storage-v3' }));
-
-export { useSettingsStore };
