@@ -1,36 +1,36 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useCatalogStore } from '@/stores/catalogStore';
+import { useFacilitiesStore } from '@/stores/facilitiesStore';
+import { useAuthStore } from '@/stores/authStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { SearchBar } from '@/components/ui/search-bar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { ViewModeToggle, type ViewMode } from '@/components/ui/view-mode-toggle';
-import OrganizationTree from '@/components/shared/OrganizationTree';
-import ObjectCard from '../ObjectCard';
-import ObjectTableView from '../ObjectTableView';
-
-import ObjectDetailsModal from '../ObjectDetailsModal';
-import OrganizationFormModal from '../OrganizationFormModal';
-import OpoFormWizard from '../wizard/OpoFormWizard';
-import ImportModal from '../ImportModal';
-import type { IndustrialObject, Organization } from '@/types/catalog';
+import FacilityDialog from '@/modules/attestation/components/facility-catalog/FacilityDialog';
+import ComponentDialog from '@/modules/attestation/components/facility-catalog/ComponentDialog';
+import type { Facility, Component } from '@/types/facilities';
 
 export default function ObjectsTab() {
-  const { objects, selectedOrganization } = useCatalogStore();
+  const user = useAuthStore((state) => state.user);
+  const { 
+    getFacilitiesByTenant, 
+    getComponentsByTenant,
+    deleteFacility,
+    deleteComponent,
+    getComponentsByFacility 
+  } = useFacilitiesStore();
+  
+  const allFacilities = user?.tenantId ? getFacilitiesByTenant(user.tenantId) : [];
+  const allComponents = user?.tenantId ? getComponentsByTenant(user.tenantId) : [];
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [wizardOpen, setWizardOpen] = useState(false);
-  const [wizardMode, setWizardMode] = useState<'create' | 'edit'>('create');
-  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
-  const [selectedObject, setSelectedObject] = useState<IndustrialObject | null>(null);
-  const [orgFormModalOpen, setOrgFormModalOpen] = useState(false);
-  const [orgFormMode, setOrgFormMode] = useState<'create' | 'edit'>('create');
-  const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
-  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [showFacilityDialog, setShowFacilityDialog] = useState(false);
+  const [showComponentDialog, setShowComponentDialog] = useState(false);
+  const [editingFacilityId, setEditingFacilityId] = useState<string | null>(null);
+  const [editingComponentId, setEditingComponentId] = useState<string | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     const saved = localStorage.getItem('catalog-sidebar-collapsed');
     return saved ? JSON.parse(saved) : false;
@@ -40,81 +40,71 @@ export default function ObjectsTab() {
     localStorage.setItem('catalog-sidebar-collapsed', JSON.stringify(sidebarCollapsed));
   }, [sidebarCollapsed]);
 
-  const handleCreateOpo = () => {
-    setSelectedObject(null);
-    setWizardMode('create');
-    setWizardOpen(true);
+  const handleCreateFacility = () => {
+    setEditingFacilityId(null);
+    setShowFacilityDialog(true);
   };
 
-  const handleCreateOrganization = () => {
-    setSelectedOrg(null);
-    setOrgFormMode('create');
-    setOrgFormModalOpen(true);
+  const handleEditFacility = (id: string) => {
+    setEditingFacilityId(id);
+    setShowFacilityDialog(true);
   };
 
-  const handleEditOrganization = (org: Organization) => {
-    setSelectedOrg(org);
-    setOrgFormMode('edit');
-    setOrgFormModalOpen(true);
+  const handleDeleteFacility = (id: string) => {
+    const components = getComponentsByFacility(id);
+    if (components.length > 0) {
+      if (!confirm(`У объекта есть ${components.length} компонентов. Удалить объект и все компоненты?`)) {
+        return;
+      }
+    }
+    deleteFacility(id);
   };
 
-  const handleDeleteOrganization = () => {
-    // Callback after delete if needed
+  const handleEditComponent = (id: string) => {
+    setEditingComponentId(id);
+    setShowComponentDialog(true);
   };
 
-  const handleEditObject = (object: IndustrialObject) => {
-    setSelectedObject(object);
-    setWizardMode('edit');
-    setWizardOpen(true);
-    setDetailsModalOpen(false);
-  };
-
-  const handleViewObject = (object: IndustrialObject) => {
-    setSelectedObject(object);
-    setDetailsModalOpen(true);
+  const handleDeleteComponent = (id: string) => {
+    if (confirm('Удалить компонент?')) {
+      deleteComponent(id);
+    }
   };
 
   const handleExport = async () => {
-    if (filteredObjects.length === 0) {
+    if (filteredItems.length === 0) {
       alert('Нет данных для экспорта');
       return;
     }
 
     try {
       const { utils, writeFile } = await import('xlsx');
-      const { organizations } = useCatalogStore.getState();
 
-      const getOrganizationName = (orgId: string) => {
-        const org = organizations.find(o => o.id === orgId);
-        return org?.name || 'Не указана';
-      };
-
-      const exportData = filteredObjects.map(obj => ({
-        'Регистрационный номер': obj.registrationNumber || '',
-        'Наименование объекта': obj.name,
-        'Организация': getOrganizationName(obj.organizationId),
-        'Тип объекта': obj.type === 'opo' ? 'ОПО' : obj.type === 'gts' ? 'ГТС' : 'Здание/Сооружение',
-        'Класс опасности': obj.hazardClass || '',
-        'Статус': obj.status === 'active' ? 'Активен' : obj.status === 'suspended' ? 'Приостановлен' : 'Выведен из эксплуатации',
-        'Адрес': obj.location.address,
-        'Субъект РФ': obj.detailedAddress?.region || '',
-        'Код ОКТМО': obj.detailedAddress?.oktmo || '',
-        'Почтовый индекс': obj.detailedAddress?.postalCode || '',
-        'GPS координаты': obj.location.coordinates || '',
-        'Дата ввода в эксплуатацию': obj.commissioningDate || '',
-        'Ответственное лицо': obj.responsiblePerson || '',
-        'Владелец': obj.ownerId || '',
-        'Код отрасли': obj.industryCode || '',
-        'Признаки опасности': obj.dangerSigns?.join(', ') || '',
-        'Классификация': obj.classifications?.join(', ') || '',
-        'Обоснование класса опасности': obj.hazardClassJustification || '',
-        'Лицензируемая деятельность': obj.licensedActivities?.join(', ') || '',
-        'Дата регистрации в РТН': obj.registrationDate || '',
-        'Орган РТН': obj.rtnDepartmentId || '',
-        'Дата следующей экспертизы': obj.nextExpertiseDate || '',
-        'Дата следующей диагностики': obj.nextDiagnosticDate || '',
-        'Количество документов': obj.documents?.length || 0,
-      }));
+      const exportData = filteredItems.map(item => {
+        if ('hazardClass' in item) {
+          return {
+            'Тип': item.type === 'opo' ? 'ОПО' : 'ГТС',
+            'Полное наименование': item.fullName,
+            'Типовое наименование': item.typicalName || '',
+            'Регистрационный номер': item.registrationNumber || '',
+            'Класс опасности': item.hazardClass || '',
+            'Организация': item.organizationName,
+            'Адрес': item.address,
+            'Ответственное лицо': item.responsiblePersonName || '',
+          };
+        } else {
+          return {
+            'Тип': 'Компонент',
+            'Объект': item.facilityName,
+            'Полное наименование': item.fullName,
+            'Краткое наименование': item.shortName || '',
+            'Тип компонента': item.type === 'technical_device' ? 'Техническое устройство' : 'Здание/Сооружение',
+            'Заводской номер': ('factoryNumber' in item ? item.factoryNumber : '') || '',
+            'Дата ввода в эксплуатацию': item.commissioningDate || '',
+            'Статус': item.technicalStatus || '',
+          };
+        }
+      });
 
       const worksheet = utils.json_to_sheet(exportData);
       const workbook = utils.book_new();
@@ -128,33 +118,39 @@ export default function ObjectsTab() {
     }
   };
 
-  const filteredObjects = useMemo(() => {
-    return objects.filter((obj) => {
-      const matchesSearch = obj.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           obj.registrationNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           obj.location.address.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesType = typeFilter === 'all' || obj.type === typeFilter;
-      const matchesStatus = statusFilter === 'all' || obj.status === statusFilter;
-      const matchesOrg = !selectedOrganization || obj.organizationId === selectedOrganization;
+  const allItems = useMemo(() => {
+    return [...allFacilities, ...allComponents] as Array<Facility | Component>;
+  }, [allFacilities, allComponents]);
+
+  const filteredItems = useMemo(() => {
+    return allItems.filter((item) => {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch =
+        item.fullName.toLowerCase().includes(query) ||
+        ('registrationNumber' in item && item.registrationNumber?.toLowerCase().includes(query)) ||
+        ('organizationName' in item && item.organizationName.toLowerCase().includes(query));
       
-      return matchesSearch && matchesType && matchesStatus && matchesOrg;
+      let matchesType = true;
+      if (typeFilter !== 'all') {
+        if (typeFilter === 'opo' || typeFilter === 'gts') {
+          matchesType = 'type' in item && item.type === typeFilter;
+        } else if (typeFilter === 'technical_device' || typeFilter === 'building_structure') {
+          matchesType = 'facilityId' in item && item.type === typeFilter;
+        }
+      }
+      
+      return matchesSearch && matchesType;
     });
-  }, [objects, searchQuery, typeFilter, statusFilter, selectedOrganization]);
+  }, [allItems, searchQuery, typeFilter]);
 
   const stats = useMemo(() => {
-    const total = filteredObjects.length;
-    const active = filteredObjects.filter(o => o.status === 'active').length;
-    const needsExpertise = filteredObjects.filter(o => 
-      o.nextExpertiseDate && new Date(o.nextExpertiseDate) < new Date()
-    ).length;
-    const soonExpertise = filteredObjects.filter(o => {
-      if (!o.nextExpertiseDate) return false;
-      const diffDays = Math.floor((new Date(o.nextExpertiseDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-      return diffDays <= 90 && diffDays >= 0;
-    }).length;
+    const facilities = allFacilities.length;
+    const opo = allFacilities.filter(f => f.type === 'opo').length;
+    const gts = allFacilities.filter(f => f.type === 'gts').length;
+    const components = allComponents.length;
     
-    return { total, active, needsExpertise, soonExpertise };
-  }, [filteredObjects]);
+    return { total: facilities + components, facilities, opo, gts, components };
+  }, [allFacilities, allComponents]);
 
   return (
     <div className="space-y-6">
@@ -162,200 +158,235 @@ export default function ObjectsTab() {
         <div>
           <h2 className="text-2xl font-bold">Опасные производственные объекты</h2>
           <p className="text-muted-foreground mt-1">
-            Реестр ОПО, оборудования под надзором и зданий
+            Реестр ОПО, ГТС, оборудования под надзором и зданий
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setImportModalOpen(true)}>
-            <Icon name="Upload" size={18} className="mr-2" />
-            Импорт
-          </Button>
           <Button variant="outline" onClick={handleExport}>
             <Icon name="FileDown" size={18} className="mr-2" />
             Экспорт
           </Button>
-          <Button onClick={handleCreateOpo}>
+          <Button onClick={handleCreateFacility}>
             <Icon name="Plus" size={18} className="mr-2" />
-            Создать ОПО
+            Создать объект
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
         <Card>
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-2">
               <Icon name="Building" className="text-blue-600" size={20} />
               <span className="text-xl md:text-2xl font-bold">{stats.total}</span>
             </div>
-            <p className="text-xs md:text-sm text-muted-foreground">Всего объектов</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Всего позиций</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-2">
-              <Icon name="CheckCircle2" className="text-emerald-600" size={20} />
-              <span className="text-xl md:text-2xl font-bold">{stats.active}</span>
+              <Icon name="Factory" className="text-orange-600" size={20} />
+              <span className="text-xl md:text-2xl font-bold">{stats.opo}</span>
             </div>
-            <p className="text-xs md:text-sm text-muted-foreground">Активных</p>
+            <p className="text-xs md:text-sm text-muted-foreground">ОПО</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-2">
-              <Icon name="AlertTriangle" className="text-red-600" size={20} />
-              <span className="text-xl md:text-2xl font-bold">{stats.needsExpertise}</span>
+              <Icon name="Waves" className="text-cyan-600" size={20} />
+              <span className="text-xl md:text-2xl font-bold">{stats.gts}</span>
             </div>
-            <p className="text-xs md:text-sm text-muted-foreground">Просрочена ЭПБ</p>
+            <p className="text-xs md:text-sm text-muted-foreground">ГТС</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-2">
-              <Icon name="Clock" className="text-amber-600" size={20} />
-              <span className="text-xl md:text-2xl font-bold">{stats.soonExpertise}</span>
+              <Icon name="Cpu" className="text-purple-600" size={20} />
+              <span className="text-xl md:text-2xl font-bold">{stats.components}</span>
             </div>
-            <p className="text-xs md:text-sm text-muted-foreground">ЭПБ через 90 дней</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Компонентов</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 md:p-6">
+            <div className="flex items-center justify-between mb-2">
+              <Icon name="Building2" className="text-emerald-600" size={20} />
+              <span className="text-xl md:text-2xl font-bold">{stats.facilities}</span>
+            </div>
+            <p className="text-xs md:text-sm text-muted-foreground">Объектов</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-4 md:gap-6">
-        <div className="relative">
-          {!sidebarCollapsed && (
-            <Card className="overflow-hidden flex flex-col max-h-[600px] w-[320px]">
-              <CardContent className="p-4 flex-1 overflow-auto">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-lg">Организации</h3>
-                  <Button variant="ghost" size="sm" onClick={handleCreateOrganization}>
-                    <Icon name="Plus" size={16} />
-                  </Button>
-                </div>
-                <OrganizationTree 
-                  onEdit={handleEditOrganization}
-                  onDelete={handleDeleteOrganization}
-                />
-              </CardContent>
-            </Card>
-          )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className={`absolute top-0 z-10 shadow-md h-32 w-10 p-0 rounded-r-lg flex flex-col items-center justify-center gap-2 bg-primary/5 hover:bg-primary/10 border-primary/20 hover:border-primary/30 transition-colors ${
-              sidebarCollapsed ? '-left-0 rounded-l-none border-l-0' : '-right-5 rounded-l-lg'
-            }`}
-            title={sidebarCollapsed ? 'Показать организации' : 'Скрыть организации'}
-          >
-            <Icon name={sidebarCollapsed ? "ChevronRight" : "ChevronLeft"} size={16} className="text-primary" />
-            <div 
-              className="text-[10px] font-medium leading-tight whitespace-nowrap text-primary"
-              style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
-            >
-              Организации
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="flex-1">
+              <SearchBar
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Поиск по названию, рег. номеру, организации..."
+              />
             </div>
-          </Button>
-        </div>
-
-        <div className="flex flex-col">
-          <div className="flex flex-col sm:flex-row gap-3 mb-4">
-            <SearchBar
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Поиск по названию, рег. номеру, адресу..."
-              className="flex-1"
-            />
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-full sm:w-[150px]">
-                <SelectValue placeholder="Тип" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все типы</SelectItem>
-                <SelectItem value="opo">ОПО</SelectItem>
-                <SelectItem value="gts">ГТС</SelectItem>
-                <SelectItem value="building">Здание</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Статус" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все статусы</SelectItem>
-                <SelectItem value="active">Активен</SelectItem>
-                <SelectItem value="conservation">На консервации</SelectItem>
-                <SelectItem value="liquidated">Ликвидирован</SelectItem>
-              </SelectContent>
-            </Select>
-            <ViewModeToggle value={viewMode} onChange={setViewMode} />
+            <div className="flex gap-2">
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Тип" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все типы</SelectItem>
+                  <SelectItem value="opo">ОПО</SelectItem>
+                  <SelectItem value="gts">ГТС</SelectItem>
+                  <SelectItem value="technical_device">Технические устройства</SelectItem>
+                  <SelectItem value="building_structure">Здания/Сооружения</SelectItem>
+                </SelectContent>
+              </Select>
+              <ViewModeToggle value={viewMode} onChange={setViewMode} />
+            </div>
           </div>
 
-          <div>
-            {filteredObjects.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <Icon name="Search" className="mx-auto mb-3" size={48} />
-                <p className="text-lg font-medium">Объекты не найдены</p>
-                <p className="text-sm mt-1">Попробуйте изменить параметры поиска</p>
+          {filteredItems.length === 0 ? (
+            <div className="text-center py-12">
+              <Icon name="Inbox" size={48} className="mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Нет данных</h3>
+              <p className="text-muted-foreground mb-4">
+                Начните с создания первого объекта
+              </p>
+              <Button onClick={handleCreateFacility}>
+                <Icon name="Plus" size={18} className="mr-2" />
+                Создать объект
+              </Button>
+            </div>
+          ) : viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredItems.map((item) => {
+                const isFacility = 'hazardClass' in item;
+                return (
+                  <Card key={item.id} className="hover:shadow-lg transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Icon 
+                            name={isFacility ? (item.type === 'opo' ? 'Factory' : 'Waves') : 'Cpu'} 
+                            size={20}
+                            className={isFacility ? (item.type === 'opo' ? 'text-orange-600' : 'text-cyan-600') : 'text-purple-600'}
+                          />
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {isFacility ? (item.type === 'opo' ? 'ОПО' : 'ГТС') : 'Компонент'}
+                          </span>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => isFacility ? handleEditFacility(item.id) : handleEditComponent(item.id)}
+                          >
+                            <Icon name="Pencil" size={14} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => isFacility ? handleDeleteFacility(item.id) : handleDeleteComponent(item.id)}
+                          >
+                            <Icon name="Trash2" size={14} />
+                          </Button>
+                        </div>
+                      </div>
+                      <h3 className="font-semibold mb-2 line-clamp-2">{item.fullName}</h3>
+                      {isFacility && (
+                        <>
+                          <p className="text-sm text-muted-foreground mb-2">{item.organizationName}</p>
+                          {item.hazardClass && (
+                            <div className="inline-block px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-xs rounded">
+                              Класс {item.hazardClass}
+                            </div>
+                          )}
+                        </>
+                      )}
+                      {!isFacility && (
+                        <p className="text-sm text-muted-foreground">{item.facilityName}</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="grid grid-cols-12 gap-4 px-4 py-2 bg-muted/50 rounded font-medium text-sm">
+                <div className="col-span-1">Тип</div>
+                <div className="col-span-4">Наименование</div>
+                <div className="col-span-3">Организация/Объект</div>
+                <div className="col-span-2">Рег. номер/Класс</div>
+                <div className="col-span-2 text-right">Действия</div>
               </div>
-            ) : (
-              <>
-                <div className="flex items-center gap-2 mb-4">
-                  <Badge variant="secondary">{filteredObjects.length} объект(ов)</Badge>
-                  {selectedOrganization && (
-                    <Badge variant="outline" className="gap-1">
-                      <Icon name="Filter" size={12} />
-                      Фильтр по организации
-                    </Badge>
-                  )}
-                </div>
-                {viewMode === 'table' ? (
-                  <ObjectTableView
-                    objects={filteredObjects}
-                    onView={handleViewObject}
-                    onEdit={handleEditObject}
-                  />
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {filteredObjects.map((object) => (
-                      <ObjectCard
-                        key={object.id}
-                        object={object}
-                        onView={handleViewObject}
-                        onEdit={handleEditObject}
+              {filteredItems.map((item) => {
+                const isFacility = 'hazardClass' in item;
+                return (
+                  <div key={item.id} className="grid grid-cols-12 gap-4 px-4 py-3 border rounded hover:bg-muted/50 transition-colors">
+                    <div className="col-span-1 flex items-center">
+                      <Icon 
+                        name={isFacility ? (item.type === 'opo' ? 'Factory' : 'Waves') : 'Cpu'} 
+                        size={18}
+                        className={isFacility ? (item.type === 'opo' ? 'text-orange-600' : 'text-cyan-600') : 'text-purple-600'}
                       />
-                    ))}
+                    </div>
+                    <div className="col-span-4">
+                      <p className="font-medium">{item.fullName}</p>
+                      <p className="text-sm text-muted-foreground">{item.shortName || item.typicalName}</p>
+                    </div>
+                    <div className="col-span-3">
+                      <p className="text-sm">{isFacility ? item.organizationName : item.facilityName}</p>
+                    </div>
+                    <div className="col-span-2">
+                      {isFacility ? (
+                        <>
+                          <p className="text-sm">{item.registrationNumber}</p>
+                          {item.hazardClass && (
+                            <span className="text-xs text-muted-foreground">Класс {item.hazardClass}</span>
+                          )}
+                        </>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">{item.type === 'technical_device' ? 'ТУ' : 'ЗС'}</p>
+                      )}
+                    </div>
+                    <div className="col-span-2 flex items-center justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => isFacility ? handleEditFacility(item.id) : handleEditComponent(item.id)}
+                      >
+                        <Icon name="Pencil" size={16} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => isFacility ? handleDeleteFacility(item.id) : handleDeleteComponent(item.id)}
+                      >
+                        <Icon name="Trash2" size={16} />
+                      </Button>
+                    </div>
                   </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-      <ObjectDetailsModal
-        object={selectedObject}
-        open={detailsModalOpen}
-        onOpenChange={setDetailsModalOpen}
-        onEdit={handleEditObject}
+      <FacilityDialog
+        open={showFacilityDialog}
+        onOpenChange={setShowFacilityDialog}
+        facilityId={editingFacilityId}
       />
 
-      <OrganizationFormModal
-        open={orgFormModalOpen}
-        onOpenChange={setOrgFormModalOpen}
-        organization={orgFormMode === 'edit' ? selectedOrg : undefined}
-        mode={orgFormMode}
-      />
-
-      <OpoFormWizard
-        open={wizardOpen}
-        onOpenChange={setWizardOpen}
-        mode={wizardMode}
-        object={wizardMode === 'edit' ? selectedObject || undefined : undefined}
-      />
-
-      <ImportModal
-        open={importModalOpen}
-        onOpenChange={setImportModalOpen}
+      <ComponentDialog
+        open={showComponentDialog}
+        onOpenChange={setShowComponentDialog}
+        componentId={editingComponentId}
       />
     </div>
   );
