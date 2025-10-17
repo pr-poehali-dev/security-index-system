@@ -22,7 +22,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/components/ui/icon';
 import { useTrainingCenterStore, type IssuedCertificate } from '@/stores/trainingCenterStore';
-import { useCertificationStore } from '@/stores/certificationStore';
+import { useDpoQualificationStore } from '@/stores/dpoQualificationStore';
 
 interface BulkIssueCertificatesDialogProps {
   open: boolean;
@@ -43,7 +43,7 @@ interface ParsedRow {
 
 export default function BulkIssueCertificatesDialog({ open, onClose }: BulkIssueCertificatesDialogProps) {
   const { addIssuedCertificate, syncCertificateToAttestation } = useTrainingCenterStore();
-  const { addCertification } = useCertificationStore();
+  const { addQualification } = useDpoQualificationStore();
   
   const [step, setStep] = useState<'upload' | 'preview' | 'result'>('upload');
   const [file, setFile] = useState<File | null>(null);
@@ -153,10 +153,18 @@ export default function BulkIssueCertificatesDialog({ open, onClose }: BulkIssue
         const issued = addIssuedCertificate(newCert);
         
         if (autoSync) {
-          const attestationCert = syncCertificateToAttestation(issued.id);
-          if (attestationCert) {
-            addCertification(attestationCert);
-          }
+          addQualification({
+            personnelId: issued.personnelId,
+            tenantId: clientTenantId,
+            category: category as any,
+            programName: programName,
+            trainingOrganizationId: 'external-org-1',
+            trainingOrganizationName: 'АНО ДПО "Учебный центр"',
+            certificateNumber: issued.certificateNumber,
+            issueDate: issued.issueDate,
+            expiryDate: issued.expiryDate,
+            duration: 72
+          });
         }
         
         success++;

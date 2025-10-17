@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import Icon from '@/components/ui/icon';
 import { useTrainingCenterStore } from '@/stores/trainingCenterStore';
-import { useCertificationStore } from '@/stores/certificationStore';
+import { useDpoQualificationStore } from '@/stores/dpoQualificationStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import BulkIssueCertificatesDialog from './BulkIssueCertificatesDialog';
 import ManualCertificateDialog from './ManualCertificateDialog';
@@ -36,7 +36,7 @@ const categoryLabels = {
 
 export default function IssuedCertificatesRegistry() {
   const { issuedCertificates, syncCertificateToAttestation } = useTrainingCenterStore();
-  const { addCertification } = useCertificationStore();
+  const { addQualification } = useDpoQualificationStore();
   const { organizations = [], personnel = [] } = useSettingsStore();
   
   const [searchQuery, setSearchQuery] = useState('');

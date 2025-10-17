@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useCertificationStore } from '@/stores/certificationStore';
+import { useAttestationStore } from '@/stores/certificationStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useExpiryNotifications } from './useExpiryNotifications';
 import { differenceInDays, parseISO } from 'date-fns';
@@ -7,11 +7,11 @@ import type { Certification } from '@/types';
 
 export function useAttestationNotifications() {
   const user = useAuthStore((state) => state.user);
-  const { getCertificationsByTenant } = useCertificationStore();
+  const { getAttestationsByTenant } = useAttestationStore();
 
   const certifications = useMemo(
-    () => (user?.tenantId ? getCertificationsByTenant(user.tenantId) : []),
-    [user?.tenantId, getCertificationsByTenant]
+    () => (user?.tenantId ? getAttestationsByTenant(user.tenantId) : []),
+    [user?.tenantId, getAttestationsByTenant]
   );
 
   useExpiryNotifications<Certification>({
