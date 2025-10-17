@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import OrganizationsTab from '../components/OrganizationsTab';
-import FacilitiesTab from '../components/FacilitiesTab';
+import OpoTab from '../components/OpoTab';
+import GtsTab from '../components/GtsTab';
 import ComponentsTab from '../components/ComponentsTab';
 import ContractorsTab from '../components/ContractorsTab';
 import ReportsTab from '@/modules/catalog/components/tabs/ReportsTab';
@@ -34,11 +35,18 @@ export default function FacilityCatalogPage() {
             <span className="text-xs font-medium text-center leading-tight">Организации</span>
           </TabsTrigger>
           <TabsTrigger 
-            value="facilities" 
+            value="opo" 
             className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             <Icon name="Factory" size={20} />
-            <span className="text-xs font-medium text-center leading-tight">ОПО и ГТС</span>
+            <span className="text-xs font-medium text-center leading-tight">ОПО</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="gts" 
+            className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          >
+            <Icon name="Waves" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">ГТС</span>
           </TabsTrigger>
           <TabsTrigger 
             value="components" 
@@ -67,8 +75,12 @@ export default function FacilityCatalogPage() {
           <OrganizationsTab />
         </TabsContent>
 
-        <TabsContent value="facilities">
-          <FacilitiesTab />
+        <TabsContent value="opo">
+          <OpoTab />
+        </TabsContent>
+
+        <TabsContent value="gts">
+          <GtsTab />
         </TabsContent>
 
         <TabsContent value="components">
