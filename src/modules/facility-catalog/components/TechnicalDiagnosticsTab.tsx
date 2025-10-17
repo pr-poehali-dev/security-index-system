@@ -20,48 +20,11 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
-
-interface TechnicalDiagnostic {
-  id: string;
-  equipmentName: string;
-  diagnosticType: string;
-  plannedDate: string;
-  status: 'planned' | 'in-progress' | 'completed' | 'overdue';
-  contractor?: string;
-  notes?: string;
-}
-
-const mockDiagnostics: TechnicalDiagnostic[] = [
-  {
-    id: '1',
-    equipmentName: 'Котел паровой КЕ-25-14',
-    diagnosticType: 'Полное обследование',
-    plannedDate: '2025-11-15',
-    status: 'planned',
-    contractor: 'ООО "ТехДиагностика"',
-    notes: 'Плановое обследование согласно графику'
-  },
-  {
-    id: '2',
-    equipmentName: 'Трубопровод ГТС-001',
-    diagnosticType: 'УЗК толщины стенок',
-    plannedDate: '2025-10-20',
-    status: 'in-progress',
-    contractor: 'ООО "ПромЭксперт"',
-  },
-  {
-    id: '3',
-    equipmentName: 'Резервуар РВС-5000',
-    diagnosticType: 'Визуальный контроль',
-    plannedDate: '2025-09-30',
-    status: 'overdue',
-    contractor: 'ООО "СпецКонтроль"',
-    notes: 'Требуется согласование доступа'
-  },
-];
+import { mockTechnicalDiagnostics, mockComponents, mockContractors } from '../data/mockData';
+import type { TechnicalDiagnostic } from '../data/mockData';
 
 export default function TechnicalDiagnosticsTab() {
-  const [diagnostics] = useState<TechnicalDiagnostic[]>(mockDiagnostics);
+  const [diagnostics] = useState<TechnicalDiagnostic[]>(mockTechnicalDiagnostics);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 

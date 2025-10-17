@@ -20,48 +20,11 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
-
-interface IndustrialSafetyExpertise {
-  id: string;
-  facilityName: string;
-  expertiseType: string;
-  plannedDate: string;
-  status: 'planned' | 'in-progress' | 'completed' | 'overdue';
-  expertOrganization?: string;
-  notes?: string;
-}
-
-const mockExpertises: IndustrialSafetyExpertise[] = [
-  {
-    id: '1',
-    facilityName: 'ОПО "Котельная №1"',
-    expertiseType: 'Полная ЭПБ',
-    plannedDate: '2025-12-10',
-    status: 'planned',
-    expertOrganization: 'ООО "ПромБезопасность"',
-    notes: 'Истекает срок действия предыдущей экспертизы'
-  },
-  {
-    id: '2',
-    facilityName: 'ОПО "Газопровод высокого давления"',
-    expertiseType: 'Проектная документация',
-    plannedDate: '2025-10-25',
-    status: 'in-progress',
-    expertOrganization: 'АО "Экспертцентр"',
-  },
-  {
-    id: '3',
-    facilityName: 'ОПО "Резервуарный парк"',
-    expertiseType: 'Полная ЭПБ',
-    plannedDate: '2025-10-05',
-    status: 'overdue',
-    expertOrganization: 'ООО "СпецЭксперт"',
-    notes: 'Ожидание документов от производителя'
-  },
-];
+import { mockIndustrialSafetyExpertises, mockFacilities, mockContractors } from '../data/mockData';
+import type { IndustrialSafetyExpertise } from '../data/mockData';
 
 export default function IndustrialSafetyExpertiseTab() {
-  const [expertises] = useState<IndustrialSafetyExpertise[]>(mockExpertises);
+  const [expertises] = useState<IndustrialSafetyExpertise[]>(mockIndustrialSafetyExpertises);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
