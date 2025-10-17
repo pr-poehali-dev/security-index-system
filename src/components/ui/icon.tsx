@@ -5,16 +5,16 @@ import {
   AlertCircle, AlertTriangle, Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp,
   Award, BarChart3, Bell, BookMarked, BookOpen, Building, Building2,
   Calendar, CalendarDays, Check, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
-  Circle, CircleAlert, ClipboardCheck, ClipboardList, Clock, Construction, Copy,
-  Download, Edit, Eye, EyeOff, File, FileCheck, FileText, FileX, Filter, FolderOpen,
+  Circle, CircleAlert, ClipboardCheck, ClipboardList, Clock, Construction, Copy, Cpu,
+  Download, Edit, Eye, EyeOff, Factory, File, FileBarChart, FileCheck, FileText, FileX, Filter, FolderOpen, Fuel,
   GraduationCap, Grid, HelpCircle, Home, Info,
-  KeyRound, LayoutDashboard, List, ListTodo, LogOut,
+  KeyRound, LayoutDashboard, LayoutGrid, List, ListTodo, LogOut,
   Mail, Menu, MessageSquare, Microscope, Monitor, Moon, MoreHorizontal, MoreVertical,
-  Newspaper, Pencil, Phone, PieChart, Play, PlayCircle, Plus, Printer,
+  Network, Newspaper, Pencil, Phone, PieChart, Play, PlayCircle, Plus, Printer,
   RefreshCw, Save, Search, Send, Settings, Shield, ShieldCheck, Sun,
-  Target, Trash, Trash2, TrendingDown, TrendingUp,
+  Table, Target, Trash, Trash2, TrendingDown, TrendingUp, TriangleAlert,
   Upload, User, UserCheck, UserPlus, Users,
-  Wallet, Wrench, X, XCircle,
+  Wallet, Waves, Wrench, X, XCircle,
   type LucideProps
 } from 'lucide-react';
 
@@ -23,15 +23,15 @@ type IconName =
   | 'Award' | 'BarChart3' | 'Bell' | 'BookMarked' | 'BookOpen' | 'Building' | 'Building2'
   | 'Calendar' | 'CalendarDays' | 'Check' | 'CheckCircle' | 'CheckCircle2' | 'ChevronDown' | 'ChevronLeft' | 'ChevronRight' | 'ChevronUp'
   | 'Circle' | 'CircleAlert' | 'ClipboardCheck' | 'ClipboardList' | 'Clock' | 'Construction' | 'Copy'
-  | 'Download' | 'Edit' | 'Eye' | 'EyeOff' | 'File' | 'FileCheck' | 'FileText' | 'FileX' | 'Filter' | 'FolderOpen'
-  | 'GraduationCap' | 'Grid' | 'HelpCircle' | 'Home' | 'Info'
+  | 'Download' | 'Edit' | 'Eye' | 'EyeOff' | 'Factory' | 'File' | 'FileBarChart' | 'FileCheck' | 'FileText' | 'FileX' | 'Filter' | 'FolderOpen' | 'Fuel'
+  | 'GraduationCap' | 'Grid' | 'HelpCircle' | 'Home' | 'Info' | 'LayoutGrid'
   | 'KeyRound' | 'LayoutDashboard' | 'List' | 'ListTodo' | 'LogOut'
   | 'Mail' | 'Menu' | 'MessageSquare' | 'Microscope' | 'Monitor' | 'Moon' | 'MoreHorizontal' | 'MoreVertical'
   | 'Newspaper' | 'Pencil' | 'Phone' | 'PieChart' | 'Play' | 'PlayCircle' | 'Plus' | 'Printer'
   | 'RefreshCw' | 'Save' | 'Search' | 'Send' | 'Settings' | 'Shield' | 'ShieldCheck' | 'Sun'
-  | 'Target' | 'Trash' | 'Trash2' | 'TrendingDown' | 'TrendingUp'
+  | 'Table' | 'Target' | 'Trash' | 'Trash2' | 'TrendingDown' | 'TrendingUp' | 'TriangleAlert'
   | 'Upload' | 'User' | 'UserCheck' | 'UserPlus' | 'Users'
-  | 'Wallet' | 'Wrench' | 'X' | 'XCircle';
+  | 'Wallet' | 'Waves' | 'Wrench' | 'X' | 'XCircle' | 'Network' | 'Cpu';
 
 interface IconProps extends LucideProps {
   name: IconName;
@@ -42,16 +42,16 @@ const ICON_MAP: Record<string, FC<LucideProps>> = {
   AlertCircle, AlertTriangle, Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp,
   Award, BarChart3, Bell, BookMarked, BookOpen, Building, Building2,
   Calendar, CalendarDays, Check, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
-  Circle, CircleAlert, ClipboardCheck, ClipboardList, Clock, Construction, Copy,
-  Download, Edit, Eye, EyeOff, File, FileCheck, FileText, FileX, Filter, FolderOpen,
+  Circle, CircleAlert, ClipboardCheck, ClipboardList, Clock, Construction, Copy, Cpu,
+  Download, Edit, Eye, EyeOff, Factory, File, FileBarChart, FileCheck, FileText, FileX, Filter, FolderOpen, Fuel,
   GraduationCap, Grid, HelpCircle, Home, Info,
-  KeyRound, LayoutDashboard, List, ListTodo, LogOut,
+  KeyRound, LayoutDashboard, LayoutGrid, List, ListTodo, LogOut,
   Mail, Menu, MessageSquare, Microscope, Monitor, Moon, MoreHorizontal, MoreVertical,
-  Newspaper, Pencil, Phone, PieChart, Play, PlayCircle, Plus, Printer,
+  Network, Newspaper, Pencil, Phone, PieChart, Play, PlayCircle, Plus, Printer,
   RefreshCw, Save, Search, Send, Settings, Shield, ShieldCheck, Sun,
-  Target, Trash, Trash2, TrendingDown, TrendingUp,
+  Table, Target, Trash, Trash2, TrendingDown, TrendingUp, TriangleAlert,
   Upload, User, UserCheck, UserPlus, Users,
-  Wallet, Wrench, X, XCircle,
+  Wallet, Waves, Wrench, X, XCircle,
 };
 
 const Icon: FC<IconProps> = ({ name, fallback = 'CircleAlert', ...props }) => {
