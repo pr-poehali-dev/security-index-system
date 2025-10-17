@@ -7,6 +7,8 @@ import ComponentsTab from '../components/ComponentsTab';
 import ContractorsTab from '../components/ContractorsTab';
 import ReportsTab from '../components/tabs/ReportsTab';
 import OpoCharacteristicsTab from '../components/OpoCharacteristicsTab';
+import TechnicalDiagnosticsTab from '../components/TechnicalDiagnosticsTab';
+import IndustrialSafetyExpertiseTab from '../components/IndustrialSafetyExpertiseTab';
 
 export default function FacilityCatalogPage() {
   const [activeTab, setActiveTab] = useState('opo');
@@ -81,6 +83,24 @@ export default function FacilityCatalogPage() {
             </div>
             <span className="text-xs font-medium text-center leading-tight">Отчеты<br/>и аналитика</span>
           </TabsTrigger>
+          <TabsTrigger 
+            value="technical-diagnostics" 
+            className="flex-col gap-1.5 h-20 px-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:border-emerald-500"
+          >
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activeTab === 'technical-diagnostics' ? 'bg-white/20' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
+              <Icon name="Stethoscope" size={18} className={activeTab === 'technical-diagnostics' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'} />
+            </div>
+            <span className="text-xs font-medium text-center leading-tight">Планирование<br/>ТД</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="industrial-safety-expertise" 
+            className="flex-col gap-1.5 h-20 px-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:border-emerald-500"
+          >
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activeTab === 'industrial-safety-expertise' ? 'bg-white/20' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
+              <Icon name="ShieldCheck" size={18} className={activeTab === 'industrial-safety-expertise' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'} />
+            </div>
+            <span className="text-xs font-medium text-center leading-tight">Планирование<br/>ЭПБ</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="opo">
@@ -105,6 +125,14 @@ export default function FacilityCatalogPage() {
 
         <TabsContent value="reports">
           <ReportsTab />
+        </TabsContent>
+
+        <TabsContent value="technical-diagnostics">
+          <TechnicalDiagnosticsTab />
+        </TabsContent>
+
+        <TabsContent value="industrial-safety-expertise">
+          <IndustrialSafetyExpertiseTab />
         </TabsContent>
       </Tabs>
     </div>
