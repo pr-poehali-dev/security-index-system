@@ -8,6 +8,7 @@ import {
   TenantsPage,
   SettingsPage,
   CatalogPage,
+  FacilityCatalogPage,
   IncidentsPage,
   ChecklistsPage,
   AttestationPage,
@@ -68,6 +69,17 @@ export default function AppRoutes() {
           <ProtectedRoute>
             <AuthenticatedLayout>
               <CatalogPage />
+            </AuthenticatedLayout>
+          </ProtectedRoute>
+        }
+      />
+      
+      <Route
+        path={ROUTES.FACILITY_CATALOG}
+        element={
+          <ProtectedRoute>
+            <AuthenticatedLayout>
+              <FacilityCatalogPage />
             </AuthenticatedLayout>
           </ProtectedRoute>
         }

@@ -122,6 +122,7 @@ export const ROUTES = {
   SETTINGS_COMPETENCIES: '/settings/competencies',
   ATTESTATION: '/attestation',
   CATALOG: '/catalog',
+  FACILITY_CATALOG: '/facility-catalog',
   INCIDENTS: '/incidents',
   CHECKLISTS: '/checklists',
   TASKS: '/tasks',
