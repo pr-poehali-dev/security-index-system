@@ -105,7 +105,7 @@ export default function FacilitiesTab() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.gts}</p>
-                <p className="text-xs text-muted-foreground">ГТС</p>
+                <p className="text-xs text-muted-foreground">Гидротехнические сооружения</p>
               </div>
             </div>
           </CardContent>
@@ -115,7 +115,7 @@ export default function FacilitiesTab() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Опасные производственные объекты и ГТС</CardTitle>
+            <CardTitle>Опасные производственные объекты и гидротехнические сооружения</CardTitle>
             <Button onClick={handleAdd}>
               <Icon name="Plus" size={16} className="mr-2" />
               Добавить объект
@@ -145,7 +145,7 @@ export default function FacilitiesTab() {
               <SelectContent>
                 <SelectItem value="all">Все типы</SelectItem>
                 <SelectItem value="opo">ОПО</SelectItem>
-                <SelectItem value="gts">ГТС</SelectItem>
+                <SelectItem value="gts">Гидротехнические сооружения</SelectItem>
               </SelectContent>
             </Select>
           </div>

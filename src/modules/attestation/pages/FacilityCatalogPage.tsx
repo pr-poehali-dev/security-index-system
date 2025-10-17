@@ -17,7 +17,7 @@ export default function FacilityCatalogPage() {
         <div>
           <h1 className="text-3xl font-bold">Каталог объектов</h1>
           <p className="text-muted-foreground">
-            Управление организациями, ОПО, ГТС и их составом
+            Управление организациями, ОПО, гидротехническими сооружениями и их составом
           </p>
         </div>
       </div>
