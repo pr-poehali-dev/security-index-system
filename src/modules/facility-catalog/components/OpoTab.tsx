@@ -10,8 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Facility } from '@/types/facilities';
 import FacilityDialog from './FacilityDialog';
 import FacilityTreeView from './FacilityTreeView';
+import FacilityTableView from './FacilityTableView';
 import ComponentDialog from './ComponentDialog';
 import BulkImportDialog from './BulkImportDialog';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function OpoTab() {
   const user = useAuthStore((state) => state.user);
@@ -34,6 +36,15 @@ export default function OpoTab() {
   const [selectedParentOpoId, setSelectedParentOpoId] = useState<string | null>(null);
   const [selectedSubType, setSelectedSubType] = useState<'tu' | 'zs' | null>(null);
   const [selectedComponentType, setSelectedComponentType] = useState<'technical_device' | 'building_structure' | null>(null);
+  const [viewMode, setViewMode] = useState<'tree' | 'table'>(() => {
+    const saved = localStorage.getItem('opoViewMode');
+    return (saved as 'tree' | 'table') || 'tree';
+  });
+
+  const handleViewModeChange = (mode: 'tree' | 'table') => {
+    setViewMode(mode);
+    localStorage.setItem('opoViewMode', mode);
+  };
 
   const filteredOrganizations = organizations.filter((org) => {
     const query = searchQuery.toLowerCase();
@@ -244,10 +255,24 @@ export default function OpoTab() {
                 Организации → ОПО → Технические устройства (ТУ) / Здания и сооружения (ЗС)
               </p>
             </div>
-            <Button variant="outline" size="sm" onClick={() => setShowImportDialog(true)}>
-              <Icon name="Upload" size={16} className="mr-2" />
-              Импорт ТУ/ЗС
-            </Button>
+            <div className="flex items-center gap-2">
+              <Tabs value={viewMode} onValueChange={(v) => handleViewModeChange(v as 'tree' | 'table')}>
+                <TabsList>
+                  <TabsTrigger value="tree" className="text-xs">
+                    <Icon name="Network" size={14} className="mr-1" />
+                    Карточки
+                  </TabsTrigger>
+                  <TabsTrigger value="table" className="text-xs">
+                    <Icon name="Table" size={14} className="mr-1" />
+                    Таблица
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+              <Button variant="outline" size="sm" onClick={() => setShowImportDialog(true)}>
+                <Icon name="Upload" size={16} className="mr-2" />
+                Импорт ТУ/ЗС
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -265,16 +290,27 @@ export default function OpoTab() {
             />
           </div>
 
-          <FacilityTreeView
-            organizations={filteredOrganizations}
-            facilities={filteredFacilities}
-            onAddOpo={handleAddOpo}
-            onAddTuZs={handleAddTuZs}
-            onEdit={handleEdit}
-            onEditComponent={handleEditComponent}
-            onDelete={handleDelete}
-            onDeleteComponent={handleDeleteComponent}
-          />
+          {viewMode === 'tree' ? (
+            <FacilityTreeView
+              organizations={filteredOrganizations}
+              facilities={filteredFacilities}
+              onAddOpo={handleAddOpo}
+              onAddTuZs={handleAddTuZs}
+              onEdit={handleEdit}
+              onEditComponent={handleEditComponent}
+              onDelete={handleDelete}
+              onDeleteComponent={handleDeleteComponent}
+            />
+          ) : (
+            <FacilityTableView
+              organizations={filteredOrganizations}
+              facilities={filteredFacilities}
+              onEdit={handleEdit}
+              onEditComponent={handleEditComponent}
+              onDelete={handleDelete}
+              onDeleteComponent={handleDeleteComponent}
+            />
+          )}
         </CardContent>
       </Card>
 

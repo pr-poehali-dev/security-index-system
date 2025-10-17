@@ -15,7 +15,9 @@ import {
 } from '@/components/ui/select';
 import ComponentDialog from './ComponentDialog';
 import ComponentsTable from './ComponentsTable';
+import ComponentsCardView from './ComponentsCardView';
 import BulkImportDialog from './BulkImportDialog';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function ComponentsTab() {
   const user = useAuthStore((state) => state.user);
@@ -29,6 +31,15 @@ export default function ComponentsTab() {
   const [showDialog, setShowDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [editingComponent, setEditingComponent] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>(() => {
+    const saved = localStorage.getItem('componentsViewMode');
+    return (saved as 'table' | 'cards') || 'table';
+  });
+
+  const handleViewModeChange = (mode: 'table' | 'cards') => {
+    setViewMode(mode);
+    localStorage.setItem('componentsViewMode', mode);
+  };
 
   const filteredComponents = components.filter((component) => {
     const query = searchQuery.toLowerCase();
@@ -135,6 +146,18 @@ export default function ComponentsTab() {
           <div className="flex items-center justify-between">
             <CardTitle>Технические устройства и здания/сооружения</CardTitle>
             <div className="flex gap-2">
+              <Tabs value={viewMode} onValueChange={(v) => handleViewModeChange(v as 'table' | 'cards')}>
+                <TabsList>
+                  <TabsTrigger value="table" className="text-xs">
+                    <Icon name="Table" size={14} className="mr-1" />
+                    Таблица
+                  </TabsTrigger>
+                  <TabsTrigger value="cards" className="text-xs">
+                    <Icon name="LayoutGrid" size={14} className="mr-1" />
+                    Карточки
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
               <Button variant="outline" onClick={() => setShowImportDialog(true)}>
                 <Icon name="Upload" size={16} className="mr-2" />
                 Импорт из Excel
@@ -188,11 +211,19 @@ export default function ComponentsTab() {
             </Select>
           </div>
 
-          <ComponentsTable
-            components={filteredComponents}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+          {viewMode === 'table' ? (
+            <ComponentsTable
+              components={filteredComponents}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ) : (
+            <ComponentsCardView
+              components={filteredComponents}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </CardContent>
       </Card>
 
