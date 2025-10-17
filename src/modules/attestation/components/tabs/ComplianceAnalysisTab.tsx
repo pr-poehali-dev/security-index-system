@@ -11,7 +11,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useCertificationStore } from '@/stores/certificationStore';
+import { useAttestationStore } from '@/stores/certificationStore';
 import { useComplianceCalculations } from '../../hooks/useComplianceCalculations';
 import { useComplianceSelection } from '../../hooks/useComplianceSelection';
 import MassActionDialog from '../orders/MassActionDialog';
@@ -24,7 +24,7 @@ export default function ComplianceAnalysisTab() {
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
   const { personnel, people, positions, departments, competencies } = useSettingsStore();
-  const { certifications } = useCertificationStore();
+  const { attestations } = useAttestationStore();
   
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
   const [complianceFilter, setComplianceFilter] = useState<string>('all');
@@ -43,7 +43,7 @@ export default function ComplianceAnalysisTab() {
     positions,
     departments,
     competencies,
-    certifications
+    attestations
   });
 
   const filteredData = complianceData.filter(item => {

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/stores/authStore';
 import { useTrainingCentersStore } from '@/stores/trainingCentersStore';
-import { useCertificationStore } from '@/stores/certificationStore';
+import { useDpoQualificationStore } from '@/stores/dpoQualificationStore';
 import { useToast } from '@/hooks/use-toast';
 import {
   Select,
@@ -29,7 +29,7 @@ import { TrainingCenterRequest } from '@/types/attestation';
 export default function IncomingRequestsTab() {
   const user = useAuthStore((state) => state.user);
   const { getCenterRequestsByTrainingCenter, updateCenterRequest } = useTrainingCentersStore();
-  const { addCertification } = useCertificationStore();
+  const { addQualification } = useDpoQualificationStore();
   const { toast } = useToast();
   
   const incomingRequests = user?.tenantId ? getCenterRequestsByTrainingCenter(user.tenantId) : [];
@@ -40,6 +40,7 @@ export default function IncomingRequestsTab() {
   const [certificateIssueDate, setCertificateIssueDate] = useState('');
   const [certificateExpiryDate, setCertificateExpiryDate] = useState('');
   const [certificateValidityYears, setCertificateValidityYears] = useState('5');
+  const [duration, setDuration] = useState('72');
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const filteredRequests = incomingRequests.filter((req) => 
@@ -78,7 +79,7 @@ export default function IncomingRequestsTab() {
     
     const year = today.getFullYear();
     const randomNum = Math.floor(Math.random() * 9000) + 1000;
-    setCertificateNumber(`ПК-${year}-${randomNum}`);
+    setCertificateNumber(`ДПО-${year}-${randomNum}`);
     
     setDialogOpen(true);
   };
@@ -95,22 +96,21 @@ export default function IncomingRequestsTab() {
       certificateValidityYears: parseInt(certificateValidityYears)
     });
 
-    addCertification({
-      tenantId: selectedRequest.tenantId,
+    addQualification({
       personnelId: selectedRequest.employeeId,
+      tenantId: selectedRequest.tenantId,
       category: 'labor_safety',
-      area: selectedRequest.programName,
+      programName: selectedRequest.programName,
+      trainingOrganizationId: user?.tenantId || '',
+      trainingOrganizationName: user?.tenantName || 'Учебный центр',
+      certificateNumber: certificateNumber,
       issueDate: certificateIssueDate,
       expiryDate: certificateExpiryDate,
-      certificateNumber: certificateNumber,
-      verified: true,
-      verifiedDate: new Date().toISOString(),
-      verifiedBy: user?.fullName || 'Учебный центр',
-      trainingOrganizationId: user?.tenantId
+      duration: parseInt(duration)
     });
 
     toast({ 
-      title: 'Удостоверение выдано', 
+      title: 'Удостоверение ДПО выдано', 
       description: `№ ${certificateNumber} для ${selectedRequest.employeeName}` 
     });
 
@@ -315,9 +315,9 @@ export default function IncomingRequestsTab() {
                             </DialogTrigger>
                             <DialogContent className="max-w-md">
                               <DialogHeader>
-                                <DialogTitle>Выдача удостоверения</DialogTitle>
+                                <DialogTitle>Выдача удостоверения ДПО</DialogTitle>
                                 <DialogDescription>
-                                  Заполните данные удостоверения о повышении квалификации
+                                  Выдайте удостоверение о повышении квалификации. Учебный центр НЕ может проводить аттестацию.
                                 </DialogDescription>
                               </DialogHeader>
 
@@ -334,7 +334,7 @@ export default function IncomingRequestsTab() {
                                     id="certNumber"
                                     value={certificateNumber}
                                     onChange={(e) => setCertificateNumber(e.target.value)}
-                                    placeholder="ПК-2025-0001"
+                                    placeholder="ДПО-2025-0001"
                                   />
                                 </div>
 
@@ -370,6 +370,19 @@ export default function IncomingRequestsTab() {
                                       <SelectItem value="5">5 лет</SelectItem>
                                     </SelectContent>
                                   </Select>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label htmlFor="duration">Длительность программы (часов)</Label>
+                                  <Input
+                                    id="duration"
+                                    type="number"
+                                    min="16"
+                                    max="500"
+                                    value={duration}
+                                    onChange={(e) => setDuration(e.target.value)}
+                                    placeholder="72"
+                                  />
                                 </div>
 
                                 <div className="space-y-2">

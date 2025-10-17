@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useCertificationStore } from '@/stores/certificationStore';
+import { useAttestationStore } from '@/stores/certificationStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,7 @@ interface EmployeeAttestationsTabProps {
 
 export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttestationsTabProps) {
   const { personnel, people, positions, organizations } = useSettingsStore();
-  const { certifications, updateCertification } = useCertificationStore();
+  const { attestations, updateAttestation } = useAttestationStore();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -54,7 +54,7 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
       .map(p => {
         const info = getPersonnelFullInfo(p, people, positions);
         const org = organizations.find(o => o.id === p.organizationId);
-        const personnelCerts = certifications.filter(c => c.personnelId === p.id);
+        const personnelCerts = attestations.filter(c => c.personnelId === p.id);
 
         return {
           id: p.id,
@@ -86,13 +86,13 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
         })
       };
     });
-  }, [personnel, people, positions, organizations, certifications]);
+  }, [personnel, people, positions, organizations, attestations]);
 
   const handleVerificationToggle = (certId: string) => {
-    const cert = certifications.find(c => c.id === certId);
+    const cert = attestations.find(c => c.id === certId);
     if (!cert) return;
     
-    updateCertification(certId, {
+    updateAttestation(certId, {
       verified: !cert.verified,
       verifiedDate: !cert.verified ? new Date().toISOString() : undefined,
       verifiedBy: !cert.verified ? 'Текущий пользователь' : undefined

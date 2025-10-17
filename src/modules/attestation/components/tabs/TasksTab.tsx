@@ -6,7 +6,7 @@ import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useCertificationStore } from '@/stores/certificationStore';
+import { useAttestationStore } from '@/stores/certificationStore';
 import { useOrdersStore } from '@/stores/ordersStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
 import TaskStatisticsCards from '../TaskStatisticsCards';
@@ -22,7 +22,7 @@ export default function TasksTab() {
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
   const { personnel, people, positions, departments: deptList } = useSettingsStore();
-  const { certifications } = useCertificationStore();
+  const { attestations } = useAttestationStore();
   const orders = useOrdersStore((state) => state.orders);
   
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -44,7 +44,7 @@ export default function TasksTab() {
     tenantPersonnel.forEach(p => {
       const info = getPersonnelFullInfo(p, people, positions);
       const dept = deptList.find(d => d.id === p.departmentId);
-      const personnelCerts = certifications.filter(c => c.personnelId === p.id);
+      const personnelCerts = attestations.filter(c => c.personnelId === p.id);
       
       personnelCerts.forEach(cert => {
         const { status, daysLeft } = getCertificationStatus(cert.expiryDate);
@@ -149,7 +149,7 @@ export default function TasksTab() {
     });
     
     return result.sort((a, b) => a.daysLeft - b.daysLeft);
-  }, [user?.tenantId, personnel, people, positions, deptList, certifications, orders]);
+  }, [user?.tenantId, personnel, people, positions, deptList, attestations, orders]);
 
   const tasksWithStatuses = useMemo(() => {
     return tasks.map(task => ({

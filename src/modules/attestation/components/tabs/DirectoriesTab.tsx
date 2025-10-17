@@ -6,7 +6,7 @@ import Icon from '@/components/ui/icon';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useCertificationStore } from '@/stores/certificationStore';
+import { useAttestationStore } from '@/stores/certificationStore';
 
 import { 
   CERTIFICATION_CATEGORIES, 

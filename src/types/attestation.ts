@@ -18,28 +18,41 @@ export interface Employee {
   email?: string;
   phone?: string;
   status: 'active' | 'inactive';
-  certifications: Certification[];
+  dpoQualifications: DpoQualification[];
+  attestations: Attestation[];
   createdAt: string;
   updatedAt: string;
 }
 
-export interface Certification {
+export interface DpoQualification {
   id: string;
-  employeeId: string;
-  type: CertificationType;
+  personnelId: string;
+  tenantId: string;
   category: string;
+  programName: string;
+  trainingOrganizationId: string;
+  trainingOrganizationName: string;
+  certificateNumber: string;
   issueDate: string;
   expiryDate: string;
-  nextCertificationDate?: string;
-  status: CertificationStatus;
-  result: CertificationResult;
-  certificateNumber?: string;
-  documentUrl?: string;
-  issuedBy?: string;
+  duration: number;
   notes?: string;
-  linkedTrainingId?: string;
-  autoRenewed?: boolean;
-  previousCertificationId?: string;
+}
+
+export interface Attestation {
+  id: string;
+  personnelId: string;
+  tenantId: string;
+  category: 'industrial_safety' | 'energy_safety' | 'labor_safety' | 'ecology';
+  area: string;
+  protocolNumber: string;
+  protocolDate: string;
+  expiryDate: string;
+  attestationType: 'rostechnadzor' | 'company_commission';
+  commissionId?: string;
+  dpoQualificationId?: string;
+  result: 'passed' | 'failed';
+  notes?: string;
 }
 
 export interface TrainingProgram {

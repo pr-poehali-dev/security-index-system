@@ -33,7 +33,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useCertificationStore } from '@/stores/certificationStore';
+import { useAttestationStore } from '@/stores/certificationStore';
 import { getCertificationStatus } from '@/lib/utils/personnelUtils';
 import { useDocumentsStore } from '@/stores/documentsStore';
 import { ChecklistDocumentStatus } from '@/types/documentStatus';
@@ -112,7 +112,7 @@ export default function UnifiedDocumentDialog({
   const positions = useSettingsStore((state) => state.positions);
   const departments = useSettingsStore((state) => state.departments);
   const contractors = useSettingsStore((state) => state.contractors);
-  const { certifications } = useCertificationStore();
+  const { attestations } = useAttestationStore();
   
   const trainingOrganizations = useMemo(() => {
     if (!user?.tenantId) return [];
@@ -160,7 +160,7 @@ export default function UnifiedDocumentDialog({
     return tenantPersonnel.map((p) => {
       const info = getPersonnelFullInfo(p, people, positions);
       const dept = departments.find((d) => d.id === p.departmentId);
-      const employeeCerts = certifications.filter(c => c.personnelId === p.id);
+      const employeeCerts = attestations.filter(c => c.personnelId === p.id);
 
       return {
         id: p.id,
@@ -170,7 +170,7 @@ export default function UnifiedDocumentDialog({
         certifications: employeeCerts,
       };
     });
-  }, [tenantPersonnel, people, positions, departments, certifications]);
+  }, [tenantPersonnel, people, positions, departments, attestations]);
 
   const getEmployeeCertStatus = (employee: Employee): CertificationStatusFilter => {
     if (!employee.certifications || employee.certifications.length === 0) {
