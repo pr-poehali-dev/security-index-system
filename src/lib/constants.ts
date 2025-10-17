@@ -24,6 +24,11 @@ export const MODULES: Record<ModuleType, { name: string; description: string; ic
     description: 'Опасные производственные объекты и гидротехнические сооружения',
     icon: 'Factory'
   },
+  contractors: {
+    name: 'Подрядчики',
+    description: 'Управление подрядными организациями',
+    icon: 'Users'
+  },
   incidents: {
     name: 'Учет инцидентов',
     description: 'Регистрация и расследование инцидентов',

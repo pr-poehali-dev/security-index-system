@@ -162,7 +162,8 @@ const Sidebar = memo(function Sidebar() {
           const module = MODULES[moduleKey];
           const route = MODULE_ROUTES[moduleKey];
           
-          if (!module || !route) return null;
+          if (!module) return null;
+          if (!route) return null;
           
           let notifications: import('@/types').Notification[] = [];
           if (moduleKey === 'incidents') notifications = incidentNotifications;
