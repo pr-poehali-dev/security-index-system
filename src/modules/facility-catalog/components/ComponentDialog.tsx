@@ -22,7 +22,6 @@ import ComponentMaintenanceTab from './component-dialog/ComponentMaintenanceTab'
 import ComponentConstructionTab from './component-dialog/ComponentConstructionTab';
 import ComponentTechnicalParamsTab from './component-dialog/ComponentTechnicalParamsTab';
 import ComponentAccidentsTab from './component-dialog/ComponentAccidentsTab';
-import ComponentPrescriptionsTab from './component-dialog/ComponentPrescriptionsTab';
 
 interface ComponentDialogProps {
   open: boolean;
@@ -70,7 +69,6 @@ export default function ComponentDialog({
     constructionData: [],
     technicalParameters: [],
     accidents: [],
-    prescriptions: [],
   });
 
   useEffect(() => {
@@ -110,7 +108,6 @@ export default function ComponentDialog({
         constructionData: [],
         technicalParameters: [],
         accidents: [],
-        prescriptions: [],
       });
     }
     setActiveTab('basic');
@@ -160,16 +157,15 @@ export default function ComponentDialog({
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
-          <TabsList className="grid w-full grid-cols-9 h-auto">
-            <TabsTrigger value="basic" className="text-xs px-2">Основные</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-8 h-auto">
+            <TabsTrigger value="basic" className="text-xs px-2">Основные сведения</TabsTrigger>
             <TabsTrigger value="identification" className="text-xs px-2">Идентификация</TabsTrigger>
-            <TabsTrigger value="documentation" className="text-xs px-2">Документы</TabsTrigger>
-            <TabsTrigger value="expertise" className="text-xs px-2">ЭПБ</TabsTrigger>
-            <TabsTrigger value="maintenance" className="text-xs px-2">ТО</TabsTrigger>
-            <TabsTrigger value="construction" className="text-xs px-2">Конструкция</TabsTrigger>
-            <TabsTrigger value="technical" className="text-xs px-2">Параметры</TabsTrigger>
-            <TabsTrigger value="accidents" className="text-xs px-2">Аварии</TabsTrigger>
-            <TabsTrigger value="prescriptions" className="text-xs px-2">Предписания</TabsTrigger>
+            <TabsTrigger value="documentation" className="text-xs px-2">Документация</TabsTrigger>
+            <TabsTrigger value="expertise" className="text-xs px-2">Сведения о ЭПБ</TabsTrigger>
+            <TabsTrigger value="maintenance" className="text-xs px-2">Сведения о ТО</TabsTrigger>
+            <TabsTrigger value="construction" className="text-xs px-2">Данные о конструкции</TabsTrigger>
+            <TabsTrigger value="technical" className="text-xs px-2">Технические параметры</TabsTrigger>
+            <TabsTrigger value="accidents" className="text-xs px-2">Сведения об авариях</TabsTrigger>
           </TabsList>
 
           <ScrollArea className="flex-1 mt-4">
@@ -217,13 +213,6 @@ export default function ComponentDialog({
               <ComponentAccidentsTab
                 accidents={formData.accidents || []}
                 onChange={(accidents) => updateFormField('accidents', accidents)}
-              />
-            </TabsContent>
-
-            <TabsContent value="prescriptions" className="mt-0">
-              <ComponentPrescriptionsTab
-                prescriptions={formData.prescriptions || []}
-                onChange={(prescriptions) => updateFormField('prescriptions', prescriptions)}
               />
             </TabsContent>
           </ScrollArea>

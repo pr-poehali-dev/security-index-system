@@ -129,14 +129,6 @@ export interface AccidentRecord {
   description: string;
 }
 
-export interface Prescription {
-  id: string;
-  date: string;
-  essence: string;
-  status?: 'open' | 'closed';
-  closedDate?: string;
-}
-
 export interface CustomDocument {
   id: string;
   name: string;
@@ -179,7 +171,6 @@ export interface FacilityComponent {
   constructionData: ConstructionData[];
   technicalParameters: TechnicalParameter[];
   accidents: AccidentRecord[];
-  prescriptions: Prescription[];
   createdAt: string;
   updatedAt: string;
 }
