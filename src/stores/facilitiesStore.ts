@@ -1,17 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Facility, FacilityComponent, Organization, TerritorialAuthority } from '@/types/facilities';
+import { Facility, FacilityComponent, TerritorialAuthority } from '@/types/facilities';
 
 interface FacilitiesState {
-  organizations: Organization[];
   facilities: Facility[];
   components: FacilityComponent[];
   territorialAuthorities: TerritorialAuthority[];
-  
-  addOrganization: (org: Omit<Organization, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateOrganization: (id: string, updates: Partial<Organization>) => void;
-  deleteOrganization: (id: string) => void;
-  getOrganizationsByTenant: (tenantId: string) => Organization[];
   
   addFacility: (facility: Omit<Facility, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateFacility: (id: string, updates: Partial<Facility>) => void;
@@ -48,39 +42,6 @@ const mockTerritorialAuthorities: TerritorialAuthority[] = [
     address: 'г. Санкт-Петербург, Невский пр., д. 100',
     phone: '+7 (812) 987-65-43',
     email: 'spb@gosnadzor.ru'
-  }
-];
-
-const demoOrganizations: Organization[] = [
-  {
-    id: 'org-1',
-    tenantId: 'tenant-1',
-    fullName: 'Общество с ограниченной ответственностью "Газпром нефть"',
-    shortName: 'ООО "Газпром нефть"',
-    inn: '7736050003',
-    kpp: '773601001',
-    ogrn: '1027700070903',
-    address: 'г. Москва, ул. Почтовая, д. 26, стр. 1',
-    headFullName: 'Дьяков Александр Владимирович',
-    headPosition: 'Генеральный директор',
-    isActive: true,
-    createdAt: '2024-01-15T10:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z',
-  },
-  {
-    id: 'org-2',
-    tenantId: 'tenant-1',
-    fullName: 'Публичное акционерное общество "Нефтяная компания Лукойл"',
-    shortName: 'ПАО "Лукойл"',
-    inn: '7708004767',
-    kpp: '770801001',
-    ogrn: '1027700035769',
-    address: 'г. Москва, Сретенский бульвар, д. 11',
-    headFullName: 'Федоров Вадим Львович',
-    headPosition: 'Президент',
-    isActive: true,
-    createdAt: '2024-01-20T10:00:00Z',
-    updatedAt: '2024-01-20T10:00:00Z',
   }
 ];
 
@@ -319,40 +280,9 @@ const demoComponents: FacilityComponent[] = [
 export const useFacilitiesStore = create<FacilitiesState>()(
   persist(
     (set, get) => ({
-      organizations: demoOrganizations,
       facilities: demoFacilities,
       components: demoComponents,
       territorialAuthorities: mockTerritorialAuthorities,
-      
-      addOrganization: (org) => {
-        const newOrg: Organization = {
-          ...org,
-          id: crypto.randomUUID(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        set((state) => ({
-          organizations: [...state.organizations, newOrg],
-        }));
-      },
-      
-      updateOrganization: (id, updates) => {
-        set((state) => ({
-          organizations: state.organizations.map((org) =>
-            org.id === id ? { ...org, ...updates, updatedAt: new Date().toISOString() } : org
-          ),
-        }));
-      },
-      
-      deleteOrganization: (id) => {
-        set((state) => ({
-          organizations: state.organizations.filter((org) => org.id !== id),
-        }));
-      },
-      
-      getOrganizationsByTenant: (tenantId) => {
-        return get().organizations.filter((org) => org.tenantId === tenantId);
-      },
       
       addFacility: (facility) => {
         const newFacility: Facility = {

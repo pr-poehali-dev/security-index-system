@@ -4,45 +4,24 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
 import { useAuthStore } from '@/stores/authStore';
-import { useFacilitiesStore } from '@/stores/facilitiesStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useToast } from '@/hooks/use-toast';
-import OrganizationDialog from './OrganizationDialog';
-import OrganizationsTable from './OrganizationsTable';
+import { useNavigate } from 'react-router-dom';
 
 export default function OrganizationsTab() {
   const user = useAuthStore((state) => state.user);
-  const { getOrganizationsByTenant, deleteOrganization } = useFacilitiesStore();
+  const navigate = useNavigate();
+  const { getOrganizationsByTenant } = useSettingsStore();
   const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
-  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
-  const [showDialog, setShowDialog] = useState(false);
-  const [editingOrg, setEditingOrg] = useState<string | null>(null);
 
   const filteredOrganizations = organizations.filter((org) => {
     const query = searchQuery.toLowerCase();
     return (
-      org.fullName.toLowerCase().includes(query) ||
-      org.shortName?.toLowerCase().includes(query) ||
+      org.name.toLowerCase().includes(query) ||
       org.inn.includes(query)
     );
   });
-
-  const handleAdd = () => {
-    setEditingOrg(null);
-    setShowDialog(true);
-  };
-
-  const handleEdit = (id: string) => {
-    setEditingOrg(id);
-    setShowDialog(true);
-  };
-
-  const handleDelete = (id: string) => {
-    if (confirm('Удалить организацию?')) {
-      deleteOrganization(id);
-      toast({ title: 'Организация удалена' });
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -50,11 +29,14 @@ export default function OrganizationsTab() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Организации тенанта</CardTitle>
-            <Button onClick={handleAdd}>
-              <Icon name="Plus" size={16} className="mr-2" />
-              Добавить организацию
+            <Button onClick={() => navigate('/settings')}>
+              <Icon name="Settings" size={16} className="mr-2" />
+              Управление организациями
             </Button>
           </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            Организации управляются в разделе Настройки → Организации
+          </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-4">
@@ -73,19 +55,48 @@ export default function OrganizationsTab() {
             </div>
           </div>
 
-          <OrganizationsTable
-            organizations={filteredOrganizations}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+          <div className="rounded-md border">
+            <table className="w-full">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="p-3 text-left font-medium">Название</th>
+                  <th className="p-3 text-left font-medium">ИНН</th>
+                  <th className="p-3 text-left font-medium">КПП</th>
+                  <th className="p-3 text-left font-medium">Адрес</th>
+                  <th className="p-3 text-left font-medium">Статус</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredOrganizations.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                      Организации не найдены. Добавьте организации в разделе Настройки.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredOrganizations.map((org) => (
+                    <tr key={org.id} className="border-t hover:bg-muted/50">
+                      <td className="p-3">{org.name}</td>
+                      <td className="p-3">{org.inn}</td>
+                      <td className="p-3">{org.kpp || '—'}</td>
+                      <td className="p-3">{org.address || '—'}</td>
+                      <td className="p-3">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          org.status === 'active' 
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                            : 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+                        }`}>
+                          {org.status === 'active' ? 'Активна' : 'Неактивна'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </CardContent>
       </Card>
-
-      <OrganizationDialog
-        open={showDialog}
-        onOpenChange={setShowDialog}
-        organizationId={editingOrg}
-      />
     </div>
   );
 }
