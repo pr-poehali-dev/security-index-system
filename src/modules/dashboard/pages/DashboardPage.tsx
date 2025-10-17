@@ -3,7 +3,7 @@
 import { useMemo, memo, useCallback, useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
-import { useCatalogStore } from '@/stores/catalogStore';
+import { useFacilitiesStore } from '@/stores/facilitiesStore';
 import { useTaskStore } from '@/stores/taskStore';
 import { useIncidentsStore } from '@/stores/incidentsStore';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -46,7 +46,8 @@ const DashboardPage = memo(function DashboardPage() {
     return <Navigate to={ROUTES.TENANTS} replace />;
   }
   
-  const { objects, organizations: catalogOrganizations } = useCatalogStore();
+  const { getFacilitiesByTenant } = useFacilitiesStore();
+  const objects = user?.tenantId ? getFacilitiesByTenant(user.tenantId) : [];
   const tasks = useTaskStore((state) => state.tasks);
   const { incidents } = useIncidentsStore();
   const personnel = useSettingsStore((state) => state.personnel);

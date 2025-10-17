@@ -12,7 +12,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useAttestationStore } from '@/stores/certificationStore';
+import { useAttestationStore } from '@/stores/attestationStore';
 import { useComplianceCalculations } from '../../hooks/useComplianceCalculations';
 import { useComplianceSelection } from '../../hooks/useComplianceSelection';
 import MassActionDialog from '../orders/MassActionDialog';

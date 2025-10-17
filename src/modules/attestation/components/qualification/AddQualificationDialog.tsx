@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
-import { useQualificationStore } from '../../stores/qualificationStore';
+import { useDpoQualificationStore } from '@/stores/dpoQualificationStore';
 import { useToast } from '@/hooks/use-toast';
 import { 
   CERTIFICATION_CATEGORIES, 
@@ -37,22 +37,23 @@ export default function AddQualificationDialog({
   onOpenChange,
   employeeId,
 }: AddQualificationDialogProps) {
-  const addCertificate = useQualificationStore((state) => state.addCertificate);
+  const addQualification = useDpoQualificationStore((state) => state.addQualification);
   const { toast } = useToast();
 
-  const [category, setCategory] = useState('');
-  const [certificationTypeId, setCertificationTypeId] = useState('');
-  const [number, setNumber] = useState('');
+  const [category, setCategory] = useState<'industrial_safety' | 'energy_safety' | 'labor_safety' | 'ecology'>('industrial_safety');
+  const [programName, setProgramName] = useState('');
+  const [certificateNumber, setCertificateNumber] = useState('');
   const [issueDate, setIssueDate] = useState('');
-  const [trainingCenterId, setTrainingCenterId] = useState('');
+  const [expiryDate, setExpiryDate] = useState('');
+  const [duration, setDuration] = useState('72');
+  const [trainingOrganizationId, setTrainingOrganizationId] = useState('');
+  const [trainingOrganizationName, setTrainingOrganizationName] = useState('');
   const [scanFile, setScanFile] = useState<File | null>(null);
   const [notes, setNotes] = useState('');
 
   const trainingCenters: Array<{id: string; name: string}> = [];
 
-  const certificationAreas = category 
-    ? CERTIFICATION_AREAS_BY_CATEGORY[category as keyof typeof CERTIFICATION_AREAS_BY_CATEGORY] || []
-    : [];
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -80,7 +81,7 @@ export default function AddQualificationDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!certificationTypeId || !number || !issueDate || !trainingCenterId) {
+    if (!programName || !certificateNumber || !issueDate || !expiryDate || !trainingOrganizationId) {
       toast({
         title: 'Ошибка',
         description: 'Заполните все обязательные поля',
@@ -90,13 +91,17 @@ export default function AddQualificationDialog({
     }
 
     try {
-      await addCertificate({
-        employeeId,
-        certificationTypeId,
-        number,
+      addQualification({
+        personnelId: employeeId,
+        tenantId: 'tenant-1',
+        category,
+        programName,
+        trainingOrganizationId,
+        trainingOrganizationName: trainingOrganizationName || 'Учебный центр',
+        certificateNumber,
         issueDate,
-        trainingCenterId,
-        scanFile: scanFile || undefined,
+        expiryDate,
+        duration: parseInt(duration) || 72,
         notes: notes || undefined,
       });
 
@@ -105,11 +110,14 @@ export default function AddQualificationDialog({
         description: 'Удостоверение повышения квалификации добавлено',
       });
 
-      setCategory('');
-      setCertificationTypeId('');
-      setNumber('');
+      setCategory('industrial_safety');
+      setProgramName('');
+      setCertificateNumber('');
       setIssueDate('');
-      setTrainingCenterId('');
+      setExpiryDate('');
+      setDuration('72');
+      setTrainingOrganizationId('');
+      setTrainingOrganizationName('');
       setScanFile(null);
       setNotes('');
       onOpenChange(false);
@@ -140,10 +148,7 @@ export default function AddQualificationDialog({
             <Label htmlFor="category">
               Категория аттестации <span className="text-destructive">*</span>
             </Label>
-            <Select value={category} onValueChange={(value) => {
-              setCategory(value);
-              setCertificationTypeId('');
-            }}>
+            <Select value={category} onValueChange={(value) => setCategory(value as any)}>
               <SelectTrigger id="category">
                 <SelectValue placeholder="Выберите категорию" />
               </SelectTrigger>
@@ -158,36 +163,26 @@ export default function AddQualificationDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="certificationTypeId">
-              Область аттестации <span className="text-destructive">*</span>
+            <Label htmlFor="programName">
+              Название программы <span className="text-destructive">*</span>
             </Label>
-            <Select 
-              value={certificationTypeId} 
-              onValueChange={setCertificationTypeId}
-              disabled={!category}
-            >
-              <SelectTrigger id="certificationTypeId">
-                <SelectValue placeholder={category ? "Выберите область" : "Сначала выберите категорию"} />
-              </SelectTrigger>
-              <SelectContent>
-                {certificationAreas.map((area) => (
-                  <SelectItem key={area.code} value={area.code}>
-                    {area.code} - {area.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Input
+              id="programName"
+              value={programName}
+              onChange={(e) => setProgramName(e.target.value)}
+              placeholder="Промышленная безопасность опасных производственных объектов"
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="number">
+            <Label htmlFor="certificateNumber">
               Номер удостоверения <span className="text-destructive">*</span>
             </Label>
             <Input
-              id="number"
-              value={number}
-              onChange={(e) => setNumber(e.target.value)}
-              placeholder="ПК-2023-001234"
+              id="certificateNumber"
+              value={certificateNumber}
+              onChange={(e) => setCertificateNumber(e.target.value)}
+              placeholder="ДПО-2023-001234"
             />
           </div>
 
@@ -205,27 +200,54 @@ export default function AddQualificationDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="trainingCenterId">
-              Учебный центр <span className="text-destructive">*</span>
+            <Label htmlFor="expiryDate">
+              Срок действия <span className="text-destructive">*</span>
             </Label>
-            <Select value={trainingCenterId} onValueChange={setTrainingCenterId}>
-              <SelectTrigger id="trainingCenterId">
-                <SelectValue placeholder="Выберите учебный центр" />
-              </SelectTrigger>
-              <SelectContent>
-                {trainingCenters.length > 0 ? (
-                  trainingCenters.map((center) => (
-                    <SelectItem key={center.id} value={center.id}>
-                      {center.name}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <SelectItem value="none" disabled>
-                    Нет доступных учебных центров
-                  </SelectItem>
-                )}
-              </SelectContent>
-            </Select>
+            <Input
+              id="expiryDate"
+              type="date"
+              value={expiryDate}
+              onChange={(e) => setExpiryDate(e.target.value)}
+              min={issueDate || new Date().toISOString().split('T')[0]}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="duration">
+              Длительность (часов) <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="duration"
+              type="number"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              placeholder="72"
+              min="1"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="trainingOrganizationId">
+              ID учебного центра <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="trainingOrganizationId"
+              value={trainingOrganizationId}
+              onChange={(e) => setTrainingOrganizationId(e.target.value)}
+              placeholder="training-center-1"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="trainingOrganizationName">
+              Название учебного центра
+            </Label>
+            <Input
+              id="trainingOrganizationName"
+              value={trainingOrganizationName}
+              onChange={(e) => setTrainingOrganizationName(e.target.value)}
+              placeholder="АНО ДПО \"Учебный центр\""
+            />
           </div>
 
           <div className="space-y-2">
