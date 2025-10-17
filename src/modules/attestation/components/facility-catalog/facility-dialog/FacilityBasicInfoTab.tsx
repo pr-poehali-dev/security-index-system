@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/select';
 import { useAuthStore } from '@/stores/authStore';
 import { useFacilitiesStore } from '@/stores/facilitiesStore';
-import { useEmployeesStore } from '@/stores/employeesStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { Facility } from '@/types/facilities';
 
 interface FacilityBasicInfoTabProps {
@@ -24,9 +24,22 @@ export default function FacilityBasicInfoTab({
 }: FacilityBasicInfoTabProps) {
   const user = useAuthStore((state) => state.user);
   const { getOrganizationsByTenant } = useFacilitiesStore();
-  const { getEmployeesByTenant } = useEmployeesStore();
+  const personnel = useSettingsStore((state) => state.personnel);
+  const people = useSettingsStore((state) => state.people);
+  const positions = useSettingsStore((state) => state.positions);
   const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
-  const employees = user?.tenantId ? getEmployeesByTenant(user.tenantId) : [];
+  
+  const employees = user?.tenantId ? personnel
+    .filter(p => p.tenantId === user.tenantId && p.status === 'active')
+    .map(p => {
+      const person = people.find(per => per.id === p.personId);
+      const position = positions.find(pos => pos.id === p.positionId);
+      return {
+        id: p.id,
+        fullName: person ? `${person.lastName} ${person.firstName} ${person.middleName || ''}`.trim() : 'Неизвестно',
+        position: position?.name || 'Неизвестно',
+      };
+    }) : [];
 
   return (
     <div className="space-y-4">
