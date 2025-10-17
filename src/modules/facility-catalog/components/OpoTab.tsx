@@ -32,6 +32,7 @@ export default function OpoTab() {
   const [editingComponent, setEditingComponent] = useState<string | null>(null);
   const [selectedOrganizationId, setSelectedOrganizationId] = useState<string | null>(null);
   const [selectedParentOpoId, setSelectedParentOpoId] = useState<string | null>(null);
+  const [selectedSubType, setSelectedSubType] = useState<'tu' | 'zs' | null>(null);
   const [selectedComponentType, setSelectedComponentType] = useState<'technical_device' | 'building_structure' | null>(null);
 
   const filteredOrganizations = organizations.filter((org) => {
@@ -59,6 +60,7 @@ export default function OpoTab() {
 
   const handleAddTuZs = (parentOpoId: string, subType: 'tu' | 'zs') => {
     setSelectedParentOpoId(parentOpoId);
+    setSelectedSubType(subType);
     setSelectedComponentType(subType === 'tu' ? 'technical_device' : 'building_structure');
     setEditingComponent(null);
     setShowComponentDialog(true);
