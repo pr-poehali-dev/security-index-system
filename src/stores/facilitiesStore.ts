@@ -147,7 +147,7 @@ const demoComponents: FacilityComponent[] = [
     ],
     technicalParameters: [],
     accidents: [],
-    prescriptions: [],
+    rostechnadzorDirectives: [],
     createdAt: '2024-02-01T11:00:00Z',
     updatedAt: '2024-02-01T11:00:00Z',
   },
@@ -179,7 +179,7 @@ const demoComponents: FacilityComponent[] = [
       { id: 'tp3', parameter: 'Рабочее давление', value: '75.0', unit: 'атм' }
     ],
     accidents: [],
-    prescriptions: [],
+    rostechnadzorDirectives: [],
     createdAt: '2024-02-01T11:30:00Z',
     updatedAt: '2024-02-01T11:30:00Z',
   },
@@ -209,7 +209,7 @@ const demoComponents: FacilityComponent[] = [
     ],
     technicalParameters: [],
     accidents: [],
-    prescriptions: [],
+    rostechnadzorDirectives: [],
     createdAt: '2024-02-05T11:00:00Z',
     updatedAt: '2024-02-05T11:00:00Z',
   },
@@ -241,7 +241,7 @@ const demoComponents: FacilityComponent[] = [
       { id: 'tp6', parameter: 'Пропускная способность', value: '45', unit: 'м³/с' }
     ],
     accidents: [],
-    prescriptions: [],
+    rostechnadzorDirectives: [],
     createdAt: '2024-02-05T11:30:00Z',
     updatedAt: '2024-02-05T11:30:00Z',
   },
@@ -272,7 +272,7 @@ const demoComponents: FacilityComponent[] = [
       { id: 'tp7', parameter: 'Рабочая температура', value: '180', unit: '°C' }
     ],
     accidents: [],
-    prescriptions: [],
+    rostechnadzorDirectives: [],
     createdAt: '2024-02-10T11:00:00Z',
     updatedAt: '2024-02-10T11:00:00Z',
   }

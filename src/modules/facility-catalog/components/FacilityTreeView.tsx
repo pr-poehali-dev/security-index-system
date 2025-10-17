@@ -6,6 +6,7 @@ import Icon from '@/components/ui/icon';
 import { Facility } from '@/types/facilities';
 import { Organization } from '@/types';
 import { cn } from '@/lib/utils';
+import { useFacilitiesStore } from '@/stores/facilitiesStore';
 
 interface FacilityTreeViewProps {
   organizations: Organization[];
@@ -62,12 +63,17 @@ export default function FacilityTreeView({
     setExpandedOpos(newExpanded);
   };
 
+  const { getComponentsByFacility } = useFacilitiesStore();
+
   const getOposByOrganization = (orgId: string) => {
-    return facilities.filter(f => f.organizationId === orgId && f.type === 'opo' && !f.parentId);
+    return facilities.filter(f => f.organizationId === orgId && f.type === 'opo');
   };
 
   const getTuZsByOpo = (opoId: string, subType: 'tu' | 'zs') => {
-    return facilities.filter(f => f.parentId === opoId && f.subType === subType);
+    const components = getComponentsByFacility(opoId);
+    return components.filter(c => 
+      subType === 'tu' ? c.type === 'technical_device' : c.type === 'building_structure'
+    );
   };
 
   if (organizations.length === 0) {

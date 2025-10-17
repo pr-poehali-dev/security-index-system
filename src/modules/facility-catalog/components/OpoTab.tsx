@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Facility } from '@/types/facilities';
 import FacilityDialog from './FacilityDialog';
 import FacilityTreeView from './FacilityTreeView';
+import ComponentDialog from './ComponentDialog';
 
 export default function OpoTab() {
   const user = useAuthStore((state) => state.user);
@@ -17,15 +18,18 @@ export default function OpoTab() {
   
   const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
   const allFacilities = user?.tenantId ? getFacilitiesByTenant(user.tenantId) : [];
-  const facilities = allFacilities.filter(f => f.type === 'opo' || f.subType);
+  const facilities = allFacilities.filter(f => f.type === 'opo');
+  const allComponents = user?.tenantId ? useFacilitiesStore.getState().getComponentsByTenant(user.tenantId) : [];
   
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [showDialog, setShowDialog] = useState(false);
+  const [showComponentDialog, setShowComponentDialog] = useState(false);
   const [editingFacility, setEditingFacility] = useState<string | null>(null);
+  const [editingComponent, setEditingComponent] = useState<string | null>(null);
   const [selectedOrganizationId, setSelectedOrganizationId] = useState<string | null>(null);
   const [selectedParentOpoId, setSelectedParentOpoId] = useState<string | null>(null);
-  const [selectedSubType, setSelectedSubType] = useState<'tu' | 'zs' | null>(null);
+  const [selectedComponentType, setSelectedComponentType] = useState<'technical_device' | 'building_structure' | null>(null);
 
   const filteredOrganizations = organizations.filter((org) => {
     const query = searchQuery.toLowerCase();
@@ -51,14 +55,10 @@ export default function OpoTab() {
   };
 
   const handleAddTuZs = (parentOpoId: string, subType: 'tu' | 'zs') => {
-    const parentOpo = facilities.find(f => f.id === parentOpoId);
-    if (parentOpo) {
-      setSelectedOrganizationId(parentOpo.organizationId);
-      setSelectedParentOpoId(parentOpoId);
-      setSelectedSubType(subType);
-      setEditingFacility(null);
-      setShowDialog(true);
-    }
+    setSelectedParentOpoId(parentOpoId);
+    setSelectedComponentType(subType === 'tu' ? 'technical_device' : 'building_structure');
+    setEditingComponent(null);
+    setShowComponentDialog(true);
   };
 
   const handleEdit = (facility: Facility) => {
@@ -101,9 +101,9 @@ export default function OpoTab() {
   };
 
   const stats = {
-    totalOpo: facilities.filter(f => f.type === 'opo' && !f.parentId).length,
-    totalTu: facilities.filter(f => f.subType === 'tu').length,
-    totalZs: facilities.filter(f => f.subType === 'zs').length,
+    totalOpo: facilities.length,
+    totalTu: allComponents.filter(c => c.type === 'technical_device').length,
+    totalZs: allComponents.filter(c => c.type === 'building_structure').length,
     class1: facilities.filter(f => f.hazardClass === 'I').length,
     class2: facilities.filter(f => f.hazardClass === 'II').length,
     class3: facilities.filter(f => f.hazardClass === 'III').length,
@@ -251,7 +251,15 @@ export default function OpoTab() {
         facilityId={editingFacility}
         preselectedOrganizationId={selectedOrganizationId}
         parentOpoId={selectedParentOpoId}
-        subType={selectedSubType}
+        subType={null}
+      />
+
+      <ComponentDialog
+        open={showComponentDialog}
+        onOpenChange={setShowComponentDialog}
+        componentId={editingComponent}
+        preselectedFacilityId={selectedParentOpoId}
+        preselectedType={selectedComponentType}
       />
     </div>
   );

@@ -22,17 +22,22 @@ import ComponentMaintenanceTab from './component-dialog/ComponentMaintenanceTab'
 import ComponentConstructionTab from './component-dialog/ComponentConstructionTab';
 import ComponentTechnicalParamsTab from './component-dialog/ComponentTechnicalParamsTab';
 import ComponentAccidentsTab from './component-dialog/ComponentAccidentsTab';
+import ComponentDirectivesTab from './component-dialog/ComponentDirectivesTab';
 
 interface ComponentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   componentId: string | null;
+  preselectedFacilityId?: string | null;
+  preselectedType?: 'technical_device' | 'building_structure' | null;
 }
 
 export default function ComponentDialog({
   open,
   onOpenChange,
   componentId,
+  preselectedFacilityId,
+  preselectedType,
 }: ComponentDialogProps) {
   const user = useAuthStore((state) => state.user);
   const { components, addComponent, updateComponent } = useFacilitiesStore();
@@ -69,6 +74,7 @@ export default function ComponentDialog({
     constructionData: [],
     technicalParameters: [],
     accidents: [],
+    rostechnadzorDirectives: [],
   });
 
   useEffect(() => {
@@ -79,7 +85,8 @@ export default function ComponentDialog({
       }
     } else {
       setFormData({
-        type: 'technical_device',
+        type: preselectedType || 'technical_device',
+        facilityId: preselectedFacilityId || undefined,
         fullName: '',
         shortName: '',
         deviceType: '',
@@ -108,10 +115,11 @@ export default function ComponentDialog({
         constructionData: [],
         technicalParameters: [],
         accidents: [],
+        rostechnadzorDirectives: [],
       });
     }
     setActiveTab('basic');
-  }, [componentId, components, open]);
+  }, [componentId, components, open, preselectedFacilityId, preselectedType]);
 
   const handleSubmit = () => {
     if (!user?.tenantId) return;
@@ -157,7 +165,7 @@ export default function ComponentDialog({
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
-          <TabsList className="grid w-full grid-cols-8 h-auto">
+          <TabsList className="grid w-full grid-cols-9 h-auto">
             <TabsTrigger value="basic" className="text-xs px-2">Основные сведения</TabsTrigger>
             <TabsTrigger value="identification" className="text-xs px-2">Идентификация</TabsTrigger>
             <TabsTrigger value="documentation" className="text-xs px-2">Документация</TabsTrigger>
@@ -166,6 +174,7 @@ export default function ComponentDialog({
             <TabsTrigger value="construction" className="text-xs px-2">Данные о конструкции</TabsTrigger>
             <TabsTrigger value="technical" className="text-xs px-2">Технические параметры</TabsTrigger>
             <TabsTrigger value="accidents" className="text-xs px-2">Сведения об авариях</TabsTrigger>
+            <TabsTrigger value="directives" className="text-xs px-2">Предписания РТН</TabsTrigger>
           </TabsList>
 
           <ScrollArea className="flex-1 mt-4">
@@ -213,6 +222,13 @@ export default function ComponentDialog({
               <ComponentAccidentsTab
                 accidents={formData.accidents || []}
                 onChange={(accidents) => updateFormField('accidents', accidents)}
+              />
+            </TabsContent>
+
+            <TabsContent value="directives" className="mt-0">
+              <ComponentDirectivesTab
+                directives={formData.rostechnadzorDirectives || []}
+                onChange={(directives) => updateFormField('rostechnadzorDirectives', directives)}
               />
             </TabsContent>
           </ScrollArea>

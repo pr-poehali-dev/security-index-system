@@ -129,6 +129,12 @@ export interface AccidentRecord {
   description: string;
 }
 
+export interface RostechnadzorDirective {
+  id: string;
+  date: string;
+  description: string;
+}
+
 export interface CustomDocument {
   id: string;
   name: string;
@@ -171,6 +177,7 @@ export interface FacilityComponent {
   constructionData: ConstructionData[];
   technicalParameters: TechnicalParameter[];
   accidents: AccidentRecord[];
+  rostechnadzorDirectives: RostechnadzorDirective[];
   createdAt: string;
   updatedAt: string;
 }
