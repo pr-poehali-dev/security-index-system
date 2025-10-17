@@ -31,7 +31,7 @@ export default function FacilityCatalogPage() {
             className="flex-col gap-1.5 h-20 px-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:border-emerald-500"
           >
             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activeTab === 'opo' ? 'bg-white/20' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
-              <Icon name="Factory" size={18} className={activeTab === 'opo' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'} />
+              <Icon name="TriangleAlert" size={18} className={activeTab === 'opo' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'} />
             </div>
             <span className="text-xs font-medium text-center leading-tight">ОПО</span>
           </TabsTrigger>
@@ -40,7 +40,7 @@ export default function FacilityCatalogPage() {
             className="flex-col gap-1.5 h-20 px-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:border-emerald-500"
           >
             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activeTab === 'gts' ? 'bg-white/20' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
-              <Icon name="Dam" size={18} className={activeTab === 'gts' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'} fallback="Waves" />
+              <Icon name="Waves" size={18} className={activeTab === 'gts' ? 'text-white' : 'text-emerald-600 dark:text-emerald-400'} />
             </div>
             <span className="text-xs font-medium text-center leading-tight">ГТС</span>
           </TabsTrigger>
