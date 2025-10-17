@@ -49,7 +49,7 @@ export default function CalendarFilters({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Все категории</SelectItem>
-          {categories.map(cat => (
+          {categories.filter(cat => cat && cat.trim() !== '').map(cat => (
             <SelectItem key={cat} value={cat}>{cat}</SelectItem>
           ))}
         </SelectContent>
