@@ -1,10 +1,13 @@
-import { useCatalogStore } from '@/stores/catalogStore';
+import { useFacilitiesStore } from '@/stores/facilitiesStore';
+import { useAuthStore } from '@/stores/authStore';
 import { useExpiryNotifications } from './useExpiryNotifications';
 import { differenceInDays, parseISO } from 'date-fns';
 import type { CatalogObject } from '@/types';
 
 export function useCatalogNotifications() {
-  const { objects } = useCatalogStore();
+  const user = useAuthStore((state) => state.user);
+  const { getFacilitiesByTenant } = useFacilitiesStore();
+  const objects = user?.tenantId ? getFacilitiesByTenant(user.tenantId) : [];
 
   useExpiryNotifications<CatalogObject>({
     source: 'catalog',

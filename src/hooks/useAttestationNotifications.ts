@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useAttestationStore } from '@/stores/certificationStore';
+import { useAttestationStore } from '@/stores/attestationStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useExpiryNotifications } from './useExpiryNotifications';
 import { differenceInDays, parseISO } from 'date-fns';

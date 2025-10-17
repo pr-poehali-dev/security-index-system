@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
-import { useQualificationStore } from '../../stores/qualificationStore';
-import { CERTIFICATION_AREAS_BY_CATEGORY } from '@/lib/constants';
+import { useDpoQualificationStore } from '@/stores/dpoQualificationStore';
+
 import {
   Table,
   TableBody,
@@ -29,23 +29,21 @@ interface QualificationCertificatesListProps {
 }
 
 export default function QualificationCertificatesList({ employeeId }: QualificationCertificatesListProps) {
-  const certificates = useQualificationStore((state) => 
-    state.getCertificatesByEmployee(employeeId)
+  const certificates = useDpoQualificationStore((state) => 
+    state.getQualificationsByPersonnel(employeeId)
   );
-  const deleteCertificate = useQualificationStore((state) => state.deleteCertificate);
+  const deleteQualification = useDpoQualificationStore((state) => state.deleteQualification);
   
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <Badge className="bg-green-500">Действует</Badge>;
-      case 'expiring_soon':
-        return <Badge className="bg-amber-500">Истекает</Badge>;
-      case 'expired':
-        return <Badge variant="destructive">Просрочено</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
+  const getStatusBadge = (expiryDate: string) => {
+    const daysLeft = getDaysUntilExpiry(expiryDate);
+    if (daysLeft < 0) {
+      return <Badge variant="destructive">Просрочено</Badge>;
+    } else if (daysLeft <= 30) {
+      return <Badge className="bg-amber-500">Истекает</Badge>;
+    } else {
+      return <Badge className="bg-green-500">Действует</Badge>;
     }
   };
 
@@ -60,27 +58,16 @@ export default function QualificationCertificatesList({ employeeId }: Qualificat
     return days;
   };
 
-  const getTrainingCenterName = (_centerId: string) => {
-    return 'Учебный центр';
-  };
+
 
   const handleDelete = async () => {
     if (deleteId) {
-      await deleteCertificate(deleteId);
+      await deleteQualification(deleteId);
       setDeleteId(null);
     }
   };
 
-  const getCertificationAreaName = (certTypeId: string) => {
-    const allAreas = [
-      ...CERTIFICATION_AREAS_BY_CATEGORY.industrial_safety,
-      ...CERTIFICATION_AREAS_BY_CATEGORY.energy_safety,
-      ...CERTIFICATION_AREAS_BY_CATEGORY.labor_safety,
-      ...CERTIFICATION_AREAS_BY_CATEGORY.ecology,
-    ];
-    const area = allAreas.find(a => a.code === certTypeId);
-    return area ? `${area.code} - ${area.name}` : certTypeId;
-  };
+
 
   if (certificates.length === 0) {
     return (
@@ -120,39 +107,40 @@ export default function QualificationCertificatesList({ employeeId }: Qualificat
             <TableBody>
               {certificates.map((cert) => {
                 const daysLeft = getDaysUntilExpiry(cert.expiryDate);
+                const firstDoc = cert.documents && cert.documents[0];
                 return (
                   <TableRow key={cert.id}>
                     <TableCell>
                       <div className="text-sm">
-                        {getCertificationAreaName(cert.certificationTypeId)}
+                        {cert.programName}
                       </div>
                     </TableCell>
-                    <TableCell className="font-medium">{cert.number}</TableCell>
+                    <TableCell className="font-medium">{cert.certificateNumber}</TableCell>
                     <TableCell>{formatDate(cert.issueDate)}</TableCell>
                     <TableCell>
                       <div className="flex flex-col">
                         <span>{formatDate(cert.expiryDate)}</span>
-                        {cert.status === 'expiring_soon' && daysLeft > 0 && (
+                        {daysLeft > 0 && daysLeft <= 30 && (
                           <span className="text-xs text-amber-600">
                             Осталось {daysLeft} дн.
                           </span>
                         )}
-                        {cert.status === 'expired' && (
+                        {daysLeft < 0 && (
                           <span className="text-xs text-red-600">
                             Просрочено на {Math.abs(daysLeft)} дн.
                           </span>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>{getTrainingCenterName(cert.trainingCenterId)}</TableCell>
-                    <TableCell>{getStatusBadge(cert.status)}</TableCell>
+                    <TableCell>{cert.trainingOrganizationName}</TableCell>
+                    <TableCell>{getStatusBadge(cert.expiryDate)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {cert.scanUrl && (
+                        {firstDoc && (
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => window.open(cert.scanUrl, '_blank')}
+                            onClick={() => window.open(firstDoc.fileUrl, '_blank')}
                           >
                             <Icon name="Eye" size={16} />
                           </Button>
@@ -178,7 +166,7 @@ export default function QualificationCertificatesList({ employeeId }: Qualificat
                 .filter(c => c.notes)
                 .map(cert => (
                   <div key={cert.id} className="text-sm bg-muted p-3 rounded">
-                    <span className="font-medium">{cert.number}:</span> {cert.notes}
+                    <span className="font-medium">{cert.certificateNumber}:</span> {cert.notes}
                   </div>
                 ))}
             </div>

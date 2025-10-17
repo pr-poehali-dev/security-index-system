@@ -8,7 +8,7 @@ import MonthView from '../MonthView';
 import YearView from '../YearView';
 import UpcomingCertificationsList from '../UpcomingCertificationsList';
 import DayCertificationsDialog from '../DayCertificationsDialog';
-import { useQualificationStore } from '../../stores/qualificationStore';
+import { useDpoQualificationStore } from '@/stores/dpoQualificationStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { CERTIFICATION_AREAS_BY_CATEGORY } from '@/lib/constants';
 
@@ -33,7 +33,7 @@ export default function AttestationCalendarTab() {
   const [filterCategory, setFilterCategory] = useState('all');
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
-  const qualificationCertificates = useQualificationStore(state => state.certificates);
+  const qualificationCertificates = useDpoQualificationStore(state => state.qualifications);
   const { personnel } = useSettingsStore();
 
   const getCertificationAreaName = (certTypeId: string) => {
@@ -48,8 +48,15 @@ export default function AttestationCalendarTab() {
   };
 
   const qualificationEvents: CalendarCertification[] = qualificationCertificates.map(cert => {
-    const employee = personnel.find(p => p.id === cert.employeeId);
+    const employee = personnel.find(p => p.id === cert.personnelId);
     const daysLeft = Math.floor((new Date(cert.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    
+    let status: 'valid' | 'expiring_soon' | 'expired' = 'valid';
+    if (daysLeft < 0) {
+      status = 'expired';
+    } else if (daysLeft <= 30) {
+      status = 'expiring_soon';
+    }
     
     return {
       id: `qual-${cert.id}`,
@@ -57,9 +64,9 @@ export default function AttestationCalendarTab() {
       employeePosition: employee?.position || '',
       department: employee?.department || '',
       category: 'Удостоверение ПК',
-      area: getCertificationAreaName(cert.certificationTypeId),
+      area: cert.programName,
       expiryDate: cert.expiryDate,
-      status: cert.status,
+      status,
       daysLeft,
       type: 'qualification' as const
     };

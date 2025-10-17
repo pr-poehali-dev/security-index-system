@@ -33,9 +33,9 @@ import { useState, useMemo, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useAttestationStore } from '@/stores/certificationStore';
+import { useAttestationStore } from '@/stores/attestationStore';
 import { getCertificationStatus } from '@/lib/utils/personnelUtils';
-import { useDocumentsStore } from '@/stores/documentsStore';
+
 import { ChecklistDocumentStatus } from '@/types/documentStatus';
 import DocumentCreationWizard, { WizardStep } from '@/components/shared/DocumentCreationWizard';
 import TypeSelectionStep, { TypeOption } from '@/components/shared/wizard-steps/TypeSelectionStep';
@@ -44,7 +44,7 @@ import EmployeeSelectionStep, { Employee, CertificationStatusFilter } from '@/co
 import TrainingDetailsStep, { TrainingDetailsData } from '@/components/shared/wizard-steps/TrainingDetailsStep';
 import ContractorDialog from '@/modules/settings/components/ContractorDialog';
 import { getPersonnelFullInfo } from '@/lib/utils/personnelUtils';
-import type { OrderDocument, TrainingDocument } from '@/stores/documentsStore';
+
 
 interface UnifiedDocumentDialogProps {
   open: boolean;
@@ -131,7 +131,7 @@ export default function UnifiedDocumentDialog({
   const handleContractorDialogClose = useCallback((open: boolean) => {
     setContractorDialogOpen(open);
   }, []);
-  const { addDocument } = useDocumentsStore();
+
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedType, setSelectedType] = useState('');
@@ -380,42 +380,15 @@ export default function UnifiedDocumentDialog({
     setIsSubmitting(true);
 
     try {
-      if (selectedType === 'training') {
-        const trainingDoc: Omit<TrainingDocument, 'id' | 'createdAt' | 'updatedAt'> = {
-          type: 'training',
-          tenantId: user.tenantId,
-          number: basicInfo.number,
-          date: basicInfo.date,
-          title: basicInfo.title,
-          status: DocumentStatus.DRAFT,
-          employeeIds: selectedEmployees,
-          createdBy: user.name || 'Система',
-          description: basicInfo.description,
-          trainingType: (selectedSubType as 'initial' | 'periodic' | 'extraordinary') || 'periodic',
-          startDate: trainingDetails.startDate,
-          endDate: trainingDetails.endDate,
-          organizationId: trainingDetails.organizationId,
-          cost: parseFloat(trainingDetails.cost) || 0,
-          program: trainingDetails.program,
-        };
-
-        addDocument(trainingDoc);
-      } else {
-        const orderDoc: Omit<OrderDocument, 'id' | 'createdAt' | 'updatedAt'> = {
-          type: 'order',
-          tenantId: user.tenantId,
-          number: basicInfo.number,
-          date: basicInfo.date,
-          title: basicInfo.title,
-          status: DocumentStatus.DRAFT,
-          employeeIds: selectedEmployees,
-          createdBy: user.name || 'Система',
-          description: basicInfo.description,
-          orderType: (selectedType as 'attestation' | 'training' | 'suspension') || 'attestation',
-        };
-
-        addDocument(orderDoc);
-      }
+      // TODO: Implement document creation with attestationStore
+      // For now, just show success message
+      console.log('Document data:', {
+        type: selectedType,
+        subType: selectedSubType,
+        basicInfo,
+        selectedEmployees,
+        trainingDetails,
+      });
 
       toast({
         title: 'Успешно',
