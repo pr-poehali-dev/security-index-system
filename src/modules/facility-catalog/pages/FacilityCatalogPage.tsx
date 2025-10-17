@@ -5,7 +5,7 @@ import OpoTab from '../components/OpoTab';
 import GtsTab from '../components/GtsTab';
 import ComponentsTab from '../components/ComponentsTab';
 import ContractorsTab from '../components/ContractorsTab';
-import ReportsTab from '@/modules/catalog/components/tabs/ReportsTab';
+import ReportsTab from '../components/tabs/ReportsTab';
 
 export default function FacilityCatalogPage() {
   const [activeTab, setActiveTab] = useState('opo');
