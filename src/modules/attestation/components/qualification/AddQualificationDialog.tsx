@@ -20,7 +20,6 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
 import { useQualificationStore } from '../../stores/qualificationStore';
-import { useContractorsStore } from '@/modules/catalog/stores/contractorsStore';
 import { useToast } from '@/hooks/use-toast';
 import { 
   CERTIFICATION_CATEGORIES, 
@@ -39,7 +38,6 @@ export default function AddQualificationDialog({
   employeeId,
 }: AddQualificationDialogProps) {
   const addCertificate = useQualificationStore((state) => state.addCertificate);
-  const { contractors } = useContractorsStore();
   const { toast } = useToast();
 
   const [category, setCategory] = useState('');
@@ -50,7 +48,7 @@ export default function AddQualificationDialog({
   const [scanFile, setScanFile] = useState<File | null>(null);
   const [notes, setNotes] = useState('');
 
-  const trainingCenters = contractors.filter(c => c.type === 'training_center');
+  const trainingCenters: Array<{id: string; name: string}> = [];
 
   const certificationAreas = category 
     ? CERTIFICATION_AREAS_BY_CATEGORY[category as keyof typeof CERTIFICATION_AREAS_BY_CATEGORY] || []

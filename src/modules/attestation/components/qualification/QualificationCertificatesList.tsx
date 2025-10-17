@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { useQualificationStore } from '../../stores/qualificationStore';
-import { useContractorsStore } from '@/modules/catalog/stores/contractorsStore';
 import { CERTIFICATION_AREAS_BY_CATEGORY } from '@/lib/constants';
 import {
   Table,
@@ -34,7 +33,6 @@ export default function QualificationCertificatesList({ employeeId }: Qualificat
     state.getCertificatesByEmployee(employeeId)
   );
   const deleteCertificate = useQualificationStore((state) => state.deleteCertificate);
-  const { contractors } = useContractorsStore();
   
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -62,9 +60,8 @@ export default function QualificationCertificatesList({ employeeId }: Qualificat
     return days;
   };
 
-  const getTrainingCenterName = (centerId: string) => {
-    const center = contractors.find(c => c.id === centerId);
-    return center?.name || 'Не указан';
+  const getTrainingCenterName = (_centerId: string) => {
+    return 'Учебный центр';
   };
 
   const handleDelete = async () => {
