@@ -45,7 +45,7 @@ export default function EmployeeDetailsDialog({
           <DialogTitle>Карточка сотрудника</DialogTitle>
         </DialogHeader>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="certifications" className="flex items-center gap-2">
               <Icon name="Award" size={16} />
               Аттестации
@@ -53,6 +53,10 @@ export default function EmployeeDetailsDialog({
             <TabsTrigger value="qualifications" className="flex items-center gap-2">
               <Icon name="GraduationCap" size={16} />
               Удостоверения ПК
+            </TabsTrigger>
+            <TabsTrigger value="archive" className="flex items-center gap-2">
+              <Icon name="Archive" size={16} />
+              Архив
             </TabsTrigger>
           </TabsList>
 
@@ -226,6 +230,62 @@ export default function EmployeeDetailsDialog({
               position={employee.position}
               department={employee.department}
             />
+          </TabsContent>
+
+          <TabsContent value="archive" className="space-y-4">
+            <div className="pb-4 border-b">
+              <h3 className="font-semibold text-lg">Архив удостоверений</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Старые удостоверения, замененные на новые
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Icon name="GraduationCap" size={16} className="text-muted-foreground" />
+                        <h4 className="font-semibold">А.1 Общие требования промышленной безопасности</h4>
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400">
+                          Архив
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <p className="text-muted-foreground">Номер удостоверения:</p>
+                          <p className="font-medium">ДПО-2023-001</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Дата выдачи:</p>
+                          <p className="font-medium">15.06.2023</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Срок действия до:</p>
+                          <p className="font-medium text-muted-foreground">14.06.2024</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Заменено на:</p>
+                          <p className="font-medium text-emerald-600">ДПО-2024-123</p>
+                        </div>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      <Icon name="FileText" size={16} />
+                    </Button>
+                  </div>
+                  <div className="pt-3 border-t text-xs text-muted-foreground">
+                    Дата архивирования: {new Date().toLocaleDateString('ru-RU')}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="text-center py-8 text-muted-foreground">
+                <Icon name="Archive" size={48} className="mx-auto mb-4 opacity-20" />
+                <p>Показан 1 архивный документ</p>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </DialogContent>

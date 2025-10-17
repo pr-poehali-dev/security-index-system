@@ -6,17 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import EmployeeAttestationsTab from '../components/employees/EmployeeAttestationsTab';
 import ComplianceAnalysisTab from '../components/tabs/ComplianceAnalysisTab';
-import OrdersTrainingTab from '../components/tabs/OrdersTrainingTab';
 import ReportsTab from '../components/tabs/ReportsTab';
-import DirectoriesTab from '../components/tabs/DirectoriesTab';
-import NotificationsTab from '../components/tabs/NotificationsTab';
 import AttestationCalendarTab from '../components/tabs/AttestationCalendarTab';
-import TasksTab from '../components/tabs/TasksTab';
 import TrainingRequestsTab from '../components/tabs/TrainingRequestsTab';
-import TrainingCentersTab from '../components/tabs/TrainingCentersTab';
-import IncomingRequestsTab from '../components/tabs/IncomingRequestsTab';
-import QualificationRenewalTab from '../components/tabs/QualificationRenewalTab';
-import PersonnelComplianceTab from '../components/tabs/PersonnelComplianceTab';
+import TrainingTab from '../components/tabs/TrainingTab';
+import AttestationOrdersTab from '../components/tabs/AttestationOrdersTab';
+import SettingsTab from '../components/tabs/SettingsTab';
 
 const AttestationPage = memo(function AttestationPage() {
   return (
@@ -27,112 +22,72 @@ const AttestationPage = memo(function AttestationPage() {
         icon="GraduationCap"
       />
 
-      <Tabs defaultValue="personnel" className="space-y-6">
+      <Tabs defaultValue="employees" className="space-y-6">
         <TabsList className="h-auto flex-wrap justify-start gap-2 bg-transparent p-0">
-          <TabsTrigger value="personnel" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="UserCheck" size={20} />
-            <span className="text-xs font-medium text-center leading-tight">Соответствие<br/>персонала</span>
-          </TabsTrigger>
           <TabsTrigger value="employees" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="Users" size={20} />
             <span className="text-xs font-medium text-center leading-tight">Сотрудники и<br/>аттестации</span>
-          </TabsTrigger>
-          <TabsTrigger value="tasks" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="ListTodo" size={20} />
-            <span className="text-xs font-medium text-center leading-tight">Контроль<br/>сроков</span>
-          </TabsTrigger>
-          <TabsTrigger value="calendar" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="CalendarDays" size={20} />
-            <span className="text-xs font-medium text-center leading-tight">Календарь-<br/>планировщик</span>
           </TabsTrigger>
           <TabsTrigger value="compliance" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="Target" size={20} />
             <span className="text-xs font-medium text-center leading-tight">Анализ<br/>соответствия</span>
           </TabsTrigger>
+          <TabsTrigger value="training-requests" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="FileCheck" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Заявки на<br/>обучение</span>
+          </TabsTrigger>
+          <TabsTrigger value="training" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="GraduationCap" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Заявки на<br/>тренинг</span>
+          </TabsTrigger>
           <TabsTrigger value="orders" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="FileText" size={20} />
-            <span className="text-xs font-medium text-center leading-tight">Приказы и<br/>обучения</span>
+            <span className="text-xs font-medium text-center leading-tight">Приказы на<br/>аттестацию</span>
+          </TabsTrigger>
+          <TabsTrigger value="calendar" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="CalendarDays" size={20} />
+            <span className="text-xs font-medium text-center leading-tight">Календарь-<br/>планировщик</span>
           </TabsTrigger>
           <TabsTrigger value="reports" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Icon name="BarChart3" size={20} />
             <span className="text-xs font-medium">Отчеты</span>
           </TabsTrigger>
-          <TabsTrigger value="directories" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="BookOpen" size={20} />
-            <span className="text-xs font-medium">Справочники</span>
-          </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="Bell" size={20} />
-            <span className="text-xs font-medium">Уведомления</span>
-          </TabsTrigger>
-          <TabsTrigger value="training-requests" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="FileCheck" size={20} />
-            <span className="text-xs font-medium text-center leading-tight">Заявки на<br/>обучение</span>
-          </TabsTrigger>
-          <TabsTrigger value="training-centers" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="Building2" size={20} />
-            <span className="text-xs font-medium text-center leading-tight">Учебные<br/>центры</span>
-          </TabsTrigger>
-          <TabsTrigger value="incoming-requests" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="Inbox" size={20} />
-            <span className="text-xs font-medium text-center leading-tight">Входящие<br/>заявки (УЦ)</span>
-          </TabsTrigger>
-          <TabsTrigger value="renewal" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-            <Icon name="FileCheck2" size={20} />
-            <span className="text-xs font-medium text-center leading-tight">Продление<br/>удостоверений</span>
+          <TabsTrigger value="settings" className="flex-col gap-2 h-20 px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Icon name="Settings" size={20} />
+            <span className="text-xs font-medium">Настройки</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="personnel">
-          <PersonnelComplianceTab />
-        </TabsContent>
-
         <TabsContent value="employees">
           <EmployeeAttestationsTab />
-        </TabsContent>
-
-        <TabsContent value="tasks">
-          <TasksTab />
-        </TabsContent>
-
-        <TabsContent value="calendar">
-          <AttestationCalendarTab />
         </TabsContent>
 
         <TabsContent value="compliance">
           <ComplianceAnalysisTab />
         </TabsContent>
 
+        <TabsContent value="training-requests">
+          <TrainingRequestsTab />
+        </TabsContent>
+
+        <TabsContent value="training">
+          <TrainingTab />
+        </TabsContent>
+
         <TabsContent value="orders">
-          <OrdersTrainingTab />
+          <AttestationOrdersTab />
+        </TabsContent>
+
+        <TabsContent value="calendar">
+          <AttestationCalendarTab />
         </TabsContent>
 
         <TabsContent value="reports">
           <ReportsTab />
         </TabsContent>
 
-        <TabsContent value="directories">
-          <DirectoriesTab />
-        </TabsContent>
-
-        <TabsContent value="notifications">
-          <NotificationsTab />
-        </TabsContent>
-
-        <TabsContent value="training-requests">
-          <TrainingRequestsTab />
-        </TabsContent>
-
-        <TabsContent value="training-centers">
-          <TrainingCentersTab />
-        </TabsContent>
-
-        <TabsContent value="incoming-requests">
-          <IncomingRequestsTab />
-        </TabsContent>
-
-        <TabsContent value="renewal">
-          <QualificationRenewalTab />
+        <TabsContent value="settings">
+          <SettingsTab />
         </TabsContent>
       </Tabs>
     </div>

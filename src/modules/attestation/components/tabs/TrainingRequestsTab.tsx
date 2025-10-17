@@ -10,12 +10,59 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { useAuthStore } from '@/stores/authStore';
 import { useTrainingRequestsStore } from '@/stores/trainingRequestsStore';
 import { useTrainingCentersStore } from '@/stores/trainingCentersStore';
 import { useQualificationRenewalStore } from '@/stores/qualificationRenewalStore';
 import { TrainingRequest } from '@/types/attestation';
 import { useToast } from '@/hooks/use-toast';
+
+interface TrainingResult {
+  id: string;
+  organization: string;
+  fullName: string;
+  position: string;
+  attestationArea: string;
+  certificateNumber: string;
+  certificateDate: string;
+}
+
+const mockTrainingResults: TrainingResult[] = [
+  {
+    id: '1',
+    organization: 'ООО "Энерго"',
+    fullName: 'Петров Петр Петрович',
+    position: 'Инженер по ТБ',
+    attestationArea: 'А.1 Общие требования промышленной безопасности',
+    certificateNumber: 'ДПО-2024-123',
+    certificateDate: '2024-03-15',
+  },
+  {
+    id: '2',
+    organization: 'ООО "Энерго"',
+    fullName: 'Сидорова Анна Ивановна',
+    position: 'Инженер-энергетик',
+    attestationArea: 'Б.3 Эксплуатация электроустановок',
+    certificateNumber: 'ДПО-2024-124',
+    certificateDate: '2024-03-15',
+  },
+];
 
 export default function TrainingRequestsTab() {
   const user = useAuthStore((state) => state.user);
@@ -27,6 +74,9 @@ export default function TrainingRequestsTab() {
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [showResultsDialog, setShowResultsDialog] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<TrainingRequest | null>(null);
+  const [selectedResults, setSelectedResults] = useState<string[]>([]);
 
   const filteredRequests = requests.filter((req) => {
     if (statusFilter !== 'all' && req.status !== statusFilter) return false;
@@ -358,46 +408,155 @@ export default function TrainingRequestsTab() {
                         size="sm"
                         className="gap-2"
                         onClick={() => {
-                          updateRequest(request.id, { status: 'completed' });
-                          
-                          if (user?.tenantId && request.reason === 'expiring_qualification') {
-                            autoCreateRenewal(
-                              user.tenantId,
-                              request.employeeId,
-                              request.employeeName,
-                              `training-${Date.now()}`,
-                              request.programName,
-                              5,
-                              undefined,
-                              request.expiryDate
-                            );
-                            toast({ 
-                              title: 'Обучение завершено', 
-                              description: 'Автоматически создана заявка на продление удостоверения ПК' 
-                            });
-                          } else {
-                            toast({ title: 'Обучение завершено' });
-                          }
+                          setSelectedRequest(request);
+                          setShowResultsDialog(true);
                         }}
                       >
-                        <Icon name="CheckCircle2" size={16} />
-                        Завершить обучение
+                        <Icon name="Eye" size={16} />
+                        Просмотреть результаты обучения
+                      </Button>
+                    </div>
+                  )}
+
+                  {request.status === 'completed' && (
+                    <div className="pt-3 border-t">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-2"
+                        onClick={() => {
+                          setSelectedRequest(request);
+                          setShowResultsDialog(true);
+                        }}
+                      >
+                        <Icon name="Eye" size={16} />
+                        Просмотреть результаты
                       </Button>
                     </div>
                   )}
                 </CardContent>
               </Card>
             ))}
-
             {filteredRequests.length === 0 && (
               <div className="text-center py-12 text-muted-foreground">
-                <Icon name="Inbox" size={48} className="mx-auto mb-4 opacity-50" />
-                <p>Заявок не найдено</p>
+                <Icon name="Inbox" size={48} className="mx-auto mb-4 opacity-20" />
+                <p>Нет заявок по выбранным фильтрам</p>
               </div>
             )}
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={showResultsDialog} onOpenChange={setShowResultsDialog}>
+        <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Результаты обучения</DialogTitle>
+            <DialogDescription>
+              Заявка на обучение по программе "{selectedRequest?.programName}"
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">
+                    <input
+                      type="checkbox"
+                      className="rounded border-gray-300"
+                      checked={selectedResults.length === mockTrainingResults.length}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedResults(mockTrainingResults.map(r => r.id));
+                        } else {
+                          setSelectedResults([]);
+                        }
+                      }}
+                    />
+                  </TableHead>
+                  <TableHead>Организация</TableHead>
+                  <TableHead>ФИО</TableHead>
+                  <TableHead>Должность</TableHead>
+                  <TableHead>Область аттестации</TableHead>
+                  <TableHead>№ удостоверения</TableHead>
+                  <TableHead>Дата удостоверения</TableHead>
+                  <TableHead className="text-right">Действия</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mockTrainingResults.map((result) => (
+                  <TableRow key={result.id}>
+                    <TableCell>
+                      <input
+                        type="checkbox"
+                        className="rounded border-gray-300"
+                        checked={selectedResults.includes(result.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedResults([...selectedResults, result.id]);
+                          } else {
+                            setSelectedResults(selectedResults.filter(id => id !== result.id));
+                          }
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>{result.organization}</TableCell>
+                    <TableCell className="font-medium">{result.fullName}</TableCell>
+                    <TableCell>{result.position}</TableCell>
+                    <TableCell className="max-w-xs">{result.attestationArea}</TableCell>
+                    <TableCell>{result.certificateNumber}</TableCell>
+                    <TableCell>
+                      {new Date(result.certificateDate).toLocaleDateString('ru-RU')}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button variant="ghost" size="sm">
+                          <Icon name="Eye" size={16} />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            toast({
+                              title: 'Удостоверение принято',
+                              description: `Удостоверение ${result.certificateNumber} добавлено в карточку сотрудника`,
+                            });
+                          }}
+                        >
+                          <Icon name="Check" size={16} />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowResultsDialog(false)}>
+              Закрыть
+            </Button>
+            <Button
+              disabled={selectedResults.length === 0}
+              onClick={() => {
+                toast({
+                  title: 'Удостоверения приняты',
+                  description: `Принято ${selectedResults.length} удостоверений. Старые удостоверения перемещены в архив.`,
+                });
+                setSelectedResults([]);
+                setShowResultsDialog(false);
+                if (selectedRequest) {
+                  updateRequest(selectedRequest.id, { status: 'completed' });
+                }
+              }}
+            >
+              <Icon name="CheckCircle2" size={16} className="mr-2" />
+              Принять выбранные удостоверения ({selectedResults.length})
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Card className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border-purple-200 dark:border-purple-900">
         <CardContent className="p-6">
