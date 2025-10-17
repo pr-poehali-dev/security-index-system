@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useAttestationStore } from '@/stores/certificationStore';
+import { useAttestationStore } from '@/stores/attestationStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

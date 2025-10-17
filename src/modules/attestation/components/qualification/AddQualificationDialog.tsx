@@ -246,7 +246,7 @@ export default function AddQualificationDialog({
               id="trainingOrganizationName"
               value={trainingOrganizationName}
               onChange={(e) => setTrainingOrganizationName(e.target.value)}
-              placeholder="АНО ДПО \"Учебный центр\""
+              placeholder='АНО ДПО "Учебный центр"'
             />
           </div>
 

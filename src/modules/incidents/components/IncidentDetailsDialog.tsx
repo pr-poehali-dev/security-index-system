@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useIncidentsStore } from '@/stores/incidentsStore';
-import { useCatalogStore } from '@/stores/catalogStore';
+import { useFacilitiesStore } from '@/stores/facilitiesStore';
 import { useAuthStore } from '@/stores/authStore';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -21,8 +21,9 @@ interface IncidentDetailsDialogProps {
 
 export default function IncidentDetailsDialog({ incident, open, onOpenChange }: IncidentDetailsDialogProps) {
   const { updateIncident } = useIncidentsStore();
-  const { objects } = useCatalogStore();
+  const { getFacilitiesByTenant } = useFacilitiesStore();
   const user = useAuthStore((state) => state.user);
+  const objects = user?.tenantId ? getFacilitiesByTenant(user.tenantId) : [];
   const [activeTab, setActiveTab] = useState('details');
   const [newComment, setNewComment] = useState('');
   const [resolution, setResolution] = useState(incident.notes || '');
