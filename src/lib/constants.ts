@@ -19,6 +19,11 @@ export const MODULES: Record<ModuleType, { name: string; description: string; ic
     description: 'Учет опасных производственных объектов',
     icon: 'Building'
   },
+  'facility-catalog': {
+    name: 'ОПО и ГТС',
+    description: 'Опасные производственные объекты и гидротехнические сооружения',
+    icon: 'Factory'
+  },
   incidents: {
     name: 'Учет инцидентов',
     description: 'Регистрация и расследование инцидентов',
@@ -76,6 +81,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, ModuleType[]> = {
     'tenants',
     'attestation',
     'catalog',
+    'facility-catalog',
     'incidents',
     'checklists',
     'tasks',
@@ -89,6 +95,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, ModuleType[]> = {
   TenantAdmin: [
     'attestation',
     'catalog',
+    'facility-catalog',
     'incidents',
     'checklists',
     'tasks',
@@ -99,8 +106,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, ModuleType[]> = {
     'audit',
     'settings'
   ],
-  Auditor: ['attestation', 'catalog', 'incidents', 'checklists', 'examination', 'audit', 'knowledge-base'],
-  Manager: ['attestation', 'catalog', 'tasks', 'maintenance', 'knowledge-base'],
+  Auditor: ['attestation', 'catalog', 'facility-catalog', 'incidents', 'checklists', 'examination', 'audit', 'knowledge-base'],
+  Manager: ['attestation', 'catalog', 'facility-catalog', 'tasks', 'maintenance', 'knowledge-base'],
   Director: ['attestation', 'incidents', 'budget', 'knowledge-base'],
   TrainingCenterManager: ['training-center', 'knowledge-base']
 };

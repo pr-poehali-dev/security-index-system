@@ -19,6 +19,8 @@ const MODULE_ROUTES: Record<ModuleType, string> = {
   tenants: ROUTES.TENANTS,
   attestation: ROUTES.ATTESTATION,
   catalog: ROUTES.CATALOG,
+  'facility-catalog': ROUTES.FACILITY_CATALOG,
+  contractors: '',
   incidents: ROUTES.INCIDENTS,
   checklists: ROUTES.CHECKLISTS,
   tasks: ROUTES.TASKS,
@@ -155,56 +157,7 @@ const Sidebar = memo(function Sidebar() {
             );
           }
 
-          if (moduleKey === 'catalog') {
-            return (
-              <>
-                <NavLink
-                  key={moduleKey}
-                  to={ROUTES.CATALOG}
-                  title={sidebarCollapsed ? "Каталог объектов" : ""}
-                  className={({ isActive }) => cn(
-                    "flex items-center gap-3 rounded-lg mb-1 transition-colors relative",
-                    sidebarCollapsed ? "justify-center px-2 py-2.5" : "px-3 py-2.5",
-                    isActive 
-                      ? "bg-emerald-600 text-white" 
-                      : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                  )}
-                >
-                  <Icon name="Building" size={20} />
-                  {!sidebarCollapsed && (
-                    <span className="text-sm font-medium flex items-center gap-2">
-                      Каталог объектов
-                      {catalogNotifications.length > 0 && (
-                        <Badge variant="destructive" className="h-5 min-w-5 flex items-center justify-center p-0 text-xs">
-                          {catalogNotifications.length > 99 ? '99+' : catalogNotifications.length}
-                        </Badge>
-                      )}
-                    </span>
-                  )}
-                  {sidebarCollapsed && catalogNotifications.length > 0 && (
-                    <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-[10px]">
-                      {catalogNotifications.length > 9 ? '9+' : catalogNotifications.length}
-                    </Badge>
-                  )}
-                </NavLink>
-                <NavLink
-                  key="facility-catalog"
-                  to={ROUTES.FACILITY_CATALOG}
-                  title={sidebarCollapsed ? "Каталог ОПО/ГТС" : ""}
-                  className={({ isActive }) => cn(
-                    "flex items-center gap-3 rounded-lg mb-1 transition-colors",
-                    sidebarCollapsed ? "justify-center px-2 py-2.5" : "px-3 py-2.5 pl-6",
-                    isActive 
-                      ? "bg-emerald-600 text-white" 
-                      : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                  )}
-                >
-                  <Icon name="Factory" size={18} />
-                  {!sidebarCollapsed && <span className="text-sm font-medium">ОПО и ГТС</span>}
-                </NavLink>
-              </>
-            );
-          }
+
           
           const module = MODULES[moduleKey];
           const route = MODULE_ROUTES[moduleKey];

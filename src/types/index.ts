@@ -6,6 +6,7 @@ export type ModuleType =
   | 'tenants'
   | 'attestation'
   | 'catalog'
+  | 'facility-catalog'
   | 'contractors'
   | 'incidents'
   | 'checklists'
