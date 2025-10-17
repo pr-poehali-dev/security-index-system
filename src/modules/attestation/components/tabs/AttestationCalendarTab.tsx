@@ -67,8 +67,8 @@ export default function AttestationCalendarTab() {
 
   const mockCertifications: CalendarCertification[] = [...qualificationEvents];
 
-  const departments = Array.from(new Set(mockCertifications.map(c => c.department)));
-  const categories = Array.from(new Set(mockCertifications.map(c => c.category)));
+  const departments = Array.from(new Set(mockCertifications.map(c => c.department))).filter(d => d && d.trim() !== '');
+  const categories = Array.from(new Set(mockCertifications.map(c => c.category))).filter(c => c && c.trim() !== '');
 
   const filteredCertifications = useMemo(() => {
     return mockCertifications.filter(cert => {
