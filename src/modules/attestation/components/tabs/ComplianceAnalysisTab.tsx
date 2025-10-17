@@ -167,35 +167,49 @@ export default function ComplianceAnalysisTab() {
             <CardTitle>Анализ соответствия требованиям</CardTitle>
             <div className="flex items-center gap-2">
               {selectedPersonnelIds.size > 0 && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="default" className="gap-2">
-                      <Icon name="FileText" size={18} />
-                      Сформировать приказ ({selectedPersonnelIds.size})
-                      <Icon name="ChevronDown" size={14} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[320px]">
-                    <DropdownMenuItem onClick={() => handleCreateOrder('sdo')}>
-                      <Icon name="Monitor" size={16} className="mr-2" />
-                      О подготовке в СДО Интеллектуальная система
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleCreateOrder('training_center')}>
-                      <Icon name="School" size={16} className="mr-2" />
-                      О подготовке в учебный центр
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleCreateOrder('internal_attestation')}>
-                      <Icon name="ClipboardCheck" size={16} className="mr-2" />
-                      О аттестации в ЕПТ организации
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleCreateOrder('rostechnadzor')}>
-                      <Icon name="Building2" size={16} className="mr-2" />
-                      О направлении на аттестацию в Ростехнадзор
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="gap-2">
+                        <Icon name="Send" size={18} />
+                        Создать заявку ({selectedPersonnelIds.size})
+                        <Icon name="ChevronDown" size={14} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-[280px]">
+                      <DropdownMenuItem onClick={() => handleCreateOrder('sdo')}>
+                        <Icon name="Monitor" size={16} className="mr-2" />
+                        На обучение в СДО
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleCreateOrder('training_center')}>
+                        <Icon name="School" size={16} className="mr-2" />
+                        В учебный центр
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="default" className="gap-2">
+                        <Icon name="FileText" size={18} />
+                        Сформировать приказ ({selectedPersonnelIds.size})
+                        <Icon name="ChevronDown" size={14} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-[280px]">
+                      <DropdownMenuItem onClick={() => handleCreateOrder('internal_attestation')}>
+                        <Icon name="ClipboardCheck" size={16} className="mr-2" />
+                        На аттестацию в ЕПТ
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleCreateOrder('rostechnadzor')}>
+                        <Icon name="Building2" size={16} className="mr-2" />
+                        В Ростехнадзор
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </>
               )}
-              <Button className="gap-2">
+              <Button variant="outline" className="gap-2">
                 <Icon name="Download" size={16} />
                 Экспорт отчета
               </Button>
