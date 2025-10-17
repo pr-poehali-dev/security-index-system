@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,15 +10,7 @@ import {
 } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import { Badge } from '@/components/ui/badge';
-
-interface AnalyticsData {
-  totalFacilities: number;
-  totalContractors: number;
-  activeProjects: number;
-  completedWorks: number;
-  upcomingInspections: number;
-  overdueItems: number;
-}
+import { useFacilityCatalogStore } from '../../store/useFacilityCatalogStore';
 
 interface ReportTemplate {
   id: string;
@@ -27,15 +19,6 @@ interface ReportTemplate {
   icon: string;
   category: 'facilities' | 'contractors' | 'inspections' | 'statistics';
 }
-
-const analyticsData: AnalyticsData = {
-  totalFacilities: 24,
-  totalContractors: 12,
-  activeProjects: 8,
-  completedWorks: 156,
-  upcomingInspections: 15,
-  overdueItems: 3,
-};
 
 const reportTemplates: ReportTemplate[] = [
   {
@@ -97,8 +80,26 @@ const reportTemplates: ReportTemplate[] = [
 ];
 
 export default function ReportsTab() {
+  const facilities = useFacilityCatalogStore((state) => state.facilities);
+  const contractors = useFacilityCatalogStore((state) => state.contractors);
+  const technicalDiagnostics = useFacilityCatalogStore((state) => state.technicalDiagnostics);
+  const industrialSafetyExpertises = useFacilityCatalogStore((state) => state.industrialSafetyExpertises);
+
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedPeriod, setSelectedPeriod] = useState<string>('month');
+
+  const analyticsData = useMemo(() => ({
+    totalFacilities: facilities.length,
+    totalContractors: contractors.length,
+    activeProjects: contractors.reduce((sum, c) => sum + (c.activeProjects || 0), 0),
+    completedWorks: contractors.reduce((sum, c) => sum + (c.completedProjects || 0), 0),
+    upcomingInspections: [...technicalDiagnostics, ...industrialSafetyExpertises].filter(
+      item => item.status === 'planned' || item.status === 'in-progress'
+    ).length,
+    overdueItems: [...technicalDiagnostics, ...industrialSafetyExpertises].filter(
+      item => item.status === 'overdue'
+    ).length,
+  }), [facilities, contractors, technicalDiagnostics, industrialSafetyExpertises]);
 
   const filteredReports = reportTemplates.filter(
     report => selectedCategory === 'all' || report.category === selectedCategory

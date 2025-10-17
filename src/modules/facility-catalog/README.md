@@ -7,45 +7,111 @@
 ```
 facility-catalog/
 ├── data/
-│   └── mockData.ts              # Статичные моковые данные для инициализации
+│   └── mockData.ts                 # Статичные моковые данные для инициализации
 ├── store/
-│   └── useFacilityCatalogStore.ts  # Zustand store - централизованное управление состоянием
-├── components/                   # React компоненты
-└── pages/                        # Страницы модуля
+│   └── useFacilityCatalogStore.ts  # Локальный store модуля (специфичные данные)
+├── components/                     # React компоненты
+└── pages/                          # Страницы модуля
 ```
+
+## Разделение ответственности stores
+
+### Глобальные stores (из `/stores`)
+- **facilitiesStore** - управление объектами ОПО, ГТС, компонентами (используется в OpoTab, GtsTab, ComponentsTab)
+- **settingsStore** - управление организациями, подрядчиками (используется в ContractorsTab)
+- **authStore** - аутентификация, текущий пользователь, мультитенантность
+
+### Локальный store модуля (`useFacilityCatalogStore`)
+- **Технические диагностики** - планирование ТД (TechnicalDiagnosticsTab)
+- **Экспертизы ЭПБ** - планирование экспертиз промышленной безопасности (IndustrialSafetyExpertiseTab)
+- **Характеристики ОПО** - параметры объектов (OpoCharacteristicsTab)
+- **Аналитика** - агрегированные данные для отчетов (ReportsTab)
+
+**Почему такое разделение?**
+- Глобальные stores используются во всём приложении (мультитенантность, общие сущности)
+- Локальный store содержит специфичные для модуля данные планирования и аналитики
+- Избегаем дублирования логики и конфликтов данных
+- Моковые данные в локальном store независимы от глобальных
 
 ## Принципы работы с данными
 
 ### 1. Моковые данные (`data/mockData.ts`)
-- Статичные данные для инициализации store
+- Статичные данные для инициализации локального store
 - Только для чтения
 - Используются как начальное состояние
 - В будущем заменятся на данные из API
 
-### 2. Store (`store/useFacilityCatalogStore.ts`)
-- Единственный источник правды (Single Source of Truth)
-- Управление состоянием всего модуля
-- CRUD операции для всех сущностей
-- Вспомогательные методы (фильтрация, поиск)
+### 2. Локальный Store (`store/useFacilityCatalogStore.ts`)
+- Управление специфичными для модуля данными
+- CRUD операции для планирования и аналитики
+- Вспомогательные методы (фильтрация, поиск, агрегация)
+- Не пересекается с глобальными stores
 
 ### 3. Компоненты
-- Читают данные из store через хуки
-- Вызывают методы store для изменения данных
+- Используют глобальные stores для общих данных (объекты, подрядчики)
+- Используют локальный store для специфичных данных (планирование, аналитика)
 - НЕ содержат локальных копий данных (кроме UI состояния)
 
-## Использование Store
+## Использование Stores
+
+### Пример 1: Использование только локального store
 
 ```typescript
 import { useFacilityCatalogStore } from '../store/useFacilityCatalogStore';
 
-function MyComponent() {
-  // Читаем данные
-  const facilities = useFacilityCatalogStore((state) => state.facilities);
-  const addFacility = useFacilityCatalogStore((state) => state.addFacility);
+function TechnicalDiagnosticsTab() {
+  // Читаем данные из локального store
+  const diagnostics = useFacilityCatalogStore((state) => state.technicalDiagnostics);
+  const addDiagnostic = useFacilityCatalogStore((state) => state.addTechnicalDiagnostic);
   
   // Используем методы
   const handleAdd = () => {
-    addFacility({ id: '5', name: 'Новый объект', ... });
+    addDiagnostic({ id: '6', equipmentName: 'Котел №2', ... });
+  };
+  
+  return <div>...</div>;
+}
+```
+
+### Пример 2: Использование глобального store
+
+```typescript
+import { useFacilitiesStore } from '@/stores/facilitiesStore';
+import { useAuthStore } from '@/stores/authStore';
+
+function OpoTab() {
+  // Читаем данные из глобальных stores
+  const user = useAuthStore((state) => state.user);
+  const { getFacilitiesByTenant } = useFacilitiesStore();
+  const facilities = user?.tenantId ? getFacilitiesByTenant(user.tenantId) : [];
+  
+  return <div>...</div>;
+}
+```
+
+### Пример 3: Комбинирование обоих stores
+
+```typescript
+import { useFacilityCatalogStore } from '../store/useFacilityCatalogStore';
+import { useFacilitiesStore } from '@/stores/facilitiesStore';
+import { useAuthStore } from '@/stores/authStore';
+
+function ReportsTab() {
+  // Глобальные данные (мультитенант)
+  const user = useAuthStore((state) => state.user);
+  const { getFacilitiesByTenant } = useFacilitiesStore();
+  const globalFacilities = user?.tenantId ? getFacilitiesByTenant(user.tenantId) : [];
+  
+  // Локальные данные модуля (планирование)
+  const diagnostics = useFacilityCatalogStore((state) => state.technicalDiagnostics);
+  const expertises = useFacilityCatalogStore((state) => state.industrialSafetyExpertises);
+  
+  // Агрегированная аналитика
+  const analytics = {
+    totalFacilities: globalFacilities.length,
+    upcomingInspections: [...diagnostics, ...expertises].filter(
+      item => item.status === 'planned'
+    ).length,
   };
   
   return <div>...</div>;
