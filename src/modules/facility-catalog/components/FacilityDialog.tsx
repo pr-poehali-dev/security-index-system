@@ -23,12 +23,18 @@ interface FacilityDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   facilityId: string | null;
+  preselectedOrganizationId?: string | null;
+  parentOpoId?: string | null;
+  subType?: 'tu' | 'zs' | null;
 }
 
 export default function FacilityDialog({
   open,
   onOpenChange,
   facilityId,
+  preselectedOrganizationId,
+  parentOpoId,
+  subType,
 }: FacilityDialogProps) {
   const user = useAuthStore((state) => state.user);
   const { facilities, addFacility, updateFacility, getTerritorialAuthorities } = useFacilitiesStore();
@@ -44,7 +50,7 @@ export default function FacilityDialog({
     address: '',
     operatingOrganizationId: '',
     operatingOrganizationName: '',
-    organizationId: '',
+    organizationId: preselectedOrganizationId || '',
     organizationName: '',
     owner: {
       legalEntityFullName: '',
@@ -59,6 +65,8 @@ export default function FacilityDialog({
     territorialAuthorityId: '',
     territorialAuthorityName: '',
     documents: [],
+    parentId: parentOpoId || undefined,
+    subType: subType || undefined,
   });
 
   useEffect(() => {
@@ -77,7 +85,7 @@ export default function FacilityDialog({
         address: '',
         operatingOrganizationId: '',
         operatingOrganizationName: '',
-        organizationId: '',
+        organizationId: preselectedOrganizationId || '',
         organizationName: '',
         owner: {
           legalEntityFullName: '',
@@ -92,6 +100,8 @@ export default function FacilityDialog({
         territorialAuthorityId: '',
         territorialAuthorityName: '',
         documents: [],
+        parentId: parentOpoId || undefined,
+        subType: subType || undefined,
       });
     }
     setActiveTab('basic');

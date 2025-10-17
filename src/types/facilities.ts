@@ -1,4 +1,5 @@
 export type FacilityType = 'opo' | 'gts';
+export type FacilitySubType = 'tu' | 'zs';
 export type HazardClass = 'I' | 'II' | 'III' | 'IV';
 export type TechnicalStatus = 'operating' | 'needs_repair' | 'needs_replacement' | 'decommissioned';
 export type EquipmentStatus = 'working' | 'in_repair' | 'decommissioned';
@@ -62,6 +63,8 @@ export interface Facility {
   organizationId: string;
   organizationName: string;
   type: FacilityType;
+  subType?: FacilitySubType;
+  parentId?: string;
   fullName: string;
   typicalName?: string;
   registrationNumber?: string;

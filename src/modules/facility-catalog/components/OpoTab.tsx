@@ -1,260 +1,257 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { useAuthStore } from '@/stores/authStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useFacilitiesStore } from '@/stores/facilitiesStore';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Facility } from '@/types/facilities';
 import FacilityDialog from './FacilityDialog';
-import FacilitiesTable from './FacilitiesTable';
-import FacilitiesGrid from './FacilitiesGrid';
-
-type OpoType = 'all' | 'tu' | 'zs';
-type ViewMode = 'grid' | 'table';
+import FacilityTreeView from './FacilityTreeView';
 
 export default function OpoTab() {
   const user = useAuthStore((state) => state.user);
+  const { getOrganizationsByTenant } = useSettingsStore();
   const { getFacilitiesByTenant, deleteFacility, getComponentsByFacility } = useFacilitiesStore();
+  
+  const organizations = user?.tenantId ? getOrganizationsByTenant(user.tenantId) : [];
   const allFacilities = user?.tenantId ? getFacilitiesByTenant(user.tenantId) : [];
-  const opoFacilities = allFacilities.filter(f => f.type === 'opo');
+  const facilities = allFacilities.filter(f => f.type === 'opo' || f.subType);
+  
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
-  const [hazardClassFilter, setHazardClassFilter] = useState<string>('all');
   const [showDialog, setShowDialog] = useState(false);
   const [editingFacility, setEditingFacility] = useState<string | null>(null);
-  const [opoType, setOpoType] = useState<OpoType>('all');
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState<string | null>(null);
+  const [selectedParentOpoId, setSelectedParentOpoId] = useState<string | null>(null);
+  const [selectedSubType, setSelectedSubType] = useState<'tu' | 'zs' | null>(null);
 
-  const facilities = opoFacilities.filter((facility) => {
-    if (opoType === 'tu') return facility.subType === 'tu';
-    if (opoType === 'zs') return facility.subType === 'zs';
-    return true;
+  const filteredOrganizations = organizations.filter((org) => {
+    const query = searchQuery.toLowerCase();
+    return org.name.toLowerCase().includes(query) || org.inn.includes(query);
   });
 
   const filteredFacilities = facilities.filter((facility) => {
     const query = searchQuery.toLowerCase();
-    const matchesSearch =
+    return (
       facility.fullName.toLowerCase().includes(query) ||
       facility.typicalName?.toLowerCase().includes(query) ||
       facility.registrationNumber?.toLowerCase().includes(query) ||
-      facility.organizationName.toLowerCase().includes(query);
-    
-    const matchesClass = hazardClassFilter === 'all' || facility.hazardClass === hazardClassFilter;
-    
-    return matchesSearch && matchesClass;
+      facility.organizationName.toLowerCase().includes(query)
+    );
   });
 
-  const handleAdd = () => {
+  const handleAddOpo = (organizationId: string) => {
+    setSelectedOrganizationId(organizationId);
+    setSelectedParentOpoId(null);
+    setSelectedSubType(null);
     setEditingFacility(null);
     setShowDialog(true);
   };
 
-  const handleEdit = (id: string) => {
-    setEditingFacility(id);
+  const handleAddTuZs = (parentOpoId: string, subType: 'tu' | 'zs') => {
+    const parentOpo = facilities.find(f => f.id === parentOpoId);
+    if (parentOpo) {
+      setSelectedOrganizationId(parentOpo.organizationId);
+      setSelectedParentOpoId(parentOpoId);
+      setSelectedSubType(subType);
+      setEditingFacility(null);
+      setShowDialog(true);
+    }
+  };
+
+  const handleEdit = (facility: Facility) => {
+    setEditingFacility(facility.id);
+    setSelectedOrganizationId(facility.organizationId);
+    setSelectedParentOpoId(facility.parentId || null);
+    setSelectedSubType(facility.subType || null);
     setShowDialog(true);
   };
 
   const handleDelete = (id: string) => {
+    const facility = facilities.find(f => f.id === id);
     const components = getComponentsByFacility(id);
-    if (components.length > 0) {
-      if (!confirm(`У объекта есть ${components.length} компонентов. Удалить объект и все компоненты?`)) {
-        return;
+    const childFacilities = facilities.filter(f => f.parentId === id);
+    
+    let confirmMessage = '';
+    
+    if (facility?.subType) {
+      confirmMessage = components.length > 0 
+        ? `У ${facility.subType === 'tu' ? 'ТУ' : 'ЗС'} есть ${components.length} компонентов. Удалить и все компоненты?`
+        : `Удалить ${facility.subType === 'tu' ? 'ТУ' : 'ЗС'}?`;
+    } else {
+      const totalChildren = childFacilities.length + components.length;
+      if (totalChildren > 0) {
+        confirmMessage = `У ОПО есть ${childFacilities.length} дочерних объектов (ТУ/ЗС) и ${components.length} компонентов. Удалить ОПО и всё дочернее?`;
+      } else {
+        confirmMessage = 'Удалить ОПО?';
       }
     }
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    childFacilities.forEach(child => deleteFacility(child.id));
     deleteFacility(id);
-    toast({ title: 'ОПО удален' });
+    
+    const itemType = facility?.subType === 'tu' ? 'ТУ' : facility?.subType === 'zs' ? 'ЗС' : 'ОПО';
+    toast({ title: `${itemType} удалено` });
   };
 
   const stats = {
-    total: facilities.length,
+    totalOpo: facilities.filter(f => f.type === 'opo' && !f.parentId).length,
+    totalTu: facilities.filter(f => f.subType === 'tu').length,
+    totalZs: facilities.filter(f => f.subType === 'zs').length,
     class1: facilities.filter(f => f.hazardClass === 'I').length,
     class2: facilities.filter(f => f.hazardClass === 'II').length,
     class3: facilities.filter(f => f.hazardClass === 'III').length,
     class4: facilities.filter(f => f.hazardClass === 'IV').length,
   };
 
-  const getOpoTypeTitle = () => {
-    switch (opoType) {
-      case 'tu': return 'Технические устройства';
-      case 'zs': return 'Здания и сооружения';
-      default: return 'Опасные производственные объекты';
-    }
-  };
-
   return (
     <div className="space-y-6">
-      <Tabs value={opoType} onValueChange={(v) => setOpoType(v as OpoType)} className="w-full">
-        <div className="flex items-center justify-between mb-4">
-          <TabsList>
-            <TabsTrigger value="all">Все ОПО</TabsTrigger>
-            <TabsTrigger value="tu">ТУ</TabsTrigger>
-            <TabsTrigger value="zs">ЗС</TabsTrigger>
-          </TabsList>
-          
-          <div className="flex items-center gap-2 bg-muted p-1 rounded-lg">
-            <Button
-              size="sm"
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              className="h-8 px-3"
-              onClick={() => setViewMode('grid')}
-            >
-              <Icon name="LayoutGrid" size={16} />
-            </Button>
-            <Button
-              size="sm"
-              variant={viewMode === 'table' ? 'default' : 'ghost'}
-              className="h-8 px-3"
-              onClick={() => setViewMode('table')}
-            >
-              <Icon name="Table" size={16} />
-            </Button>
-          </div>
-        </div>
-
-        <TabsContent value={opoType} className="mt-0 space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                    <Icon name="Factory" size={20} className="text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{stats.total}</p>
-                    <p className="text-xs text-muted-foreground">Всего</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
-                    <Icon name="AlertCircle" size={20} className="text-red-600 dark:text-red-400" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{stats.class1}</p>
-                    <p className="text-xs text-muted-foreground">I класс</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30">
-                    <Icon name="AlertTriangle" size={20} className="text-orange-600 dark:text-orange-400" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{stats.class2}</p>
-                    <p className="text-xs text-muted-foreground">II класс</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
-                    <Icon name="AlertTriangle" size={20} className="text-yellow-600 dark:text-yellow-400" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{stats.class3}</p>
-                    <p className="text-xs text-muted-foreground">III класс</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
-                    <Icon name="Shield" size={20} className="text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{stats.class4}</p>
-                    <p className="text-xs text-muted-foreground">IV класс</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>{getOpoTypeTitle()}</CardTitle>
-                <Button onClick={handleAdd}>
-                  <Icon name="Plus" size={16} className="mr-2" />
-                  Добавить ОПО
-                </Button>
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                <Icon name="Factory" size={20} className="text-blue-600 dark:text-blue-400" />
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-4">
-                <div className="relative flex-1">
-                  <Icon
-                    name="Search"
-                    size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  />
-                  <Input
-                    placeholder="Поиск по названию, рег. номеру, организации..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-                
-                <Select value={hazardClassFilter} onValueChange={setHazardClassFilter}>
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="Класс опасности" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Все классы</SelectItem>
-                    <SelectItem value="I">I класс</SelectItem>
-                    <SelectItem value="II">II класс</SelectItem>
-                    <SelectItem value="III">III класс</SelectItem>
-                    <SelectItem value="IV">IV класс</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div>
+                <p className="text-2xl font-bold">{stats.totalOpo}</p>
+                <p className="text-xs text-muted-foreground">ОПО</p>
               </div>
+            </div>
+          </CardContent>
+        </Card>
 
-              {viewMode === 'table' ? (
-                <FacilitiesTable
-                  facilities={filteredFacilities}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              ) : (
-                <FacilitiesGrid
-                  facilities={filteredFacilities}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                <Icon name="Cpu" size={20} className="text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.totalTu}</p>
+                <p className="text-xs text-muted-foreground">ТУ</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-teal-100 dark:bg-teal-900/30">
+                <Icon name="Building" size={20} className="text-teal-600 dark:text-teal-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.totalZs}</p>
+                <p className="text-xs text-muted-foreground">ЗС</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
+                <Icon name="AlertCircle" size={20} className="text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.class1}</p>
+                <p className="text-xs text-muted-foreground">I класс</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30">
+                <Icon name="AlertTriangle" size={20} className="text-orange-600 dark:text-orange-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.class2}</p>
+                <p className="text-xs text-muted-foreground">II класс</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
+                <Icon name="AlertTriangle" size={20} className="text-yellow-600 dark:text-yellow-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.class3}</p>
+                <p className="text-xs text-muted-foreground">III класс</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                <Icon name="Shield" size={20} className="text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.class4}</p>
+                <p className="text-xs text-muted-foreground">IV класс</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Иерархия ОПО</CardTitle>
+          <p className="text-sm text-muted-foreground mt-2">
+            Организации → ОПО → Технические устройства (ТУ) / Здания и сооружения (ЗС)
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="relative">
+            <Icon
+              name="Search"
+              size={16}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              placeholder="Поиск по организациям, ОПО, ТУ, ЗС..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+
+          <FacilityTreeView
+            organizations={filteredOrganizations}
+            facilities={filteredFacilities}
+            onAddOpo={handleAddOpo}
+            onAddTuZs={handleAddTuZs}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </CardContent>
+      </Card>
 
       <FacilityDialog
         open={showDialog}
         onOpenChange={setShowDialog}
         facilityId={editingFacility}
+        preselectedOrganizationId={selectedOrganizationId}
+        parentOpoId={selectedParentOpoId}
+        subType={selectedSubType}
       />
     </div>
   );
