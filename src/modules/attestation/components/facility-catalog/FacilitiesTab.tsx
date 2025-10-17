@@ -23,6 +23,7 @@ export default function FacilitiesTab() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [hazardClassFilter, setHazardClassFilter] = useState<string>('all');
   const [showDialog, setShowDialog] = useState(false);
   const [editingFacility, setEditingFacility] = useState<string | null>(null);
 
@@ -35,8 +36,9 @@ export default function FacilitiesTab() {
       facility.organizationName.toLowerCase().includes(query);
     
     const matchesType = typeFilter === 'all' || facility.type === typeFilter;
+    const matchesHazardClass = hazardClassFilter === 'all' || facility.hazardClass === hazardClassFilter;
     
-    return matchesSearch && matchesType;
+    return matchesSearch && matchesType && matchesHazardClass;
   });
 
   const handleAdd = () => {
@@ -139,13 +141,26 @@ export default function FacilitiesTab() {
             </div>
             
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Тип объекта" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Все типы</SelectItem>
                 <SelectItem value="opo">ОПО</SelectItem>
-                <SelectItem value="gts">Гидротехнические сооружения</SelectItem>
+                <SelectItem value="gts">ГТС</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={hazardClassFilter} onValueChange={setHazardClassFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Класс опасности" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Все классы</SelectItem>
+                <SelectItem value="I">I класс</SelectItem>
+                <SelectItem value="II">II класс</SelectItem>
+                <SelectItem value="III">III класс</SelectItem>
+                <SelectItem value="IV">IV класс</SelectItem>
               </SelectContent>
             </Select>
           </div>
