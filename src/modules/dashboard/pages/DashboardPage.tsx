@@ -428,7 +428,7 @@ const DashboardPage = memo(function DashboardPage() {
         />
 
         <OrganizationsCard 
-          organizations={catalogOrganizations}
+          organizations={tenantOrganizations}
           objects={objects}
           onGenerateReport={handleGenerateOrganizationsReport}
           onNavigate={() => navigate(ROUTES.CATALOG)}
