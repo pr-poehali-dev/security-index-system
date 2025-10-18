@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Icon from '@/components/ui/icon';
 import { useTrainingCenterStore } from '@/stores/trainingCenterStore';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { getAreasForCategory } from '@/stores/mockData/certificationAreas';
 
 interface ManualCertificateDialogProps {
   open: boolean;
@@ -27,7 +28,7 @@ export default function ManualCertificateDialog({
   trainingCenterId
 }: ManualCertificateDialogProps) {
   const { addIssuedCertificate } = useTrainingCenterStore();
-  const { personnel = [], organizations = [], certificationAreas } = useSettingsStore();
+  const { personnel = [], organizations = [] } = useSettingsStore();
   
   const [formData, setFormData] = useState({
     personnelId: '',
@@ -41,8 +42,8 @@ export default function ManualCertificateDialog({
     issuedBy: ''
   });
 
-  const availableAreas = formData.category && certificationAreas
-    ? certificationAreas.getAreasForCategory(formData.category)
+  const availableAreas = formData.category 
+    ? getAreasForCategory(formData.category)
     : [];
   
   const [certificateFile, setCertificateFile] = useState<File | null>(null);
