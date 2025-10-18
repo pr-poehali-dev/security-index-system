@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,85 +17,93 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
+import { useAuthStore } from '@/stores/authStore';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { AttestationOrder, useAttestationOrdersStore } from '@/stores/attestationOrdersStore';
+import { useToast } from '@/hooks/use-toast';
+import CreateAttestationOrderDialog from '../orders/CreateAttestationOrderDialog';
+import EditAttestationOrderDialog from '../orders/EditAttestationOrderDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
-interface AttestationOrder {
-  id: string;
-  number: string;
-  date: string;
-  status: 'draft' | 'active' | 'completed' | 'cancelled';
-  employeeCount: number;
-  attestationType: string;
-}
 
-interface OrderEmployee {
-  id: string;
-  organization: string;
-  fullName: string;
-  position: string;
-  attestationArea: string;
-  certificateNumber: string;
-  certificateDate: string;
-}
-
-const mockOrders: AttestationOrder[] = [
-  {
-    id: '1',
-    number: 'ПА-015-2024',
-    date: '2024-03-10',
-    status: 'active',
-    employeeCount: 8,
-    attestationType: 'Ростехнадзор',
-  },
-  {
-    id: '2',
-    number: 'ПА-014-2024',
-    date: '2024-02-28',
-    status: 'completed',
-    employeeCount: 5,
-    attestationType: 'Комиссия предприятия',
-  },
-];
-
-const mockEmployees: OrderEmployee[] = [
-  {
-    id: '1',
-    organization: 'ООО "Энерго"',
-    fullName: 'Петров Петр Петрович',
-    position: 'Инженер по ТБ',
-    attestationArea: 'А.1 Общие требования промышленной безопасности',
-    certificateNumber: 'ДПО-2023-001',
-    certificateDate: '2023-06-15',
-  },
-  {
-    id: '2',
-    organization: 'ООО "Энерго"',
-    fullName: 'Сидорова Анна Ивановна',
-    position: 'Инженер-энергетик',
-    attestationArea: 'Б.3 Эксплуатация электроустановок',
-    certificateNumber: 'ДПО-2023-045',
-    certificateDate: '2023-08-20',
-  },
-];
 
 const AttestationOrdersTab = memo(function AttestationOrdersTab() {
+  const user = useAuthStore((state) => state.user);
+  const { personnel, organizations } = useSettingsStore();
+  const { getOrdersByTenant, getOrderEmployees, deleteOrder } = useAttestationOrdersStore();
+  const { toast } = useToast();
+
   const [selectedOrder, setSelectedOrder] = useState<AttestationOrder | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [orderToEdit, setOrderToEdit] = useState<AttestationOrder | null>(null);
+  const [orderToDelete, setOrderToDelete] = useState<AttestationOrder | null>(null);
+
+  const orders = useMemo(() => {
+    return user?.tenantId ? getOrdersByTenant(user.tenantId) : [];
+  }, [user?.tenantId, getOrdersByTenant]);
+
+  const selectedOrderEmployees = useMemo(() => {
+    return selectedOrder ? getOrderEmployees(selectedOrder.id) : [];
+  }, [selectedOrder, getOrderEmployees]);
 
   const getStatusBadge = (status: AttestationOrder['status']) => {
     const config = {
       draft: { label: 'Черновик', variant: 'outline' as const },
       active: { label: 'Активен', variant: 'default' as const },
-      completed: { label: 'Завершен', variant: 'success' as const },
+      completed: { label: 'Завершен', variant: 'default' as const },
       cancelled: { label: 'Отменен', variant: 'destructive' as const },
     };
     const { label, variant } = config[status];
     return <Badge variant={variant}>{label}</Badge>;
   };
 
+  const getAttestationTypeLabel = (type: 'rostechnadzor' | 'company_commission') => {
+    return type === 'rostechnadzor' ? 'Ростехнадзор' : 'Комиссия предприятия';
+  };
+
   const handleViewDetails = (order: AttestationOrder) => {
     setSelectedOrder(order);
     setShowDetailsDialog(true);
+  };
+
+  const handleEdit = (order: AttestationOrder) => {
+    setOrderToEdit(order);
+    setShowEditDialog(true);
+  };
+
+  const handleDelete = (order: AttestationOrder) => {
+    setOrderToDelete(order);
+  };
+
+  const confirmDelete = () => {
+    if (orderToDelete) {
+      deleteOrder(orderToDelete.id);
+      toast({ 
+        title: 'Приказ удален', 
+        description: `Приказ ${orderToDelete.number} успешно удален` 
+      });
+      setOrderToDelete(null);
+    }
+  };
+
+  const handleDownload = (order: AttestationOrder) => {
+    toast({ 
+      title: 'Экспорт приказа', 
+      description: 'Функция экспорта в разработке', 
+    });
   };
 
   return (
@@ -108,7 +116,7 @@ const AttestationOrdersTab = memo(function AttestationOrdersTab() {
               Приказы о направлении сотрудников на аттестацию с приложениями
             </p>
           </div>
-          <Button>
+          <Button onClick={() => setShowCreateDialog(true)}>
             <Icon name="Plus" size={16} className="mr-2" />
             Создать приказ
           </Button>
@@ -126,32 +134,62 @@ const AttestationOrdersTab = memo(function AttestationOrdersTab() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockOrders.map((order) => (
-              <TableRow key={order.id}>
-                <TableCell className="font-medium">{order.number}</TableCell>
-                <TableCell>{new Date(order.date).toLocaleDateString('ru-RU')}</TableCell>
-                <TableCell>{order.attestationType}</TableCell>
-                <TableCell>{order.employeeCount}</TableCell>
-                <TableCell>{getStatusBadge(order.status)}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleViewDetails(order)}
-                    >
-                      <Icon name="Eye" size={16} />
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <Icon name="Pencil" size={16} />
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <Icon name="Download" size={16} />
-                    </Button>
-                  </div>
+            {orders.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  Нет приказов на аттестацию. Создайте первый приказ.
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              orders.map((order) => {
+                const employeeCount = getOrderEmployees(order.id).length;
+                return (
+                  <TableRow key={order.id}>
+                    <TableCell className="font-medium">{order.number}</TableCell>
+                    <TableCell>{new Date(order.date).toLocaleDateString('ru-RU')}</TableCell>
+                    <TableCell>{getAttestationTypeLabel(order.attestationType)}</TableCell>
+                    <TableCell>{employeeCount}</TableCell>
+                    <TableCell>{getStatusBadge(order.status)}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewDetails(order)}
+                          title="Просмотреть"
+                        >
+                          <Icon name="Eye" size={16} />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEdit(order)}
+                          title="Редактировать"
+                        >
+                          <Icon name="Pencil" size={16} />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDownload(order)}
+                          title="Скачать"
+                        >
+                          <Icon name="Download" size={16} />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDelete(order)}
+                          title="Удалить"
+                        >
+                          <Icon name="Trash2" size={16} className="text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
           </TableBody>
         </Table>
       </Card>
@@ -178,28 +216,70 @@ const AttestationOrdersTab = memo(function AttestationOrdersTab() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockEmployees.map((employee) => (
-                  <TableRow key={employee.id}>
-                    <TableCell>{employee.organization}</TableCell>
-                    <TableCell className="font-medium">{employee.fullName}</TableCell>
-                    <TableCell>{employee.position}</TableCell>
-                    <TableCell className="max-w-xs">{employee.attestationArea}</TableCell>
-                    <TableCell>{employee.certificateNumber}</TableCell>
-                    <TableCell>
-                      {new Date(employee.certificateDate).toLocaleDateString('ru-RU')}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        <Icon name="FileText" size={16} />
-                      </Button>
+                {selectedOrderEmployees.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-4">
+                      Нет сотрудников в приказе
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  selectedOrderEmployees.map((employee) => (
+                    <TableRow key={employee.id}>
+                      <TableCell>{employee.organizationName}</TableCell>
+                      <TableCell className="font-medium">{employee.fullName}</TableCell>
+                      <TableCell>{employee.position}</TableCell>
+                      <TableCell className="max-w-xs">{employee.attestationArea}</TableCell>
+                      <TableCell>{employee.certificateNumber}</TableCell>
+                      <TableCell>
+                        {new Date(employee.certificateDate).toLocaleDateString('ru-RU')}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="sm" title="Документы">
+                          <Icon name="FileText" size={16} />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDetailsDialog(false)}>
+              Закрыть
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <CreateAttestationOrderDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+      />
+
+      <EditAttestationOrderDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        order={orderToEdit}
+      />
+
+      <AlertDialog open={!!orderToDelete} onOpenChange={() => setOrderToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Удалить приказ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Вы уверены, что хотите удалить приказ {orderToDelete?.number}?
+              Это действие нельзя отменить.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Удалить
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 });
