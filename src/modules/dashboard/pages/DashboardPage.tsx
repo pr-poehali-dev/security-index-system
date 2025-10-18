@@ -307,13 +307,13 @@ const DashboardPage = memo(function DashboardPage() {
         tasks: criticalTasks,
         incidents,
         objects,
-        organizations: catalogOrganizations
+        organizations: tenantOrganizations
       }, period);
       toast.success('Отчет успешно сформирован!');
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
     }
-  }, [objectsStats, taskStats, overdueTasks, openIncidents, incidents, criticalTasks, objects, catalogOrganizations]);
+  }, [objectsStats, taskStats, overdueTasks, openIncidents, incidents, criticalTasks, objects, tenantOrganizations]);
 
   const handleGenerateTasksReport = useCallback(async (period: ReportPeriod) => {
     try {
@@ -338,22 +338,22 @@ const DashboardPage = memo(function DashboardPage() {
   const handleGenerateExpertiseReport = useCallback(async (period: ReportPeriod) => {
     try {
       toast.info('Формируем отчет по экспертизам...');
-      await generateExpertiseReport(objects, catalogOrganizations, period);
+      await generateExpertiseReport(objects, tenantOrganizations, period);
       toast.success('Отчет по экспертизам сформирован!');
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
     }
-  }, [objects, catalogOrganizations]);
+  }, [objects, tenantOrganizations]);
 
   const handleGenerateOrganizationsReport = useCallback(async (period: ReportPeriod) => {
     try {
       toast.info('Формируем отчет по организациям...');
-      await generateOrganizationsReport(catalogOrganizations, objects, period);
+      await generateOrganizationsReport(tenantOrganizations, objects, period);
       toast.success('Отчет по организациям сформирован!');
     } catch (error) {
       toast.error('Ошибка при формировании отчета');
     }
-  }, [catalogOrganizations, objects]);
+  }, [tenantOrganizations, objects]);
 
   if (isLoading) {
     return (
