@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Icon from '@/components/ui/icon';
 import { useTrainingCenterStore } from '@/stores/trainingCenterStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { getAreasForCategory } from '@/stores/mockData/certificationAreas';
+import { getAreasForCategory, certificationCategories } from '@/stores/mockData/certificationAreas';
 
 interface ManualCertificateDialogProps {
   open: boolean;
@@ -170,7 +170,7 @@ export default function ManualCertificateDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {certificationAreas.categories.map(cat => (
+                  {certificationCategories.map(cat => (
                     <SelectItem key={cat} value={cat}>
                       {cat}
                     </SelectItem>
