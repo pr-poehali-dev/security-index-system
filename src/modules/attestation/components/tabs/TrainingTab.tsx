@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import CreateTrainingDialog from '../training/CreateTrainingDialog';
 
 interface TrainingRequest {
   id: string;
@@ -27,31 +28,40 @@ interface TrainingRequest {
   status: 'pending' | 'in_progress' | 'completed';
   employeeCount: number;
   organization?: string;
+  courseName?: string;
+  employees?: Array<{ id: string; name: string; position: string }>;
+  plannedDate?: string;
+  notes?: string;
 }
 
-const mockRequests: TrainingRequest[] = [
-  {
-    id: '1',
-    number: 'ЗТ-001-2024',
-    date: '2024-03-15',
-    type: 'external',
-    status: 'completed',
-    employeeCount: 5,
-    organization: 'УЦ "Прогресс"',
-  },
-  {
-    id: '2',
-    number: 'ЗТ-002-2024',
-    date: '2024-03-20',
-    type: 'internal',
-    status: 'in_progress',
-    employeeCount: 3,
-  },
-];
-
 const TrainingTab = memo(function TrainingTab() {
+  const [requests, setRequests] = useState<TrainingRequest[]>([
+    {
+      id: '1',
+      number: 'ЗТ-001-2024',
+      date: '2024-03-15',
+      type: 'external',
+      status: 'completed',
+      employeeCount: 5,
+      organization: 'УЦ "Прогресс"',
+    },
+    {
+      id: '2',
+      number: 'ЗТ-002-2024',
+      date: '2024-03-20',
+      type: 'internal',
+      status: 'in_progress',
+      employeeCount: 3,
+    },
+  ]);
+
   const [selectedRequest, setSelectedRequest] = useState<TrainingRequest | null>(null);
   const [showResultsDialog, setShowResultsDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+
+  const handleCreateTraining = (training: TrainingRequest) => {
+    setRequests(prev => [training, ...prev]);
+  };
 
   const getStatusBadge = (status: TrainingRequest['status']) => {
     const config = {
@@ -81,7 +91,7 @@ const TrainingTab = memo(function TrainingTab() {
               Направление на тренинг в учебные центры и СДО ИСП
             </p>
           </div>
-          <Button>
+          <Button onClick={() => setShowCreateDialog(true)}>
             <Icon name="Plus" size={16} className="mr-2" />
             Создать заявку
           </Button>
@@ -100,7 +110,7 @@ const TrainingTab = memo(function TrainingTab() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockRequests.map((request) => (
+            {requests.map((request) => (
               <TableRow key={request.id}>
                 <TableCell className="font-medium">{request.number}</TableCell>
                 <TableCell>{new Date(request.date).toLocaleDateString('ru-RU')}</TableCell>
@@ -140,6 +150,12 @@ const TrainingTab = memo(function TrainingTab() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <CreateTrainingDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onCreateTraining={handleCreateTraining}
+      />
     </div>
   );
 });
