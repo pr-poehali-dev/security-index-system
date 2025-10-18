@@ -41,7 +41,7 @@ export default function ManualCertificateDialog({
     issuedBy: ''
   });
 
-  const availableAreas = formData.category 
+  const availableAreas = formData.category && certificationAreas
     ? certificationAreas.getAreasForCategory(formData.category)
     : [];
   
