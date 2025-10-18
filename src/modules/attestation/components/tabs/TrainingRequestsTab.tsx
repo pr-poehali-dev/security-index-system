@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Icon from '@/components/ui/icon';
 import { useAuthStore } from '@/stores/authStore';
 import { useTrainingRequestsStore } from '@/stores/trainingRequestsStore';
 import { useTrainingCentersStore } from '@/stores/trainingCentersStore';
@@ -10,6 +12,7 @@ import TrainingRequestsStatistics from '../training-requests/TrainingRequestsSta
 import TrainingRequestsFilters from '../training-requests/TrainingRequestsFilters';
 import TrainingRequestsTable from '../training-requests/TrainingRequestsTable';
 import TrainingResultsDialog from '../training-requests/TrainingResultsDialog';
+import CreateTrainingRequestDialog from '../training-requests/CreateTrainingRequestDialog';
 
 interface TrainingResult {
   id: string;
@@ -53,6 +56,7 @@ export default function TrainingRequestsTab() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [showResultsDialog, setShowResultsDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<TrainingRequest | null>(null);
 
   const filteredRequests = requests.filter((req) => {
@@ -153,8 +157,12 @@ export default function TrainingRequestsTab() {
       <TrainingRequestsStatistics stats={stats} />
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle>Заявки на обучение</CardTitle>
+          <Button onClick={() => setShowCreateDialog(true)}>
+            <Icon name="Plus" size={16} className="mr-2" />
+            Создать заявку
+          </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           <TrainingRequestsFilters
@@ -179,6 +187,11 @@ export default function TrainingRequestsTab() {
         request={selectedRequest}
         results={mockTrainingResults}
         onConfirm={handleConfirmResults}
+      />
+
+      <CreateTrainingRequestDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
       />
     </div>
   );
