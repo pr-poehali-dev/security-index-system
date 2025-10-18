@@ -25,6 +25,7 @@ import { AttestationOrder, useAttestationOrdersStore } from '@/stores/attestatio
 import { useToast } from '@/hooks/use-toast';
 import CreateAttestationOrderDialog from '../orders/CreateAttestationOrderDialog';
 import EditAttestationOrderDialog from '../orders/EditAttestationOrderDialog';
+import ExportOrderDialog from '../orders/ExportOrderDialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,7 +49,9 @@ const AttestationOrdersTab = memo(function AttestationOrdersTab() {
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
   const [orderToEdit, setOrderToEdit] = useState<AttestationOrder | null>(null);
+  const [orderToExport, setOrderToExport] = useState<AttestationOrder | null>(null);
   const [orderToDelete, setOrderToDelete] = useState<AttestationOrder | null>(null);
 
   const orders = useMemo(() => {
@@ -100,10 +103,8 @@ const AttestationOrdersTab = memo(function AttestationOrdersTab() {
   };
 
   const handleDownload = (order: AttestationOrder) => {
-    toast({ 
-      title: 'Экспорт приказа', 
-      description: 'Функция экспорта в разработке', 
-    });
+    setOrderToExport(order);
+    setShowExportDialog(true);
   };
 
   return (
@@ -261,6 +262,12 @@ const AttestationOrdersTab = memo(function AttestationOrdersTab() {
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
         order={orderToEdit}
+      />
+
+      <ExportOrderDialog
+        open={showExportDialog}
+        onOpenChange={setShowExportDialog}
+        order={orderToExport}
       />
 
       <AlertDialog open={!!orderToDelete} onOpenChange={() => setOrderToDelete(null)}>
