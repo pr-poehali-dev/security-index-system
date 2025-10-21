@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useChecklistsStore } from '@/stores/checklistsStore';
 import { useIncidentsStore } from '@/stores/incidentsStore';
 import { useTaskStore } from '@/stores/taskStore';
-import { useOrganizationsStore } from '@/stores/organizationsStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import {
   Dialog,
   DialogContent,
@@ -38,9 +38,9 @@ interface ItemResponse {
 
 export default function AuditDialog({ open, onClose, audit }: AuditDialogProps) {
   const { checklists, updateAuditFindings, completeAudit } = useChecklistsStore();
+  const { organizations, departments } = useSettingsStore();
   const { addIncident, sources, directions } = useIncidentsStore();
   const { addTask } = useTaskStore();
-  const { organizations } = useOrganizationsStore();
   const checklist = checklists.find(c => c.id === audit.checklistId);
   
   const [responses, setResponses] = useState<ItemResponse[]>([]);

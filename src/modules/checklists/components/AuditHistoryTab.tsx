@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useChecklistsStore } from '@/stores/checklistsStore';
-import { useOrganizationsStore } from '@/stores/organizationsStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { Card, CardContent } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
 import AuditFiltersCard from './AuditFiltersCard';
@@ -9,7 +9,7 @@ import { generateAuditReportPrint, generateAuditReportPDF } from '../utils/audit
 
 export default function AuditHistoryTab() {
   const { audits, checklists } = useChecklistsStore();
-  const { organizations } = useOrganizationsStore();
+  const { organizations } = useSettingsStore();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');

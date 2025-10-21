@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import { useBudgetStore } from '@/stores/budgetStore';
-import { useOrganizationsStore } from '@/stores/organizationsStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import type { BudgetExpense } from '@/types';
 
 interface ExpenseHistoryTableProps {
@@ -21,7 +21,7 @@ interface ExpenseHistoryTableProps {
 
 export default function ExpenseHistoryTable({ year }: ExpenseHistoryTableProps) {
   const { expenses, categories, deleteExpense } = useBudgetStore();
-  const { organizations } = useOrganizationsStore();
+  const { organizations } = useSettingsStore();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');

@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import Icon from '@/components/ui/icon';
 import { useBudgetStore } from '@/stores/budgetStore';
-import { useOrganizationsStore } from '@/stores/organizationsStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 interface AddExpenseDialogProps {
   open: boolean;
@@ -30,7 +30,7 @@ interface AddExpenseDialogProps {
 
 export default function AddExpenseDialog({ open, onClose, year }: AddExpenseDialogProps) {
   const { addExpense, getCategoriesByYear } = useBudgetStore();
-  const { organizations } = useOrganizationsStore();
+  const { organizations } = useSettingsStore();
 
   const [categoryId, setCategoryId] = useState('');
   const [amount, setAmount] = useState('');

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { mockAttestationOrders, mockOrderEmployees } from './mockData';
 
 export interface AttestationOrder {
   id: string;
@@ -43,55 +44,8 @@ interface AttestationOrdersState {
 }
 
 export const useAttestationOrdersStore = create<AttestationOrdersState>()(persist((set, get) => ({
-  orders: [
-    {
-      id: 'order-1',
-      tenantId: 'tenant-1',
-      number: 'ПА-015-2024',
-      date: '2024-03-10',
-      status: 'active',
-      attestationType: 'rostechnadzor',
-      employeeIds: ['personnel-1', 'personnel-2'],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    },
-    {
-      id: 'order-2',
-      tenantId: 'tenant-1',
-      number: 'ПА-014-2024',
-      date: '2024-02-28',
-      status: 'completed',
-      attestationType: 'company_commission',
-      employeeIds: ['personnel-3'],
-      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date().toISOString()
-    }
-  ],
-  
-  orderEmployees: [
-    {
-      id: 'oe-1',
-      orderId: 'order-1',
-      personnelId: 'personnel-1',
-      organizationName: 'ГЭС-1',
-      fullName: 'Иванов Иван Иванович',
-      position: 'Начальник смены',
-      attestationArea: 'А.1 Основы промышленной безопасности',
-      certificateNumber: 'ДПО-2023-001',
-      certificateDate: '2023-06-15'
-    },
-    {
-      id: 'oe-2',
-      orderId: 'order-1',
-      personnelId: 'personnel-2',
-      organizationName: 'ГЭС-1',
-      fullName: 'Петров Иван Сергеевич',
-      position: 'Главный энергетик',
-      attestationArea: 'Б.3 Эксплуатация объектов электроэнергетики',
-      certificateNumber: 'ДПО-2023-045',
-      certificateDate: '2023-08-20'
-    }
-  ],
+  orders: mockAttestationOrders,
+  orderEmployees: mockOrderEmployees,
 
   addOrder: (order) => {
     const newOrder: AttestationOrder = {

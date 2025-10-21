@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Icon from '@/components/ui/icon';
 import { useBudgetStore } from '@/stores/budgetStore';
-import { useOrganizationsStore } from '@/stores/organizationsStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import OrganizationBudgetPlanDialog from './OrganizationBudgetPlanDialog';
 
 interface OrganizationBudgetPlansTableProps {
@@ -28,7 +28,7 @@ interface OrganizationBudgetPlansTableProps {
 
 export default function OrganizationBudgetPlansTable({ year }: OrganizationBudgetPlansTableProps) {
   const { getOrganizationPlansByYear, deleteOrganizationPlan, expenses, categories } = useBudgetStore();
-  const { organizations } = useOrganizationsStore();
+  const { organizations } = useSettingsStore();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useChecklistsStore } from '@/stores/checklistsStore';
-import { useOrganizationsStore } from '@/stores/organizationsStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useUsersStore } from '@/stores/usersStore';
 import {
   Dialog,
@@ -28,8 +28,8 @@ interface ScheduleAuditDialogProps {
 }
 
 export default function ScheduleAuditDialog({ open, onClose }: ScheduleAuditDialogProps) {
+  const { organizations } = useSettingsStore();
   const { checklists, scheduleAudit } = useChecklistsStore();
-  const { organizations } = useOrganizationsStore();
   const { users } = useUsersStore();
   
   const [checklistId, setChecklistId] = useState('');
