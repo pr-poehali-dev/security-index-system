@@ -6,6 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { AttestationOrder, useAttestationOrdersStore } from '@/stores/attestationOrdersStore';
+import { useTrainingRequestsStore } from '@/stores/trainingRequestsStore';
+import { useTrainingCentersStore } from '@/stores/trainingCentersStore';
+import { useNotificationsStore } from '@/stores/notificationsStore';
+import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/hooks/use-toast';
 
 interface EditAttestationOrderDialogProps {
@@ -15,7 +19,11 @@ interface EditAttestationOrderDialogProps {
 }
 
 export default function EditAttestationOrderDialog({ open, onOpenChange, order }: EditAttestationOrderDialogProps) {
-  const { updateOrder } = useAttestationOrdersStore();
+  const { updateOrder, getOrderEmployees } = useAttestationOrdersStore();
+  const { approveRequestsByOrder } = useTrainingRequestsStore();
+  const { getActiveConnections, addCenterRequest } = useTrainingCentersStore();
+  const { addNotification } = useNotificationsStore();
+  const user = useAuthStore((state) => state.user);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -48,6 +56,8 @@ export default function EditAttestationOrderDialog({ open, onOpenChange, order }
       return;
     }
 
+    const wasActivated = order.status !== 'active' && formData.status === 'active';
+
     updateOrder(order.id, {
       number: formData.number,
       date: formData.date,
@@ -56,10 +66,61 @@ export default function EditAttestationOrderDialog({ open, onOpenChange, order }
       notes: formData.notes
     });
 
-    toast({ 
-      title: 'Приказ обновлен', 
-      description: `Приказ ${formData.number} успешно обновлен` 
-    });
+    if (wasActivated && user?.tenantId) {
+      const orderEmployees = getOrderEmployees(order.id);
+      const employeeIds = orderEmployees.map(emp => emp.personnelId);
+      const approvedRequests = approveRequestsByOrder(
+        employeeIds,
+        user.tenantId,
+        user.name || 'Система'
+      );
+
+      if (approvedRequests.length > 0) {
+        const activeConnections = getActiveConnections(user.tenantId).filter(c => c.autoSendRequests);
+        approvedRequests.forEach(req => {
+          activeConnections.forEach(conn => {
+            addCenterRequest({
+              tenantId: req.tenantId,
+              trainingCenterTenantId: conn.trainingCenterTenantId,
+              trainingCenterName: conn.trainingCenterName,
+              trainingRequestId: req.id,
+              employeeId: req.employeeId,
+              employeeName: req.employeeName,
+              position: req.position,
+              organizationName: req.organizationName,
+              programName: req.programName,
+              sendDate: new Date().toISOString(),
+              status: 'sent'
+            });
+          });
+        });
+
+        addNotification({
+          tenantId: user.tenantId,
+          type: 'info',
+          source: 'attestation',
+          title: 'Автосогласование заявок на обучение',
+          message: `Приказ ${formData.number} утвержден. Автоматически согласовано ${approvedRequests.length} заявок на обучение и отправлено в учебные центры.`,
+          link: '/attestation',
+          isRead: false
+        });
+
+        toast({
+          title: 'Приказ утвержден',
+          description: `Автоматически согласовано ${approvedRequests.length} заявок на обучение`
+        });
+      } else {
+        toast({
+          title: 'Приказ обновлен',
+          description: `Приказ ${formData.number} успешно обновлен`
+        });
+      }
+    } else {
+      toast({ 
+        title: 'Приказ обновлен', 
+        description: `Приказ ${formData.number} успешно обновлен` 
+      });
+    }
 
     onOpenChange(false);
   };

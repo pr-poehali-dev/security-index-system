@@ -10,6 +10,7 @@ export interface AttestationOrder {
   status: 'draft' | 'active' | 'completed' | 'cancelled';
   attestationType: 'rostechnadzor' | 'company_commission';
   employeeIds: string[];
+  trainingRequestIds?: string[];
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -36,6 +37,7 @@ interface AttestationOrdersState {
   updateOrder: (id: string, updates: Partial<AttestationOrder>) => void;
   deleteOrder: (id: string) => void;
   getOrdersByTenant: (tenantId: string) => AttestationOrder[];
+  approveOrderWithAutoApproval: (orderId: string, tenantId: string) => AttestationOrder | null;
   
   addOrderEmployee: (employee: Omit<OrderEmployee, 'id'>) => void;
   removeOrderEmployee: (id: string) => void;
@@ -77,6 +79,19 @@ export const useAttestationOrdersStore = create<AttestationOrdersState>()(persis
 
   getOrdersByTenant: (tenantId) => {
     return get().orders.filter(order => order.tenantId === tenantId);
+  },
+
+  approveOrderWithAutoApproval: (orderId, tenantId) => {
+    const order = get().orders.find(o => o.id === orderId && o.tenantId === tenantId);
+    if (!order) return null;
+    set((state) => ({
+      orders: state.orders.map(o =>
+        o.id === orderId
+          ? { ...o, status: 'active' as const, updatedAt: new Date().toISOString() }
+          : o
+      )
+    }));
+    return { ...order, status: 'active' as const };
   },
 
   addOrderEmployee: (employee) => {

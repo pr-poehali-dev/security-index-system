@@ -101,6 +101,8 @@ export interface TrainingRequest {
   approvedDate?: string;
   notes?: string;
   autoCreated: boolean;
+  orderId?: string;
+  trainingCenterTenantId?: string;
   createdAt: string;
   updatedAt: string;
 }

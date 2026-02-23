@@ -13,6 +13,7 @@ interface TrainingRequestsState {
   getRequestsByTenant: (tenantId: string) => TrainingRequest[];
   getRequestsByEmployee: (employeeId: string) => TrainingRequest[];
   getPendingRequests: (tenantId: string) => TrainingRequest[];
+  approveRequestsByOrder: (employeeIds: string[], tenantId: string, approvedBy: string) => TrainingRequest[];
   autoCreateRequest: (employeeId: string, employeeName: string, position: string, organizationName: string, expiryDate: string, tenantId: string) => void;
 }
 
@@ -77,7 +78,7 @@ export const useTrainingRequestsStore = create<TrainingRequestsState>()(persist(
   addRequest: (request) => {
     const newRequest: TrainingRequest = {
       ...request,
-      id: `req-${Date.now()}`,
+      id: `req-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -111,7 +112,24 @@ export const useTrainingRequestsStore = create<TrainingRequestsState>()(persist(
       request.tenantId === tenantId && request.status === 'pending'
     );
   },
-  
+
+  approveRequestsByOrder: (employeeIds, tenantId, approvedBy) => {
+    const now = new Date().toISOString();
+    const matchingRequests = get().requests.filter(
+      (req) => req.tenantId === tenantId && employeeIds.includes(req.employeeId) && req.status === 'pending'
+    );
+    if (matchingRequests.length > 0) {
+      set((state) => ({
+        requests: state.requests.map((req) =>
+          matchingRequests.some((m) => m.id === req.id)
+            ? { ...req, status: 'approved' as const, approvedBy, approvedDate: now, updatedAt: now }
+            : req
+        )
+      }));
+    }
+    return matchingRequests;
+  },
+
   autoCreateRequest: (employeeId, employeeName, position, organizationName, expiryDate, tenantId) => {
     const existingRequest = get().requests.find(
       (req) => req.employeeId === employeeId && 
