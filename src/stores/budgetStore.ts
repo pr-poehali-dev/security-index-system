@@ -268,4 +268,12 @@ export const useBudgetStore = create<BudgetState>()(persist((set, get) => ({
     set({ selectedYear: year });
   }
 
-}), { name: 'budget-storage-v2' }));
+}), { 
+  name: 'budget-storage-v2',
+  partialize: (state) => ({
+    categories: state.categories,
+    expenses: state.expenses,
+    organizationPlans: state.organizationPlans,
+    selectedYear: state.selectedYear,
+  }),
+}));

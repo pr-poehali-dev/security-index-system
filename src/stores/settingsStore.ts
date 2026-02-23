@@ -692,4 +692,22 @@ export const useSettingsStore = create<SettingsState>()(persist((set, get) => ({
     }));
   },
 
-}), { name: 'settings-storage-v3' }));
+}), { 
+  name: 'settings-storage-v3',
+  partialize: (state) => ({
+    organizations: state.organizations,
+    departments: state.departments,
+    people: state.people,
+    positions: state.positions,
+    personnel: state.personnel,
+    competencies: state.competencies,
+    competenciesDirectory: state.competenciesDirectory,
+    certifications: state.certifications,
+    productionSites: state.productionSites,
+    systemUsers: state.systemUsers,
+    externalOrganizations: state.externalOrganizations,
+    contractors: state.contractors,
+    interOrgDocuments: state.interOrgDocuments,
+    contractorFacilityAccesses: state.contractorFacilityAccesses,
+  }),
+}));

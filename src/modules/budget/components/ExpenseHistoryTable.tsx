@@ -79,7 +79,7 @@ export default function ExpenseHistoryTable({ year }: ExpenseHistoryTableProps) 
   const getOrganizationName = (orgId?: string) => {
     if (!orgId) return '—';
     const org = organizations.find(o => o.id === orgId);
-    return org?.shortName || org?.fullName || '—';
+    return org?.name || '—';
   };
 
   const formatCurrency = (value: number) => {

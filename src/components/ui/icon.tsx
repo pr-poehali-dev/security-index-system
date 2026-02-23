@@ -3,14 +3,14 @@
 import type { FC } from 'react';
 import {
   AlertCircle, AlertTriangle, Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp,
-  Award, BarChart3, Bell, BookMarked, BookOpen, Building, Building2,
-  Calendar, CalendarDays, Check, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
+  Award, Banknote, BarChart3, Bell, BookMarked, BookOpen, Building, Building2,
+  Calculator, Calendar, CalendarDays, Check, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
   Circle, CircleAlert, ClipboardCheck, ClipboardList, Clock, Construction, Copy, Cpu,
-  Download, Edit, Eye, EyeOff, Factory, File, FileBarChart, FileCheck, FileText, FileX, Filter, FolderOpen, Fuel,
+  Download, Edit, Eye, EyeOff, Factory, File, FileBarChart, FileCheck, FileSearch, FileText, FileX, Filter, FolderOpen, Fuel,
   GraduationCap, Grid, HelpCircle, Home, Info,
   KeyRound, LayoutDashboard, LayoutGrid, List, ListTodo, LogOut,
   Mail, Menu, MessageSquare, Microscope, Monitor, Moon, MoreHorizontal, MoreVertical,
-  Network, Newspaper, Pencil, Phone, PieChart, Play, PlayCircle, Plus, Printer,
+  Network, Newspaper, Pencil, Percent, Phone, PieChart, Play, PlayCircle, Plus, Printer,
   RefreshCw, Save, Search, Send, Settings, Shield, ShieldCheck, Sun,
   Table, Target, Trash, Trash2, TrendingDown, TrendingUp, TriangleAlert,
   Upload, User, UserCheck, UserPlus, Users,
@@ -20,14 +20,14 @@ import {
 
 type IconName = 
   | 'AlertCircle' | 'AlertTriangle' | 'Archive' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight' | 'ArrowUp'
-  | 'Award' | 'BarChart3' | 'Bell' | 'BookMarked' | 'BookOpen' | 'Building' | 'Building2'
-  | 'Calendar' | 'CalendarDays' | 'Check' | 'CheckCircle' | 'CheckCircle2' | 'ChevronDown' | 'ChevronLeft' | 'ChevronRight' | 'ChevronUp'
+  | 'Award' | 'Banknote' | 'BarChart3' | 'Bell' | 'BookMarked' | 'BookOpen' | 'Building' | 'Building2'
+  | 'Calculator' | 'Calendar' | 'CalendarDays' | 'Check' | 'CheckCircle' | 'CheckCircle2' | 'ChevronDown' | 'ChevronLeft' | 'ChevronRight' | 'ChevronUp'
   | 'Circle' | 'CircleAlert' | 'ClipboardCheck' | 'ClipboardList' | 'Clock' | 'Construction' | 'Copy'
-  | 'Download' | 'Edit' | 'Eye' | 'EyeOff' | 'Factory' | 'File' | 'FileBarChart' | 'FileCheck' | 'FileText' | 'FileX' | 'Filter' | 'FolderOpen' | 'Fuel'
+  | 'Download' | 'Edit' | 'Eye' | 'EyeOff' | 'Factory' | 'File' | 'FileBarChart' | 'FileCheck' | 'FileSearch' | 'FileText' | 'FileX' | 'Filter' | 'FolderOpen' | 'Fuel'
   | 'GraduationCap' | 'Grid' | 'HelpCircle' | 'Home' | 'Info' | 'LayoutGrid'
   | 'KeyRound' | 'LayoutDashboard' | 'List' | 'ListTodo' | 'LogOut'
   | 'Mail' | 'Menu' | 'MessageSquare' | 'Microscope' | 'Monitor' | 'Moon' | 'MoreHorizontal' | 'MoreVertical'
-  | 'Newspaper' | 'Pencil' | 'Phone' | 'PieChart' | 'Play' | 'PlayCircle' | 'Plus' | 'Printer'
+  | 'Newspaper' | 'Pencil' | 'Percent' | 'Phone' | 'PieChart' | 'Play' | 'PlayCircle' | 'Plus' | 'Printer'
   | 'RefreshCw' | 'Save' | 'Search' | 'Send' | 'Settings' | 'Shield' | 'ShieldCheck' | 'Sun'
   | 'Table' | 'Target' | 'Trash' | 'Trash2' | 'TrendingDown' | 'TrendingUp' | 'TriangleAlert'
   | 'Upload' | 'User' | 'UserCheck' | 'UserPlus' | 'Users'
@@ -40,14 +40,14 @@ interface IconProps extends LucideProps {
 
 const ICON_MAP: Record<string, FC<LucideProps>> = {
   AlertCircle, AlertTriangle, Archive, ArrowDown, ArrowLeft, ArrowRight, ArrowUp,
-  Award, BarChart3, Bell, BookMarked, BookOpen, Building, Building2,
-  Calendar, CalendarDays, Check, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
+  Award, Banknote, BarChart3, Bell, BookMarked, BookOpen, Building, Building2,
+  Calculator, Calendar, CalendarDays, Check, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
   Circle, CircleAlert, ClipboardCheck, ClipboardList, Clock, Construction, Copy, Cpu,
-  Download, Edit, Eye, EyeOff, Factory, File, FileBarChart, FileCheck, FileText, FileX, Filter, FolderOpen, Fuel,
+  Download, Edit, Eye, EyeOff, Factory, File, FileBarChart, FileCheck, FileSearch, FileText, FileX, Filter, FolderOpen, Fuel,
   GraduationCap, Grid, HelpCircle, Home, Info,
   KeyRound, LayoutDashboard, LayoutGrid, List, ListTodo, LogOut,
   Mail, Menu, MessageSquare, Microscope, Monitor, Moon, MoreHorizontal, MoreVertical,
-  Network, Newspaper, Pencil, Phone, PieChart, Play, PlayCircle, Plus, Printer,
+  Network, Newspaper, Pencil, Percent, Phone, PieChart, Play, PlayCircle, Plus, Printer,
   RefreshCw, Save, Search, Send, Settings, Shield, ShieldCheck, Sun,
   Table, Target, Trash, Trash2, TrendingDown, TrendingUp, TriangleAlert,
   Upload, User, UserCheck, UserPlus, Users,

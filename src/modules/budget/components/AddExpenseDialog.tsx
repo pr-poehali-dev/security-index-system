@@ -170,7 +170,7 @@ export default function AddExpenseDialog({ open, onClose, year }: AddExpenseDial
                 <SelectContent>
                   {organizations.map((org) => (
                     <SelectItem key={org.id} value={org.id}>
-                      {org.shortName || org.fullName}
+                      {org.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
