@@ -8,6 +8,10 @@ interface ComplianceData {
   personnelName: string;
   position: string;
   department: string;
+  organizationId: string;
+  organizationName: string;
+  productionSiteId: string;
+  productionSiteName: string;
   requiredCertifications: string[];
   actualCertifications: string[];
   expiringCertifications: string[];
@@ -197,19 +201,6 @@ export default function CompliancePersonnelCard({
                   Только истекающие ({item.expiringCertifications.length})
                 </Button>
               )}
-              <Button 
-                size="sm" 
-                className="gap-2 ml-auto"
-                onClick={() => {
-                  onToast(
-                    "Направление на обучение",
-                    `${item.personnelName} направлен на обучение`
-                  );
-                }}
-              >
-                <Icon name="GraduationCap" size={14} />
-                Направить на обучение
-              </Button>
             </div>
           </div>
         )}

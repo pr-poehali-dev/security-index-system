@@ -387,7 +387,6 @@ export default function EmployeeAttestationsTab({ onAddEmployee }: EmployeeAttes
         open={!!selectedEmployee}
         onClose={() => setSelectedEmployee(null)}
         onVerificationToggle={handleVerificationToggle}
-        onShowExportDialog={() => setShowExportDialog(true)}
         onShowAddCertDialog={() => setShowAddCertDialog(true)}
       />
 

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { useAuthStore } from '@/stores/authStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useTrainingRequestsStore } from '@/stores/trainingRequestsStore';
 import { useTrainingCentersStore } from '@/stores/trainingCentersStore';
 import { useQualificationRenewalStore } from '@/stores/qualificationRenewalStore';
@@ -47,6 +48,7 @@ const mockTrainingResults: TrainingResult[] = [
 
 export default function TrainingRequestsTab() {
   const user = useAuthStore((state) => state.user);
+  const { organizations, productionSites, departments } = useSettingsStore();
   const { getRequestsByTenant, updateRequest } = useTrainingRequestsStore();
   const { getActiveConnections, addCenterRequest } = useTrainingCentersStore();
   const { autoCreateRenewal } = useQualificationRenewalStore();
@@ -55,13 +57,38 @@ export default function TrainingRequestsTab() {
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [organizationFilter, setOrganizationFilter] = useState<string>('all');
+  const [productionSiteFilter, setProductionSiteFilter] = useState<string>('all');
+  const [departmentFilter, setDepartmentFilter] = useState<string>('all');
   const [showResultsDialog, setShowResultsDialog] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<TrainingRequest | null>(null);
 
+  const tenantOrganizations = useMemo(() => {
+    if (!Array.isArray(organizations) || !user?.tenantId) return [];
+    return organizations.filter(o => o.tenantId === user.tenantId);
+  }, [organizations, user?.tenantId]);
+
+  const tenantProductionSites = useMemo(() => {
+    if (!Array.isArray(productionSites) || !user?.tenantId) return [];
+    return productionSites.filter(ps => ps.tenantId === user.tenantId);
+  }, [productionSites, user?.tenantId]);
+
+  const tenantDepartments = useMemo(() => {
+    if (!Array.isArray(departments) || !user?.tenantId) return [];
+    return departments.filter(d => d.tenantId === user.tenantId);
+  }, [departments, user?.tenantId]);
+
   const filteredRequests = requests.filter((req) => {
     if (statusFilter !== 'all' && req.status !== statusFilter) return false;
     if (priorityFilter !== 'all' && req.priority !== priorityFilter) return false;
+    if (organizationFilter !== 'all') {
+      const org = tenantOrganizations.find(o => o.id === organizationFilter);
+      if (org && req.organizationName !== org.name) return false;
+    }
+    if (departmentFilter !== 'all') {
+      return false;
+    }
     return true;
   });
 
@@ -168,8 +195,17 @@ export default function TrainingRequestsTab() {
           <TrainingRequestsFilters
             statusFilter={statusFilter}
             priorityFilter={priorityFilter}
+            organizationFilter={organizationFilter}
+            productionSiteFilter={productionSiteFilter}
+            departmentFilter={departmentFilter}
             onStatusChange={setStatusFilter}
             onPriorityChange={setPriorityFilter}
+            onOrganizationChange={setOrganizationFilter}
+            onProductionSiteChange={setProductionSiteFilter}
+            onDepartmentChange={setDepartmentFilter}
+            organizations={tenantOrganizations}
+            productionSites={tenantProductionSites}
+            departments={tenantDepartments}
           />
           
           <TrainingRequestsTable

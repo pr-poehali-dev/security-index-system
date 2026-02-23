@@ -6,7 +6,12 @@ interface ComplianceData {
   personnelName: string;
   position: string;
   department: string;
+  organizationId: string;
+  organizationName: string;
+  productionSiteId: string;
+  productionSiteName: string;
   missingCertifications: string[];
+  expiringCertifications: string[];
 }
 
 export function useComplianceSelection(filteredData: ComplianceData[]) {
@@ -42,7 +47,11 @@ export function useComplianceSelection(filteredData: ComplianceData[]) {
         name: item.personnelName,
         position: item.position,
         department: item.department,
-        organization: '—',
+        organization: item.organizationName || '—',
+        organizationName: item.organizationName || '—',
+        productionSiteName: item.productionSiteName || '—',
+        missingCertifications: item.missingCertifications || [],
+        expiringCertifications: item.expiringCertifications || [],
         certifications: item.missingCertifications.map(area => ({
           id: `missing-${area}`,
           category: getCategoryForArea(area),

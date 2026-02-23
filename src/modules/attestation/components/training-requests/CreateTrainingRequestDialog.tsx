@@ -12,9 +12,11 @@ import { useTrainingRequestsStore } from '@/stores/trainingRequestsStore';
 import { useTrainingCentersStore } from '@/stores/trainingCentersStore';
 import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
-import { 
-  certificationCategories, 
-  getAreasForCategory 
+import {
+  industrialSafetyAreas,
+  energySafetyAreas,
+  electricalSafetyAreas,
+  heightWorkAreas,
 } from '@/stores/mockData/certificationAreas';
 
 interface CreateTrainingRequestDialogProps {
@@ -27,6 +29,13 @@ interface EmployeeSelection {
   areas: string[];
 }
 
+const allAreas: readonly string[] = [
+  ...industrialSafetyAreas,
+  ...energySafetyAreas,
+  ...electricalSafetyAreas,
+  ...heightWorkAreas,
+];
+
 export default function CreateTrainingRequestDialog({ open, onOpenChange }: CreateTrainingRequestDialogProps) {
   const user = useAuthStore((state) => state.user);
   const { personnel, organizations } = useSettingsStore();
@@ -36,13 +45,11 @@ export default function CreateTrainingRequestDialog({ open, onOpenChange }: Crea
 
   const [formData, setFormData] = useState({
     trainingCenterTenantId: '',
-    category: certificationCategories[0],
     priority: 'medium' as 'low' | 'medium' | 'high' | 'critical',
     notes: ''
   });
 
   const [selectedEmployees, setSelectedEmployees] = useState<EmployeeSelection[]>([]);
-  const [filterByArea, setFilterByArea] = useState<string>('');
 
   const tenantPersonnel = user?.tenantId 
     ? personnel.filter(p => p.tenantId === user.tenantId) 
@@ -51,11 +58,6 @@ export default function CreateTrainingRequestDialog({ open, onOpenChange }: Crea
   const activeConnections = user?.tenantId 
     ? getActiveConnections(user.tenantId)
     : [];
-
-  const availableAreas = useMemo(() => 
-    getAreasForCategory(formData.category),
-    [formData.category]
-  );
 
   const handleToggleEmployee = (employeeId: string) => {
     setSelectedEmployees(prev => {
@@ -83,28 +85,6 @@ export default function CreateTrainingRequestDialog({ open, onOpenChange }: Crea
         return emp;
       })
     );
-  };
-
-  const handleSelectAllByArea = () => {
-    if (!filterByArea) {
-      toast({ 
-        title: 'Ошибка', 
-        description: 'Выберите область аттестации для фильтра', 
-        variant: 'destructive' 
-      });
-      return;
-    }
-
-    const newSelections: EmployeeSelection[] = tenantPersonnel.map(person => ({
-      employeeId: person.id,
-      areas: [filterByArea]
-    }));
-
-    setSelectedEmployees(newSelections);
-    toast({ 
-      title: 'Сотрудники выбраны', 
-      description: `Выбрано ${newSelections.length} сотрудников с областью "${filterByArea}"` 
-    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -161,12 +141,10 @@ export default function CreateTrainingRequestDialog({ open, onOpenChange }: Crea
 
     setFormData({
       trainingCenterTenantId: '',
-      category: certificationCategories[0],
       priority: 'medium',
       notes: ''
     });
     setSelectedEmployees([]);
-    setFilterByArea('');
 
     onOpenChange(false);
   };
@@ -214,7 +192,7 @@ export default function CreateTrainingRequestDialog({ open, onOpenChange }: Crea
               <Label>Приоритет *</Label>
               <Select 
                 value={formData.priority} 
-                onValueChange={(value: any) => setFormData({ ...formData, priority: value })}
+                onValueChange={(value: string) => setFormData({ ...formData, priority: value as 'low' | 'medium' | 'high' | 'critical' })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -226,58 +204,6 @@ export default function CreateTrainingRequestDialog({ open, onOpenChange }: Crea
                   <SelectItem value="critical">Критический</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Категория аттестации *</Label>
-            <Select 
-              value={formData.category} 
-              onValueChange={(value: any) => setFormData({ ...formData, category: value })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {certificationCategories.map(cat => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label>Быстрый выбор по области</Label>
-              <div className="flex items-center gap-2">
-                <Select 
-                  value={filterByArea} 
-                  onValueChange={setFilterByArea}
-                >
-                  <SelectTrigger className="w-[300px]">
-                    <SelectValue placeholder="Выберите область" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableAreas.map(area => (
-                      <SelectItem key={area} value={area}>
-                        {area}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleSelectAllByArea}
-                  disabled={!filterByArea}
-                >
-                  <Icon name="Users" size={16} className="mr-2" />
-                  Выбрать всех
-                </Button>
-              </div>
             </div>
           </div>
 
@@ -320,7 +246,7 @@ export default function CreateTrainingRequestDialog({ open, onOpenChange }: Crea
                                   Области аттестации:
                                 </div>
                                 <div className="flex flex-wrap gap-1">
-                                  {availableAreas.map(area => {
+                                  {allAreas.map(area => {
                                     const isAreaSelected = selection.areas.includes(area);
                                     return (
                                       <Badge

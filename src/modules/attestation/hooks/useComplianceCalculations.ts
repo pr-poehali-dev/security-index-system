@@ -1,12 +1,16 @@
 import { useMemo } from 'react';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
-import type { Personnel, Person, Position, Department, Competency, Certification } from '@/types';
+import type { Personnel, Person, Position, Department, CompetencyMatrix, Certification, Organization, ProductionSite } from '@/types';
 
-interface ComplianceData {
+export interface ComplianceData {
   personnelId: string;
   personnelName: string;
   position: string;
   department: string;
+  organizationId: string;
+  organizationName: string;
+  productionSiteId: string;
+  productionSiteName: string;
   requiredCertifications: string[];
   actualCertifications: string[];
   expiringCertifications: string[];
@@ -19,8 +23,10 @@ interface UseComplianceCalculationsProps {
   people: Person[];
   positions: Position[];
   departments: Department[];
-  competencies: Competency[];
+  competencies: CompetencyMatrix[];
   certifications: Certification[];
+  organizations?: Organization[];
+  productionSites?: ProductionSite[];
 }
 
 export function useComplianceCalculations({
@@ -29,7 +35,9 @@ export function useComplianceCalculations({
   positions,
   departments,
   competencies,
-  certifications
+  certifications,
+  organizations = [],
+  productionSites = []
 }: UseComplianceCalculationsProps) {
   const complianceData = useMemo((): ComplianceData[] => {
     if (!Array.isArray(personnel) || personnel.length === 0) {
@@ -45,6 +53,10 @@ export function useComplianceCalculations({
     return personnel.map(p => {
       const info = getPersonnelFullInfo(p, people, positions);
       const dept = departments.find(d => d.id === p.departmentId);
+      const org = organizations.find(o => o.id === p.organizationId);
+
+      const deptOrgId = dept?.organizationId || p.organizationId || '';
+      const matchedSite = productionSites.find(ps => ps.organizationId === deptOrgId);
       
       const competency = competencies.find(c => c.positionId === p.positionId);
       const requiredAreas = competency?.requiredAreas?.flatMap(ra => ra.areas) || [];
@@ -80,6 +92,10 @@ export function useComplianceCalculations({
         personnelName: info.fullName,
         position: info.position,
         department: dept?.name || '—',
+        organizationId: org?.id || '',
+        organizationName: org?.name || '—',
+        productionSiteId: matchedSite?.id || '',
+        productionSiteName: matchedSite?.name || '—',
         requiredCertifications: requiredAreas,
         actualCertifications: actualAreas,
         expiringCertifications: expiringAreas,
@@ -87,7 +103,7 @@ export function useComplianceCalculations({
         compliancePercent
       };
     });
-  }, [personnel, people, positions, departments, competencies, certifications]);
+  }, [personnel, people, positions, departments, competencies, certifications, organizations, productionSites]);
 
   const stats = useMemo(() => ({
     totalEmployees: complianceData.length,

@@ -21,7 +21,6 @@ interface EmployeeDetailsDialogProps {
   open: boolean;
   onClose: () => void;
   onVerificationToggle: (certId: string) => void;
-  onShowExportDialog: () => void;
   onShowAddCertDialog: () => void;
 }
 
@@ -30,7 +29,6 @@ export default function EmployeeDetailsDialog({
   open,
   onClose,
   onVerificationToggle,
-  onShowExportDialog,
   onShowAddCertDialog
 }: EmployeeDetailsDialogProps) {
   const { toast } = useToast();
@@ -204,18 +202,7 @@ export default function EmployeeDetailsDialog({
           </div>
 
           <div className="pt-4 border-t flex items-center justify-end gap-2">
-            <Button 
-              variant="outline" 
-              className="gap-2"
-              onClick={onShowExportDialog}
-            >
-              <Icon name="Download" size={16} />
-              Экспорт отчёта
-            </Button>
-            <Button 
-              className="gap-2"
-              onClick={onShowAddCertDialog}
-            >
+            <Button className="gap-2" onClick={onShowAddCertDialog}>
               <Icon name="Plus" size={16} />
               Добавить аттестацию
             </Button>

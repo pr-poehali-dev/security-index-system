@@ -20,19 +20,24 @@ import ComplianceStatisticsCards from '../compliance/ComplianceStatisticsCards';
 import ComplianceFilters from '../compliance/ComplianceFilters';
 import ComplianceSelectionBar from '../compliance/ComplianceSelectionBar';
 import CompliancePersonnelCard from '../compliance/CompliancePersonnelCard';
+import CreateGroupRequestDialog from '../compliance/CreateGroupRequestDialog';
 
 export default function ComplianceAnalysisTab() {
   const { toast } = useToast();
   const user = useAuthStore((state) => state.user);
-  const { personnel, people, positions, departments, competencies } = useSettingsStore();
+  const { personnel, people, positions, departments, competencies, organizations, productionSites } = useSettingsStore();
   const { attestations } = useAttestationStore();
   
+  const [selectedOrganization, setSelectedOrganization] = useState<string>('all');
+  const [selectedProductionSite, setSelectedProductionSite] = useState<string>('all');
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
   const [complianceFilter, setComplianceFilter] = useState<string>('all');
   const [showMassActionDialog, setShowMassActionDialog] = useState(false);
   const [massActionType, setMassActionType] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [showGroupRequestDialog, setShowGroupRequestDialog] = useState(false);
+  const [groupRequestType, setGroupRequestType] = useState<'sdo' | 'training_center'>('sdo');
 
   useEffect(() => {
     setIsLoading(true);
@@ -67,22 +72,47 @@ export default function ComplianceAnalysisTab() {
     return personnel.filter(p => p.tenantId === user.tenantId && p.personnelType === 'employee');
   }, [personnel, user?.tenantId]);
 
+  const tenantOrganizations = useMemo(() => {
+    if (!Array.isArray(organizations) || !user?.tenantId) return [];
+    return organizations.filter(o => o.tenantId === user.tenantId);
+  }, [organizations, user?.tenantId]);
+
+  const tenantProductionSites = useMemo(() => {
+    if (!Array.isArray(productionSites) || !user?.tenantId) return [];
+    return productionSites.filter(ps => ps.tenantId === user.tenantId);
+  }, [productionSites, user?.tenantId]);
+
   const { complianceData, stats, uniqueDepartments } = useComplianceCalculations({
     personnel: tenantPersonnel,
     people: people || [],
     positions: positions || [],
     departments: departments || [],
     competencies: competencies || [],
-    certifications: attestations || []
+    certifications: attestations || [],
+    organizations: tenantOrganizations,
+    productionSites: tenantProductionSites
   });
 
+  const filteredDepartments = useMemo(() => {
+    let filtered = complianceData;
+    if (selectedOrganization !== 'all') {
+      filtered = filtered.filter(item => item.organizationId === selectedOrganization);
+    }
+    if (selectedProductionSite !== 'all') {
+      filtered = filtered.filter(item => item.productionSiteId === selectedProductionSite);
+    }
+    return Array.from(new Set(filtered.map(d => d.department))).filter(d => d !== '—');
+  }, [complianceData, selectedOrganization, selectedProductionSite]);
+
   const filteredData = complianceData.filter(item => {
+    const matchesOrganization = selectedOrganization === 'all' || item.organizationId === selectedOrganization;
+    const matchesProductionSite = selectedProductionSite === 'all' || item.productionSiteId === selectedProductionSite;
     const matchesDepartment = selectedDepartment === 'all' || item.department === selectedDepartment;
     const matchesCompliance = complianceFilter === 'all' ||
       (complianceFilter === 'full' && item.compliancePercent === 100) ||
       (complianceFilter === 'partial' && item.compliancePercent > 0 && item.compliancePercent < 100) ||
       (complianceFilter === 'none' && item.compliancePercent === 0);
-    return matchesDepartment && matchesCompliance;
+    return matchesOrganization && matchesProductionSite && matchesDepartment && matchesCompliance;
   });
 
   const {
@@ -94,8 +124,13 @@ export default function ComplianceAnalysisTab() {
   } = useComplianceSelection(filteredData);
 
   const handleCreateOrder = (type: string) => {
-    setMassActionType(type);
-    setShowMassActionDialog(true);
+    if (type === 'sdo' || type === 'training_center') {
+      setGroupRequestType(type);
+      setShowGroupRequestDialog(true);
+    } else {
+      setMassActionType(type);
+      setShowMassActionDialog(true);
+    }
   };
 
   const handleToast = (title: string, description: string) => {
@@ -182,7 +217,7 @@ export default function ComplianceAnalysisTab() {
                         На обучение в СДО
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleCreateOrder('training_center')}>
-                        <Icon name="School" size={16} className="mr-2" />
+                        <Icon name="GraduationCap" size={16} className="mr-2" />
                         В учебный центр
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -218,11 +253,17 @@ export default function ComplianceAnalysisTab() {
         </CardHeader>
         <CardContent>
           <ComplianceFilters
+            selectedOrganization={selectedOrganization}
+            setSelectedOrganization={setSelectedOrganization}
+            selectedProductionSite={selectedProductionSite}
+            setSelectedProductionSite={setSelectedProductionSite}
             selectedDepartment={selectedDepartment}
             setSelectedDepartment={setSelectedDepartment}
             complianceFilter={complianceFilter}
             setComplianceFilter={setComplianceFilter}
-            uniqueDepartments={uniqueDepartments}
+            organizations={tenantOrganizations}
+            productionSites={tenantProductionSites}
+            uniqueDepartments={filteredDepartments}
           />
 
           <ComplianceSelectionBar
@@ -258,6 +299,22 @@ export default function ComplianceAnalysisTab() {
         onOpenChange={setShowMassActionDialog}
         actionType={massActionType}
         employees={selectedEmployees}
+      />
+
+      <CreateGroupRequestDialog
+        open={showGroupRequestDialog}
+        onOpenChange={setShowGroupRequestDialog}
+        type={groupRequestType}
+        selectedEmployees={selectedEmployees.map(emp => ({
+          personnelId: emp.id,
+          personnelName: emp.name,
+          position: emp.position,
+          department: emp.department,
+          organizationName: emp.organizationName,
+          productionSiteName: emp.productionSiteName,
+          missingCertifications: emp.missingCertifications,
+          expiringCertifications: emp.expiringCertifications,
+        }))}
       />
     </div>
   );
