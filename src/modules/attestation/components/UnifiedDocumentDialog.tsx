@@ -184,12 +184,12 @@ export default function UnifiedDocumentDialog({
     employee.certifications.forEach((cert: any) => {
       const { status } = getCertificationStatus(cert.expiryDate);
       if (status === 'expired') hasExpired = true;
-      else if (status === 'expiring') hasExpiring = true;
+      else if (status === 'expiring_soon') hasExpiring = true;
       else if (status === 'valid') hasValid = true;
     });
 
     if (hasExpired) return 'expired';
-    if (hasExpiring) return 'expiring';
+    if (hasExpiring) return 'expiring_soon';
     if (hasValid) return 'valid';
     return 'all';
   };

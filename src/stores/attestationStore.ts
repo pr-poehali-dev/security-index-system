@@ -29,6 +29,10 @@ export interface Attestation {
   commissionId?: string;
   dpoQualificationId?: string;
   result: 'passed' | 'failed';
+  issueDate?: string;
+  verified?: boolean;
+  verifiedDate?: string;
+  verifiedBy?: string;
   documents?: AttestationDocument[];
   notes?: string;
   createdAt: string;

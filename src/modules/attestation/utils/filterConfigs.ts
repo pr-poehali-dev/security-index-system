@@ -217,7 +217,7 @@ export const calendarFilterConfig: FilterConfig = {
       options: [
         { value: 'all', label: 'Все статусы' },
         { value: 'valid', label: 'Действует' },
-        { value: 'expiring', label: 'Истекает' },
+        { value: 'expiring_soon', label: 'Истекает' },
         { value: 'expired', label: 'Истекло' },
       ],
     },

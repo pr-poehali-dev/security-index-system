@@ -13,7 +13,7 @@ export interface Employee {
   department: string;
 }
 
-export type CertificationStatusFilter = 'all' | 'valid' | 'expiring' | 'expired' | 'missing';
+export type CertificationStatusFilter = 'all' | 'valid' | 'expiring_soon' | 'expired' | 'missing';
 
 interface EmployeeSelectionStepProps {
   employees: Employee[];

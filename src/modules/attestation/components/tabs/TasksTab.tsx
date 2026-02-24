@@ -6,7 +6,7 @@ import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
-import { useAttestationStore } from '@/stores/certificationStore';
+import { useAttestationStore } from '@/stores/attestationStore';
 import { useOrdersStore } from '@/stores/ordersStore';
 import { getPersonnelFullInfo, getCertificationStatus } from '@/lib/utils/personnelUtils';
 import TaskStatisticsCards from '../TaskStatisticsCards';
@@ -274,7 +274,7 @@ export default function TasksTab() {
   };
 
   const getSelectedEmployees = () => {
-    const uniqueEmployees = new Map<string, any>();
+    const uniqueEmployees = new Map<string, Record<string, unknown>>();
     
     tasksWithStatuses
       .filter(task => selectedTasks.has(task.id))

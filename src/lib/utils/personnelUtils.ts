@@ -55,19 +55,19 @@ export function getPersonnelFullInfo(
 }
 
 export function getCertificationStatus(expiryDate: string): {
-  status: 'valid' | 'expiring' | 'expired';
+  status: 'valid' | 'expiring_soon' | 'expired';
   daysLeft: number;
 } {
   const today = new Date();
   const expiry = new Date(expiryDate);
   const daysLeft = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-  let status: 'valid' | 'expiring' | 'expired';
+  let status: 'valid' | 'expiring_soon' | 'expired';
   
   if (daysLeft < 0) {
     status = 'expired';
   } else if (daysLeft <= 30) {
-    status = 'expiring';
+    status = 'expiring_soon';
   } else {
     status = 'valid';
   }
