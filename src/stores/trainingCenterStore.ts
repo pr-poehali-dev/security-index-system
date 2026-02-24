@@ -11,7 +11,7 @@ import type {
   TrainingScheduleEntry,
   OrganizationTrainingRequest,
 } from '@/types';
-import type { Certification, CertificationDocument } from './certificationStore';
+import type { Attestation as Certification, AttestationDocument as CertificationDocument } from './attestationStore';
 
 export interface IssuedCertificate {
   id: string;
@@ -744,40 +744,41 @@ export const useTrainingCenterStore = create<TrainingCenterState>()(persist((set
     const issuedCert = get().issuedCertificates.find((c) => c.id === certificateId);
     if (!issuedCert) return null;
 
+    const certId = `cert-synced-${Date.now()}`;
     const attestationCert: Certification = {
-      id: `cert-synced-${Date.now()}`,
+      id: certId,
       personnelId: issuedCert.personnelId,
       tenantId: issuedCert.clientTenantId,
       category: issuedCert.category,
       area: issuedCert.area,
       issueDate: issuedCert.issueDate,
       expiryDate: issuedCert.expiryDate,
-      certificateNumber: issuedCert.certificateNumber,
       protocolNumber: issuedCert.protocolNumber,
       protocolDate: issuedCert.protocolDate,
+      attestationType: 'company_commission',
+      result: 'passed',
       verified: false,
-      trainingOrganizationId: issuedCert.trainingCenterId,
       documents: [
         issuedCert.certificateFileUrl ? {
           id: `doc-${Date.now()}-1`,
-          certificationId: `cert-synced-${Date.now()}`,
-          type: 'certificate' as const,
+          attestationId: certId,
+          type: 'scan' as const,
           fileName: `Удостоверение_${issuedCert.certificateNumber}.pdf`,
           fileUrl: issuedCert.certificateFileUrl,
           fileSize: 0,
           uploadedBy: issuedCert.issuedBy,
-          uploadedByRole: 'training_center' as const,
+          uploadedByRole: 'admin' as const,
           uploadedAt: issuedCert.createdAt
         } : undefined,
         issuedCert.protocolFileUrl ? {
           id: `doc-${Date.now()}-2`,
-          certificationId: `cert-synced-${Date.now()}`,
+          attestationId: certId,
           type: 'protocol' as const,
           fileName: `Протокол_${issuedCert.protocolNumber}.pdf`,
           fileUrl: issuedCert.protocolFileUrl,
           fileSize: 0,
           uploadedBy: issuedCert.issuedBy,
-          uploadedByRole: 'training_center' as const,
+          uploadedByRole: 'admin' as const,
           uploadedAt: issuedCert.createdAt
         } : undefined
       ].filter(Boolean) as CertificationDocument[],
